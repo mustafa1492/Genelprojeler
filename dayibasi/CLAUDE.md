@@ -87,6 +87,7 @@ docs/
 - İstemci: `core/supabase/client.ts`.
 
 ## Kaldığımız yer (1 Kasım 2026)
+- **Sıradaki işler: `docs/istekler.md`** (Mustafa'nın not ettirdiği istekler; önce onu oku).
 - Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).
 - **Bekleyen (Supabase panelinde, kullanıcı yapar):** Authentication > Providers > Email: şifre en az 8, "leaked password protection" açık. Authentication > URL Configuration: yayın adresi Site URL + Redirect URLs'e `<adres>/sifre` eklenecek (şifremi unuttum için).
 - Bugün (tarla → kişi, araba adımı yok; kullanıcı "arabaların önemi yok" dedi) ve Alacaklarım gerçek veriyle çalışıyor. Hesap kuralları `docs/urun.md` ve `products/dayibasi/hesap.ts`; kayıtta `events.data` = {wage, fee, workers[]} (eski kayıtlarda yalnız rate). Arabalar "yakında".
