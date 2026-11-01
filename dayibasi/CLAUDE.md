@@ -75,6 +75,7 @@ docs/
 - **Yevmiye:** işçinin günlük ücreti; dayıbaşı payı ayrıca eklenir
 
 ## Çalışma şekli
+- **Sahibi genel izin verdi (1 Kasım 2026):** işleri sormadan yap, yapınca kısaca söyle. Yine de önce sor: gerçek kullanıcı verisini silme/değiştirme, para harcatan ya da geri alınamayan işler, para hesabı/oyun kuralı gibi iş kuralları (bunlar uydurulmaz).
 - Sahibi haftada 10-12 saat ayırabiliyor; işleri küçük, bitirilebilir parçalara böl
 - Yol haritası: `docs/yol-haritasi.md`
 - Bir şey yapmadan önce "bu kullanıcıyı telefona sarılmaya iter mi?" diye sor
