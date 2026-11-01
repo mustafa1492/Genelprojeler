@@ -12,6 +12,11 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
     → Havuzdaki herhangi biri istendiği an aktif listeye eklenir / çıkarılır (tek dokunuş). Amaç karışıklığı en aza indirmek.
     → Ekibim'de iki görünüm: **Aktif liste** (açılışta bu) ve **Bütün ekip (havuz)**.
   - **Netleşti:** dayıbaşı **istediği kadar liste** oluşturabilir (ör. iki farklı şehre işçi göndereceği zaman her şehir ayrı liste, ayrı ayrı görür). Her listenin kendi yoklaması (Geliyor/Gelmiyor, Bekleyenlere sor, Gelenleri paylaş) olur. Bir kişi birden çok listede olabilir; havuzdan tek dokunuşla listeye eklenir/çıkarılır.
+  - **"Geliyor musun?" mesajı gönderirken seçim ekranı** (Mustafa: "bütün opsiyonları istiyorum"):
+    - Bir liste seç → o listeye gönder
+    - Birden çok liste seç (ör. 2 liste birlikte) → hepsine (aynı kişi iki listedeyse bir kez)
+    - Bütün işçiler (havuz) arasından tek tek seç → seçilenlere gönder
+    - Seçimden sonra mevcut "Bekleyenlere sor" akışı (WhatsApp sırayla açılır)
   - Hâlâ sorulacak: kayıt eklerken "Kimler gitti?" ekranında önce seçili listenin kişileri mi gösterilsin? Aynı kişi iki listede "Geliyor" olursa uyarı verilsin mi?
 - [ ] **Estetik:** genel görünüm daha güzel olsun. Somut yön alınmadı; önce 2-3 seçenek (ekran görüntüsüyle) göster, Mustafa seçsin.
 - [ ] **Hesap gönderme: seçerek gönder.** Toplu gönderimde (çiftçi ve işçi) kişilerin yanına seçim kutusu; "Seçilenlere gönder". Hepsini seç / hiçbirini seçme.
