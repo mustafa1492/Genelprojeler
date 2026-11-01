@@ -3,12 +3,17 @@
 Mustafa, 1 Kasım 2026: "Sadece benim çiftçi masraflarımı sezon boyu girip hasat zamanı gelen parayı da girip veri çıktısı oluşturabildiğim bir sistem."
 Kullanıcı: çiftçi (Mustafa'nın kendisi ilk kullanıcı olabilir). Tek kişilik, ekip yok.
 
+## Ayrı ürün (Mustafa: "babama hesap açınca dayıbaşı işlerini görmesin")
+- Kullanıcı yalnız **masraf + gelir + çiftçilik çıktıları** görür; Ekibim, yoklama, puantaj, Alacaklarım (dayıbaşı) **hiç görünmez**.
+- Teknik: aynı kod, ayrı ürün. `businesses.product = 'ciftci'`; `products/ciftci/config.ts` + kendi ekranları ve alt menüsü. Giriş yapınca işletmenin ürününe göre o ürünün ekranları açılır (AuthGate zaten `product` ile çalışıyor). Ayrı adres de olabilir (ör. ciftci.<alan>), istenirse.
+- İlk kullanıcı: Mustafa'nın babası (ayrıca servis şoförlüğü için ayrı fikir konuşuldu; ikisi ayrı ürünler).
+
 ## Akış
 - **Sezon** aç (ör. "2026 Zeytin"), isteğe bağlı tarla(lar) ve dönüm.
 - Sezon boyu **masraf** gir (tek ekran, 3 dokunuş): tür → tutar → kaydet. Not ve fiş fotoğrafı isteğe bağlı.
   Türler (config'ten, değiştirilebilir): Tohum/fide, Gübre, İlaç, Mazot, İşçilik (dayıbaşı), Su/elektrik, Kira, Makine/traktör, Nakliye, Diğer.
 - Hasatta **gelir** gir: ne sattı, miktar (kg/kasa/ton) × fiyat ya da toplam, kime sattı, alınan / alınacak.
-- **Çıktı:** sezon özeti (toplam masraf, gelir, kâr/zarar), tür tür masraf, ay ay grafik, dönüm başı ve kg başı maliyet, geçen sezonla karşılaştırma. **Excel (.xlsx)** ve WhatsApp'a özet.
+- **Çıktı (çiftçiliğe özel, dayıbaşı raporlarından farklı):** sezon özeti (toplam masraf, gelir, kâr/zarar), tür tür masraf, ay ay grafik, dönüm başı ve kg başı maliyet, geçen sezonla karşılaştırma. **Excel (.xlsx)** ve WhatsApp'a özet.
 
 ## Çekirdekten gelenler
 places (tarla), ledger/events (masraf ve gelir kayıtları), takvim, geçmiş + geri alma, internetsiz çalışma, Excel çıktısı, Alacaklarım (alıcıdan alınacak para).
