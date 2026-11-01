@@ -14,6 +14,13 @@ export async function listEntries(personId: string) {
     .sort((a, b) => (b.occurred_on + (b.created_at ?? "")).localeCompare(a.occurred_on + (a.created_at ?? "")));
 }
 
+/** İşletmenin bütün hareketleri (alacak listesi için). */
+export async function listAllEntries(businessId: string) {
+  const rows = await query<LedgerEntry & { business_id: string }>("ledger_entries", (r) => r.business_id === businessId,
+    () => supabase().from("ledger_entries").select("id, person_id, business_id, kind, amount, occurred_on, note, created_at").eq("business_id", businessId));
+  return rows.map((e) => ({ ...e, amount: Number(e.amount) }));
+}
+
 export async function addEntry(businessId: string, personId: string, kind: LedgerKind, amount: number, note?: string) {
   const id = crypto.randomUUID();
   await mutate({ kind: "insert", table: "ledger_entries", values: {

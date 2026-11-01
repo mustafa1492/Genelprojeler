@@ -7,8 +7,11 @@ import { SyncBar } from "@/core/offline/SyncBar";
 import { supabase } from "@/core/supabase/client";
 import { ErrorText, MainButton, TextField } from "@/core/ui";
 
-export type Business = { id: string; name: string };
+export type Business = { id: string; name: string; settings?: Record<string, unknown> };
 const BusinessCtx = createContext<Business | null>(null);
+const SetBusinessCtx = createContext<(b: Business) => void>(() => {});
+/** İşletme ayarı değişince ekranı güncellemek için. */
+export const useSetBusiness = () => useContext(SetBusinessCtx);
 /** Giriş yapılmış kişinin işletmesi. */
 export const useBusiness = () => useContext(BusinessCtx)!;
 
@@ -46,12 +49,12 @@ function Gate({ product, texts, children }: { product: string; texts: Texts; chi
     if (cached) setBiz(cached); // internetsiz açılışta da işletme bilinsin
     supabase()
       .from("memberships")
-      .select("business_id, businesses(id, name, product)")
+      .select("business_id, businesses(id, name, product, settings)")
       .then(({ data, error }) => {
         if (error) { if (!cached) setBiz(undefined); return; } // internet yok: önbellekle devam
         const row = (data ?? []).map((m) => m.businesses as unknown as Business & { product: string })
           .find((b) => b && b.product === product);
-        const b = row ? { id: row.id, name: row.name } : null;
+        const b = row ? { id: row.id, name: row.name, settings: row.settings ?? {} } : null;
         try { localStorage.setItem(cacheKey, JSON.stringify(b)); } catch { /* yok */ }
         setBiz(b);
       });
@@ -64,7 +67,11 @@ function Gate({ product, texts, children }: { product: string; texts: Texts; chi
   }
   if (!session) return <Login appName={texts.appName} />;
   if (!biz) return <CreateBusiness product={product} placeholder={texts.businessPlaceholder} onDone={(b) => { try { localStorage.setItem(`ko:biz:${session.user.id}:${product}`, JSON.stringify(b)); } catch { /* yok */ } setBiz(b); }} />;
-  return <BusinessCtx.Provider value={biz}><SyncBar />{children}</BusinessCtx.Provider>;
+  const update = (b: Business) => {
+    try { localStorage.setItem(`ko:biz:${session.user.id}:${product}`, JSON.stringify(b)); } catch { /* yok */ }
+    setBiz(b);
+  };
+  return <BusinessCtx.Provider value={biz}><SetBusinessCtx.Provider value={update}><SyncBar />{children}</SetBusinessCtx.Provider></BusinessCtx.Provider>;
 }
 
 function Login({ appName }: { appName: string }) {

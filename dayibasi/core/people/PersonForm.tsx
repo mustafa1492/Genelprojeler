@@ -48,12 +48,12 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
         <TextField key={f.key} id={`custom_${f.key}`} label={f.label} maxLength={100} value={custom[f.key] ?? ""}
           onChange={(e) => setCustom({ ...custom, [f.key]: e.target.value })} />
       ))}
-      <div className="ui-stack" style={{ gap: 8 }}>
+      {tags.length > 0 && <div className="ui-stack" style={{ gap: 8 }}>
         <span style={{ fontSize: 17, fontWeight: 700 }}>Hangi işleri yapar?</span>
         <div className="ui-chips wrap">
           {tags.map((t) => <Chip key={t} selected={picked.includes(t)} onClick={() => toggle(t)}>{t}</Chip>)}
         </div>
-      </div>
+      </div>}
       <TextField id="notes" label="Not (isteğe bağlı)" maxLength={500} placeholder="Örnek: Sabah erken gelemez"
         value={notes} onChange={(e) => setNotes(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}

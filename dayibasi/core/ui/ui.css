@@ -126,3 +126,6 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-sync.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
 .ui-sync button { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 12px; border-radius: 12px;
   border: 2px solid currentColor; background: transparent; color: inherit; cursor: pointer; flex-shrink: 0; }
+.ui-total { background: var(--koyu); color: #fff; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
+.ui-total span { font-size: 16px; font-weight: 600; color: #d6d9d2; }
+.ui-total b { font-size: 36px; font-weight: 800; }

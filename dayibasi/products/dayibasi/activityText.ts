@@ -30,6 +30,7 @@ export function describe(a: Activity, names: Record<string, string>): string {
     }
     case "ledger_entries": {
       const what = d.kind === "avans" ? "avans" : d.kind === "odeme" ? "ödeme" : "alacak";
+      // (çiftçide "ödeme" = alınan, işçide = verilen; cümle ikisinde de doğru okunur)
       const amount = formatTL(Number(d.amount));
       if (a.action === "insert") return `${who}: ${amount} ${what} yazıldı`;
       if (a.action === "delete") return `${who}: ${amount} ${what} silindi`;
@@ -43,7 +44,10 @@ export function describe(a: Activity, names: Record<string, string>): string {
     case "assets": return `${s(d.label)} arabası ${a.action === "insert" ? "eklendi" : a.action === "delete" ? "silindi" : "değişti"}`;
     case "documents": return `${s(d.title)} kâğıdı ${a.action === "insert" ? "eklendi" : a.action === "delete" ? "silindi" : "değişti"}`;
     case "places": return `${s(d.name)} tarlası ${a.action === "insert" ? "eklendi" : a.action === "delete" ? "silindi" : "değişti"}`;
-    case "events": return `Bugünün kaydı ${a.action === "insert" ? "eklendi" : a.action === "delete" ? "silindi" : "değişti"}`;
+    case "events": {
+      const day = new Date(s(d.occurred_on) + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+      return `${who === "Bir kişi" ? "Tarla" : who}: ${day}, ${s(d.quantity)} kişi kaydı ${a.action === "insert" ? "eklendi" : a.action === "delete" ? "silindi" : "değişti"}`;
+    }
     default: return "Bir değişiklik yapıldı";
   }
 }

@@ -28,6 +28,12 @@ export const config = {
     remindDaysBefore: 5,
   },
 
+  // Çiftçinin kartında sorulan alanlar (etiket yok)
+  farmers: {
+    kind: "ciftci",
+    customFields: [{ key: "koy", label: "Köyü", type: "text" }],
+  },
+
   ledger: {
     defaultDailyRate: 1600, // TL, kişi başı günlük (örnek: Manisa 2026 tavsiyesi, dayıbaşı payı dahil)
   },
