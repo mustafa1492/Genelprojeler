@@ -31,9 +31,9 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
 ## Para kuralları (Mustafa, 1 Kasım 2026) — hesap motorunu değiştirir, dikkat
 - [ ] **Kasa / kilo başı ücret:** bazı hasatlarda yevmiye yerine kasa ya da kilo başına ücret. Kayıtta ücret türü seçilecek (günlük / kasa / kilo); kasa-kilo ise kişi başı ya da toplam miktar girilecek. Sorulacak: miktar kişi kişi mi tutulur, ekip toplamı mı? Dayıbaşı payı bu işlerde nasıl (kasa başı mı, sabit mi)?
 - [ ] **Yarım gün / tam gün:** kayıtta kişi bazında yarım gün işaretlenebilsin. Sorulacak: yarım gün = yevmiyenin yarısı mı, ayrı bir tutar mı? Çiftçiye yansıyan da yarım mı, dayıbaşı payı da yarım mı?
-- [ ] **Kişiye özel ücret:** ekipte 1-2 kişi diğerlerinden 100-200 TL fazla alabiliyor. Kayıtta o gün çalışanlar arasından kişi seçip ayrı ücret verilebilsin. Sorulacak: fark çiftçiye de yansır mı, yoksa dayıbaşının payından mı çıkar?
+- [ ] **Kişiye özel ücret:** ekipte 1-2 kişi diğerlerinden 100-200 TL fazla alabiliyor. Kayıtta o gün çalışanlar arasından kişi seçip ayrı ücret verilebilsin. **Netleşti:** farkı kimin ödediği seçilebilsin: **çiftçi öder (varsayılan)** ya da **dayıbaşı öder** (payından düşer).
 - **İşçiden kesinti yok** (yol, yemek vb. dayıbaşının aldığı ücretin içinde). Kesinti özelliği yapılmayacak.
-- [ ] **Dayıbaşının masrafları:** gün içinde çok kolay giriş (ör. "+ Masraf": Yakıt / Şoför / Lastik / Tamir / Yemek / Diğer → tutar → kaydet; tek ekran). Ayın istediği zamanında **liste ve toplam** (türe göre), net kazanç = payın − masraflar. Sorulacak: masraf bir tarlaya/çiftçiye bağlanacak mı (çiftçiye yansıtılacak masraf var mı)?
+- [ ] **Dayıbaşının masrafları:** gün içinde çok kolay giriş (ör. "+ Masraf": Yakıt / Şoför / Lastik / Tamir / Yemek / Diğer → tutar → kaydet; tek ekran). Ayın istediği zamanında **liste ve toplam** (türe göre), net kazanç = payın − masraflar. **Netleşti:** bazı masraflar çiftçiye yansıtılabilir → masraf girerken isteğe bağlı "Çiftçiye yansıt: [çiftçi seç]"; yansıtılan masraf çiftçinin borcuna eklenir, dayıbaşının net kazancından düşmez.
 
 ## İşçi ve çiftçi tarafı
 - [ ] **İşçi kendi hesabını görsün, hesap açmadan:** dayıbaşı WhatsApp'tan **kişiye özel gizli bağlantı** gönderir; işçi açınca yalnız kendi çalıştığı günleri (takvim), kazancını, avans ve kalanını görür. Giriş/şifre yok. Bağlantı dayıbaşı tarafından yenilenebilir/iptal edilebilir. (Güvenlik: tahmin edilemez uzun kod, salt okuma, KVKK metni.)
@@ -51,8 +51,6 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
   - Dayıbaşı payı bu işlerde nasıl (kasa başı mı, sabit mi, yüzde mi)?
   - Kasayı/kiloyu kim sayıyor, nereye yazılıyor? (Tartışma çıkıyor mu?)
 - Yarım gün: tam yevmiyenin yarısı mı? Çiftçinin ödediği ve dayıbaşı payı da yarım mı?
-- Fazla ücret alan 1-2 işçi: fark çiftçiden mi alınıyor, dayıbaşının payından mı çıkıyor?
-- Masraflar: çiftçiye yansıtılan masraf var mı (ör. uzak tarla için yol parası)?
 - Çiftçiyle hesap: anlaşmazlık en çok nerede çıkıyor? Çiftçi kayıtları nasıl görmek/onaylamak ister?
 - Uygulamaya ayda ne öder, ödemeyi nasıl yapar?
 
