@@ -64,6 +64,8 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 ## Gelecek ürün
 - Müteahhit işçi ve masraf takibi: `docs/fikirler/06-muteahhit-isci-masraf-takibi.md`. Şimdilik başlanmaz; ama yeni özellikler `core/` altında genel yazılır.
 
+- Çiftçinin sezon defteri (gelir-gider, hasat, Excel): `docs/fikirler/07-ciftci-sezon-defteri.md`.
+
 ## Amaç
 "Bu insanların bütün işlerini kolaylaştırıp hepsini bir araya getirmek."
 
