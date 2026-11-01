@@ -42,6 +42,20 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
 ## Abonelik
 - [ ] **Abonelik biterse:** dayıbaşı eski verilerini **görmeye devam eder**, yalnız **yeni veri girişi kapanır** (ekleme/düzenleme düğmeleri kapalı + veritabanında yazma engeli). Abonelik altyapısı henüz yok.
 
+## Dayıbaşıyla konuşulacaklar
+Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısımlar yapılmaz.
+- **Kasa / kilo başı ücret nasıl işliyor?**
+  - Hangi hasatlarda (zeytin, üzüm, domates…)?
+  - Miktar kişi kişi mi sayılıyor, ekibin toplamı mı?
+  - İşçi kasa başı mı alıyor, yoksa yine günlük mü alıyor da çiftçi dayıbaşına kasa başı mı ödüyor?
+  - Dayıbaşı payı bu işlerde nasıl (kasa başı mı, sabit mi, yüzde mi)?
+  - Kasayı/kiloyu kim sayıyor, nereye yazılıyor? (Tartışma çıkıyor mu?)
+- Yarım gün: tam yevmiyenin yarısı mı? Çiftçinin ödediği ve dayıbaşı payı da yarım mı?
+- Fazla ücret alan 1-2 işçi: fark çiftçiden mi alınıyor, dayıbaşının payından mı çıkıyor?
+- Masraflar: çiftçiye yansıtılan masraf var mı (ör. uzak tarla için yol parası)?
+- Çiftçiyle hesap: anlaşmazlık en çok nerede çıkıyor? Çiftçi kayıtları nasıl görmek/onaylamak ister?
+- Uygulamaya ayda ne öder, ödemeyi nasıl yapar?
+
 ## Amaç
 "Bu insanların bütün işlerini kolaylaştırıp hepsini bir araya getirmek."
 
