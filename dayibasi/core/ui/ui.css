@@ -1,0 +1,46 @@
+/* Ortak arayüz parçaları. Ölçüler: docs/tasarim/kurallar.md */
+.ui-main-btn { width: 100%; min-height: 68px; border: 0; border-radius: 18px; background: var(--ana); color: #fff;
+  font: inherit; font-size: 20px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.ui-main-btn:disabled { opacity: 0.45; }
+.ui-main-btn.ikincil { background: var(--kart); color: var(--yazi); border: 2px solid var(--cizgi); }
+
+.ui-choice { width: 100%; font: inherit; font-size: 18px; font-weight: 800; text-align: left; padding: 14px 16px; min-height: 56px;
+  border-radius: 14px; cursor: pointer; border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
+.ui-choice[aria-pressed="true"] { border-color: var(--ana); background: var(--ana-acik); }
+
+.ui-chip { flex-shrink: 0; font: inherit; font-size: 16px; font-weight: 800; padding: 10px 16px; min-height: 48px; border-radius: 999px;
+  cursor: pointer; border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
+.ui-chip[aria-pressed="true"] { border-color: var(--ana); background: var(--ana); color: #fff; }
+
+.ui-counter { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ui-counter button { width: 64px; height: 64px; font: inherit; font-size: 32px; font-weight: 800; border-radius: 16px; border: 0;
+  background: #eeede8; color: var(--yazi); cursor: pointer; }
+.ui-counter button:disabled { opacity: 0.4; }
+.ui-counter output { font-size: 44px; font-weight: 800; text-align: center; flex: 1; }
+.ui-counter small { display: block; font-size: 16px; font-weight: 600; color: var(--sessiz2); }
+
+.ui-pill { display: inline-block; font-size: 15px; font-weight: 800; padding: 8px 12px; border-radius: 999px; white-space: nowrap; }
+.ui-pill.tamam { background: var(--ana-acik); color: var(--ana-yazi); }
+.ui-pill.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
+.ui-pill.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
+.ui-pill.bekliyor { background: #eeede8; color: var(--sessiz); }
+
+.ui-card { background: var(--kart); border-radius: 18px; padding: 16px; border: 1px solid var(--cizgi2); }
+.ui-warn { border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.ui-warn.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
+.ui-warn.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
+.ui-warn b { font-size: 19px; }
+.ui-warn p { margin: 0; font-size: 17px; }
+
+.ui-done { background: var(--ana-acik); color: var(--ana-yazi); border-radius: 18px; padding: 16px; display: flex;
+  align-items: center; gap: 12px; font-size: 18px; font-weight: 700; }
+.ui-done p { margin: 0; flex: 1; }
+.ui-done button { font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
+  border: 2px solid var(--ana); background: transparent; color: var(--ana-yazi); cursor: pointer; }
+
+.ui-nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: #fff; border-top: 1px solid var(--cizgi2); padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); }
+.ui-nav a { display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 14px; padding: 8px 2px;
+  min-height: 60px; font-size: 14px; font-weight: 800; color: var(--sessiz); text-decoration: none; }
+.ui-nav a[aria-current="page"] { background: var(--ana-acik); color: var(--ana-yazi); }
+.ui-has-nav { padding-bottom: 110px; }
