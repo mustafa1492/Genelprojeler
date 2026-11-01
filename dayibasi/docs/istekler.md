@@ -39,6 +39,13 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
 - [ ] **İşçi kendi hesabını görsün, hesap açmadan:** dayıbaşı WhatsApp'tan **kişiye özel gizli bağlantı** gönderir; işçi açınca yalnız kendi çalıştığı günleri (takvim), kazancını, avans ve kalanını görür. Giriş/şifre yok. Bağlantı dayıbaşı tarafından yenilenebilir/iptal edilebilir. (Güvenlik: tahmin edilemez uzun kod, salt okuma, KVKK metni.)
 - [ ] **Çiftçi onayı:** Mustafa "farklı şekilde düşünmemiz gerekiyor" dedi; önerilen "akşam mesajla onay" yeterli değil. Yeni öneriler hazırlanıp sorulacak (ör. çiftçiye de gizli bağlantı: günleri görüp itiraz/onay; ya da haftalık özet).
 
+## Planlama ve hatırlatıcılar
+- [ ] **İş planı / hatırlatıcı bölümü (ayrı bölüm):** dayıbaşı istediği notu/veriyi serbestçe girer; tarihli olabilir (ör. "Hasan Ağa 5-10 Kasım 20 kişi istiyor", "Lastik değişecek", "Fatma Hanım'dan para alınacak"). Takvimde görünür (takvim isteğiyle birleşir); günü gelince hatırlatır. Çiftçi talebiyse isteğe bağlı kişi sayısı → o gün kaç kişi lazım / aktif listede kaç kişi var karşılaştırması.
+- [ ] **Hatırlatma bildirimleri, özelleştirilebilir:** dayıbaşı hangi hatırlatmayı isteyeceğini ve saatini kendisi seçer (aç/kapat + saat). Adaylar: yoklama yapılmadı (ör. 19:00), bugünün kaydı girilmedi (ör. 21:00), geciken çiftçi borcu, iş planındaki notun günü geldi. Web Push (iOS'ta ana ekrana eklenmiş uygulamada çalışır; okey projesinde server/push.js örneği var). Sunucu tarafı zamanlayıcı gerekir (Supabase cron / Edge Function).
+
+## Yapılmayacaklar (Mustafa: "bizi ilgilendirmez")
+- Toplanma yeri/saati, tarla konumu.
+
 ## Abonelik
 - [ ] **Abonelik biterse:** dayıbaşı eski verilerini **görmeye devam eder**, yalnız **yeni veri girişi kapanır** (ekleme/düzenleme düğmeleri kapalı + veritabanında yazma engeli). Abonelik altyapısı henüz yok.
 
