@@ -38,7 +38,16 @@
 - "Hesabını WhatsApp'tan gönder" → hazır döküm mesajı (gün, kişi, tutar, ödenen, kalan)
 - Ödeme girişi: tutar + tarih (sayı klavyesi, tek alan)
 
-## Hesap mantığı
+## Hesap mantığı (Mustafa ile netleşti, 1 Kasım 2026)
+- Dayıbaşı payı: kişi başı **sabit TL** (işletme ayarı, varsayılan 150).
+- Yevmiye: piyasa ortalaması, ±100 TL oynar → **her kayıtta** girilir (son değer hazır gelir, − / + 50'şer).
+- Çiftçiden kişi başı alınan = yevmiye + dayıbaşı payı.
+- İşçilere parayı **dayıbaşı öder**.
+- Kimin çalıştığı her kayıtta **elle seçilir**; istenirse isim seçmeden sadece sayı girilir (o zaman işçi hesabına yazılmaz).
+- Rakamlar kayıt anında kaydın içine yazılır; ayar sonradan değişse de eski kayıtların hesabı değişmez.
+- Alacaklarım: Çiftçiler (borç, ödeme aldım, WhatsApp hesap) · İşçiler (kalan, Öde, Herkese öde, WhatsApp hesap) · Puantaj (ay ay, kim kaç gün, gün gün kim nerede; WhatsApp'ta paylaş / kopyala).
+
+## Hesap mantığı (ilk taslak)
 - Çiftçinin borcu = Σ (kayıttaki kişi sayısı × kişi başı ücret) − Σ ödemeler
 - Kişi başı ücret işletme ayarında; çiftçiye göre değiştirilebilir. Örnek: Manisa Ziraat Odaları 2026 tavsiyesi kesici için 1.450 TL + 150 TL dayıbaşı payı = 1.600 TL
 - İşçi alacağı = çalıştığı gün × yevmiye − avanslar − ödemeler

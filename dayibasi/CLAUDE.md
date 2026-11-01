@@ -88,7 +88,7 @@ docs/
 ## Kaldığımız yer (1 Kasım 2026)
 - Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).
 - **Bekleyen (Supabase panelinde, kullanıcı yapar):** Authentication > Providers > Email: şifre en az 8, "leaked password protection" açık. Authentication > URL Configuration: yayın adresi Site URL + Redirect URLs'e `<adres>/sifre` eklenecek (şifremi unuttum için).
-- Bugün (tarla → kişi, araba adımı yok; kullanıcı "arabaların önemi yok" dedi) ve Alacaklarım gerçek veriyle çalışıyor. Hesap: `products/dayibasi/hesap.ts`; ücret kayıt anında `events.data.rate`'e yazılır. Arabalar "yakında".
+- Bugün (tarla → kişi, araba adımı yok; kullanıcı "arabaların önemi yok" dedi) ve Alacaklarım gerçek veriyle çalışıyor. Hesap kuralları `docs/urun.md` ve `products/dayibasi/hesap.ts`; kayıtta `events.data` = {wage, fee, workers[]} (eski kayıtlarda yalnız rate). Arabalar "yakında".
 - Uygulama yayında değil (Vercel önerildi, kullanıcı henüz açmadı).
 - Güvenlik planı ve açık listesi: `docs/guvenlik.md`. KVKK aydınlatma metni `/kvkk` TASLAK, avukata gösterilmeli.
 - İnternetsiz çalışma (`core/offline/`): yazmalar `mutate()` ile yerel aynaya + giden kutusuna, internet gelince sırayla gönderilir; okumalar `query()` ile. Yeni tablo yazan her kod buradan geçmeli (doğrudan supabase insert/update yazma). Kimlikler istemcide `crypto.randomUUID()`. `public/sw.js` sayfaları ve dosyaları saklar; önbellek adını değiştirince `RegisterSW.tsx`'teki de değişmeli. Geri alma, Geçmiş ve "tamamen sil" internet ister.

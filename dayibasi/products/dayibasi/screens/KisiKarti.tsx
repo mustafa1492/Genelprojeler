@@ -6,7 +6,10 @@ import { prettyPhone, telLink, waLink } from "@/core/messaging/links";
 import type { Person } from "@/core/people/api";
 import { setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
 import { BackButton, Card, ContactButtons, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
+import { listEvents, type EventRow } from "@/core/events/api";
+import { listPlaces, type Place } from "@/core/places/api";
 import { config } from "../config";
+import { dayText, PUANTAJ, split, workerAccounts } from "../hesap";
 
 const kindText: Record<LedgerKind, string> = { avans: "Avans verdim", odeme: "Ödeme yaptım", alacak: "Alacak" };
 
@@ -16,12 +19,18 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
 }) {
   const biz = useBusiness();
   const [entries, setEntries] = useState<LedgerEntry[] | null>(null);
+  const [events, setEvents] = useState<EventRow[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
   const [adding, setAdding] = useState<LedgerKind | null>(null);
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [done, setDone] = useState<{ message: string; id: string } | null>(null);
 
-  const load = useCallback(() => { listEntries(person.id).then(setEntries).catch(() => setEntries([])); }, [person.id]);
+  const load = useCallback(() => {
+    listEntries(person.id).then(setEntries).catch(() => setEntries([]));
+    listEvents(biz.id, PUANTAJ).then(setEvents).catch(() => {});
+    listPlaces(biz.id).then(setPlaces).catch(() => {});
+  }, [person.id, biz.id]);
   useEffect(load, [load]);
 
   const save = async () => {
@@ -40,8 +49,7 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
     onAnswer(next);
   };
 
-  const avans = (entries ?? []).filter((e) => e.kind === "avans").reduce((t, e) => t + e.amount, 0);
-  const odeme = (entries ?? []).filter((e) => e.kind === "odeme").reduce((t, e) => t + e.amount, 0);
+  const acc = workerAccounts([person], events, entries ?? [], biz)[0];
   const kindLabel = config.people.kinds.isci.label;
 
   if (adding) {
@@ -83,9 +91,13 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
         ]} />
       </Card>
 
-      <h2 className="ui-section">Avans ve ödemeler</h2>
+      <h2 className="ui-section">Hesabı</h2>
+      <div className="ui-total">
+        <span>{acc.kalan > 0 ? "Ona borcun" : acc.kalan < 0 ? "Sana borcu (fazla avans)" : "Hesap kapalı"}</span>
+        <b>{formatTL(Math.abs(acc.kalan))}</b>
+      </div>
       <Card>
-        <InfoRows rows={[["Verilen avans", formatTL(avans)], ["Yapılan ödeme", formatTL(odeme)]]} />
+        <InfoRows rows={[["Çalıştığı gün", `${acc.gun} gün`], ["Kazancı", formatTL(acc.kazanc)], ["Verilen avans", formatTL(acc.avans)], ["Yapılan ödeme", formatTL(acc.odenen)]]} />
       </Card>
       <div className="ui-seg">
         <button type="button" onClick={() => { setDone(null); setAdding("avans"); }}>+ Avans verdim</button>
@@ -97,7 +109,14 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
           <strong>{formatTL(e.amount)}</strong>
         </div>
       ))}
-      <p style={{ margin: "0 4px", fontSize: 15, color: "var(--sessiz2)" }}>Çalıştığı günler, bugünün kayıtları gerçek olunca burada görünecek.</p>
+      <h2 className="ui-section">Çalıştığı günler</h2>
+      {acc.gunler.length === 0 && <div className="ui-empty">Henüz çalıştığı gün yok. Bugün ekranında kayıt eklerken ismini seç.</div>}
+      {acc.gunler.slice().reverse().map((e) => (
+        <div key={e.id} className="ui-moneyrow">
+          <b>{dayText(e.occurred_on)}<small>{places.find((p) => p.id === e.place_id)?.name ?? "Tarla"}</small></b>
+          <strong>{formatTL(split(e, biz).wage)}</strong>
+        </div>
+      ))}
 
       <MainButton secondary onClick={onEdit}>Bilgileri değiştir</MainButton>
     </main>

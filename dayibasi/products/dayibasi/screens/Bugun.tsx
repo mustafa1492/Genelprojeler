@@ -5,13 +5,15 @@ import { addEvent, deleteEvent, listEvents, todayIstanbul, type EventRow } from 
 import { addPerson, listPeople, type Person } from "@/core/people/api";
 import { addPlace, listPlaces, type Place } from "@/core/places/api";
 import { listAnswers, tomorrowIstanbul } from "@/core/rsvp/api";
-import { BackButton, BottomNav, Card, ChoiceButton, Counter, DoneCard, ErrorText, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
+import { formatTL } from "@/core/ledger/api";
+import { BackButton, BottomNav, Card, Chip, ChoiceButton, Counter, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
-import { farmerRate, PUANTAJ } from "../hesap";
+import { defaults, PUANTAJ, workersOf } from "../hesap";
 import { HistoryLink, navItems } from "../nav";
 
 const LAST_COUNT = "ko:son-kisi";
-type Step = "list" | "tarla" | "kisi" | "yeniTarla";
+const LAST_WAGE = "ko:son-yevmiye";
+type Step = "list" | "tarla" | "isci" | "kisi" | "yevmiye" | "yeniTarla";
 
 export default function Bugun() {
   const biz = useBusiness();
@@ -19,6 +21,10 @@ export default function Bugun() {
   const [events, setEvents] = useState<EventRow[] | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [farmers, setFarmers] = useState<Person[]>([]);
+  const [workers, setWorkers] = useState<Person[]>([]);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [yesIds, setYesIds] = useState<string[]>([]);
+  const [wage, setWage] = useState(defaults(biz).wage);
   const [allEvents, setAllEvents] = useState<EventRow[]>([]);
   const [geliyor, setGeliyor] = useState(0);
   const [step, setStep] = useState<Step>("list");
@@ -32,16 +38,25 @@ export default function Bugun() {
       listEvents(biz.id, PUANTAJ),
       listPlaces(biz.id),
       listPeople(biz.id, [config.farmers.kind]),
+      listPeople(biz.id, ["isci"]),
       // Dünkü yoklamada "Geliyor" diyenler bugün için ipucu
       listAnswers(biz.id, today).catch(() => ({})),
-    ]).then(([ev, pl, fa, ans]) => {
+    ]).then(([ev, pl, fa, wo, ans]) => {
       setAllEvents(ev); setEvents(ev.filter((e) => e.occurred_on === today));
-      setPlaces(pl); setFarmers(fa);
-      setGeliyor(Object.values(ans).filter((a) => a === "evet").length);
+      setPlaces(pl); setFarmers(fa); setWorkers(wo);
+      const yes = Object.entries(ans).filter(([, a]) => a === "evet").map(([id]) => id);
+      setYesIds(yes); setGeliyor(yes.length);
     }).catch(() => setError("Bilgileri getiremedim."));
   }, [biz.id, today]);
   useEffect(load, [load]);
-  useEffect(() => { try { const n = Number(localStorage.getItem(LAST_COUNT)); if (n > 0) setKisi(n); } catch { /* yok */ } }, []);
+  useEffect(() => {
+    try {
+      const n = Number(localStorage.getItem(LAST_COUNT)); if (n > 0) setKisi(n);
+      const w = Number(localStorage.getItem(LAST_WAGE)); if (w > 0) setWage(w);
+    } catch { /* yok */ }
+  }, []);
+  const fee = defaults(biz).fee;
+  const count = picked.length || kisi;
 
   const farmerOf = (p?: Place | null) => farmers.find((f) => f.id === p?.owner_person_id);
   const placeLabel = (p?: Place | null) => {
@@ -58,32 +73,59 @@ export default function Bugun() {
     if (!place) return;
     const f = farmerOf(place);
     const ev = await addEvent(biz.id, {
-      kind: PUANTAJ, place_id: place.id, person_id: f?.id ?? null, quantity: kisi,
-      data: { rate: farmerRate(f, biz) },
+      kind: PUANTAJ, place_id: place.id, person_id: f?.id ?? null, quantity: count,
+      data: { wage, fee, ...(picked.length ? { workers: picked } : {}) },
     });
-    try { localStorage.setItem(LAST_COUNT, String(kisi)); } catch { /* yok */ }
-    setDone({ message: `Kaydettim: ${placeLabel(place)}, ${kisi} kişi.`, id: ev.id });
-    setStep("list"); setPlace(null);
+    try { localStorage.setItem(LAST_COUNT, String(count)); localStorage.setItem(LAST_WAGE, String(wage)); } catch { /* yok */ }
+    setDone({ message: `Kaydettim: ${placeLabel(place)}, ${count} kişi, yevmiye ${formatTL(wage)}.`, id: ev.id });
+    setStep("list"); setPlace(null); setPicked([]);
     load();
   };
+  const afterPlace = (p: Place) => { setPlace(p); setPicked([]); setStep(workers.length ? "isci" : "kisi"); };
 
   const toplam = (events ?? []).reduce((t, e) => t + (e.quantity ?? 0), 0);
   const tarih = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", weekday: "long", timeZone: "Europe/Istanbul" });
 
   if (step === "yeniTarla") {
-    return <YeniTarla farmers={farmers} onCancel={() => setStep("tarla")} onSaved={async (p) => { load(); setPlace(p); setStep("kisi"); }} />;
+    return <YeniTarla farmers={farmers} onCancel={() => setStep("tarla")} onSaved={async (p) => { load(); afterPlace(p); }} />;
   }
 
   if (step === "tarla") {
     return (
       <main className="ui-stack">
         <BackButton onClick={() => setStep("list")} label="Vazgeç" />
-        <PageHeader sub="1 / 2" title="Hangi tarlaya gittiniz?" />
+        <PageHeader sub="1 / 3" title="Hangi tarlaya gittiniz?" />
         {sortedPlaces.length === 0 && <div className="ui-empty">Henüz tarla yok. Aşağıdan ilk tarlanı ekle.</div>}
         {sortedPlaces.map((p) => (
-          <ChoiceButton key={p.id} selected={place?.id === p.id} onClick={() => { setPlace(p); setStep("kisi"); }}>{placeLabel(p)}</ChoiceButton>
+          <ChoiceButton key={p.id} selected={place?.id === p.id} onClick={() => afterPlace(p)}>{placeLabel(p)}</ChoiceButton>
         ))}
         <MainButton secondary onClick={() => setStep("yeniTarla")}>+ Yeni tarla</MainButton>
+      </main>
+    );
+  }
+
+  if (step === "isci") {
+    const toggle = (id: string) => setPicked(picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id]);
+    const yesHere = workers.filter((w) => yesIds.includes(w.id)).map((w) => w.id);
+    return (
+      <main className="ui-stack" style={{ paddingBottom: 120 }}>
+        <BackButton onClick={() => setStep("tarla")} />
+        <PageHeader sub={`2 / 3 · ${placeLabel(place)}`} title="Kimler gitti?" />
+        <div className="ui-chips wrap">
+          {yesHere.length > 0 && <Chip onClick={() => setPicked(yesHere)}>Yoklamada gelenler ({yesHere.length})</Chip>}
+          <Chip onClick={() => setPicked(workers.map((w) => w.id))}>Hepsi</Chip>
+          {picked.length > 0 && <Chip onClick={() => setPicked([])}>Temizle</Chip>}
+        </div>
+        {workers.map((w) => (
+          <button key={w.id} type="button" className="ui-choice" aria-pressed={picked.includes(w.id)} onClick={() => toggle(w.id)}>
+            <PersonRow name={w.full_name} sub={w.tags.join(", ") || undefined}
+              right={<span aria-hidden="true" style={{ fontSize: 26 }}>{picked.includes(w.id) ? "✓" : ""}</span>} />
+          </button>
+        ))}
+        <button type="button" className="ui-link" onClick={() => { setPicked([]); setStep("kisi"); }}>İsim seçmeden sadece sayı gir</button>
+        <div className="ui-sticky-bottom">
+          <MainButton disabled={!picked.length} onClick={() => setStep("yevmiye")}>{picked.length ? `${picked.length} kişi · Devam` : "Gidenlere dokun"}</MainButton>
+        </div>
       </main>
     );
   }
@@ -91,12 +133,32 @@ export default function Bugun() {
   if (step === "kisi") {
     return (
       <main className="ui-stack">
-        <BackButton onClick={() => setStep("tarla")} />
-        <PageHeader sub={`2 / 2 · ${placeLabel(place)}`} title="Kaç kişi gitti?" />
+        <BackButton onClick={() => setStep(workers.length ? "isci" : "tarla")} />
+        <PageHeader sub={`2 / 3 · ${placeLabel(place)}`} title="Kaç kişi gitti?" />
         <Card><Counter value={kisi} onChange={setKisi} min={1} max={200} unit="kişi" /></Card>
         {geliyor > 0 && geliyor !== kisi && (
           <button type="button" className="ui-link" onClick={() => setKisi(geliyor)}>Yoklamada “Geliyor” diyen {geliyor} kişi: bunu kullan</button>
         )}
+        <MainButton onClick={() => setStep("yevmiye")}>Devam</MainButton>
+      </main>
+    );
+  }
+
+  if (step === "yevmiye") {
+    const f = farmerOf(place);
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={() => setStep(picked.length ? "isci" : "kisi")} />
+        <PageHeader sub={`3 / 3 · ${placeLabel(place)} · ${count} kişi`} title="Bugünün yevmiyesi" />
+        <Card><Counter value={wage} onChange={setWage} min={config.ledger.wageStep} max={20000} step={config.ledger.wageStep} unit="TL, işçi başı" /></Card>
+        <Card>
+          <InfoRows rows={[
+            [`${f?.full_name ?? "Çiftçi"} öder`, formatTL(count * (wage + fee))],
+            ["İşçilere gider", formatTL(count * wage)],
+            ["Senin payın", formatTL(count * fee)],
+          ]} />
+        </Card>
+        <p style={{ margin: "0 4px", fontSize: 15, color: "var(--sessiz2)" }}>Kişi başı: yevmiye {formatTL(wage)} + senin payın {formatTL(fee)} = {formatTL(wage + fee)}</p>
         <MainButton onClick={save}>Kaydet</MainButton>
       </main>
     );
@@ -117,6 +179,11 @@ export default function Bugun() {
             <div style={{ fontSize: 18, fontWeight: 800, minWidth: 0 }}>{placeLabel(places.find((p) => p.id === e.place_id))}</div>
             <StatusPill status="tamam">{e.quantity} kişi</StatusPill>
           </div>
+          {workersOf(e).length > 0 && (
+            <div style={{ fontSize: 15, color: "var(--sessiz)", marginTop: 6 }}>
+              {workersOf(e).map((id) => workers.find((w) => w.id === id)?.full_name.split(" ")[0] ?? "?").join(", ")}
+            </div>
+          )}
         </Card>
       ))}
       {events?.length === 0 && <div className="ui-empty">Bugün henüz kayıt yok.</div>}

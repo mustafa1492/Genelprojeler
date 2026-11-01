@@ -35,7 +35,11 @@ export const config = {
   },
 
   ledger: {
-    defaultDailyRate: 1600, // TL, kişi başı günlük (örnek: Manisa 2026 tavsiyesi, dayıbaşı payı dahil)
+    // Varsayılanlar (işletme ayarından değiştirilir). Çiftçiden kişi başı alınan = yevmiye + dayıbaşı payı.
+    // Örnek: Manisa Ziraat Odaları 2026 tavsiyesi 1.450 + 150 = 1.600 TL (docs/urun.md)
+    defaultWage: 1450,   // işçinin günlük yevmiyesi
+    defaultFee: 150,     // dayıbaşı payı, kişi başı
+    wageStep: 50,        // − / + adımı (yevmiye piyasaya göre ±100 TL oynar)
   },
 
   texts: {
