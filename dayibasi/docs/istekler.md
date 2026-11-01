@@ -11,7 +11,8 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
     → Dayıbaşı havuzdan istediği kişileri (ör. 25) **aktif listeye** koyar. **Yoklama (Geliyor/Gelmiyor, Bekleyenlere sor, Gelenleri paylaş) yalnız bu liste üzerinden** yapılır.
     → Havuzdaki herhangi biri istendiği an aktif listeye eklenir / çıkarılır (tek dokunuş). Amaç karışıklığı en aza indirmek.
     → Ekibim'de iki görünüm: **Aktif liste** (açılışta bu) ve **Bütün ekip (havuz)**.
-  - Sorulacak (tahminle kural koyma): birden çok kayıtlı liste mi (ör. "Kınık minibüsü", "Bergama"), yoksa tek bir aktif liste mi yeterli? Kayıt eklerken "Kimler gitti?" ekranında da önce aktif liste mi gösterilsin?
+  - **Netleşti:** dayıbaşı **istediği kadar liste** oluşturabilir (ör. iki farklı şehre işçi göndereceği zaman her şehir ayrı liste, ayrı ayrı görür). Her listenin kendi yoklaması (Geliyor/Gelmiyor, Bekleyenlere sor, Gelenleri paylaş) olur. Bir kişi birden çok listede olabilir; havuzdan tek dokunuşla listeye eklenir/çıkarılır.
+  - Hâlâ sorulacak: kayıt eklerken "Kimler gitti?" ekranında önce seçili listenin kişileri mi gösterilsin? Aynı kişi iki listede "Geliyor" olursa uyarı verilsin mi?
 - [ ] **Estetik:** genel görünüm daha güzel olsun. Somut yön alınmadı; önce 2-3 seçenek (ekran görüntüsüyle) göster, Mustafa seçsin.
 - [ ] **Hesap gönderme: seçerek gönder.** Toplu gönderimde (çiftçi ve işçi) kişilerin yanına seçim kutusu; "Seçilenlere gönder". Hepsini seç / hiçbirini seçme.
 - [ ] **Takvim, uygun her yerde** (Mustafa: "ekleyebileceğin diğer yerlere de ekle"). Adaylar:
