@@ -81,8 +81,8 @@ export default function KayitDuzenle({ event, places, farmers, workers, placeLab
         {inList.map((w) => (
           <button key={w.id} type="button" className="ui-choice" aria-pressed={picked.includes(w.id)} onClick={() => toggle(w.id)}>
             <PersonRow name={displayName(w, workers)}
-              sub={[birthYear(w.custom?.dogum), w.custom?.[config.people.groupKey] as string].filter(Boolean).join(" · ") || undefined}
-              right={<span aria-hidden="true" style={{ fontSize: 26 }}>{picked.includes(w.id) ? "✓" : ""}</span>} />
+              sub={birthYear(w.custom?.dogum) || undefined}
+              right={<span aria-hidden="true" style={{ fontSize: "1.444rem" }}>{picked.includes(w.id) ? "✓" : ""}</span>} />
           </button>
         ))}
       </div>

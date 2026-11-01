@@ -59,7 +59,7 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
         <BackButton onClick={() => { setAdding(null); setError(""); }} label="Vazgeç" />
         <PageHeader sub={person.full_name} title={adding === "avans" ? "Avans verdim" : "Ödeme yaptım"} />
         <TextField id="amount" label="Kaç TL?" inputMode="decimal" maxLength={12} autoFocus placeholder="Örnek: 500"
-          value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: 30, fontWeight: 800 }} />
+          value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: "1.667rem", fontWeight: 800 }} />
         {error && <ErrorText>{error}</ErrorText>}
         <MainButton onClick={save}>Kaydet</MainButton>
       </main>
@@ -89,7 +89,6 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
           ...config.people.customFields.map((f) => [f.label,
             f.key === "dogum" ? (person.custom?.dogum ? `${birthText(person.custom.dogum)} (${ageOf(person.custom.dogum)} yaş)` : "Yok")
               : person.custom?.[f.key] || "Yok"] as [string, string]),
-          ["Grubu", (person.custom?.[config.people.groupKey] as string) || "Yok"],
           ...(person.notes ? [["Not", person.notes] as [string, string]] : []),
         ]} />
       </Card>

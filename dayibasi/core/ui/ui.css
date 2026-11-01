@@ -1,25 +1,25 @@
 /* Ortak arayüz parçaları. Ölçüler: docs/tasarim/kurallar.md */
 .ui-main-btn { width: 100%; min-height: 68px; border: 0; border-radius: 18px; background: var(--ana); color: #fff; box-shadow: 0 2px 0 var(--ana-koyu);
-  font: inherit; font-size: 20px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  font: inherit; font-size: 1.111rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .ui-main-btn:disabled { opacity: 0.45; }
 .ui-main-btn.ikincil { background: var(--kart); color: var(--ana-yazi); border: 2px solid var(--cizgi); box-shadow: none; }
 
-.ui-choice { width: 100%; font: inherit; font-size: 18px; font-weight: 800; text-align: left; padding: 14px 16px; min-height: 56px;
+.ui-choice { width: 100%; font: inherit; font-size: 1.0rem; font-weight: 800; text-align: left; padding: 14px 16px; min-height: 56px;
   border-radius: 14px; cursor: pointer; border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
 .ui-choice[aria-pressed="true"] { border-color: var(--ana); background: var(--ana-acik); }
 
-.ui-chip { flex-shrink: 0; font: inherit; font-size: 16px; font-weight: 800; padding: 10px 16px; min-height: 48px; border-radius: 999px;
+.ui-chip { flex-shrink: 0; font: inherit; font-size: 0.889rem; font-weight: 800; padding: 10px 16px; min-height: 48px; border-radius: 999px;
   cursor: pointer; border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
 .ui-chip[aria-pressed="true"] { border-color: var(--ana); background: var(--ana); color: #fff; }
 
 .ui-counter { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.ui-counter button { width: 64px; height: 64px; font: inherit; font-size: 32px; font-weight: 800; border-radius: 16px; border: 0;
+.ui-counter button { width: 64px; height: 64px; font: inherit; font-size: 1.778rem; font-weight: 800; border-radius: 16px; border: 0;
   background: var(--notr); color: var(--yazi); cursor: pointer; }
 .ui-counter button:disabled { opacity: 0.4; }
-.ui-counter output { font-size: 44px; font-weight: 800; text-align: center; flex: 1; }
-.ui-counter small { display: block; font-size: 16px; font-weight: 600; color: var(--sessiz2); }
+.ui-counter output { font-size: 2.444rem; font-weight: 800; text-align: center; flex: 1; }
+.ui-counter small { display: block; font-size: 0.889rem; font-weight: 600; color: var(--sessiz2); }
 
-.ui-pill { display: inline-block; font-size: 15px; font-weight: 800; padding: 8px 12px; border-radius: 999px; white-space: nowrap; }
+.ui-pill { display: inline-block; font-size: 0.833rem; font-weight: 800; padding: 8px 12px; border-radius: 999px; white-space: nowrap; }
 .ui-pill.tamam { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-pill.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
 .ui-pill.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
@@ -30,10 +30,10 @@ button.ui-card { width: 100%; border: 1px solid var(--cizgi2); font: inherit; co
 
 .ui-header { padding: 2px 4px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .ui-header > div { display: flex; flex-direction: column; gap: 2px; }
-.ui-header small { font-size: 15px; font-weight: 600; color: var(--sessiz2); }
-.ui-header h1 { font-size: 28px; font-weight: 800; line-height: 1.15; margin: 0; }
-.ui-pill.ornek { font-size: 12px; font-weight: 700; color: var(--uyari-yazi); background: var(--uyari-acik); padding: 6px 10px; }
-.ui-header button { font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 14px;
+.ui-header small { font-size: 0.833rem; font-weight: 600; color: var(--sessiz2); }
+.ui-header h1 { font-size: 1.556rem; font-weight: 800; line-height: 1.15; margin: 0; }
+.ui-pill.ornek { font-size: 0.667rem; font-weight: 700; color: var(--uyari-yazi); background: var(--uyari-acik); padding: 6px 10px; }
+.ui-header button { font: inherit; font-size: 0.889rem; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 14px;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); cursor: pointer; }
 
 .ui-stack { display: flex; flex-direction: column; gap: 14px; }
@@ -42,69 +42,69 @@ button.ui-card { width: 100%; border: 1px solid var(--cizgi2); font: inherit; co
 
 .ui-person { display: flex; gap: 14px; align-items: center; }
 .ui-avatar { width: 48px; height: 48px; border-radius: 999px; background: var(--ana-acik); color: var(--ana-yazi); display: flex;
-  align-items: center; justify-content: center; font-weight: 800; font-size: 17px; flex-shrink: 0; }
+  align-items: center; justify-content: center; font-weight: 800; font-size: 0.944rem; flex-shrink: 0; }
 .ui-person-text { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 0; }
-.ui-person-text b { font-size: 18px; font-weight: 800; }
-.ui-person-text span { font-size: 15px; color: var(--sessiz); }
+.ui-person-text b { font-size: 1.0rem; font-weight: 800; }
+.ui-person-text span { font-size: 0.833rem; color: var(--sessiz); }
 
-.ui-empty { background: var(--notr2); border: 1px dashed var(--cizgi); border-radius: 18px; padding: 24px 16px; text-align: center; font-size: 18px; color: var(--sessiz); }
+.ui-empty { background: var(--notr2); border: 1px dashed var(--cizgi); border-radius: 18px; padding: 24px 16px; text-align: center; font-size: 1.0rem; color: var(--sessiz); }
 .ui-warn { border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .ui-warn.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); border: 2px solid var(--tehlike-cizgi); }
-.ui-warn-row { display: flex; gap: 12px; align-items: flex-start; font-size: 18px; font-weight: 700; line-height: 1.4; }
+.ui-warn-row { display: flex; gap: 12px; align-items: flex-start; font-size: 1.0rem; font-weight: 700; line-height: 1.4; }
 .ui-warn-row svg { flex-shrink: 0; }
-.ui-warn .ui-main-btn { min-height: 56px; font-size: 18px; border-radius: 14px; }
+.ui-warn .ui-main-btn { min-height: 56px; font-size: 1.0rem; border-radius: 14px; }
 .ui-warn.gecti .ui-main-btn { background: var(--tehlike); }
 .ui-warn.yakin .ui-main-btn { background: var(--uyari-yazi); }
 .ui-main-btn.tehlike { box-shadow: none; background: transparent; color: var(--tehlike); border: 2px solid var(--tehlike); }
 .ui-warn.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); border: 2px solid var(--uyari-cizgi); }
 
 .ui-done { background: var(--ana-acik); color: var(--ana-yazi); border-radius: 18px; padding: 16px; display: flex;
-  align-items: center; gap: 12px; font-size: 18px; font-weight: 700; }
+  align-items: center; gap: 12px; font-size: 1.0rem; font-weight: 700; }
 .ui-done p { margin: 0; flex: 1; }
-.ui-done button { font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
+.ui-done button { font: inherit; font-size: 0.889rem; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
   border: 2px solid var(--ana); background: transparent; color: var(--ana-yazi); cursor: pointer; }
 
 .ui-nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
   background: #fff; border-top: 1px solid var(--cizgi2); box-shadow: 0 -2px 10px rgba(20, 45, 25, 0.06); padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); }
 .ui-nav a { display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 14px; padding: 8px 2px;
-  min-height: 60px; font-size: 14px; font-weight: 800; color: var(--sessiz); text-decoration: none; }
+  min-height: 60px; font-size: 0.778rem; font-weight: 800; color: var(--sessiz); text-decoration: none; }
 .ui-nav a[aria-current="page"] { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-has-nav { padding-bottom: 110px; }
 
-.ui-field { display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; }
-.ui-field input { font: inherit; font-size: 18px; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
+.ui-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.944rem; font-weight: 700; }
+.ui-field input { font: inherit; font-size: 1.0rem; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
 .ui-field input:focus { outline: none; border-color: var(--ana); }
-.ui-link { font: inherit; font-size: 17px; font-weight: 700; color: var(--ana-yazi); background: none; border: 0;
+.ui-link { font: inherit; font-size: 0.944rem; font-weight: 700; color: var(--ana-yazi); background: none; border: 0;
   min-height: 48px; cursor: pointer; text-decoration: underline; }
 .ui-error { background: var(--tehlike-acik); color: var(--tehlike-yazi); border-radius: 14px; padding: 12px 14px; font-weight: 700; }
 
 .ui-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .ui-contact a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 60px; border-radius: 16px;
-  font-size: 18px; font-weight: 800; text-decoration: none; }
+  font-size: 1.0rem; font-weight: 800; text-decoration: none; }
 .ui-contact a.ara { background: var(--ana); color: #fff; }
 .ui-contact a.wa { background: var(--kart); color: var(--ana-yazi); border: 2px solid var(--ana); }
 .ui-iconbtn { width: 52px; height: 52px; flex-shrink: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center;
   background: var(--ana-acik); color: var(--ana-yazi); text-decoration: none; }
 .ui-rows { display: flex; flex-direction: column; }
-.ui-rows > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--cizgi2); font-size: 17px; }
+.ui-rows > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--cizgi2); font-size: 0.944rem; }
 .ui-rows > div:first-child { border-top: 0; padding-top: 0; }
 .ui-rows > div:last-child { padding-bottom: 0; }
 .ui-rows span:first-child { color: var(--sessiz2); font-weight: 600; }
 .ui-rows span:last-child { font-weight: 800; text-align: right; min-width: 0; }
-.ui-section { font-size: 20px; font-weight: 800; margin: 6px 4px -4px; }
-.ui-back { align-self: flex-start; font: inherit; font-size: 17px; font-weight: 800; min-height: 48px; padding: 0 14px 0 8px;
+.ui-section { font-size: 1.111rem; font-weight: 800; margin: 6px 4px -4px; }
+.ui-back { align-self: flex-start; font: inherit; font-size: 0.944rem; font-weight: 800; min-height: 48px; padding: 0 14px 0 8px;
   border-radius: 14px; border: 0; background: transparent; color: var(--ana-yazi); cursor: pointer; display: flex; align-items: center; gap: 4px; }
 .ui-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .ui-stats > div { border-radius: 16px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.ui-stats b { font-size: 28px; font-weight: 800; }
-.ui-stats span { font-size: 14px; font-weight: 700; }
+.ui-stats b { font-size: 1.556rem; font-weight: 800; }
+.ui-stats span { font-size: 0.778rem; font-weight: 700; }
 .ui-stats .tamam { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-stats .gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
 .ui-stats .bekliyor { background: var(--notr); color: var(--sessiz); }
 .ui-stats .bekliyor b { color: var(--yazi); }
 .ui-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ui-seg button { font: inherit; font-size: 17px; font-weight: 800; min-height: 52px; border-radius: 14px; cursor: pointer;
+.ui-seg button { font: inherit; font-size: 0.944rem; font-weight: 800; min-height: 52px; border-radius: 14px; cursor: pointer;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
 .ui-seg button[aria-pressed="true"].evet { border-color: var(--ana); background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-seg button[aria-pressed="true"].hayir { border-color: var(--tehlike); background: var(--tehlike-acik); color: var(--tehlike-yazi); }
@@ -112,48 +112,48 @@ button.ui-card { width: 100%; border: 1px solid var(--cizgi2); font: inherit; co
 .ui-card.row > button { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left;
   padding: 14px 0 14px 16px; cursor: pointer; }
 .ui-moneyrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; background: var(--kart); border: 1px solid var(--cizgi2); border-radius: 12px; }
-.ui-moneyrow b { font-size: 17px; }
-.ui-moneyrow small { display: block; font-size: 14px; color: var(--sessiz2); font-weight: 600; }
-.ui-moneyrow strong { font-size: 18px; white-space: nowrap; }
+.ui-moneyrow b { font-size: 0.944rem; }
+.ui-moneyrow small { display: block; font-size: 0.778rem; color: var(--sessiz2); font-weight: 600; }
+.ui-moneyrow strong { font-size: 1.0rem; white-space: nowrap; }
 .ui-history { display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 12px; border-radius: 14px;
-  background: var(--kart); border: 2px solid var(--cizgi); color: var(--yazi); font-size: 15px; font-weight: 800; text-decoration: none; }
+  background: var(--kart); border: 2px solid var(--cizgi); color: var(--yazi); font-size: 0.833rem; font-weight: 800; text-decoration: none; }
 .ui-history svg { width: 20px; height: 20px; }
 
 .ui-sync { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 10px;
-  padding: 10px 16px; font-size: 15px; font-weight: 700; }
+  padding: 10px 16px; font-size: 0.833rem; font-weight: 700; }
 .ui-sync span { flex: 1; }
 .ui-sync.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
 .ui-sync.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
-.ui-sync button { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 12px; border-radius: 12px;
+.ui-sync button { font: inherit; font-size: 0.833rem; font-weight: 800; min-height: 44px; padding: 0 12px; border-radius: 12px;
   border: 2px solid currentColor; background: transparent; color: inherit; cursor: pointer; flex-shrink: 0; }
 .ui-total { background: var(--koyu); color: #fff; box-shadow: var(--golge); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
-.ui-total span { font-size: 16px; font-weight: 600; color: var(--koyu-yazi2); }
-.ui-total b { font-size: 36px; font-weight: 800; }
+.ui-total span { font-size: 0.889rem; font-weight: 600; color: var(--koyu-yazi2); }
+.ui-total b { font-size: 2.0rem; font-weight: 800; }
 .ui-sticky-bottom { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   background: linear-gradient(transparent, var(--zemin) 30%); }
 .ui-sticky-bottom > * { max-width: 448px; margin: 0 auto; }
-.ui-choice .ui-avatar { width: 40px; height: 40px; font-size: 15px; }
+.ui-choice .ui-avatar { width: 40px; height: 40px; font-size: 0.833rem; }
 .ui-total-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--koyu-cizgi); }
 .ui-total-row div { display: flex; flex-direction: column; gap: 2px; }
-.ui-total-row span { font-size: 14px; }
-.ui-total-row strong { font-size: 20px; font-weight: 800; }
+.ui-total-row span { font-size: 0.778rem; }
+.ui-total-row strong { font-size: 1.111rem; font-weight: 800; }
 .ui-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--notr); border-radius: 16px; padding: 4px; }
-.ui-tabs button { font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: var(--sessiz); cursor: pointer; }
+.ui-tabs button { font: inherit; font-size: 0.889rem; font-weight: 800; min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: var(--sessiz); cursor: pointer; }
 .ui-tabs button[aria-selected="true"] { background: var(--kart); color: var(--yazi); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .ui-plain { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
 .ui-plain:focus-visible { outline: 2px solid var(--ana); outline-offset: 4px; border-radius: 8px; }
-.ui-amount { font-size: 18px; font-weight: 800; white-space: nowrap; }
-.ui-amount.borc { font-size: 20px; color: var(--tehlike); }
-.ui-segbtn { display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; min-height: 52px; border-radius: 14px;
+.ui-amount { font-size: 1.0rem; font-weight: 800; white-space: nowrap; }
+.ui-amount.borc { font-size: 1.111rem; color: var(--tehlike); }
+.ui-segbtn { display: flex; align-items: center; justify-content: center; font-size: 0.944rem; font-weight: 800; min-height: 52px; border-radius: 14px;
   border: 2px solid var(--ana); background: var(--kart); color: var(--ana-yazi); text-decoration: none; }
 .ui-segbtn.off { border-color: var(--cizgi); color: var(--sessiz2); }
-.ui-link.inline { min-height: 0; padding: 0; font-size: 17px; }
+.ui-link.inline { min-height: 0; padding: 0; font-size: 0.944rem; }
 .ui-quickadd { display: flex; gap: 8px; align-items: flex-end; }
 .ui-quickadd .ui-field { flex: 1; min-width: 0; }
-.ui-quickadd > button { font: inherit; font-size: 18px; font-weight: 800; min-height: 56px; padding: 0 20px; border-radius: 14px; border: 0;
+.ui-quickadd > button { font: inherit; font-size: 1.0rem; font-weight: 800; min-height: 56px; padding: 0 20px; border-radius: 14px; border: 0;
   background: var(--ana); color: #fff; cursor: pointer; }
 .ui-quickadd > button:disabled { opacity: 0.4; }
-.ui-card.row > button.ui-remove, .ui-remove { flex: 0 0 auto; flex-shrink: 0; font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
+.ui-card.row > button.ui-remove, .ui-remove { flex: 0 0 auto; flex-shrink: 0; font: inherit; font-size: 0.889rem; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
   border: 2px solid var(--tehlike); background: var(--tehlike-acik); color: var(--tehlike-yazi); cursor: pointer; }
 .ui-stats > button { font: inherit; border: 2px solid transparent; border-radius: 16px; padding: 12px; display: flex; flex-direction: column;
   align-items: center; gap: 2px; cursor: pointer; }
@@ -161,30 +161,43 @@ button.ui-card { width: 100%; border: 1px solid var(--cizgi2); font: inherit; co
 .ui-stats > button.tamam { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-stats > button.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
 .ui-stats > button.bekliyor { background: var(--notr); color: var(--sessiz); }
-.ui-stats > button b { font-size: 28px; font-weight: 800; }
-.ui-stats > button span { font-size: 14px; font-weight: 700; }
+.ui-stats > button b { font-size: 1.556rem; font-weight: 800; }
+.ui-stats > button span { font-size: 0.778rem; font-weight: 700; }
 input[type="date"] { appearance: none; -webkit-appearance: none; }
-.ui-label { font-size: 17px; font-weight: 800; margin: 0 4px; }
+.ui-label { font-size: 0.944rem; font-weight: 800; margin: 0 4px; }
 .ui-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ui-split > div { background: var(--kart); border: 1px solid var(--cizgi2); box-shadow: var(--golge); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
 .ui-split > div.mine { background: var(--ana-acik); color: var(--ana-yazi); border-color: var(--ana-orta); }
-.ui-split span { font-size: 14px; font-weight: 700; color: inherit; opacity: .8; }
-.ui-split b { font-size: 24px; font-weight: 800; }
-.ui-split small { font-size: 14px; font-weight: 600; opacity: .75; }
+.ui-split span { font-size: 0.778rem; font-weight: 700; color: inherit; opacity: .8; }
+.ui-split b { font-size: 1.333rem; font-weight: 800; }
+.ui-split small { font-size: 0.778rem; font-weight: 600; opacity: .75; }
 .ui-daynav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: -4px; }
-.ui-daynav button { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 14px; border-radius: 12px;
+.ui-daynav button { font: inherit; font-size: 0.833rem; font-weight: 800; min-height: 44px; padding: 0 14px; border-radius: 12px;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); cursor: pointer; }
 .ui-tabs:has(> :nth-child(4)) { grid-template-columns: repeat(4, 1fr); }
-.ui-tabs:has(> :nth-child(4)) button { font-size: 15px; padding: 0 2px; }
+.ui-tabs:has(> :nth-child(4)) button { font-size: 0.833rem; padding: 0 2px; }
 .ui-bar { display: flex; height: 14px; border-radius: 7px; background: var(--notr); overflow: hidden; }
 .ui-bar i { display: block; height: 100%; background: var(--ana-orta); }
 .ui-bar i.mine { background: var(--ana); }
 .ui-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--ana-orta); margin-right: 4px; vertical-align: -1px; }
 .ui-dot.mine { background: var(--ana); }
-.ui-select { font: inherit; font-size: 18px; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
+.ui-select { font: inherit; font-size: 1.0rem; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
 button.ui-card { display: block; }
 
 /* Odak görünür olsun (klavye / erişilebilirlik) */
 :focus-visible { outline: 3px solid var(--ana-orta); outline-offset: 2px; }
 .ui-field input:focus, .ui-select:focus { outline: none; border-color: var(--ana); box-shadow: 0 0 0 3px var(--ana-acik); }
+.ui-yn { display: flex; gap: 6px; flex-shrink: 0; }
+.ui-card.row > .ui-yn button, .ui-yn button { flex: 0 0 auto; font: inherit; font-size: 0.833rem; font-weight: 800; min-height: 44px; padding: 0 10px;
+  border-radius: 12px; border: 2px solid var(--cizgi); background: var(--kart); color: var(--sessiz); cursor: pointer; }
+.ui-yn button.evet[aria-pressed="true"] { border-color: var(--ana); background: var(--ana); color: #fff; }
+.ui-yn button.hayir[aria-pressed="true"] { border-color: var(--tehlike); background: var(--tehlike); color: #fff; }
+.ui-card.row { padding-right: 10px; }
+.ui-daylabel { font-size: 0.889rem; font-weight: 800; color: var(--sessiz); margin: 0 4px -6px; }
+.ui-section span { color: var(--sessiz2); font-weight: 700; }
+.ui-section.ans-evet { color: var(--ana-yazi); }
+.ui-section.ans-hayir { color: var(--tehlike-yazi); }
+.ui-note { margin: 0 4px; font-size: 0.889rem; color: var(--sessiz); line-height: 1.45; }
+.ui-seg button:disabled { opacity: 0.45; }
+.ui-person-text b { overflow-wrap: anywhere; }

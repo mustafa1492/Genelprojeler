@@ -129,7 +129,7 @@ function Login({ appName }: { appName: string }) {
   return (
     <main style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <h1 style={{ marginBottom: 0 }}>{appName}</h1>
-      <p style={{ margin: 0, fontSize: 18 }}>{mode === "giris" ? "Hoş geldin. Giriş yap." : mode === "kayit" ? "Yeni hesap aç." : "E-postanı yaz, şifre yenileme bağlantısı göndereyim."}</p>
+      <p style={{ margin: 0, fontSize: "1.0rem" }}>{mode === "giris" ? "Hoş geldin. Giriş yap." : mode === "kayit" ? "Yeni hesap aç." : "E-postanı yaz, şifre yenileme bağlantısı göndereyim."}</p>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <TextField id="email" label="E-posta" type="email" maxLength={254} autoComplete="email" inputMode="email" required
           value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -149,7 +149,7 @@ function Login({ appName }: { appName: string }) {
       <button type="button" className="ui-link" onClick={() => { setMode(mode === "giris" ? "kayit" : "giris"); setError(""); }}>
         {mode === "giris" ? "Hesabın yok mu? Yeni hesap aç" : "Giriş ekranına dön"}
       </button>
-      <a className="ui-link" href="/kvkk" style={{ textAlign: "center", fontSize: 15 }}>Kişisel verilerin korunması</a>
+      <a className="ui-link" href="/kvkk" style={{ textAlign: "center", fontSize: "0.833rem" }}>Kişisel verilerin korunması</a>
     </main>
   );
 }
@@ -171,7 +171,7 @@ function CreateBusiness({ product, placeholder, onDone }: { product: string; pla
   return (
     <main style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <h1 style={{ marginBottom: 0 }}>İşletmeni oluştur</h1>
-      <p style={{ margin: 0, fontSize: 18 }}>Bir kere yapacaksın. Sonra hep bu adla gireceksin.</p>
+      <p style={{ margin: 0, fontSize: "1.0rem" }}>Bir kere yapacaksın. Sonra hep bu adla gireceksin.</p>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <TextField id="bizname" label="İşletmenin adı" maxLength={100} placeholder={placeholder} required
           value={name} onChange={(e) => setName(e.target.value)} />

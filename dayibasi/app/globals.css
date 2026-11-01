@@ -14,6 +14,10 @@
   --koyu: #16351c; --koyu-yazi2: #c9dcc6; --koyu-cizgi: #2e5534;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--zemin); color: var(--yazi); font-size: 17px; }
+/* Yazı boyutu telefonun ayarından gelir: iOS'ta Dinamik Yazı (-apple-system-body), diğerlerinde tarayıcı ayarı (100%) */
+html { font-size: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@supports (font: -apple-system-body) { html { font: -apple-system-body; } }
+html, body { margin: 0; background: var(--zemin); color: var(--yazi); }
+body { font-size: 1rem; line-height: 1.4; }
 main { max-width: 480px; margin: 0 auto; padding: 16px; }
-h1 { font-size: 28px; margin: 8px 0 16px; }
+h1 { font-size: 1.556rem; margin: 8px 0 16px; }

@@ -5,7 +5,7 @@ import { fillTemplate, telLink, waLink } from "@/core/messaging/links";
 import { getTemplate } from "@/core/messaging/templates";
 import { addPerson, deletePerson, forgetPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
-import { ageOf, birthText, birthYear } from "@/core/people/birth";
+import { ageOf, birthText, birthYear, displayName } from "@/core/people/birth";
 import { listAnswers, setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
 import { BackButton, BottomNav, CallIconButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
@@ -63,11 +63,10 @@ export default function Ekibim() {
     if (!quickBirth) { setQuickError("Doğum tarihini seç. Aynı adlı kişileri ayırmak için gerekli."); return; }
     const same = (people ?? []).find((p) => p.full_name.toLocaleLowerCase("tr") === name.toLocaleLowerCase("tr") && p.custom?.dogum === quickBirth);
     if (same) { setQuickError(`${same.full_name} (${birthText(quickBirth)}) zaten ekipte.`); return; }
-    const g = filter !== "Hepsi" && filter !== NO_GROUP ? filter : "";
-    const p = await addPerson(biz.id, KIND, { full_name: name, phone: null, tags: [], custom: { dogum: quickBirth, ...(g ? { [GK]: g } : {}) }, notes: null });
+    const p = await addPerson(biz.id, KIND, { full_name: name, phone: null, tags: [], custom: { dogum: quickBirth }, notes: null });
     setQuickName(""); setQuickBirth("");
     const age = ageOf(quickBirth);
-    setDone({ message: `Ekledim: ${p.full_name}${g ? ` (${g})` : ""}.${age !== null && age < 18 ? ` Dikkat: ${age} yaşında, 18’den küçük.` : " Telefonu için ismine dokun."}`, run: () => deletePerson(p.id) });
+    setDone({ message: `Ekledim: ${p.full_name}.${age !== null && age < 18 ? ` Dikkat: ${age} yaşında, 18’den küçük.` : " Telefonu için ismine dokun."}`, run: () => deletePerson(p.id) });
     load();
   };
 
@@ -106,7 +105,6 @@ export default function Ekibim() {
     return (
       <main>
         <PersonForm kindLabel={kind.label} tags={config.people.tags} customFields={config.people.customFields}
-          groups={groups} groupKey={GK}
           person={p} onSave={save} onCancel={() => setView(p ? { v: "card", id: p.id } : { v: "list" })}
           onRemove={p ? () => remove(p) : undefined}
           onForget={p ? async () => { await forgetPerson(p.id); setDone(null); setView({ v: "list" }); load(); } : undefined} />
@@ -130,41 +128,34 @@ export default function Ekibim() {
   }
 
   const all = people ?? [];
-  const yes = all.filter((p) => answers[p.id] === "evet").length;
-  const no = all.filter((p) => answers[p.id] === "hayir").length;
-  const wait = all.length - yes - no;
+  const ansOf = (p: Person): "evet" | "hayir" | "bekliyor" => answers[p.id] ?? "bekliyor";
+  const byAns = (a: "evet" | "hayir" | "bekliyor") => all.filter((p) => ansOf(p) === a);
+  const yesL = byAns("evet"), noL = byAns("hayir"), waitL = byAns("bekliyor");
+  const tomorrowText = new Date(tomorrow + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long", weekday: "long" });
+  const askText = (p: Person) => fillTemplate(tpl, { ad: p.full_name.split(" ")[0] });
+  const shareText = `Yarın (${tomorrowText}) gelenler, ${yesL.length} kişi:\n` + yesL.map((p, i) => `${i + 1}. ${displayName(p, all)}`).join("\n");
+
   const statBtn = (key: "evet" | "hayir" | "bekliyor", cls: string, n: number, label: string) => (
     <button type="button" className={cls} aria-pressed={answerFilter === key}
       onClick={() => setAnswerFilter(answerFilter === key ? null : key)}><b>{n}</b><span>{label}</span></button>
   );
-  const stats = (
-    <div className="ui-stats">
-      {statBtn("evet", "tamam", yes, "geliyor")}
-      {statBtn("hayir", "gecti", no, "gelmiyor")}
-      {statBtn("bekliyor", "bekliyor", wait, "bekleniyor")}
-    </div>
-  );
 
-  // --- Akşam yoklaması
+  // --- Bekleyenlere sor (WhatsApp, tek tek)
   if (view.v === "yoklama") {
     return (
       <main className="ui-stack">
         <BackButton onClick={() => setView({ v: "list" })} label={config.screens.ekip} />
-        <PageHeader sub="Akşam yoklaması" title="Yarın kim geliyor?" />
-        <p style={{ margin: "0 4px", fontSize: 17 }}>Her işçinin yanındaki <b>Sor</b>’a dokun, WhatsApp’ta mesaj hazır açılır. Cevap gelince <b>Geliyor</b> ya da <b>Gelmiyor</b>’a dokun.</p>
-        {stats}
-        {all.map((p) => (
-          <div key={p.id} className="ui-card ui-stack" style={{ gap: 10 }}>
-            <PersonRow name={p.full_name} sub={p.phone ? undefined : "Telefonu yok"}
-              right={p.phone ? (
-                <a className="ui-chip" style={{ textDecoration: "none", display: "flex", alignItems: "center", ...(sent[p.id] ? { background: "var(--ana-acik)", borderColor: "var(--ana)" } : {}) }}
-                  href={waLink(p.phone, fillTemplate(tpl, { ad: p.full_name.split(" ")[0] }))} target="_blank" rel="noreferrer"
-                  onClick={() => setSent({ ...sent, [p.id]: true })}>{sent[p.id] ? "Soruldu ✓" : "Sor"}</a>
-              ) : undefined} />
-            <div className="ui-seg">
-              <button type="button" className="evet" aria-pressed={answers[p.id] === "evet"} onClick={() => mark(p.id, answers[p.id] === "evet" ? null : "evet")}>Geliyor</button>
-              <button type="button" className="hayir" aria-pressed={answers[p.id] === "hayir"} onClick={() => mark(p.id, answers[p.id] === "hayir" ? null : "hayir")}>Gelmiyor</button>
-            </div>
+        <PageHeader sub={`Yarın · ${tomorrowText}`} title="Bekleyenlere sor" />
+        <p className="ui-note">Her kişinin yanındaki <b>Sor</b>’a dokun. WhatsApp’ta mesaj hazır açılır, gönder. Cevap gelince Ekibim’de işaretle.</p>
+        {waitL.length === 0 && <div className="ui-empty">Herkes cevap verdi.</div>}
+        {waitL.map((p) => (
+          <div key={p.id} className="ui-card row" style={{ padding: "10px 12px 10px 0" }}>
+            <button type="button" disabled><PersonRow name={displayName(p, all)} sub={p.phone ? undefined : "Telefonu yok"} /></button>
+            {p.phone && (
+              <a className="ui-segbtn" style={{ padding: "0 18px", flexShrink: 0, ...(sent[p.id] ? { background: "var(--ana-acik)" } : {}) }}
+                href={waLink(p.phone, askText(p))} target="_blank" rel="noreferrer"
+                onClick={() => setSent({ ...sent, [p.id]: true })}>{sent[p.id] ? "Soruldu ✓" : "Sor"}</a>
+            )}
           </div>
         ))}
         <MainButton onClick={() => setView({ v: "list" })}>Bitti</MainButton>
@@ -172,41 +163,69 @@ export default function Ekibim() {
     );
   }
 
-  // --- Liste
-  const ansOf = (p: Person) => answers[p.id] ?? "bekliyor";
-  const matches = (p: Person) => (filter === "Hepsi" || (filter === NO_GROUP ? !groupOf(p) : groupOf(p) === filter))
-    && (!answerFilter || ansOf(p) === answerFilter);
-  const shown = all.filter(matches);
-  const sections = filter === "Hepsi" && groups.length
-    ? [...groups, NO_GROUP].map((g) => ({ g, list: shown.filter((p) => (groupOf(p) || NO_GROUP) === g) })).filter((x) => x.list.length)
-    : [{ g: "", list: shown }];
+  // --- Liste: yarın durumuna göre bölünmüş
+  const sections: { key: "evet" | "hayir" | "bekliyor"; title: string; list: Person[] }[] = [
+    { key: "bekliyor", title: "Cevap bekleniyor", list: waitL },
+    { key: "evet", title: "Geliyor", list: yesL },
+    { key: "hayir", title: "Gelmiyor", list: noL },
+  ];
+  const visible = sections.filter((x) => (!answerFilter || x.key === answerFilter) && x.list.length);
   const sub = people ? `${people.length} ${kind.label.toLocaleLowerCase("tr")}` : biz.name;
-  const row = (p: Person) => (
-    <div key={p.id} className="ui-card row">
-      <button type="button" disabled={removing} onClick={() => { setDone(null); setView({ v: "card", id: p.id }); }}>
-        <PersonRow name={p.full_name}
-          sub={[birthYear(p.custom?.dogum), filter === "Hepsi" && groups.length ? "" : groupOf(p)].filter(Boolean).join(" · ") || undefined}
-          right={removing ? undefined : pill(answers[p.id] ?? null)} />
-      </button>
-      {removing
-        ? <button type="button" className="ui-remove" onClick={() => remove(p)}>Çıkar</button>
-        : p.phone && <CallIconButton href={telLink(p.phone)} name={p.full_name} />}
-    </div>
-  );
+
+  const row = (p: Person) => {
+    const a = ansOf(p);
+    return (
+      <div key={p.id} className="ui-card row">
+        <button type="button" disabled={removing} onClick={() => { setDone(null); setView({ v: "card", id: p.id }); }}>
+          <PersonRow name={displayName(p, all)} sub={birthYear(p.custom?.dogum) || undefined} />
+        </button>
+        {removing ? <button type="button" className="ui-remove" onClick={() => remove(p)}>Çıkar</button> : (
+          <div className="ui-yn" role="group" aria-label={`${p.full_name} yarın`}>
+            <button type="button" className="evet" aria-pressed={a === "evet"} onClick={() => mark(p.id, a === "evet" ? null : "evet")}>Geliyor</button>
+            <button type="button" className="hayir" aria-pressed={a === "hayir"} onClick={() => mark(p.id, a === "hayir" ? null : "hayir")}>Gelmiyor</button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={sub} title={config.screens.ekip} right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={undo} />}
-
       {loadError && <ErrorText>Listeyi getiremedim. İnterneti kontrol et. <button type="button" className="ui-link" onClick={load}>Tekrar dene</button></ErrorText>}
       {people === null && !loadError && <div className="ui-empty">Yükleniyor…</div>}
+
+      {people && people.length > 0 && !removing && (
+        <>
+          <div className="ui-daylabel">Yarın · {tomorrowText}</div>
+          <div className="ui-stats">
+            {statBtn("evet", "tamam", yesL.length, "geliyor")}
+            {statBtn("hayir", "gecti", noL.length, "gelmiyor")}
+            {statBtn("bekliyor", "bekliyor", waitL.length, "bekleniyor")}
+          </div>
+          <div className="ui-seg">
+            <button type="button" disabled={!waitL.length} onClick={() => { setDone(null); setView({ v: "yoklama" }); }}>Bekleyenlere sor ({waitL.length})</button>
+            <a className={`ui-segbtn${yesL.length ? "" : " off"}`} href={yesL.length ? `https://wa.me/?text=${encodeURIComponent(shareText)}` : undefined}
+              target="_blank" rel="noreferrer">Gelenleri paylaş</a>
+          </div>
+        </>
+      )}
+
+      {people && people.length === 0 && <div className="ui-empty">Ekibinde henüz kimse yok. Aşağıdan ilk kişiyi ekle.</div>}
+
+      {visible.map(({ key, title, list }) => (
+        <section key={key} className="ui-stack" style={{ gap: 8 }}>
+          <h2 className={`ui-section ans-${key}`}>{title} <span>· {list.length}</span></h2>
+          {list.map(row)}
+        </section>
+      ))}
+      {answerFilter && <button type="button" className="ui-link" onClick={() => setAnswerFilter(null)}>Herkesi göster</button>}
+
       <form onSubmit={quickAdd} className="ui-card ui-stack" style={{ gap: 10 }}>
-        <b style={{ fontSize: 17 }}>Ekibe ekle{filter !== "Hepsi" && filter !== NO_GROUP ? ` (${filter})` : ""}</b>
-        <div className="ui-quickadd">
-          <TextField id="quick_name" label="Adı soyadı" placeholder="Örnek: Ayşe Kaya" maxLength={100} autoComplete="off"
-            value={quickName} onChange={(e) => setQuickName(e.target.value)} />
-        </div>
+        <b>Ekibe ekle</b>
+        <TextField id="quick_name" label="Adı soyadı" placeholder="Örnek: Ayşe Kaya" maxLength={100} autoComplete="off"
+          value={quickName} onChange={(e) => setQuickName(e.target.value)} />
         <div className="ui-quickadd">
           <TextField id="quick_birth" label="Doğum tarihi" type="date" max={new Date().toISOString().slice(0, 10)}
             value={quickBirth} onChange={(e) => setQuickBirth(e.target.value)} />
@@ -214,40 +233,10 @@ export default function Ekibim() {
         </div>
         {quickError && <ErrorText>{quickError}</ErrorText>}
       </form>
-
-      {people && people.length === 0 && <div className="ui-empty">Ekibinde henüz kimse yok. Yukarıya ismini yazıp Ekle’ye bas.</div>}
-
       {people && people.length > 0 && (
-        <>
-          {!removing && <MainButton onClick={() => { setDone(null); setView({ v: "yoklama" }); }}>Herkese sor: Yarın geliyor musun?</MainButton>}
-          {!removing && stats}
-          {(groups.length > 0) && (
-            <div className="ui-chips" role="group" aria-label="Gruba göre süz">
-              {["Hepsi", ...groups, ...(all.some((p) => !groupOf(p)) ? [NO_GROUP] : [])].map((t) => (
-                <Chip key={t} selected={filter === t} onClick={() => setFilter(t)}>{t}</Chip>
-              ))}
-            </div>
-          )}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "0 4px" }}>
-            <span style={{ fontSize: 15, color: "var(--sessiz2)", fontWeight: 600 }}>
-              {removing ? "Çıkaracağın kişinin yanındaki Çıkar’a bas." : groups.length ? "" : "Grup açmak için bir kişiye dokun → Grubu → Yeni grup."}
-            </span>
-            <button type="button" className={removing ? "ui-chip" : "ui-link inline"} aria-pressed={removing}
-              onClick={() => { setRemoving(!removing); setDone(null); }}>{removing ? "Bitti" : "Çıkar…"}</button>
-          </div>
-          {sections.map(({ g, list }) => (
-            <div key={g || "x"} className="ui-stack" style={{ gap: 10 }}>
-              {g && <h2 className="ui-section">{g} <span style={{ color: "var(--sessiz2)", fontWeight: 700 }}>· {list.length}</span></h2>}
-              {list.map(row)}
-            </div>
-          ))}
-          {answerFilter && (
-            <button type="button" className="ui-link" onClick={() => setAnswerFilter(null)}>
-              Sadece “{answerFilter === "evet" ? "geliyor" : answerFilter === "hayir" ? "gelmiyor" : "bekleniyor"}” gösteriliyor · hepsini göster
-            </button>
-          )}
-          {shown.length === 0 && <div className="ui-empty">{answerFilter ? "Bu durumda kimse yok." : "Bu grupta kimse yok."}</div>}
-        </>
+        <button type="button" className={removing ? "ui-main-btn" : "ui-link"} onClick={() => { setRemoving(!removing); setDone(null); }}>
+          {removing ? "Bitti" : "Ekipten birini çıkar…"}
+        </button>
       )}
       <BottomNav items={navItems} current="/ekip" />
     </main>

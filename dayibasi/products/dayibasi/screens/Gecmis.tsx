@@ -45,7 +45,7 @@ export default function Gecmis() {
     <main className="ui-stack">
       <BackButton onClick={() => router.back()} />
       <PageHeader sub="Yapılan her şey burada" title="Geçmiş" />
-      <p style={{ margin: "0 4px", fontSize: 17 }}>Yanlışlıkla bir şey yaptıysan o satırdaki <b>Geri al</b>’a dokun.</p>
+      <p style={{ margin: "0 4px", fontSize: "0.944rem" }}>Yanlışlıkla bir şey yaptıysan o satırdaki <b>Geri al</b>’a dokun.</p>
       {done && <DoneCard message={done} />}
       {error && <ErrorText>{error}</ErrorText>}
       {items === null && !error && <div className="ui-empty">Yükleniyor…</div>}

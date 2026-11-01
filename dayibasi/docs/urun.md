@@ -28,7 +28,8 @@
 - Üstte "Herkese sor: Yarın geliyor musun?" → her işçiye wa.me bağlantısıyla hazır mesaj
 - Geliyor / Gelmiyor / Bekleniyor sayıları
 - ~~Beceriye göre filtre~~ kaldırıldı (Mustafa, 1 Kasım 2026): beceri etiketi yok
-- Ekip içi sınıflandırma: dayıbaşının kendi açtığı **gruplar** (ör. "Kınık ekibi"); liste gruplara bölünür, gruba göre süzülür
+- ~~Gruplar~~ ekrandan kaldırıldı (Mustafa, 1 Kasım 2026): liste yalnız **yarın durumuna** göre bölünür: Cevap bekleniyor / Geliyor / Gelmiyor
+- Her satırda doğrudan Geliyor / Gelmiyor düğmesi; "Bekleyenlere sor" (yalnız cevap vermeyenlere WhatsApp), "Gelenleri paylaş" (gelenlerin listesi tek mesajla, ör. şoföre)
 - Ekleme/çıkarma çok kolay: listenin üstünde tek kutu "Ekibe ekle" (seçili gruba eklenir); "Çıkar…" ile her satırda Çıkar düğmesi; her işlemde Geri al
 - Ekibe eklerken **doğum tarihi zorunlu** (aynı adlı kişileri ayırmak için); aynı ad + aynı doğum tarihi ikinci kez eklenemez; aynı adlılar listede doğum yılıyla görünür. 18 yaşından küçükse uyarı (engel değil).
 - Geliyor / Gelmiyor / Bekleniyor kutularına dokununca liste o duruma süzülür.

@@ -77,21 +77,21 @@ export default function Kayitlar() {
         return (
           <section key={d} className="ui-stack" style={{ gap: 8 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, margin: "6px 4px 0" }}>
-              <h2 style={{ margin: 0, fontSize: 19 }}>{longDay(d)}</h2>
-              <span style={{ fontSize: 15, fontWeight: 700, color: "var(--sessiz2)", whiteSpace: "nowrap" }}>{kisi} kişi</span>
+              <h2 style={{ margin: 0, fontSize: "1.056rem" }}>{longDay(d)}</h2>
+              <span style={{ fontSize: "0.833rem", fontWeight: 700, color: "var(--sessiz2)", whiteSpace: "nowrap" }}>{kisi} kişi</span>
             </div>
             {de.map((e) => {
               const ws = workersOf(e);
               return (
                 <button key={e.id} type="button" className="ui-card" onClick={() => { setDone(null); setEditing(e); }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                    <b style={{ fontSize: 18, minWidth: 0 }}>{placeLabel(places.find((p) => p.id === e.place_id))}</b>
+                    <b style={{ fontSize: "1.0rem", minWidth: 0 }}>{placeLabel(places.find((p) => p.id === e.place_id))}</b>
                     <StatusPill status="tamam">{e.quantity} kişi</StatusPill>
                   </div>
-                  <div style={{ fontSize: 16, color: "var(--yazi)", marginTop: 8, lineHeight: 1.45 }}>
+                  <div style={{ fontSize: "0.889rem", color: "var(--yazi)", marginTop: 8, lineHeight: 1.45 }}>
                     {ws.length ? ws.map(nameOf).join(", ") : <span style={{ color: "var(--sessiz2)" }}>İsim seçilmedi</span>}
                   </div>
-                  <div style={{ fontSize: 14, color: "var(--sessiz2)", marginTop: 6, fontWeight: 600 }}>
+                  <div style={{ fontSize: "0.778rem", color: "var(--sessiz2)", marginTop: 6, fontWeight: 600 }}>
                     Yevmiye {formatTL(split(e, biz).wage)} · payın {formatTL((e.quantity ?? 0) * split(e, biz).fee)} · <span style={{ color: "var(--ana-yazi)" }}>düzenle ›</span>
                   </div>
                 </button>

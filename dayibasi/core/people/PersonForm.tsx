@@ -55,7 +55,7 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
       ))}
       {groups && (
         <div className="ui-stack" style={{ gap: 8 }}>
-          <span style={{ fontSize: 17, fontWeight: 700 }}>Grubu</span>
+          <span style={{ fontSize: "0.944rem", fontWeight: 700 }}>Grubu</span>
           <div className="ui-chips wrap">
             {groups.map((g) => (
               <Chip key={g} selected={custom[groupKey] === g}
@@ -70,7 +70,7 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
         </div>
       )}
       {tags.length > 0 && <div className="ui-stack" style={{ gap: 8 }}>
-        <span style={{ fontSize: 17, fontWeight: 700 }}>Hangi işleri yapar?</span>
+        <span style={{ fontSize: "0.944rem", fontWeight: 700 }}>Hangi işleri yapar?</span>
         <div className="ui-chips wrap">
           {tags.map((t) => <Chip key={t} selected={picked.includes(t)} onClick={() => toggle(t)}>{t}</Chip>)}
         </div>

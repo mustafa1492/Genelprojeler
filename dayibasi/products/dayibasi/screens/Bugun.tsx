@@ -142,8 +142,8 @@ export default function Bugun() {
         {workers.map((w) => (
           <button key={w.id} type="button" className="ui-choice" aria-pressed={picked.includes(w.id)} onClick={() => toggle(w.id)}>
             <PersonRow name={w.full_name}
-              sub={[birthYear(w.custom?.dogum), w.custom?.[config.people.groupKey] as string].filter(Boolean).join(" · ") || undefined}
-              right={<span aria-hidden="true" style={{ fontSize: 26 }}>{picked.includes(w.id) ? "✓" : ""}</span>} />
+              sub={birthYear(w.custom?.dogum) || undefined}
+              right={<span aria-hidden="true" style={{ fontSize: "1.444rem" }}>{picked.includes(w.id) ? "✓" : ""}</span>} />
           </button>
         ))}
         <button type="button" className="ui-link" onClick={() => { setPicked([]); setStep("kisi"); }}>İsim seçmeden sadece sayı gir</button>
@@ -236,20 +236,20 @@ export default function Bugun() {
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 10 }}>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--sessiz2)" }}>{isToday ? "Bugün tarlada" : "O gün tarlada"}</div>
-            <div style={{ fontSize: 40, fontWeight: 800 }}>{toplam} kişi</div>
+            <div style={{ fontSize: "0.833rem", fontWeight: 600, color: "var(--sessiz2)" }}>{isToday ? "Bugün tarlada" : "O gün tarlada"}</div>
+            <div style={{ fontSize: "2.222rem", fontWeight: 800 }}>{toplam} kişi</div>
           </div>
-          {payGun > 0 && <div style={{ textAlign: "right" }}><div style={{ fontSize: 14, fontWeight: 600, color: "var(--sessiz2)" }}>Senin payın</div><div style={{ fontSize: 22, fontWeight: 800 }}>{formatTL(payGun)}</div></div>}
+          {payGun > 0 && <div style={{ textAlign: "right" }}><div style={{ fontSize: "0.778rem", fontWeight: 600, color: "var(--sessiz2)" }}>Senin payın</div><div style={{ fontSize: "1.222rem", fontWeight: 800 }}>{formatTL(payGun)}</div></div>}
         </div>
       </Card>
 
       {events.map((e) => (
         <button key={e.id} type="button" className="ui-card" onClick={() => { setDetail(e); setDone(null); setStep("detay"); }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <div style={{ fontSize: 18, fontWeight: 800, minWidth: 0 }}>{placeLabel(placeOf(e.place_id))}</div>
+            <div style={{ fontSize: "1.0rem", fontWeight: 800, minWidth: 0 }}>{placeLabel(placeOf(e.place_id))}</div>
             <StatusPill status="tamam">{e.quantity} kişi</StatusPill>
           </div>
-          <div style={{ fontSize: 15, color: "var(--sessiz)", marginTop: 6 }}>
+          <div style={{ fontSize: "0.833rem", color: "var(--sessiz)", marginTop: 6 }}>
             {workersOf(e).length ? firstNames(workersOf(e)) : "İsim seçilmedi"} · işçi başı {formatTL(split(e, biz).wage)}
           </div>
         </button>
@@ -260,11 +260,11 @@ export default function Bugun() {
 
       {repeatable.length > 0 && prevDay && (
         <div className="ui-card ui-stack" style={{ gap: 10 }}>
-          <b style={{ fontSize: 17 }}>{prevDay === addDays(day, -1) ? "Dünkü gibi" : `${dayText(prevDay)} gibi`}</b>
+          <b style={{ fontSize: "0.944rem" }}>{prevDay === addDays(day, -1) ? "Dünkü gibi" : `${dayText(prevDay)} gibi`}</b>
           {repeatable.map((p) => (
             <button key={p.id} type="button" className="ui-choice" onClick={() => repeat([p])}>
               + {placeLabel(placeOf(p.place_id))} · {p.quantity} kişi
-              <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: "var(--sessiz2)" }}>
+              <span style={{ display: "block", fontSize: "0.833rem", fontWeight: 600, color: "var(--sessiz2)" }}>
                 {workersOf(p).length ? firstNames(workersOf(p)) : "İsimsiz"} · {formatTL(split(p, biz).wage)}
               </span>
             </button>
@@ -275,7 +275,7 @@ export default function Bugun() {
 
       {isToday && (
         <Link href="/ekip" className="ui-card" style={{ textDecoration: "none", color: "inherit", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <span><b style={{ fontSize: 17 }}>Yarın</b><br /><span style={{ fontSize: 15, color: "var(--sessiz)" }}>
+          <span><b style={{ fontSize: "0.944rem" }}>Yarın</b><br /><span style={{ fontSize: "0.833rem", color: "var(--sessiz)" }}>
             {tomorrow.yes || tomorrow.no ? `${tomorrow.yes} geliyor, ${tomorrow.no} gelmiyor` : "Henüz kimseye sorulmadı"}</span></span>
           <span className="ui-pill bekliyor">Yoklama ›</span>
         </Link>

@@ -43,7 +43,7 @@ export default function Page() {
       )}
       {rows?.map((r) => (
         <div key={r.business_id} className="ui-card ui-stack" style={{ gap: 10 }}>
-          <div style={{ fontSize: 19, fontWeight: 800 }}>{r.name}</div>
+          <div style={{ fontSize: "1.056rem", fontWeight: 800 }}>{r.name}</div>
           <InfoRows rows={[
             ["Sahibi", r.owner_email ?? "Yok"],
             ["Açıldı", when(r.created_at)],

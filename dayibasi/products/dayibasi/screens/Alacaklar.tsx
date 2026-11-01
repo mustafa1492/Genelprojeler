@@ -214,13 +214,13 @@ export default function Alacaklar() {
               <div key={f.id} className="ui-card ui-stack" style={{ padding: 18, gap: 12 }}>
                 <button type="button" className="ui-plain" onClick={() => { setDone(null); setView({ v: "card", id: f.id }); }}>
                   <span style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-                    <span style={{ fontSize: 20, fontWeight: 800 }}>{f.full_name}</span>
+                    <span style={{ fontSize: "1.111rem", fontWeight: 800 }}>{f.full_name}</span>
                     {borclu ? <span className="ui-amount borc">{formatTL(a.kalan)}</span> : <StatusPill status="tamam">{a.kisiGun ? "Ödedi" : "İş yok"}</StatusPill>}
                   </span>
-                  <span style={{ fontSize: 16, color: "var(--sessiz)", lineHeight: 1.45 }}>{aciklama}</span>
+                  <span style={{ fontSize: "0.889rem", color: "var(--sessiz)", lineHeight: 1.45 }}>{aciklama}</span>
                 </button>
                 {borclu && (f.phone
-                  ? <a className="ui-main-btn" style={{ minHeight: 58, fontSize: 18, borderRadius: 14, textDecoration: "none", ...(sent[f.id] ? { background: "var(--ana-acik)", color: "var(--ana-yazi)" } : {}) }}
+                  ? <a className="ui-main-btn" style={{ minHeight: 58, fontSize: "1.0rem", borderRadius: 14, textDecoration: "none", ...(sent[f.id] ? { background: "var(--ana-acik)", color: "var(--ana-yazi)" } : {}) }}
                       href={waLink(f.phone, farmerMsg(a))} target="_blank" rel="noreferrer" onClick={() => markSent(f.id)}>
                       {sent[f.id] ? "Hesap gönderildi ✓" : "Hesabını WhatsApp’tan gönder"}
                     </a>
@@ -251,7 +251,7 @@ export default function Alacaklar() {
               )}
             </div>
           ))}
-          <p style={{ margin: "0 4px", fontSize: 15, color: "var(--sessiz2)" }}>Avans vermek için: Ekibim → işçiye dokun → “Avans verdim”.</p>
+          <p style={{ margin: "0 4px", fontSize: "0.833rem", color: "var(--sessiz2)" }}>Avans vermek için: Ekibim → işçiye dokun → “Avans verdim”.</p>
         </>
       )}
 
@@ -309,10 +309,10 @@ function Puantaj({ events, workers, placeLabel }: { events: EventRow[]; workers:
           <InfoRows rows={rows.map((a) => [displayName(a.worker, workers), `${a.gun} gün · ${formatTL(a.kazanc)}`] as [string, string])} />
         </Card>
       )}
-      {unnamed > 0 && <p style={{ margin: "0 4px", fontSize: 15, color: "var(--sessiz2)" }}>İsim seçilmeden girilen: {unnamed} kişi-gün (işçi hesabına girmez).</p>}
+      {unnamed > 0 && <p style={{ margin: "0 4px", fontSize: "0.833rem", color: "var(--sessiz2)" }}>İsim seçilmeden girilen: {unnamed} kişi-gün (işçi hesabına girmez).</p>}
       {days.map((d) => (
         <div key={d} className="ui-stack" style={{ gap: 8 }}>
-          <h3 style={{ margin: "6px 4px 0", fontSize: 17 }}>{dayText(d)}</h3>
+          <h3 style={{ margin: "6px 4px 0", fontSize: "0.944rem" }}>{dayText(d)}</h3>
           {ev.filter((e) => e.occurred_on === d).map((e) => (
             <div key={e.id} className="ui-moneyrow" style={{ background: "var(--kart)" }}>
               <b style={{ minWidth: 0 }}>{placeLabel(e.place_id)}
@@ -388,21 +388,21 @@ function Ozet({ events, entries, farmers, workers }: { events: EventRow[]; entri
           <div className="ui-card ui-stack" style={{ gap: 14 }}>
             {months.map((x) => (
               <div key={x.m} className="ui-stack" style={{ gap: 6 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: "0.889rem" }}>
                   <b>{monthName(x.m)}</b><span style={{ color: "var(--sessiz)" }}>{x.kisiGun} kişi-gün · {x.gun} gün</span>
                 </div>
                 <div className="ui-bar" aria-hidden="true">
                   <i style={{ width: `${(x.isci / max) * 100}%` }} />
                   <i className="mine" style={{ width: `${(x.pay / max) * 100}%` }} />
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 14, color: "var(--sessiz2)", fontWeight: 600, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: "0.778rem", color: "var(--sessiz2)", fontWeight: 600, flexWrap: "wrap" }}>
                   <span>İş {formatTL(x.ciro)} · alınan {formatTL(x.tahsil)}</span>
                   <span style={{ color: "var(--ana-yazi)", fontWeight: 800 }}>Payın {formatTL(x.pay)}</span>
                 </div>
-                {x.wageAvg > 0 && <span style={{ fontSize: 14, color: "var(--sessiz2)" }}>Ortalama yevmiye {formatTL(Math.round(x.wageAvg))}</span>}
+                {x.wageAvg > 0 && <span style={{ fontSize: "0.778rem", color: "var(--sessiz2)" }}>Ortalama yevmiye {formatTL(Math.round(x.wageAvg))}</span>}
               </div>
             ))}
-            <div style={{ display: "flex", gap: 14, fontSize: 13, color: "var(--sessiz2)", fontWeight: 700 }}>
+            <div style={{ display: "flex", gap: 14, fontSize: "0.722rem", color: "var(--sessiz2)", fontWeight: 700 }}>
               <span><i className="ui-dot" /> İşçilere</span><span><i className="ui-dot mine" /> Senin payın</span>
             </div>
           </div>
@@ -437,9 +437,9 @@ function Tutar({ title, sub, hint, initial = "", quick, onSave, onCancel }: {
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub={sub} title={title} />
       <TextField id="tutar" label="Kaç TL?" inputMode="decimal" autoFocus maxLength={12} placeholder="Örnek: 5000"
-        value={v} onChange={(e) => setV(e.target.value)} style={{ fontSize: 30, fontWeight: 800 }} />
+        value={v} onChange={(e) => setV(e.target.value)} style={{ fontSize: "1.667rem", fontWeight: 800 }} />
       {quick != null && <Chip onClick={() => setV(String(quick))}>Hepsini ödedi: {formatTL(quick)}</Chip>}
-      {hint && <p style={{ margin: "0 4px", fontSize: 16, color: "var(--sessiz2)" }}>{hint}</p>}
+      {hint && <p style={{ margin: "0 4px", fontSize: "0.889rem", color: "var(--sessiz2)" }}>{hint}</p>}
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton disabled={busy} onClick={async () => {
         const n = num(v);

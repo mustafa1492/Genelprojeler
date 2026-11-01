@@ -25,7 +25,7 @@ export const HistoryLink = () => (
 
 /** Çıkış: telefondaki kopyayı da siler. Gönderilmemiş kayıt varsa uyarır. */
 export const SignOutLink = () => (
-  <button type="button" className="ui-link" style={{ fontSize: 15, color: "var(--sessiz2)" }} onClick={async () => {
+  <button type="button" className="ui-link" style={{ fontSize: "0.833rem", color: "var(--sessiz2)" }} onClick={async () => {
     if (status().pending > 0) { window.dispatchEvent(new Event("online")); return; }
     clearLocal(); await supabase().auth.signOut(); location.href = "/";
   }}>Çıkış yap</button>

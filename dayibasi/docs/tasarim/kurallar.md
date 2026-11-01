@@ -2,6 +2,9 @@
 
 Referans ekranlar: `demo-ekranlar.dc.html` (Claude Design canvas dosyası; HTML + küçük bir şablon dili. Görünümü ve davranışı referans al, dosya biçimini değil).
 
+## Yazı boyutu (1 Kasım 2026)
+Yazılar `rem` ile; telefonun yazı boyutu ayarına uyar (iOS Dinamik Yazı: `-apple-system-body`). Mustafa "yazılar çok büyük" dedi; eski px değerleri ~%10 küçültülerek rem'e çevrildi. Dokunma alanları (min-height) px olarak kaldı.
+
 ## Kullanıcıya göre kurallar
 - Ekran başına tek ana iş; ana düğme tam genişlik, yeşil, en az 64-72 px
 - Yazı: gövde 16-18 px, kart başlığı 18-20 px, sayfa başlığı 28 px, büyük sayılar 30-44 px
