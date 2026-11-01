@@ -26,7 +26,7 @@ export default function Gecmis() {
   const [busy, setBusy] = useState<number | null>(null);
 
   const load = useCallback(() => {
-    listActivity(biz.id).then(setItems).catch(() => setError("Geçmişi getiremedim. İnterneti kontrol et."));
+    listActivity(biz.id).then(setItems).catch(() => setError(navigator.onLine ? "Geçmişi getiremedim, tekrar dene." : "Geçmişi görmek için internet lazım."));
     supabase().from("people").select("id, full_name").eq("business_id", biz.id)
       .then(({ data }) => setNames(Object.fromEntries((data ?? []).map((p) => [p.id, p.full_name]))));
   }, [biz.id]);
@@ -34,6 +34,7 @@ export default function Gecmis() {
 
   const undo = async (a: Activity) => {
     setBusy(a.id); setError(""); setDone("");
+    if (!navigator.onLine) { setBusy(null); setError("Geri almak için internet lazım."); return; }
     const err = await undoActivity(a.id);
     setBusy(null);
     if (err) setError(err);

@@ -118,3 +118,11 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-history { display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 12px; border-radius: 14px;
   background: var(--kart); border: 2px solid var(--cizgi); color: var(--yazi); font-size: 15px; font-weight: 800; text-decoration: none; }
 .ui-history svg { width: 20px; height: 20px; }
+
+.ui-sync { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; font-size: 15px; font-weight: 700; }
+.ui-sync span { flex: 1; }
+.ui-sync.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
+.ui-sync.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
+.ui-sync button { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 12px; border-radius: 12px;
+  border: 2px solid currentColor; background: transparent; color: inherit; cursor: pointer; flex-shrink: 0; }

@@ -93,5 +93,6 @@ docs/
 - Bugün ekranı hâlâ örnek veriyle; Arabalar ve Alacaklarım "yakında".
 - Uygulama yayında değil (Vercel önerildi, kullanıcı henüz açmadı).
 - Güvenlik planı ve açık listesi: `docs/guvenlik.md`. KVKK aydınlatma metni `/kvkk` TASLAK, avukata gösterilmeli.
-- Sıradaki iş: internetsiz çalışma (kayıt kuyruğu + PWA).
+- İnternetsiz çalışma (`core/offline/`): yazmalar `mutate()` ile yerel aynaya + giden kutusuna, internet gelince sırayla gönderilir; okumalar `query()` ile. Yeni tablo yazan her kod buradan geçmeli (doğrudan supabase insert/update yazma). Kimlikler istemcide `crypto.randomUUID()`. `public/sw.js` sayfaları ve dosyaları saklar; önbellek adını değiştirince `RegisterSW.tsx`'teki de değişmeli. Geri alma, Geçmiş ve "tamamen sil" internet ister.
+- Sıradaki iş: yayına alma (Vercel) ya da Arabalar; kullanıcı seçecek.
 - Bu ortamdan Supabase'e tarayıcıyla ulaşılamıyor; ekranlar sahte sunucuyla (Playwright route) denendi.

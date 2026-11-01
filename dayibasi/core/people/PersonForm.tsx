@@ -68,7 +68,7 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
       {onForget && forgetAsk && (
         <div className="ui-warn gecti">
           <div className="ui-warn-row"><span>{name} ve bütün avans, ödeme, yoklama bilgileri kalıcı olarak silinecek. Bu geri alınamaz.</span></div>
-          <MainButton onClick={async () => { setBusy(true); try { await onForget(); } catch { setError("Silemedim, tekrar dene."); setBusy(false); } }} disabled={busy}>Evet, tamamen sil</MainButton>
+          <MainButton onClick={async () => { setBusy(true); try { await onForget(); } catch { setError(navigator.onLine ? "Silemedim, tekrar dene." : "Tamamen silmek için internet lazım."); setBusy(false); } }} disabled={busy}>Evet, tamamen sil</MainButton>
           <MainButton secondary onClick={() => setForgetAsk(false)}>Vazgeç</MainButton>
         </div>
       )}

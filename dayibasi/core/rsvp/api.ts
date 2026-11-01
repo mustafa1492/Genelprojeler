@@ -1,3 +1,4 @@
+import { mutate, query } from "@/core/offline/store";
 import { supabase } from "@/core/supabase/client";
 
 // Yoklama: "Yarın geliyor musun?" cevapları. null = bekleniyor.
@@ -12,16 +13,13 @@ export function tomorrowIstanbul() {
 }
 
 export async function listAnswers(businessId: string, forDate: string) {
-  const { data, error } = await supabase().from("rsvps").select("person_id, answer")
-    .eq("business_id", businessId).eq("for_date", forDate);
-  if (error) throw error;
-  return Object.fromEntries((data ?? []).map((r) => [r.person_id, r.answer as Answer])) as Record<string, Answer>;
+  const rows = await query<{ person_id: string; answer: Answer }>("rsvps",
+    (r) => r.business_id === businessId && r.for_date === forDate,
+    () => supabase().from("rsvps").select("business_id, person_id, for_date, answer").eq("business_id", businessId).eq("for_date", forDate));
+  return Object.fromEntries(rows.map((r) => [r.person_id, r.answer])) as Record<string, Answer>;
 }
 
 export async function setAnswer(businessId: string, personId: string, forDate: string, answer: Answer) {
-  const { error } = await supabase().from("rsvps").upsert(
-    { business_id: businessId, person_id: personId, for_date: forDate, answer, updated_at: new Date().toISOString() },
-    { onConflict: "person_id,for_date" },
-  );
-  if (error) throw error;
+  await mutate({ kind: "upsert", table: "rsvps", onConflict: "person_id,for_date",
+    values: { business_id: businessId, person_id: personId, for_date: forDate, answer, updated_at: new Date().toISOString() } });
 }

@@ -2,6 +2,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
+import { clearLocal, startSync } from "@/core/offline/store";
+import { SyncBar } from "@/core/offline/SyncBar";
 import { supabase } from "@/core/supabase/client";
 import { ErrorText, MainButton, TextField } from "@/core/ui";
 
@@ -38,20 +40,31 @@ function Gate({ product, texts, children }: { product: string; texts: Texts; chi
 
   useEffect(() => {
     if (!session) { setBiz(session === null ? null : undefined); return; }
+    const cacheKey = `ko:biz:${session.user.id}:${product}`;
+    let cached: Business | null = null;
+    try { cached = JSON.parse(localStorage.getItem(cacheKey) ?? "null"); } catch { /* yok */ }
+    if (cached) setBiz(cached); // internetsiz açılışta da işletme bilinsin
     supabase()
       .from("memberships")
       .select("business_id, businesses(id, name, product)")
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { if (!cached) setBiz(undefined); return; } // internet yok: önbellekle devam
         const row = (data ?? []).map((m) => m.businesses as unknown as Business & { product: string })
           .find((b) => b && b.product === product);
-        setBiz(row ? { id: row.id, name: row.name } : null);
+        const b = row ? { id: row.id, name: row.name } : null;
+        try { localStorage.setItem(cacheKey, JSON.stringify(b)); } catch { /* yok */ }
+        setBiz(b);
       });
   }, [session, product]);
 
-  if (session === undefined || (session && biz === undefined)) return <main><p>Yükleniyor…</p></main>;
+  useEffect(() => (session && biz ? startSync() : undefined), [session, biz]);
+
+  if (session === undefined || (session && biz === undefined)) {
+    return <main><div className="ui-empty">Yükleniyor… İnternet yoksa ilk açılış için bir kere internet lazım.</div></main>;
+  }
   if (!session) return <Login appName={texts.appName} />;
-  if (!biz) return <CreateBusiness product={product} placeholder={texts.businessPlaceholder} onDone={setBiz} />;
-  return <BusinessCtx.Provider value={biz}>{children}</BusinessCtx.Provider>;
+  if (!biz) return <CreateBusiness product={product} placeholder={texts.businessPlaceholder} onDone={(b) => { try { localStorage.setItem(`ko:biz:${session.user.id}:${product}`, JSON.stringify(b)); } catch { /* yok */ } setBiz(b); }} />;
+  return <BusinessCtx.Provider value={biz}><SyncBar />{children}</BusinessCtx.Provider>;
 }
 
 function Login({ appName }: { appName: string }) {
@@ -146,7 +159,7 @@ function CreateBusiness({ product, placeholder, onDone }: { product: string; pla
         {error && <ErrorText>{error}</ErrorText>}
         <MainButton type="submit" disabled={busy || !name.trim()}>{busy ? "Bekle…" : "Oluştur"}</MainButton>
       </form>
-      <button type="button" className="ui-link" onClick={() => supabase().auth.signOut()}>Çıkış yap</button>
+      <button type="button" className="ui-link" onClick={() => { clearLocal(); supabase().auth.signOut(); }}>Çıkış yap</button>
     </main>
   );
 }
