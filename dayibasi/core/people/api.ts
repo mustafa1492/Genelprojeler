@@ -47,3 +47,9 @@ export async function getPerson(id: string) {
   if (error) throw error;
   return data as Person;
 }
+
+/** KVKK: kişiyi ve ona ait her şeyi (geçmiş dahil) kalıcı siler. Geri alınamaz. */
+export async function forgetPerson(id: string) {
+  const { error } = await supabase().rpc("forget_person", { p_id: id });
+  if (error) throw error;
+}

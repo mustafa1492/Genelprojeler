@@ -26,7 +26,7 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
 
   const save = async () => {
     const n = Number(amount.replace(/\./g, "").replace(",", "."));
-    if (!adding || !(n > 0)) { setError("Tutarı yaz. Örnek: 500"); return; }
+    if (!adding || !(n > 0) || n > 100000000) { setError("Tutarı yaz. Örnek: 500"); return; }
     try {
       const id = await addEntry(biz.id, person.id, adding, n);
       setDone({ message: `Kaydettim: ${person.full_name}, ${formatTL(n)} ${adding === "avans" ? "avans" : "ödeme"}.`, id });
@@ -49,7 +49,7 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
       <main className="ui-stack">
         <BackButton onClick={() => { setAdding(null); setError(""); }} label="Vazgeç" />
         <PageHeader sub={person.full_name} title={adding === "avans" ? "Avans verdim" : "Ödeme yaptım"} />
-        <TextField id="amount" label="Kaç TL?" inputMode="decimal" autoFocus placeholder="Örnek: 500"
+        <TextField id="amount" label="Kaç TL?" inputMode="decimal" maxLength={12} autoFocus placeholder="Örnek: 500"
           value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: 30, fontWeight: 800 }} />
         {error && <ErrorText>{error}</ErrorText>}
         <MainButton onClick={save}>Kaydet</MainButton>

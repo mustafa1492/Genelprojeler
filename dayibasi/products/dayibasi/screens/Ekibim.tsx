@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { fillTemplate, telLink, waLink } from "@/core/messaging/links";
 import { getTemplate } from "@/core/messaging/templates";
-import { addPerson, deletePerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
+import { addPerson, deletePerson, forgetPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
 import { listAnswers, setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
 import { BackButton, BottomNav, CallIconButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, PersonRow, StatusPill } from "@/core/ui";
@@ -80,7 +80,8 @@ export default function Ekibim() {
       <main>
         <PersonForm kindLabel={kind.label} tags={config.people.tags} customFields={config.people.customFields}
           person={p} onSave={save} onCancel={() => setView(p ? { v: "card", id: p.id } : { v: "list" })}
-          onRemove={p ? () => remove(p) : undefined} />
+          onRemove={p ? () => remove(p) : undefined}
+          onForget={p ? async () => { await forgetPerson(p.id); setDone(null); setView({ v: "list" }); load(); } : undefined} />
       </main>
     );
   }

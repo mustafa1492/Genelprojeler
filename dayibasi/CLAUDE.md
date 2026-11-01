@@ -87,8 +87,11 @@ docs/
 
 ## Kaldığımız yer (1 Kasım 2026)
 - Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).
-- **Bekleyen:** `supabase/migrations/0003_activity_log.sql` Supabase'e UYGULANMADI (onay sorusu iki kez zaman aşımına uğradı). Önce bunu uygula, sonra Geçmiş'i dene.
+- **Bekleyen:** 0003 (işlem geçmişi) ve 0004 (güvenlik) Supabase'e UYGULANMADI; MCP onay sorusu 3 kez zaman aşımına uğradı. İkisi `supabase/BEKLEYEN.sql` içinde tek dosya; kullanıcı SQL Editor'e yapıştıracak. Uygulanınca dosyayı sil, advisors'u çalıştır.
+- **Bekleyen (Supabase panelinde, kullanıcı yapar):** Authentication > Providers > Email: şifre en az 8, "leaked password protection" açık. Authentication > URL Configuration: yayın adresi Site URL + Redirect URLs'e `<adres>/sifre` eklenecek (şifremi unuttum için).
 - **Bekleyen:** test hesabı `deneme@dayibasi.test` (auth.users, id 2222...) silinecek.
 - Bugün ekranı hâlâ örnek veriyle; Arabalar ve Alacaklarım "yakında".
 - Uygulama yayında değil (Vercel önerildi, kullanıcı henüz açmadı).
+- Güvenlik planı ve açık listesi: `docs/guvenlik.md`. KVKK aydınlatma metni `/kvkk` TASLAK, avukata gösterilmeli.
+- Sıradaki iş: internetsiz çalışma (kayıt kuyruğu + PWA).
 - Bu ortamdan Supabase'e tarayıcıyla ulaşılamıyor; ekranlar sahte sunucuyla (Playwright route) denendi.
