@@ -28,6 +28,23 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
   - Puantaj sekmesi: ay takvimi (her günde o gün kaç kişi)
 - [ ] **Kişi kartında takvim:** işçinin çalıştığı günler alt alta liste yerine **ay takvimi** olarak görünsün (çalıştığı günler işaretli; ay ileri/geri; güne dokununca o günün tarlası ve yevmiyesi). Ay toplamı (gün, kazanç) takvimin üstünde.
 
+## Para kuralları (Mustafa, 1 Kasım 2026) — hesap motorunu değiştirir, dikkat
+- [ ] **Kasa / kilo başı ücret:** bazı hasatlarda yevmiye yerine kasa ya da kilo başına ücret. Kayıtta ücret türü seçilecek (günlük / kasa / kilo); kasa-kilo ise kişi başı ya da toplam miktar girilecek. Sorulacak: miktar kişi kişi mi tutulur, ekip toplamı mı? Dayıbaşı payı bu işlerde nasıl (kasa başı mı, sabit mi)?
+- [ ] **Yarım gün / tam gün:** kayıtta kişi bazında yarım gün işaretlenebilsin. Sorulacak: yarım gün = yevmiyenin yarısı mı, ayrı bir tutar mı? Çiftçiye yansıyan da yarım mı, dayıbaşı payı da yarım mı?
+- [ ] **Kişiye özel ücret:** ekipte 1-2 kişi diğerlerinden 100-200 TL fazla alabiliyor. Kayıtta o gün çalışanlar arasından kişi seçip ayrı ücret verilebilsin. Sorulacak: fark çiftçiye de yansır mı, yoksa dayıbaşının payından mı çıkar?
+- **İşçiden kesinti yok** (yol, yemek vb. dayıbaşının aldığı ücretin içinde). Kesinti özelliği yapılmayacak.
+- [ ] **Dayıbaşının masrafları:** gün içinde çok kolay giriş (ör. "+ Masraf": Yakıt / Şoför / Lastik / Tamir / Yemek / Diğer → tutar → kaydet; tek ekran). Ayın istediği zamanında **liste ve toplam** (türe göre), net kazanç = payın − masraflar. Sorulacak: masraf bir tarlaya/çiftçiye bağlanacak mı (çiftçiye yansıtılacak masraf var mı)?
+
+## İşçi ve çiftçi tarafı
+- [ ] **İşçi kendi hesabını görsün, hesap açmadan:** dayıbaşı WhatsApp'tan **kişiye özel gizli bağlantı** gönderir; işçi açınca yalnız kendi çalıştığı günleri (takvim), kazancını, avans ve kalanını görür. Giriş/şifre yok. Bağlantı dayıbaşı tarafından yenilenebilir/iptal edilebilir. (Güvenlik: tahmin edilemez uzun kod, salt okuma, KVKK metni.)
+- [ ] **Çiftçi onayı:** Mustafa "farklı şekilde düşünmemiz gerekiyor" dedi; önerilen "akşam mesajla onay" yeterli değil. Yeni öneriler hazırlanıp sorulacak (ör. çiftçiye de gizli bağlantı: günleri görüp itiraz/onay; ya da haftalık özet).
+
+## Abonelik
+- [ ] **Abonelik biterse:** dayıbaşı eski verilerini **görmeye devam eder**, yalnız **yeni veri girişi kapanır** (ekleme/düzenleme düğmeleri kapalı + veritabanında yazma engeli). Abonelik altyapısı henüz yok.
+
+## Amaç
+"Bu insanların bütün işlerini kolaylaştırıp hepsini bir araya getirmek."
+
 ## Önceden konuşulan, bekleyen
 - [ ] Yardımcı hesabı: davet koduyla girer; kayıt ve yoklama yapar, para ekranlarını göremez (RLS ile ledger kapalı). Not: events.data içinde yevmiye var, API'den görülebilir; ya ayrı tabloya taşı ya da kabul et.
 - [ ] Sadeleştirme planı (Bugün ekranını toplamak, Raporlar sekmesi): Mustafa "karışık" demişti; Ekibim kısmen yapıldı.
