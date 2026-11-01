@@ -6,12 +6,15 @@ import { getTemplate } from "@/core/messaging/templates";
 import { addPerson, deletePerson, forgetPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
 import { listAnswers, setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
-import { BackButton, BottomNav, CallIconButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, PersonRow, StatusPill } from "@/core/ui";
+import { BackButton, BottomNav, CallIconButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
 import { HistoryLink, navItems } from "../nav";
 import KisiKarti from "./KisiKarti";
 
 const KIND = "isci";
+const GK = config.people.groupKey;
+const NO_GROUP = "Grupsuz";
+const groupOf = (p: Person) => (p.custom?.[GK] ?? "").trim();
 const kind = config.people.kinds[KIND];
 const YOKLAMA_VARSAYILAN = "Merhaba {ad}, yarın işe geliyor musun? Evet ya da Hayır yazman yeterli.";
 type Undo = { message: string; run: () => Promise<void> } | null;
@@ -32,6 +35,8 @@ export default function Ekibim() {
   const [done, setDone] = useState<Undo>(null);
   const [tpl, setTpl] = useState(YOKLAMA_VARSAYILAN);
   const [sent, setSent] = useState<Record<string, boolean>>({});
+  const [quickName, setQuickName] = useState("");
+  const [removing, setRemoving] = useState(false);
   const tomorrow = tomorrowIstanbul();
 
   const load = useCallback(() => {
@@ -44,6 +49,18 @@ export default function Ekibim() {
   useEffect(() => { getTemplate(biz.id, "yoklama", YOKLAMA_VARSAYILAN).then(setTpl).catch(() => {}); }, [biz.id]);
 
   const find = (id?: string) => people?.find((p) => p.id === id);
+  const groups = [...new Set((people ?? []).map(groupOf).filter(Boolean))].sort((a, b) => a.localeCompare(b, "tr"));
+
+  const quickAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = quickName.trim();
+    if (!name) return;
+    const g = filter !== "Hepsi" && filter !== NO_GROUP ? filter : "";
+    const p = await addPerson(biz.id, KIND, { full_name: name, phone: null, tags: [], custom: g ? { [GK]: g } : {}, notes: null });
+    setQuickName("");
+    setDone({ message: `Ekledim: ${p.full_name}${g ? ` (${g})` : ""}. Telefonu için ismine dokun.`, run: () => deletePerson(p.id) });
+    load();
+  };
 
   const save = async (input: PersonInput) => {
     const old = view.v === "form" ? find(view.id) : undefined;
@@ -64,6 +81,7 @@ export default function Ekibim() {
     await updatePerson(p.id, { active: false });
     setDone({ message: `${p.full_name} ekipten çıktı.`, run: async () => { await updatePerson(p.id, { active: true }); } });
     setView({ v: "list" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     load();
   };
 
@@ -79,6 +97,7 @@ export default function Ekibim() {
     return (
       <main>
         <PersonForm kindLabel={kind.label} tags={config.people.tags} customFields={config.people.customFields}
+          groups={groups} groupKey={GK}
           person={p} onSave={save} onCancel={() => setView(p ? { v: "card", id: p.id } : { v: "list" })}
           onRemove={p ? () => remove(p) : undefined}
           onForget={p ? async () => { await forgetPerson(p.id); setDone(null); setView({ v: "list" }); load(); } : undefined} />
@@ -141,8 +160,23 @@ export default function Ekibim() {
   }
 
   // --- Liste
-  const shown = all.filter((p) => filter === "Hepsi" || p.tags.includes(filter));
+  const matches = (p: Person) => filter === "Hepsi" || (filter === NO_GROUP ? !groupOf(p) : groupOf(p) === filter);
+  const shown = all.filter(matches);
+  const sections = filter === "Hepsi" && groups.length
+    ? [...groups, NO_GROUP].map((g) => ({ g, list: shown.filter((p) => (groupOf(p) || NO_GROUP) === g) })).filter((x) => x.list.length)
+    : [{ g: "", list: shown }];
   const sub = people ? `${people.length} ${kind.label.toLocaleLowerCase("tr")}` : biz.name;
+  const row = (p: Person) => (
+    <div key={p.id} className="ui-card row">
+      <button type="button" disabled={removing} onClick={() => { setDone(null); setView({ v: "card", id: p.id }); }}>
+        <PersonRow name={p.full_name} sub={filter === "Hepsi" && groups.length ? undefined : groupOf(p) || undefined}
+          right={removing ? undefined : pill(answers[p.id] ?? null)} />
+      </button>
+      {removing
+        ? <button type="button" className="ui-remove" onClick={() => remove(p)}>Çıkar</button>
+        : p.phone && <CallIconButton href={telLink(p.phone)} name={p.full_name} />}
+    </div>
+  );
 
   return (
     <main className="ui-has-nav ui-stack">
@@ -151,32 +185,39 @@ export default function Ekibim() {
 
       {loadError && <ErrorText>Listeyi getiremedim. İnterneti kontrol et. <button type="button" className="ui-link" onClick={load}>Tekrar dene</button></ErrorText>}
       {people === null && !loadError && <div className="ui-empty">Yükleniyor…</div>}
-      {people && people.length === 0 && (
-        <>
-          <div className="ui-empty">Ekibinde henüz kimse yok.<br />Aşağıdaki yeşil düğmeyle ilk {kind.label.toLocaleLowerCase("tr")}ni ekle.</div>
-          <MainButton onClick={() => { setDone(null); setView({ v: "form" }); }}>+ {kind.label} ekle</MainButton>
-        </>
-      )}
+      <form onSubmit={quickAdd} className="ui-quickadd">
+        <TextField id="quick_name" label={`Ekibe ekle${filter !== "Hepsi" && filter !== NO_GROUP ? ` (${filter})` : ""}`}
+          placeholder="Adı soyadı" maxLength={100} autoComplete="off" value={quickName} onChange={(e) => setQuickName(e.target.value)} />
+        <button type="submit" disabled={!quickName.trim()}>Ekle</button>
+      </form>
+
+      {people && people.length === 0 && <div className="ui-empty">Ekibinde henüz kimse yok. Yukarıya ismini yazıp Ekle’ye bas.</div>}
 
       {people && people.length > 0 && (
         <>
-          <MainButton onClick={() => { setDone(null); setView({ v: "yoklama" }); }}>Herkese sor: Yarın geliyor musun?</MainButton>
-          {stats}
-          <div className="ui-chips" role="group" aria-label="İşe göre süz">
-            {["Hepsi", ...config.people.tags].map((t) => (
-              <Chip key={t} selected={filter === t} onClick={() => setFilter(t)}>{t}</Chip>
-            ))}
+          {!removing && <MainButton onClick={() => { setDone(null); setView({ v: "yoklama" }); }}>Herkese sor: Yarın geliyor musun?</MainButton>}
+          {!removing && stats}
+          {(groups.length > 0) && (
+            <div className="ui-chips" role="group" aria-label="Gruba göre süz">
+              {["Hepsi", ...groups, ...(all.some((p) => !groupOf(p)) ? [NO_GROUP] : [])].map((t) => (
+                <Chip key={t} selected={filter === t} onClick={() => setFilter(t)}>{t}</Chip>
+              ))}
+            </div>
+          )}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "0 4px" }}>
+            <span style={{ fontSize: 15, color: "var(--sessiz2)", fontWeight: 600 }}>
+              {removing ? "Çıkaracağın kişinin yanındaki Çıkar’a bas." : groups.length ? "" : "Grup açmak için bir kişiye dokun → Grubu → Yeni grup."}
+            </span>
+            <button type="button" className={removing ? "ui-chip" : "ui-link inline"} aria-pressed={removing}
+              onClick={() => { setRemoving(!removing); setDone(null); }}>{removing ? "Bitti" : "Çıkar…"}</button>
           </div>
-          {shown.length === 0 && <div className="ui-empty">{filter} işi yapan kimse yok.</div>}
-          {shown.map((p) => (
-            <div key={p.id} className="ui-card row">
-              <button type="button" onClick={() => { setDone(null); setView({ v: "card", id: p.id }); }}>
-                <PersonRow name={p.full_name} sub={p.tags.join(", ") || "Dokun, bilgilerini gör"} right={pill(answers[p.id] ?? null)} />
-              </button>
-              {p.phone && <CallIconButton href={telLink(p.phone)} name={p.full_name} />}
+          {sections.map(({ g, list }) => (
+            <div key={g || "x"} className="ui-stack" style={{ gap: 10 }}>
+              {g && <h2 className="ui-section">{g} <span style={{ color: "var(--sessiz2)", fontWeight: 700 }}>· {list.length}</span></h2>}
+              {list.map(row)}
             </div>
           ))}
-          <MainButton secondary onClick={() => { setDone(null); setView({ v: "form" }); }}>+ {kind.label} ekle</MainButton>
+          {shown.length === 0 && <div className="ui-empty">Bu grupta kimse yok.</div>}
         </>
       )}
       <BottomNav items={navItems} current="/ekip" />

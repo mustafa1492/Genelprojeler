@@ -118,7 +118,7 @@ export default function Bugun() {
         </div>
         {workers.map((w) => (
           <button key={w.id} type="button" className="ui-choice" aria-pressed={picked.includes(w.id)} onClick={() => toggle(w.id)}>
-            <PersonRow name={w.full_name} sub={w.tags.join(", ") || undefined}
+            <PersonRow name={w.full_name} sub={(w.custom?.[config.people.groupKey] as string) || undefined}
               right={<span aria-hidden="true" style={{ fontSize: 26 }}>{picked.includes(w.id) ? "✓" : ""}</span>} />
           </button>
         ))}

@@ -22,8 +22,10 @@
 ### 2. Ekibim
 - Üstte "Herkese sor: Yarın geliyor musun?" → her işçiye wa.me bağlantısıyla hazır mesaj
 - Geliyor / Gelmiyor / Bekleniyor sayıları
-- Beceriye göre filtre: Zeytin, Budama, Üzüm, Mısır püskülü, Çapa (ayar dosyasından)
-- İşçi kartı: ad, baş harfler, beceriler, yarın durumu
+- ~~Beceriye göre filtre~~ kaldırıldı (Mustafa, 1 Kasım 2026): beceri etiketi yok
+- Ekip içi sınıflandırma: dayıbaşının kendi açtığı **gruplar** (ör. "Kınık ekibi"); liste gruplara bölünür, gruba göre süzülür
+- Ekleme/çıkarma çok kolay: listenin üstünde tek kutu "Ekibe ekle" (seçili gruba eklenir); "Çıkar…" ile her satırda Çıkar düğmesi; her işlemde Geri al
+- İşçi kartı: ad, baş harfler, grubu, yarın durumu
 - Kişi kartı detayı: telefon, köy, beceriler, çalıştığı günler, avans/ödeme geçmişi
 
 ### 3. Arabalar

@@ -11,7 +11,9 @@ export const config = {
       ciftci: { label: "Çiftçi", plural: "Çiftçiler" },
       sofor: { label: "Şoför", plural: "Şoförler" },
     },
-    tags: ["Zeytin", "Budama", "Üzüm", "Mısır püskülü", "Çapa"],
+    tags: [] as string[],   // beceri etiketi kullanılmıyor (Mustafa, 1 Kasım 2026)
+    // Ekip içi sınıflandırma: dayıbaşı kendi gruplarını açar (custom.grup)
+    groupKey: "grup",
     customFields: [
       { key: "koy", label: "Köyü", type: "text" },
     ],

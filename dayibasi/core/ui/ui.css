@@ -148,3 +148,10 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
   border: 2px solid var(--ana); background: var(--kart); color: var(--ana-yazi); text-decoration: none; }
 .ui-segbtn.off { border-color: var(--cizgi); color: var(--sessiz2); }
 .ui-link.inline { min-height: 0; padding: 0; font-size: 17px; }
+.ui-quickadd { display: flex; gap: 8px; align-items: flex-end; }
+.ui-quickadd .ui-field { flex: 1; min-width: 0; }
+.ui-quickadd > button { font: inherit; font-size: 18px; font-weight: 800; min-height: 56px; padding: 0 20px; border-radius: 14px; border: 0;
+  background: var(--ana); color: #fff; cursor: pointer; }
+.ui-quickadd > button:disabled { opacity: 0.4; }
+.ui-card.row > button.ui-remove, .ui-remove { flex: 0 0 auto; flex-shrink: 0; font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
+  border: 2px solid var(--tehlike); background: var(--tehlike-acik); color: var(--tehlike-yazi); cursor: pointer; }

@@ -6,7 +6,7 @@ import type { Person, PersonInput } from "./api";
 export type CustomField = { key: string; label: string; type: string };
 
 /** Kişi ekleme / düzenleme. Etiketler dokunarak seçilir; yazı yalnızca ad, telefon ve özel alanlarda. */
-export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCancel, onRemove, onForget }: {
+export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCancel, onRemove, onForget, groups, groupKey = "grup" }: {
   kindLabel: string;
   tags: readonly string[];
   customFields: readonly CustomField[];
@@ -15,11 +15,15 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
   onCancel: () => void;
   onRemove?: () => void;
   onForget?: () => Promise<void>;
+  /** Var olan gruplar; verilirse "Grubu" seçimi çıkar (custom[groupKey]). */
+  groups?: string[];
+  groupKey?: string;
 }) {
   const [name, setName] = useState(person?.full_name ?? "");
   const [phone, setPhone] = useState(person?.phone ?? "");
   const [picked, setPicked] = useState<string[]>(person?.tags ?? []);
   const [custom, setCustom] = useState<Record<string, string>>(person?.custom ?? {});
+  const [newGroup, setNewGroup] = useState(false);
   const [notes, setNotes] = useState(person?.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [forgetAsk, setForgetAsk] = useState(false);
@@ -48,6 +52,22 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
         <TextField key={f.key} id={`custom_${f.key}`} label={f.label} maxLength={100} value={custom[f.key] ?? ""}
           onChange={(e) => setCustom({ ...custom, [f.key]: e.target.value })} />
       ))}
+      {groups && (
+        <div className="ui-stack" style={{ gap: 8 }}>
+          <span style={{ fontSize: 17, fontWeight: 700 }}>Grubu</span>
+          <div className="ui-chips wrap">
+            {groups.map((g) => (
+              <Chip key={g} selected={custom[groupKey] === g}
+                onClick={() => { setNewGroup(false); setCustom({ ...custom, [groupKey]: custom[groupKey] === g ? "" : g }); }}>{g}</Chip>
+            ))}
+            <Chip selected={newGroup} onClick={() => { setNewGroup(true); setCustom({ ...custom, [groupKey]: "" }); }}>+ Yeni grup</Chip>
+          </div>
+          {newGroup && (
+            <TextField id="new_group" label="Grubun adı" placeholder="Örnek: Kınık ekibi" maxLength={40} autoFocus
+              value={custom[groupKey] ?? ""} onChange={(e) => setCustom({ ...custom, [groupKey]: e.target.value })} />
+          )}
+        </div>
+      )}
       {tags.length > 0 && <div className="ui-stack" style={{ gap: 8 }}>
         <span style={{ fontSize: 17, fontWeight: 700 }}>Hangi işleri yapar?</span>
         <div className="ui-chips wrap">

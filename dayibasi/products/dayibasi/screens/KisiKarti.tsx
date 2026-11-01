@@ -86,7 +86,7 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
         <InfoRows rows={[
           ["Telefonu", person.phone ? prettyPhone(person.phone) : "Yok"],
           ...config.people.customFields.map((f) => [f.label, person.custom?.[f.key] || "Yok"] as [string, string]),
-          ["Yaptığı işler", person.tags.length ? person.tags.join(", ") : "Seçilmedi"],
+          ["Grubu", (person.custom?.[config.people.groupKey] as string) || "Yok"],
           ...(person.notes ? [["Not", person.notes] as [string, string]] : []),
         ]} />
       </Card>
