@@ -15,6 +15,28 @@ Kullanıcı: çiftçi (Mustafa'nın kendisi ilk kullanıcı olabilir). Tek kişi
 - Hasatta **gelir** gir: ne sattı, miktar (kg/kasa/ton) × fiyat ya da toplam, kime sattı, alınan / alınacak.
 - **Çıktı (çiftçiliğe özel, dayıbaşı raporlarından farklı):** sezon özeti (toplam masraf, gelir, kâr/zarar), tür tür masraf, ay ay grafik, dönüm başı ve kg başı maliyet, geçen sezonla karşılaştırma. **Excel (.xlsx)** ve WhatsApp'a özet.
 
+## Ek fikirler (1 Kasım 2026, Mustafa "başka şeyler düşünüp koyabiliriz" dedi; seçilmedi)
+**Tarla işleri**
+- Tarla günlüğü: hangi tarlaya ne zaman ne yapıldı (ilaç, gübre, sulama, budama, sürüm); takvimde.
+- İlaçlama kaydı + **hasat öncesi bekleme süresi uyarısı** (ilaç kalıntısı; satışta sorun çıkmasın): ilaç adı, doz, tarih → "Hasat en erken 14 Kasım".
+- Sulama sırası / günleri hatırlatma.
+- Verim: dönüm başı kg, yıllara göre karşılaştırma.
+
+**Para**
+- Borçlar ve vadeler: tarım kredisi, kooperatif, gübre/ilaç bayisine veresiye → vade günü hatırlatma.
+- Alacaklar: tüccar/kooperatiften alınacak para, vadeli çek/senet takibi (vade günü hatırlatma).
+- Devlet destekleri: başvuru tarihi hatırlatma, gelen destek gelir olarak.
+
+**Belgeler ve hatırlatmalar**
+- ÇKS güncelleme, TARSİM sigorta poliçesi bitişi, su/elektrik aboneliği, kira sözleşmesi: bitiş tarihi + hatırlatma (core/documents hazır).
+- Traktör/makine bakımı (yağ değişimi, muayene, sigorta).
+
+**Depo**
+- Gübre/ilaç stoğu: alınan, kullanılan, kalan (tarla günlüğünden düşer).
+
+**Bağlantılar**
+- Dayıbaşının gönderdiği işçilik hesabı tek dokunuşla masraf olur.
+
 ## Çekirdekten gelenler
 places (tarla), ledger/events (masraf ve gelir kayıtları), takvim, geçmiş + geri alma, internetsiz çalışma, Excel çıktısı, Alacaklarım (alıcıdan alınacak para).
 
