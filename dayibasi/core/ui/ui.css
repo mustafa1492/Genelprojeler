@@ -1,8 +1,8 @@
 /* Ortak arayüz parçaları. Ölçüler: docs/tasarim/kurallar.md */
-.ui-main-btn { width: 100%; min-height: 68px; border: 0; border-radius: 18px; background: var(--ana); color: #fff;
+.ui-main-btn { width: 100%; min-height: 68px; border: 0; border-radius: 18px; background: var(--ana); color: #fff; box-shadow: 0 2px 0 var(--ana-koyu);
   font: inherit; font-size: 20px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .ui-main-btn:disabled { opacity: 0.45; }
-.ui-main-btn.ikincil { background: var(--kart); color: var(--yazi); border: 2px solid var(--cizgi); }
+.ui-main-btn.ikincil { background: var(--kart); color: var(--ana-yazi); border: 2px solid var(--cizgi); box-shadow: none; }
 
 .ui-choice { width: 100%; font: inherit; font-size: 18px; font-weight: 800; text-align: left; padding: 14px 16px; min-height: 56px;
   border-radius: 14px; cursor: pointer; border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
@@ -14,7 +14,7 @@
 
 .ui-counter { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .ui-counter button { width: 64px; height: 64px; font: inherit; font-size: 32px; font-weight: 800; border-radius: 16px; border: 0;
-  background: #eeede8; color: var(--yazi); cursor: pointer; }
+  background: var(--notr); color: var(--yazi); cursor: pointer; }
 .ui-counter button:disabled { opacity: 0.4; }
 .ui-counter output { font-size: 44px; font-weight: 800; text-align: center; flex: 1; }
 .ui-counter small { display: block; font-size: 16px; font-weight: 600; color: var(--sessiz2); }
@@ -23,16 +23,16 @@
 .ui-pill.tamam { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-pill.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
 .ui-pill.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
-.ui-pill.bekliyor { background: #eeede8; color: var(--sessiz); }
+.ui-pill.bekliyor { background: var(--notr); color: var(--sessiz); }
 
-.ui-card { background: var(--kart); border-radius: 18px; padding: 14px 16px; }
-button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.ui-card { background: var(--kart); border-radius: 18px; padding: 14px 16px; border: 1px solid var(--cizgi2); box-shadow: var(--golge); }
+button.ui-card { width: 100%; border: 1px solid var(--cizgi2); font: inherit; color: inherit; text-align: left; cursor: pointer; }
 
 .ui-header { padding: 2px 4px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .ui-header > div { display: flex; flex-direction: column; gap: 2px; }
 .ui-header small { font-size: 15px; font-weight: 600; color: var(--sessiz2); }
 .ui-header h1 { font-size: 28px; font-weight: 800; line-height: 1.15; margin: 0; }
-.ui-pill.ornek { font-size: 12px; font-weight: 700; color: #9a4a06; background: var(--uyari-acik); padding: 6px 10px; }
+.ui-pill.ornek { font-size: 12px; font-weight: 700; color: var(--uyari-yazi); background: var(--uyari-acik); padding: 6px 10px; }
 .ui-header button { font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 14px;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); cursor: pointer; }
 
@@ -47,16 +47,16 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-person-text b { font-size: 18px; font-weight: 800; }
 .ui-person-text span { font-size: 15px; color: var(--sessiz); }
 
-.ui-empty { background: var(--kart); border-radius: 18px; padding: 24px 16px; text-align: center; font-size: 18px; color: var(--sessiz); }
+.ui-empty { background: var(--notr2); border: 1px dashed var(--cizgi); border-radius: 18px; padding: 24px 16px; text-align: center; font-size: 18px; color: var(--sessiz); }
 .ui-warn { border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.ui-warn.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); border: 2px solid #e8a39c; }
+.ui-warn.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); border: 2px solid var(--tehlike-cizgi); }
 .ui-warn-row { display: flex; gap: 12px; align-items: flex-start; font-size: 18px; font-weight: 700; line-height: 1.4; }
 .ui-warn-row svg { flex-shrink: 0; }
 .ui-warn .ui-main-btn { min-height: 56px; font-size: 18px; border-radius: 14px; }
 .ui-warn.gecti .ui-main-btn { background: var(--tehlike); }
 .ui-warn.yakin .ui-main-btn { background: var(--uyari-yazi); }
-.ui-main-btn.tehlike { background: transparent; color: var(--tehlike); border: 2px solid var(--tehlike); }
-.ui-warn.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); }
+.ui-main-btn.tehlike { box-shadow: none; background: transparent; color: var(--tehlike); border: 2px solid var(--tehlike); }
+.ui-warn.yakin { background: var(--uyari-acik); color: var(--uyari-yazi); border: 2px solid var(--uyari-cizgi); }
 
 .ui-done { background: var(--ana-acik); color: var(--ana-yazi); border-radius: 18px; padding: 16px; display: flex;
   align-items: center; gap: 12px; font-size: 18px; font-weight: 700; }
@@ -65,7 +65,7 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
   border: 2px solid var(--ana); background: transparent; color: var(--ana-yazi); cursor: pointer; }
 
 .ui-nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-  background: #fff; border-top: 1px solid var(--cizgi2); padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); }
+  background: #fff; border-top: 1px solid var(--cizgi2); box-shadow: 0 -2px 10px rgba(20, 45, 25, 0.06); padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); }
 .ui-nav a { display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 14px; padding: 8px 2px;
   min-height: 60px; font-size: 14px; font-weight: 800; color: var(--sessiz); text-decoration: none; }
 .ui-nav a[aria-current="page"] { background: var(--ana-acik); color: var(--ana-yazi); }
@@ -101,7 +101,7 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-stats span { font-size: 14px; font-weight: 700; }
 .ui-stats .tamam { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-stats .gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
-.ui-stats .bekliyor { background: #eeede8; color: var(--sessiz); }
+.ui-stats .bekliyor { background: var(--notr); color: var(--sessiz); }
 .ui-stats .bekliyor b { color: var(--yazi); }
 .ui-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ui-seg button { font: inherit; font-size: 17px; font-weight: 800; min-height: 52px; border-radius: 14px; cursor: pointer;
@@ -111,7 +111,7 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-card.row { display: flex; align-items: center; gap: 10px; padding: 0 12px 0 0; }
 .ui-card.row > button { flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left;
   padding: 14px 0 14px 16px; cursor: pointer; }
-.ui-moneyrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; background: #f7f6f2; border-radius: 12px; }
+.ui-moneyrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; background: var(--kart); border: 1px solid var(--cizgi2); border-radius: 12px; }
 .ui-moneyrow b { font-size: 17px; }
 .ui-moneyrow small { display: block; font-size: 14px; color: var(--sessiz2); font-weight: 600; }
 .ui-moneyrow strong { font-size: 18px; white-space: nowrap; }
@@ -126,18 +126,18 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-sync.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
 .ui-sync button { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 12px; border-radius: 12px;
   border: 2px solid currentColor; background: transparent; color: inherit; cursor: pointer; flex-shrink: 0; }
-.ui-total { background: var(--koyu); color: #fff; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
-.ui-total span { font-size: 16px; font-weight: 600; color: #d6d9d2; }
+.ui-total { background: var(--koyu); color: #fff; box-shadow: var(--golge); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 4px; }
+.ui-total span { font-size: 16px; font-weight: 600; color: var(--koyu-yazi2); }
 .ui-total b { font-size: 36px; font-weight: 800; }
 .ui-sticky-bottom { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   background: linear-gradient(transparent, var(--zemin) 30%); }
 .ui-sticky-bottom > * { max-width: 448px; margin: 0 auto; }
 .ui-choice .ui-avatar { width: 40px; height: 40px; font-size: 15px; }
-.ui-total-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-top: 12px; border-top: 1px solid #3a4038; }
+.ui-total-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--koyu-cizgi); }
 .ui-total-row div { display: flex; flex-direction: column; gap: 2px; }
 .ui-total-row span { font-size: 14px; }
 .ui-total-row strong { font-size: 20px; font-weight: 800; }
-.ui-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: #e8e7e0; border-radius: 16px; padding: 4px; }
+.ui-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--notr); border-radius: 16px; padding: 4px; }
 .ui-tabs button { font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; border: 0; border-radius: 12px; background: transparent; color: var(--sessiz); cursor: pointer; }
 .ui-tabs button[aria-selected="true"] { background: var(--kart); color: var(--yazi); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .ui-plain { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
@@ -160,14 +160,14 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-stats > button[aria-pressed="true"] { border-color: currentColor; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
 .ui-stats > button.tamam { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-stats > button.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
-.ui-stats > button.bekliyor { background: #eeede8; color: var(--sessiz); }
+.ui-stats > button.bekliyor { background: var(--notr); color: var(--sessiz); }
 .ui-stats > button b { font-size: 28px; font-weight: 800; }
 .ui-stats > button span { font-size: 14px; font-weight: 700; }
 input[type="date"] { appearance: none; -webkit-appearance: none; }
 .ui-label { font-size: 17px; font-weight: 800; margin: 0 4px; }
 .ui-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ui-split > div { background: var(--kart); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
-.ui-split > div.mine { background: var(--ana-acik); color: var(--ana-yazi); }
+.ui-split > div { background: var(--kart); border: 1px solid var(--cizgi2); box-shadow: var(--golge); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.ui-split > div.mine { background: var(--ana-acik); color: var(--ana-yazi); border-color: var(--ana-orta); }
 .ui-split span { font-size: 14px; font-weight: 700; color: inherit; opacity: .8; }
 .ui-split b { font-size: 24px; font-weight: 800; }
 .ui-split small { font-size: 14px; font-weight: 600; opacity: .75; }
@@ -176,11 +176,15 @@ input[type="date"] { appearance: none; -webkit-appearance: none; }
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); cursor: pointer; }
 .ui-tabs:has(> :nth-child(4)) { grid-template-columns: repeat(4, 1fr); }
 .ui-tabs:has(> :nth-child(4)) button { font-size: 15px; padding: 0 2px; }
-.ui-bar { display: flex; height: 14px; border-radius: 7px; background: #eeede8; overflow: hidden; }
-.ui-bar i { display: block; height: 100%; background: #9db58f; }
+.ui-bar { display: flex; height: 14px; border-radius: 7px; background: var(--notr); overflow: hidden; }
+.ui-bar i { display: block; height: 100%; background: var(--ana-orta); }
 .ui-bar i.mine { background: var(--ana); }
-.ui-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #9db58f; margin-right: 4px; vertical-align: -1px; }
+.ui-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--ana-orta); margin-right: 4px; vertical-align: -1px; }
 .ui-dot.mine { background: var(--ana); }
 .ui-select { font: inherit; font-size: 18px; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
   border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
 button.ui-card { display: block; }
+
+/* Odak görünür olsun (klavye / erişilebilirlik) */
+:focus-visible { outline: 3px solid var(--ana-orta); outline-offset: 2px; }
+.ui-field input:focus, .ui-select:focus { outline: none; border-color: var(--ana); box-shadow: 0 0 0 3px var(--ana-acik); }

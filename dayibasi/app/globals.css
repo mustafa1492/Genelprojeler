@@ -1,8 +1,17 @@
 :root {
-  --zemin: #f4f3ee; --kart: #ffffff; --yazi: #1c211b; --sessiz: #4a5046; --sessiz2: #5b6157;
-  --cizgi: #d8d6cd; --cizgi2: #e2e0d8; --ana: #3b6b2c; --ana-acik: #e7efe2; --ana-yazi: #22451a;
-  --uyari-acik: #fdf0e1; --uyari-yazi: #7a3a05; --tehlike: #a3261b; --tehlike-acik: #fbe7e5;
-  --tehlike-yazi: #7a1d14; --koyu: #1c211b;
+  /* Zemin ve yüzeyler: hafif yeşile çalan, güneşte de temiz görünen açık tonlar */
+  --zemin: #eef2ed; --kart: #ffffff; --notr: #e6ebe4; --notr2: #f4f7f3;
+  --golge: 0 1px 2px rgba(20, 45, 25, 0.06), 0 2px 8px rgba(20, 45, 25, 0.05);
+  /* Yazı: koyu, yüksek karşıtlık */
+  --yazi: #13211a; --sessiz: #445248; --sessiz2: #59665d;
+  --cizgi: #cfd8cd; --cizgi2: #dfe6dd;
+  /* Ana renk: derin tarla yeşili */
+  --ana: #2e6a2b; --ana-koyu: #245622; --ana-acik: #e1efda; --ana-yazi: #1b4519; --ana-orta: #a7c99c;
+  /* Durumlar */
+  --uyari-acik: #fff0d9; --uyari-yazi: #7a3d00; --uyari-cizgi: #f0c98e;
+  --tehlike: #b3261e; --tehlike-acik: #fdeceb; --tehlike-yazi: #8c1d16; --tehlike-cizgi: #ecaaa4;
+  /* Toplam kartı */
+  --koyu: #16351c; --koyu-yazi2: #c9dcc6; --koyu-cizgi: #2e5534;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--zemin); color: var(--yazi); font-size: 17px; }

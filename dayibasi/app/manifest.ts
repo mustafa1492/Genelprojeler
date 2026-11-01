@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Ekip, araba ve alacak takibi",
     start_url: "/",
     display: "standalone",
-    background_color: "#F4F3EE",
-    theme_color: "#3B6B2C",
+    background_color: "#EEF2ED",
+    theme_color: "#2E6A2B",
     lang: "tr",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },

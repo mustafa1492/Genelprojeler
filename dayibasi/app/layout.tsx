@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "Dayıbaşı", statusBarStyle: "default" },
   icons: { apple: "/apple-touch-icon.png", icon: "/icon-192.png" },
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#3B6B2C" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#2E6A2B" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

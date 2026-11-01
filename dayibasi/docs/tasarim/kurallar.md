@@ -11,7 +11,11 @@ Referans ekranlar: `demo-ekranlar.dc.html` (Claude Design canvas dosyası; HTML 
 - Renk + yazı birlikte; renk tek başına anlam taşımaz
 - İşlem sonrası düz onay cümlesi; geri alma
 
-## Renkler
+## Renkler (v2, 1 Kasım 2026: Mustafa "arka planı değiştir, renkleri iyi yap" dedi)
+Kaynak: `app/globals.css` :root. Zemin #EEF2ED (hafif yeşil-gri), kartlar beyaz + ince kenarlık + hafif gölge,
+yazı #13211A, ana yeşil #2E6A2B, toplam kartı koyu yeşil #16351C, uyarı/tehlike kenarlıklı. Aşağıdaki tablo ilk sürümdür.
+
+## Renkler (ilk sürüm)
 | Ad | Değer | Kullanım |
 |---|---|---|
 | zemin | #F4F3EE | sayfa arka planı |
