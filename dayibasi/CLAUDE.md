@@ -84,3 +84,11 @@ docs/
 - Giriş: şimdilik e-posta + şifre (`core/auth/AuthGate.tsx`). Telefonla (SMS) giriş ücretli bir SMS sağlayıcısı ister, sonraya.
 - Herkese açık adres ve anahtar `.env` dosyasında. Gizli anahtar (service_role, DB şifresi) depoya asla yazılmaz.
 - İstemci: `core/supabase/client.ts`.
+
+## Kaldığımız yer (1 Kasım 2026)
+- Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).
+- **Bekleyen:** `supabase/migrations/0003_activity_log.sql` Supabase'e UYGULANMADI (onay sorusu iki kez zaman aşımına uğradı). Önce bunu uygula, sonra Geçmiş'i dene.
+- **Bekleyen:** test hesabı `deneme@dayibasi.test` (auth.users, id 2222...) silinecek.
+- Bugün ekranı hâlâ örnek veriyle; Arabalar ve Alacaklarım "yakında".
+- Uygulama yayında değil (Vercel önerildi, kullanıcı henüz açmadı).
+- Bu ortamdan Supabase'e tarayıcıyla ulaşılamıyor; ekranlar sahte sunucuyla (Playwright route) denendi.
