@@ -31,7 +31,11 @@ export const workersOf = (e: EventRow) => (Array.isArray(e.data?.workers) ? (e.d
 
 const last = (xs: { occurred_on: string }[]) => xs.map((x) => x.occurred_on).sort().pop() ?? null;
 
-export type FarmerAccount = { farmer: Person; kisiGun: number; tutar: number; odenen: number; kalan: number; sonOdeme: string | null };
+export type FarmerAccount = {
+  farmer: Person; kisiGun: number; tutar: number; odenen: number; kalan: number; sonOdeme: string | null;
+  /** Ödenmemiş en eski işin günü (ödemeler eski işlerden başlayarak düşülür). Borç yoksa null. */
+  bekleyenSince: string | null;
+};
 export function farmerAccounts(farmers: Person[], events: EventRow[], entries: LedgerEntry[], b: Business): FarmerAccount[] {
   return farmers.map((f) => {
     const ev = events.filter((e) => e.person_id === f.id);
@@ -39,7 +43,14 @@ export function farmerAccounts(farmers: Person[], events: EventRow[], entries: L
     const kisiGun = ev.reduce((t, e) => t + (e.quantity ?? 0), 0);
     const tutar = ev.reduce((t, e) => t + (e.quantity ?? 0) * split(e, b).rate, 0);
     const odenen = pay.reduce((t, e) => t + e.amount, 0);
-    return { farmer: f, kisiGun, tutar, odenen, kalan: tutar - odenen, sonOdeme: last(pay) };
+    // Ödemeler en eski işten başlayarak düşülür; kapanmayan ilk işin günü = borcun başladığı gün
+    let kalanOdeme = odenen, bekleyenSince: string | null = null;
+    for (const e of [...ev].sort((a, b) => a.occurred_on.localeCompare(b.occurred_on))) {
+      const t = (e.quantity ?? 0) * split(e, b).rate;
+      if (kalanOdeme >= t) { kalanOdeme -= t; continue; }
+      bekleyenSince = e.occurred_on; break;
+    }
+    return { farmer: f, kisiGun, tutar, odenen, kalan: tutar - odenen, sonOdeme: last(pay), bekleyenSince: tutar - odenen > 0 ? bekleyenSince : null };
   });
 }
 
@@ -60,6 +71,10 @@ export function myEarnings(events: EventRow[], b: Business, from?: string, to?: 
   return events.filter((e) => (!from || e.occurred_on >= from) && (!to || e.occurred_on <= to))
     .reduce((t, e) => t + (e.quantity ?? 0) * split(e, b).fee, 0);
 }
+
+export const remindDays = (b: Business) => Number(b.settings?.remind_days) || config.ledger.remindDays;
+/** Borç kaç gündür bekliyor (yoksa 0). */
+export const waitingDays = (a: FarmerAccount) => (a.bekleyenSince ? daysAgo(a.bekleyenSince) : 0);
 
 export function daysAgo(day: string) {
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Istanbul" });

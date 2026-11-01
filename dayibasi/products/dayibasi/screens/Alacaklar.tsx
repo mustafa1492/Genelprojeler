@@ -8,12 +8,13 @@ import { getTemplate } from "@/core/messaging/templates";
 import { addPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
 import { displayName } from "@/core/people/birth";
+import { downloadCsv, trDate } from "@/core/export/csv";
 import { listPlaces, type Place } from "@/core/places/api";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, BottomNav, Card, Chip, ContactButtons, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
 import {
-  agoText, dayText, defaults, farmerAccounts, monthStart, myEarnings, PUANTAJ, split, workerAccounts, workersOf,
+  agoText, dayText, defaults, farmerAccounts, monthStart, myEarnings, PUANTAJ, remindDays, split, waitingDays, workerAccounts, workersOf,
   type FarmerAccount, type WorkerAccount,
 } from "../hesap";
 import { HistoryLink, navItems } from "../nav";
@@ -26,7 +27,8 @@ const SENT = "ko:hesap-gonderildi";
 const TAB = "ko:alacak-sekme";
 
 type Tab = "ciftci" | "isci" | "puantaj" | "ozet";
-type View = { v: "list" } | { v: "card"; id: string } | { v: "form"; id?: string } | { v: "odeme"; id: string } | { v: "ayar"; key: "wage" | "fee" };
+type View = { v: "list" } | { v: "card"; id: string } | { v: "form"; id?: string } | { v: "odeme"; id: string }
+  | { v: "ayar"; key: "wage" | "fee" | "remind_days" } | { v: "toplu"; who: "ciftci" | "isci" };
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
 export default function Alacaklar() {
@@ -56,7 +58,10 @@ export default function Alacaklar() {
   }, []);
   const setTab = (t: Tab) => { setTabState(t); setDone(null); try { localStorage.setItem(TAB, t); } catch { /* yok */ } };
 
-  const fAcc = farmerAccounts(farmers ?? [], events, entries, biz).sort((a, b) => b.kalan - a.kalan);
+  const late = remindDays(biz);
+  const isLate = (a: FarmerAccount) => a.kalan > 0 && waitingDays(a) >= late;
+  const fAcc = farmerAccounts(farmers ?? [], events, entries, biz)
+    .sort((a, b) => Number(isLate(b)) - Number(isLate(a)) || waitingDays(b) - waitingDays(a) || b.kalan - a.kalan);
   const wAcc = workerAccounts(workers, events, entries, biz).sort((a, b) => b.kalan - a.kalan);
   const alacak = fAcc.reduce((t, a) => t + Math.max(0, a.kalan), 0);
   const borc = wAcc.reduce((t, a) => t + Math.max(0, a.kalan), 0);
@@ -119,18 +124,50 @@ export default function Alacaklar() {
 
   // --- Ayarlar: varsayılan yevmiye / dayıbaşı payı
   if (view.v === "ayar") {
-    const isWage = view.key === "wage";
-    return <Tutar title={isWage ? "Varsayılan yevmiye" : "Senin payın (kişi başı)"} sub="Ücretler" initial={String(isWage ? wage : fee)}
-      hint={isWage ? "Kayıtta hazır gelen yevmiye. Her kayıtta − / + ile değiştirebilirsin." : "Her işçi-gün için çiftçiden yevmiyenin üstüne alınır. Eski kayıtlar değişmez."}
+    const isWage = view.key === "wage", isDays = view.key === "remind_days";
+    return <Tutar title={isDays ? "Kaç gün sonra gecikmiş sayılsın?" : isWage ? "Varsayılan yevmiye" : "Senin payın (kişi başı)"} sub="Ayarlar"
+      unit={isDays ? "gün" : "TL"} initial={String(isDays ? late : isWage ? wage : fee)}
+      hint={isDays ? "Çiftçinin en eski ödenmemiş işinden bu kadar gün geçince kartı kırmızı olur ve en üste çıkar."
+        : isWage ? "Kayıtta hazır gelen yevmiye. Her kayıtta − / + ile değiştirebilirsin." : "Her işçi-gün için çiftçiden yevmiyenin üstüne alınır. Eski kayıtlar değişmez."}
       onCancel={() => setView({ v: "list" })}
       onSave={async (n) => {
         const settings = { ...biz.settings, [view.key]: n };
         const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
         if (error) throw error;
         setBiz({ ...biz, settings });
-        setDone({ message: `${isWage ? "Varsayılan yevmiye" : "Payın"} ${formatTL(n)} oldu.` });
+        setDone({ message: isDays ? `${n} günü geçen borçlar gecikmiş sayılacak.` : `${isWage ? "Varsayılan yevmiye" : "Payın"} ${formatTL(n)} oldu.` });
         setView({ v: "list" });
       }} />;
+  }
+
+  // --- Toplu hesap gönderme (WhatsApp tek tek açılır; sırayla)
+  if (view.v === "toplu") {
+    const items = view.who === "ciftci"
+      ? fAcc.filter((a) => a.kalan > 0).map((a) => ({ id: a.farmer.id, name: a.farmer.full_name, phone: a.farmer.phone, amount: a.kalan, msg: farmerMsg(a) }))
+      : wAcc.filter((a) => a.kalan > 0).map((a) => ({ id: a.worker.id, name: displayName(a.worker, workers), phone: a.worker.phone, amount: a.kalan, msg: workerMsg(a) }));
+    const withPhone = items.filter((x) => x.phone);
+    const noPhone = items.filter((x) => !x.phone);
+    const sentCount = withPhone.filter((x) => sent[x.id]).length;
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={() => setView({ v: "list" })} label="Alacaklarım" />
+        <PageHeader sub={`${sentCount} / ${withPhone.length} gönderildi`} title={view.who === "ciftci" ? "Çiftçilere hesap gönder" : "İşçilere hesap gönder"} />
+        <p className="ui-note">Sırayla <b>Gönder</b>’e dokun. WhatsApp’ta mesaj hazır açılır, gönderip buraya dön.</p>
+        {withPhone.length === 0 && <div className="ui-empty">Gönderilecek kimse yok.</div>}
+        {withPhone.map((x) => (
+          <div key={x.id} className="ui-card ui-stack" style={{ gap: 8, opacity: sent[x.id] ? 0.6 : 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><b>{x.name}</b><span className="ui-amount">{formatTL(x.amount)}</span></div>
+            <span className="ui-note" style={{ margin: 0 }}>{x.msg}</span>
+            <a className={sent[x.id] ? "ui-segbtn" : "ui-main-btn"} style={{ minHeight: 52, textDecoration: "none" }}
+              href={waLink(x.phone!, x.msg)} target="_blank" rel="noreferrer" onClick={() => markSent(x.id)}>
+              {sent[x.id] ? "Gönderildi ✓ (tekrar aç)" : "Gönder"}
+            </a>
+          </div>
+        ))}
+        {noPhone.length > 0 && <p className="ui-note">Telefonu olmadığı için gönderilemeyenler: {noPhone.map((x) => x.name).join(", ")}.</p>}
+        <MainButton secondary onClick={() => setView({ v: "list" })}>Bitti</MainButton>
+      </main>
+    );
   }
 
   // --- Çiftçi kartı
@@ -207,11 +244,13 @@ export default function Alacaklar() {
           {farmers?.length === 0 && <div className="ui-empty">Henüz çiftçi yok. Bugün ekranında tarla eklerken çiftçi de eklenir, ya da aşağıdan ekle.</div>}
           {fAcc.map((a) => {
             const f = a.farmer; const borclu = a.kalan > 0;
+            const gec = isLate(a);
             const aciklama = borclu
-              ? `${a.sonOdeme ? `Son ödemesi ${agoText(a.sonOdeme)}.` : "Henüz ödeme yapmadı."} Toplam ${a.kisiGun} kişi-gün iş yapıldı.`
+              ? `${a.bekleyenSince ? `En eski ödenmemiş iş ${agoText(a.bekleyenSince)}.` : ""} ${a.sonOdeme ? `Son ödemesi ${agoText(a.sonOdeme)}.` : "Henüz ödeme yapmadı."}`
               : a.kisiGun ? "Hesabı kapandı, borcu yok." : "Henüz iş yapılmadı.";
             return (
-              <div key={f.id} className="ui-card ui-stack" style={{ padding: 18, gap: 12 }}>
+              <div key={f.id} className={`ui-card ui-stack${gec ? " late" : ""}`} style={{ padding: 18, gap: 12 }}>
+                {gec && <span className="ui-pill gecti" style={{ alignSelf: "flex-start" }}>{waitingDays(a)} gündür ödenmedi</span>}
                 <button type="button" className="ui-plain" onClick={() => { setDone(null); setView({ v: "card", id: f.id }); }}>
                   <span style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
                     <span style={{ fontSize: "1.111rem", fontWeight: 800 }}>{f.full_name}</span>
@@ -222,13 +261,18 @@ export default function Alacaklar() {
                 {borclu && (f.phone
                   ? <a className="ui-main-btn" style={{ minHeight: 58, fontSize: "1.0rem", borderRadius: 14, textDecoration: "none", ...(sent[f.id] ? { background: "var(--ana-acik)", color: "var(--ana-yazi)" } : {}) }}
                       href={waLink(f.phone, farmerMsg(a))} target="_blank" rel="noreferrer" onClick={() => markSent(f.id)}>
-                      {sent[f.id] ? "Hesap gönderildi ✓" : "Hesabını WhatsApp’tan gönder"}
+                      {gec ? (sent[f.id] ? "Hatırlatıldı ✓" : "Hatırlat (hesabı gönder)") : sent[f.id] ? "Hesap gönderildi ✓" : "Hesabını WhatsApp’tan gönder"}
                     </a>
                   : <MainButton secondary onClick={() => setView({ v: "form", id: f.id })}>Telefonunu ekle</MainButton>)}
               </div>
             );
           })}
+          {fAcc.some((a) => a.kalan > 0) && <MainButton secondary onClick={() => setView({ v: "toplu", who: "ciftci" })}>Borçlu herkese hesap gönder</MainButton>}
           <MainButton secondary onClick={() => { setDone(null); setView({ v: "form" }); }}>+ Çiftçi ekle</MainButton>
+          <button type="button" className="ui-link" onClick={() => downloadCsv(`ciftci-hesaplari-${new Date().toISOString().slice(0, 10)}`, [
+            ["Çiftçi", "Telefon", "Kişi-gün", "İşin tutarı (TL)", "Ödenen (TL)", "Kalan (TL)", "Borç başlangıcı", "Son ödeme"],
+            ...fAcc.map((a) => [a.farmer.full_name, a.farmer.phone, a.kisiGun, a.tutar, a.odenen, a.kalan, trDate(a.bekleyenSince), trDate(a.sonOdeme)]),
+          ])}>Excel’e indir</button>
         </>
       )}
 
@@ -236,6 +280,7 @@ export default function Alacaklar() {
         <>
           {wAcc.length === 0 && <div className="ui-empty">Ekibinde işçi yok. Ekibim’den ekle.</div>}
           {borc > 0 && <MainButton onClick={payAll}>Herkese öde · {formatTL(borc)}</MainButton>}
+          {borc > 0 && <MainButton secondary onClick={() => setView({ v: "toplu", who: "isci" })}>Herkese hesabını gönder</MainButton>}
           {wAcc.map((a) => (
             <div key={a.worker.id} className="ui-card ui-stack" style={{ gap: 12 }}>
               <PersonRow name={a.worker.full_name}
@@ -252,6 +297,10 @@ export default function Alacaklar() {
             </div>
           ))}
           <p style={{ margin: "0 4px", fontSize: "0.833rem", color: "var(--sessiz2)" }}>Avans vermek için: Ekibim → işçiye dokun → “Avans verdim”.</p>
+          <button type="button" className="ui-link" onClick={() => downloadCsv(`isci-hesaplari-${new Date().toISOString().slice(0, 10)}`, [
+            ["İşçi", "Doğum tarihi", "Telefon", "Çalıştığı gün", "Kazancı (TL)", "Avans (TL)", "Ödenen (TL)", "Kalan (TL)"],
+            ...wAcc.map((a) => [a.worker.full_name, trDate(a.worker.custom?.dogum), a.worker.phone, a.gun, a.kazanc, a.avans, a.odenen, a.kalan]),
+          ])}>Excel’e indir</button>
         </>
       )}
 
@@ -264,6 +313,7 @@ export default function Alacaklar() {
           ["Varsayılan yevmiye", <button key="w" type="button" className="ui-link inline" onClick={() => { setDone(null); setView({ v: "ayar", key: "wage" }); }}>{formatTL(wage)} · değiştir</button>],
           ["Senin payın (kişi başı)", <button key="f" type="button" className="ui-link inline" onClick={() => { setDone(null); setView({ v: "ayar", key: "fee" }); }}>{formatTL(fee)} · değiştir</button>],
           ["Çiftçiden kişi başı", formatTL(wage + fee)],
+          ["Gecikmiş sayılma", <button key="r" type="button" className="ui-link inline" onClick={() => { setDone(null); setView({ v: "ayar", key: "remind_days" }); }}>{late} gün · değiştir</button>],
         ]} />
       </Card>
       <BottomNav items={navItems} current="/alacaklar" />
@@ -327,6 +377,18 @@ function Puantaj({ events, workers, placeLabel }: { events: EventRow[]; workers:
           <a className="ui-segbtn" href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer">WhatsApp’ta paylaş</a>
           <button type="button" onClick={copy}>{copied ? "Kopyalandı ✓" : "Kopyala"}</button>
         </div>
+      )}
+      {ev.length > 0 && (
+        <MainButton secondary onClick={() => downloadCsv(`puantaj-${m}`, [
+          ["Tarih", "Tarla", "Kişi", "Yevmiye (TL)", "Senin payın / kişi (TL)", "Çiftçi öder (TL)", "İşçiler"],
+          ...ev.slice().sort((a, b) => a.occurred_on.localeCompare(b.occurred_on)).map((e) => {
+            const r = split(e, biz);
+            return [trDate(e.occurred_on), placeLabel(e.place_id), e.quantity, r.wage, r.fee, (e.quantity ?? 0) * r.rate, workersOf(e).map(name).join(", ")];
+          }),
+          [],
+          ["İşçi", "Gün", "Kazanç (TL)"],
+          ...rows.map((a) => [displayName(a.worker, workers), a.gun, a.kazanc]),
+        ])}>Puantajı Excel’e indir</MainButton>
       )}
     </>
   );
@@ -426,8 +488,8 @@ function Ozet({ events, entries, farmers, workers }: { events: EventRow[]; entri
 }
 
 /** Tek alanlı tutar girişi (sayı klavyesi). */
-function Tutar({ title, sub, hint, initial = "", quick, onSave, onCancel }: {
-  title: string; sub: string; hint?: string; initial?: string; quick?: number; onSave: (n: number) => Promise<void>; onCancel: () => void;
+function Tutar({ title, sub, hint, initial = "", quick, unit = "TL", onSave, onCancel }: {
+  title: string; sub: string; hint?: string; initial?: string; quick?: number; unit?: string; onSave: (n: number) => Promise<void>; onCancel: () => void;
 }) {
   const [v, setV] = useState(initial);
   const [error, setError] = useState("");
@@ -436,7 +498,7 @@ function Tutar({ title, sub, hint, initial = "", quick, onSave, onCancel }: {
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub={sub} title={title} />
-      <TextField id="tutar" label="Kaç TL?" inputMode="decimal" autoFocus maxLength={12} placeholder="Örnek: 5000"
+      <TextField id="tutar" label={unit === "TL" ? "Kaç TL?" : `Kaç ${unit}?`} inputMode="decimal" autoFocus maxLength={12} placeholder="Örnek: 5000"
         value={v} onChange={(e) => setV(e.target.value)} style={{ fontSize: "1.667rem", fontWeight: 800 }} />
       {quick != null && <Chip onClick={() => setV(String(quick))}>Hepsini ödedi: {formatTL(quick)}</Chip>}
       {hint && <p style={{ margin: "0 4px", fontSize: "0.889rem", color: "var(--sessiz2)" }}>{hint}</p>}

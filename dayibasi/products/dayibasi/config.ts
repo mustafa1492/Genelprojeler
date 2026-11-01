@@ -42,7 +42,8 @@ export const config = {
     // Örnek: Manisa Ziraat Odaları 2026 tavsiyesi 1.450 + 150 = 1.600 TL (docs/urun.md)
     defaultWage: 1450,   // işçinin günlük yevmiyesi
     defaultFee: 150,     // dayıbaşı payı, kişi başı
-    wageStep: 50,        // − / + adımı (yevmiye piyasaya göre ±100 TL oynar)
+    wageStep: 50,
+    remindDays: 15,      // bu kadar gündür ödenmeyen çiftçi borcu "gecikti" sayılır (işletme ayarından değişir)        // − / + adımı (yevmiye piyasaya göre ±100 TL oynar)
   },
 
   texts: {

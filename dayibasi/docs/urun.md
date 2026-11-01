@@ -42,6 +42,11 @@
 - Kayda dokun → düzenle: gün, tarla, kimler (ekle/çıkar), isimsizse kişi sayısı, yevmiye, pay; Sil. Kaydet/Sil sonrası Geri al
 - Aynı düzenleme ekranı Bugün'de kayda dokununca da açılır
 
+### Alacaklarım ekleri (1 Kasım 2026)
+- Gecikme: çiftçinin en eski ödenmemiş işinden (ödemeler eski işlerden başlayarak düşülür) **15 gün** (ayardan değişir) geçince kart kırmızı kenarlı, "X gündür ödenmedi" etiketi, en üste çıkar; düğme "Hatırlat (hesabı gönder)"
+- Toplu gönderim: "Borçlu herkese hesap gönder" / "Herkese hesabını gönder": sırayla Gönder (WhatsApp tek tek açılır), kaçının gönderildiği görünür, telefonu olmayanlar ayrıca yazılır
+- Excel: çiftçi hesapları, işçi hesapları, aylık puantaj (CSV; Türkçe Excel için ; ayırıcı, UTF-8, gg.aa.yyyy)
+
 ### 3. Arabalar (şimdilik menüde yok; Mustafa: "önemi yok")
 - Araba kartı: plaka, tür, kaç kişilik, şoför
 - Tek satır durum: "Her şey tamam" (yeşil) ya da "İzin kâğıdının süresi geçmiş" (kırmızı)

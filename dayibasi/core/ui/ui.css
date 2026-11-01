@@ -201,3 +201,4 @@ button.ui-card { display: block; }
 .ui-note { margin: 0 4px; font-size: 0.889rem; color: var(--sessiz); line-height: 1.45; }
 .ui-seg button:disabled { opacity: 0.45; }
 .ui-person-text b { overflow-wrap: anywhere; }
+.ui-card.late { border: 2px solid var(--tehlike-cizgi); }
