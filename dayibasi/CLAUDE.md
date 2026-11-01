@@ -78,3 +78,8 @@ docs/
 - Sahibi haftada 10-12 saat ayırabiliyor; işleri küçük, bitirilebilir parçalara böl
 - Yol haritası: `docs/yol-haritasi.md`
 - Bir şey yapmadan önce "bu kullanıcıyı telefona sarılmaya iter mi?" diye sor
+
+## Supabase
+- Proje: `dayibasi` (ref `ypblltxjbhgnnvtyteat`, Frankfurt). `0001_core` uygulandı (1 Kasım 2026).
+- Herkese açık adres ve anahtar `.env` dosyasında. Gizli anahtar (service_role, DB şifresi) depoya asla yazılmaz.
+- İstemci: `core/supabase/client.ts`.
