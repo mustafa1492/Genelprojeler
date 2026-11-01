@@ -1,0 +1,10 @@
+:root {
+  --zemin: #f4f3ee; --kart: #ffffff; --yazi: #1c211b; --sessiz: #4a5046; --sessiz2: #5b6157;
+  --cizgi: #d8d6cd; --cizgi2: #e2e0d8; --ana: #3b6b2c; --ana-acik: #e7efe2; --ana-yazi: #22451a;
+  --uyari-acik: #fdf0e1; --uyari-yazi: #7a3a05; --tehlike: #a3261b; --tehlike-acik: #fbe7e5;
+  --tehlike-yazi: #7a1d14; --koyu: #1c211b;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--zemin); color: var(--yazi); font-size: 17px; }
+main { max-width: 480px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 28px; margin: 8px 0 16px; }
