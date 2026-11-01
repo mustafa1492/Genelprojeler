@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { BottomNav, Card, ChoiceButton, Counter, DoneCard, MainButton, StatusPill, WarningCard } from "@/core/ui";
+import { BottomNav, Card, PageHeader, ChoiceButton, Counter, DoneCard, MainButton, StatusPill, WarningCard } from "@/core/ui";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { navItems } from "../nav";
 
@@ -10,7 +10,8 @@ const arabalar = ["45 ABC 101", "45 DEF 202"];
 type Kayit = { tarla: string; kisi: number; araba: string };
 
 export default function Bugun() {
-  const biz = useBusiness();
+  useBusiness();
+  const bugun = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", weekday: "long", timeZone: "Europe/Istanbul" });
   const [kayitlar, setKayitlar] = useState<Kayit[]>([
     { tarla: "Hasan Ağa", kisi: 14, araba: "45 ABC 101" },
     { tarla: "Fatma Hanım", kisi: 4, araba: "45 DEF 202" },
@@ -30,16 +31,13 @@ export default function Bugun() {
 
   return (
     <main className="ui-has-nav" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: "var(--sessiz2)" }}>{biz.name}</div>
-        <h1 style={{ margin: 0 }}>Bugün</h1>
-      </div>
+<PageHeader sub={bugun} title="Bugün" right={<span className="ui-pill ornek">Örnek</span>} />
 
       {adim === 0 && (
         <>
           {!uyariKapandi && (
-            <WarningCard title="45 DEF 202: izin kâğıdının süresi geçmiş" text="Bu arabayla işçi taşıma."
-              action="Yeniledim" onAction={() => setUyariKapandi(true)} />
+            <WarningCard text="45 DEF 202 arabasının izin kâğıdının süresi geçmiş. Bu arabayla işçi taşıma, ceza yazılır."
+              action="Kâğıdı yeniledim" onAction={() => setUyariKapandi(true)} />
           )}
           {onay && <DoneCard message={onay} onUndo={() => { setKayitlar(kayitlar.slice(0, -1)); setOnay(""); }} />}
           <Card>
@@ -63,7 +61,7 @@ export default function Bugun() {
 
       {adim === 1 && (
         <>
-          <h2 style={{ fontSize: 24, margin: 0 }}>Hangi tarlaya gittiniz?</h2>
+          <h2 style={{ fontSize: 24, margin: "4px 4px 0" }}>Hangi tarlaya gittiniz?</h2>
           {tarlalar.map((t) => (
             <ChoiceButton key={t} selected={t === tarla} onClick={() => { setTarla(t); setAdim(2); }}>{t}</ChoiceButton>
           ))}
@@ -73,7 +71,7 @@ export default function Bugun() {
 
       {adim === 2 && (
         <>
-          <h2 style={{ fontSize: 24, margin: 0 }}>{tarla}: kaç kişi gitti?</h2>
+          <h2 style={{ fontSize: 24, margin: "4px 4px 0" }}>{tarla}: kaç kişi gitti?</h2>
           <Card><Counter value={kisi} onChange={setKisi} min={1} max={60} unit="kişi" /></Card>
           <MainButton onClick={() => setAdim(3)}>Devam</MainButton>
           <MainButton secondary onClick={() => setAdim(1)}>Geri</MainButton>
@@ -82,7 +80,7 @@ export default function Bugun() {
 
       {adim === 3 && (
         <>
-          <h2 style={{ fontSize: 24, margin: 0 }}>Hangi arabayla?</h2>
+          <h2 style={{ fontSize: 24, margin: "4px 4px 0" }}>Hangi arabayla?</h2>
           {arabalar.map((a) => (
             <ChoiceButton key={a} onClick={() => kaydet(a)}>{a}</ChoiceButton>
           ))}

@@ -39,15 +39,47 @@ export function StatusPill({ status, children }: { status: Status; children: Rea
   return <span className={`ui-pill ${status}`}>{children}</span>;
 }
 
-/** Uyarı kartı: "İzin kâğıdının süresi geçmiş" + yapılacak iş. */
-export function WarningCard({ level = "gecti", title, text, action, onAction }: {
-  level?: "gecti" | "yakin"; title: string; text?: string; action?: string; onAction?: () => void;
+/** Uyarı kartı: simge + düz cümle + yapılacak iş. */
+export function WarningCard({ level = "gecti", text, action, onAction }: {
+  level?: "gecti" | "yakin"; text: string; action?: string; onAction?: () => void;
 }) {
   return (
     <div className={`ui-warn ${level}`} role="alert">
-      <b>{title}</b>
-      {text && <p>{text}</p>}
-      {action && <MainButton secondary onClick={onAction}>{action}</MainButton>}
+      <div className="ui-warn-row">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+        </svg>
+        <span>{text}</span>
+      </div>
+      {action && <MainButton onClick={onAction}>{action}</MainButton>}
+    </div>
+  );
+}
+
+/** Sayfa başlığı: üstte küçük alt yazı, altında büyük başlık, sağda isteğe bağlı düğme. */
+export function PageHeader({ sub, title, right }: { sub?: string; title: string; right?: React.ReactNode }) {
+  return (
+    <header className="ui-header">
+      <div>
+        {sub && <small>{sub}</small>}
+        <h1>{title}</h1>
+      </div>
+      {right}
+    </header>
+  );
+}
+
+/** Kişi satırı: baş harfler + ad + alt yazı + sağda etiket. */
+export function PersonRow({ name, sub, right }: { name: string; sub?: string; right?: React.ReactNode }) {
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toLocaleUpperCase("tr")).join("");
+  return (
+    <div className="ui-person">
+      <div className="ui-avatar" aria-hidden="true">{initials}</div>
+      <div className="ui-person-text">
+        <b>{name}</b>
+        {sub && <span>{sub}</span>}
+      </div>
+      {right}
     </div>
   );
 }
@@ -63,8 +95,10 @@ export function DoneCard({ message, onUndo }: { message: string; onUndo?: () => 
   );
 }
 
-export function Card({ children }: { children: React.ReactNode }) {
-  return <div className="ui-card">{children}</div>;
+export function Card({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  return onClick
+    ? <button type="button" className="ui-card" onClick={onClick}>{children}</button>
+    : <div className="ui-card">{children}</div>;
 }
 
 export type NavItem = { href: string; label: string; icon: React.ReactNode };
