@@ -19,6 +19,7 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
   const [phone, setPhone] = useState(person?.phone ?? "");
   const [picked, setPicked] = useState<string[]>(person?.tags ?? []);
   const [custom, setCustom] = useState<Record<string, string>>(person?.custom ?? {});
+  const [notes, setNotes] = useState(person?.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,7 +29,7 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
     e.preventDefault();
     setBusy(true); setError("");
     try {
-      await onSave({ full_name: name.trim(), phone: phone.replace(/\s+/g, "") || null, tags: picked, custom });
+      await onSave({ full_name: name.trim(), phone: phone.replace(/\s+/g, "") || null, tags: picked, custom, notes: notes.trim() || null });
     } catch {
       setError("Kaydedemedim. İnterneti kontrol edip tekrar dene.");
       setBusy(false);
@@ -51,6 +52,8 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
           {tags.map((t) => <Chip key={t} selected={picked.includes(t)} onClick={() => toggle(t)}>{t}</Chip>)}
         </div>
       </div>
+      <TextField id="notes" label="Not (isteğe bağlı)" placeholder="Örnek: Sabah erken gelemez"
+        value={notes} onChange={(e) => setNotes(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton type="submit" disabled={busy || !name.trim()}>{busy ? "Kaydediyorum…" : "Kaydet"}</MainButton>
       <MainButton secondary onClick={onCancel}>Vazgeç</MainButton>

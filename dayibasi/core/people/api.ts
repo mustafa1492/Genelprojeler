@@ -9,11 +9,12 @@ export type Person = {
   phone: string | null;
   tags: string[];
   custom: Record<string, string>;
+  notes: string | null;
   active: boolean;
 };
-export type PersonInput = Pick<Person, "full_name" | "phone" | "tags" | "custom">;
+export type PersonInput = Pick<Person, "full_name" | "phone" | "tags" | "custom" | "notes">;
 
-const cols = "id, business_id, kind, full_name, phone, tags, custom, active";
+const cols = "id, business_id, kind, full_name, phone, tags, custom, notes, active";
 
 export async function listPeople(businessId: string, kinds: string[]) {
   const { data, error } = await supabase().from("people").select(cols)
@@ -39,4 +40,10 @@ export async function updatePerson(id: string, p: Partial<PersonInput & { active
 export async function deletePerson(id: string) {
   const { error } = await supabase().from("people").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function getPerson(id: string) {
+  const { data, error } = await supabase().from("people").select(cols).eq("id", id).single();
+  if (error) throw error;
+  return data as Person;
 }

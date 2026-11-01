@@ -130,3 +130,33 @@ export function TextField({ label, ...p }: React.InputHTMLAttributes<HTMLInputEl
 export function ErrorText({ children }: { children: React.ReactNode }) {
   return <div className="ui-error" role="alert">{children}</div>;
 }
+
+const phoneIcon = <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />;
+const waIcon = <path d="M3 21l1.6-4.7A8.5 8.5 0 1 1 8 19.6L3 21z" />;
+export const Icon = ({ d, size = 24 }: { d: React.ReactNode; size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
+);
+
+/** Büyük "Ara" ve "WhatsApp" düğmeleri. */
+export function ContactButtons({ tel, wa }: { tel: string; wa: string }) {
+  return (
+    <div className="ui-contact">
+      <a className="ara" href={tel}><Icon d={phoneIcon} />Ara</a>
+      <a className="wa" href={wa} target="_blank" rel="noreferrer"><Icon d={waIcon} />WhatsApp</a>
+    </div>
+  );
+}
+
+/** Kartın yanındaki yuvarlak hızlı arama düğmesi. */
+export function CallIconButton({ href, name }: { href: string; name: string }) {
+  return <a className="ui-iconbtn" href={href} aria-label={`${name} ara`} onClick={(e) => e.stopPropagation()}><Icon d={phoneIcon} /></a>;
+}
+
+export function BackButton({ onClick, label = "Geri" }: { onClick: () => void; label?: string }) {
+  return <button type="button" className="ui-back" onClick={onClick}><Icon d={<path d="m15 18-6-6 6-6" />} />{label}</button>;
+}
+
+/** Bilgi satırları: sol etiket, sağ değer. */
+export function InfoRows({ rows }: { rows: [string, React.ReactNode][] }) {
+  return <div className="ui-rows">{rows.map(([k, v]) => <div key={k}><span>{k}</span><span>{v}</span></div>)}</div>;
+}
