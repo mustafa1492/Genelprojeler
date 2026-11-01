@@ -32,6 +32,11 @@ export const config = {
     defaultDailyRate: 1600, // TL, kişi başı günlük (örnek: Manisa 2026 tavsiyesi, dayıbaşı payı dahil)
   },
 
+  texts: {
+    appName: "Dayıbaşı",
+    businessPlaceholder: "Örnek: Mehmet Yılmaz ekibi",
+  },
+
   screens: {
     bugun: "Bugün",
     ekip: "Ekibim",

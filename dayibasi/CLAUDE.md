@@ -80,6 +80,7 @@ docs/
 - Bir şey yapmadan önce "bu kullanıcıyı telefona sarılmaya iter mi?" diye sor
 
 ## Supabase
-- Proje: `dayibasi` (ref `ypblltxjbhgnnvtyteat`, Frankfurt). `0001_core` uygulandı (1 Kasım 2026).
+- Proje: `dayibasi` (ref `ypblltxjbhgnnvtyteat`, Frankfurt). `0001_core` ve `0002_revoke_anon` uygulandı (1 Kasım 2026).
+- Giriş: şimdilik e-posta + şifre (`core/auth/AuthGate.tsx`). Telefonla (SMS) giriş ücretli bir SMS sağlayıcısı ister, sonraya.
 - Herkese açık adres ve anahtar `.env` dosyasında. Gizli anahtar (service_role, DB şifresi) depoya asla yazılmaz.
 - İstemci: `core/supabase/client.ts`.

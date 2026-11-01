@@ -82,3 +82,17 @@ export function BottomNav({ items, current }: { items: NavItem[]; current: strin
     </nav>
   );
 }
+
+/** Yazı kutusu (yalnızca gerçekten gerekince). */
+export function TextField({ label, ...p }: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {
+  return (
+    <label className="ui-field">
+      {label}
+      <input {...p} />
+    </label>
+  );
+}
+
+export function ErrorText({ children }: { children: React.ReactNode }) {
+  return <div className="ui-error" role="alert">{children}</div>;
+}

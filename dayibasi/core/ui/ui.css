@@ -44,3 +44,11 @@
   min-height: 60px; font-size: 14px; font-weight: 800; color: var(--sessiz); text-decoration: none; }
 .ui-nav a[aria-current="page"] { background: var(--ana-acik); color: var(--ana-yazi); }
 .ui-has-nav { padding-bottom: 110px; }
+
+.ui-field { display: flex; flex-direction: column; gap: 6px; font-size: 17px; font-weight: 700; }
+.ui-field input { font: inherit; font-size: 18px; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
+  border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
+.ui-field input:focus { outline: none; border-color: var(--ana); }
+.ui-link { font: inherit; font-size: 17px; font-weight: 700; color: var(--ana-yazi); background: none; border: 0;
+  min-height: 48px; cursor: pointer; text-decoration: underline; }
+.ui-error { background: var(--tehlike-acik); color: var(--tehlike-yazi); border-radius: 14px; padding: 12px 14px; font-weight: 700; }

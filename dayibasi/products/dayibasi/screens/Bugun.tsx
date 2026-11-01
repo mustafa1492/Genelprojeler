@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { BottomNav, Card, ChoiceButton, Counter, DoneCard, MainButton, StatusPill, WarningCard } from "@/core/ui";
+import { useBusiness } from "@/core/auth/AuthGate";
 import { navItems } from "../nav";
 
 // Şimdilik örnek verilerle (Supabase bağlantısı giriş ekranından sonra gelecek).
@@ -9,6 +10,7 @@ const arabalar = ["45 ABC 101", "45 DEF 202"];
 type Kayit = { tarla: string; kisi: number; araba: string };
 
 export default function Bugun() {
+  const biz = useBusiness();
   const [kayitlar, setKayitlar] = useState<Kayit[]>([
     { tarla: "Hasan Ağa", kisi: 14, araba: "45 ABC 101" },
     { tarla: "Fatma Hanım", kisi: 4, araba: "45 DEF 202" },
@@ -28,7 +30,10 @@ export default function Bugun() {
 
   return (
     <main className="ui-has-nav" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <h1 style={{ marginBottom: 0 }}>Bugün</h1>
+      <div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: "var(--sessiz2)" }}>{biz.name}</div>
+        <h1 style={{ margin: 0 }}>Bugün</h1>
+      </div>
 
       {adim === 0 && (
         <>
