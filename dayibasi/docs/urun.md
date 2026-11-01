@@ -35,7 +35,13 @@
 - İşçi kartı: ad, baş harfler, grubu, doğum tarihi ve yaşı, yarın durumu
 - Kişi kartı detayı: telefon, köy, beceriler, çalıştığı günler, avans/ödeme geçmişi
 
-### 3. Arabalar
+### Kayıtlar (1 Kasım 2026, alt menüde Arabalar'ın yerine)
+- Gün gün bütün kayıtlar (yeniden eskiye): tarla, kimler gitti, yevmiye, payın
+- "Kişiye göre" seçince yalnız o işçinin çalıştığı günler + "X gün çalıştı"
+- Kayda dokun → düzenle: gün, tarla, kimler (ekle/çıkar), isimsizse kişi sayısı, yevmiye, pay; Sil. Kaydet/Sil sonrası Geri al
+- Aynı düzenleme ekranı Bugün'de kayda dokununca da açılır
+
+### 3. Arabalar (şimdilik menüde yok; Mustafa: "önemi yok")
 - Araba kartı: plaka, tür, kaç kişilik, şoför
 - Tek satır durum: "Her şey tamam" (yeşil) ya da "İzin kâğıdının süresi geçmiş" (kırmızı)
 - Kâğıtlar: izin kâğıdı, muayene, sigorta, koltuk sigortası → bitiş tarihi ve "X gün kaldı / Süresi geçti"

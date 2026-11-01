@@ -181,3 +181,6 @@ input[type="date"] { appearance: none; -webkit-appearance: none; }
 .ui-bar i.mine { background: var(--ana); }
 .ui-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #9db58f; margin-right: 4px; vertical-align: -1px; }
 .ui-dot.mine { background: var(--ana); }
+.ui-select { font: inherit; font-size: 18px; font-weight: 600; min-height: 56px; padding: 0 14px; border-radius: 14px;
+  border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); }
+button.ui-card { display: block; }

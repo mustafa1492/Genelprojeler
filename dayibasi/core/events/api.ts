@@ -33,3 +33,7 @@ export async function addEvent(businessId: string, e: Omit<EventRow, "id" | "bus
 export async function deleteEvent(id: string) {
   await mutate({ kind: "delete", table: "events", key: id });
 }
+
+export async function updateEvent(id: string, values: Partial<Omit<EventRow, "id" | "business_id">>) {
+  await mutate({ kind: "update", table: "events", key: id, values });
+}

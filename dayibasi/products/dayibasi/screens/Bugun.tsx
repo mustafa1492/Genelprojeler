@@ -14,6 +14,7 @@ import {
 import { config } from "../config";
 import { dayText, defaults, PUANTAJ, split, workersOf } from "../hesap";
 import { HistoryLink, navItems, SignOutLink } from "../nav";
+import KayitDuzenle from "./KayitDuzenle";
 
 const LAST_COUNT = "ko:son-kisi";
 const LAST_WAGE = "ko:son-yevmiye";
@@ -22,6 +23,8 @@ type Step = "list" | "tarla" | "isci" | "kisi" | "ucret" | "yeniTarla" | "detay"
 
 const addDays = (d: string, n: number) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 const weekStart = (d: string) => { const x = new Date(d + "T12:00:00Z"); const wd = (x.getUTCDay() + 6) % 7; return addDays(d, -wd); };
+
+const undos: (() => Promise<void>)[] = [];
 
 export default function Bugun() {
   const biz = useBusiness();
@@ -192,33 +195,11 @@ export default function Bugun() {
   }
 
   if (step === "detay" && detail) {
-    const r = split(detail, biz);
-    const q = detail.quantity ?? 0;
-    const ws = workersOf(detail);
-    return (
-      <main className="ui-stack">
-        <BackButton onClick={() => setStep("list")} label={dayTitle} />
-        <PageHeader sub={dayLong} title={placeLabel(placeOf(detail.place_id))} />
-        <div className="ui-split">
-          <div><span>İşçilere</span><b>{formatTL(q * r.wage)}</b><small>{q} × {formatTL(r.wage)}</small></div>
-          <div className="mine"><span>Senin payın</span><b>{formatTL(q * r.fee)}</b><small>{q} × {formatTL(r.fee)}</small></div>
-        </div>
-        <Card><InfoRows rows={[["Çiftçi öder", formatTL(q * r.rate)], ["Kişi sayısı", `${q} kişi`]]} /></Card>
-        <h2 className="ui-section">Kimler gitti</h2>
-        {ws.length ? (
-          <Card><InfoRows rows={ws.map((id) => {
-            const w = workers.find((x) => x.id === id);
-            return [w ? displayName(w, workers) : "Ekipten çıkmış", formatTL(r.wage)] as [string, string];
-          })} /></Card>
-        ) : <div className="ui-empty">İsim seçilmeden girilmiş.</div>}
-        <MainButton className="tehlike" onClick={async () => {
-          await deleteEvent(detail.id);
-          const copy = detail; // Geri al: aynı kaydı geri koyar
-          setDone({ message: `Sildim: ${placeLabel(placeOf(copy.place_id))}, ${q} kişi.`, ids: [`restore:${JSON.stringify(copy)}`] });
-          setStep("list"); setDetail(null); load();
-        }}>Bu kaydı sil</MainButton>
-      </main>
-    );
+    return <KayitDuzenle event={detail} places={places} farmers={farmers} workers={workers} placeLabel={placeLabel}
+      onClose={(r) => {
+        setStep("list"); setDetail(null); load();
+        if (r) setDone({ message: r.message, ids: [`fn:${undos.push(r.undo) - 1}`] });
+      }} />;
   }
 
   // --- Liste
@@ -232,7 +213,8 @@ export default function Bugun() {
   const undo = async () => {
     if (!done) return;
     for (const id of done.ids) {
-      if (id.startsWith("restore:")) {
+      if (id.startsWith("fn:")) await undos[Number(id.slice(3))]();
+      else if (id.startsWith("restore:")) {
         const e = JSON.parse(id.slice(8)) as EventRow;
         await addEvent(biz.id, { kind: e.kind, occurred_on: e.occurred_on, place_id: e.place_id, person_id: e.person_id, quantity: e.quantity, data: e.data });
       } else await deleteEvent(id);
