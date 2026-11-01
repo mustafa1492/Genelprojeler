@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Chip, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import type { Person, PersonInput } from "./api";
 
-export type CustomField = { key: string; label: string; type: string };
+export type CustomField = { key: string; label: string; type: string; required?: boolean };
 
 /** Kişi ekleme / düzenleme. Etiketler dokunarak seçilir; yazı yalnızca ad, telefon ve özel alanlarda. */
 export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCancel, onRemove, onForget, groups, groupKey = "grup" }: {
@@ -50,6 +50,7 @@ export function PersonForm({ kindLabel, tags, customFields, person, onSave, onCa
         value={phone} onChange={(e) => setPhone(e.target.value)} />
       {customFields.map((f) => (
         <TextField key={f.key} id={`custom_${f.key}`} label={f.label} maxLength={100} value={custom[f.key] ?? ""}
+          type={f.type === "date" ? "date" : "text"} required={f.required} max={f.type === "date" ? new Date().toISOString().slice(0, 10) : undefined}
           onChange={(e) => setCustom({ ...custom, [f.key]: e.target.value })} />
       ))}
       {groups && (

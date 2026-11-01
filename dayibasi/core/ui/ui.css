@@ -155,3 +155,29 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-quickadd > button:disabled { opacity: 0.4; }
 .ui-card.row > button.ui-remove, .ui-remove { flex: 0 0 auto; flex-shrink: 0; font: inherit; font-size: 16px; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
   border: 2px solid var(--tehlike); background: var(--tehlike-acik); color: var(--tehlike-yazi); cursor: pointer; }
+.ui-stats > button { font: inherit; border: 2px solid transparent; border-radius: 16px; padding: 12px; display: flex; flex-direction: column;
+  align-items: center; gap: 2px; cursor: pointer; }
+.ui-stats > button[aria-pressed="true"] { border-color: currentColor; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+.ui-stats > button.tamam { background: var(--ana-acik); color: var(--ana-yazi); }
+.ui-stats > button.gecti { background: var(--tehlike-acik); color: var(--tehlike-yazi); }
+.ui-stats > button.bekliyor { background: #eeede8; color: var(--sessiz); }
+.ui-stats > button b { font-size: 28px; font-weight: 800; }
+.ui-stats > button span { font-size: 14px; font-weight: 700; }
+input[type="date"] { appearance: none; -webkit-appearance: none; }
+.ui-label { font-size: 17px; font-weight: 800; margin: 0 4px; }
+.ui-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ui-split > div { background: var(--kart); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.ui-split > div.mine { background: var(--ana-acik); color: var(--ana-yazi); }
+.ui-split span { font-size: 14px; font-weight: 700; color: inherit; opacity: .8; }
+.ui-split b { font-size: 24px; font-weight: 800; }
+.ui-split small { font-size: 14px; font-weight: 600; opacity: .75; }
+.ui-daynav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: -4px; }
+.ui-daynav button { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 14px; border-radius: 12px;
+  border: 2px solid var(--cizgi); background: var(--kart); color: var(--yazi); cursor: pointer; }
+.ui-tabs:has(> :nth-child(4)) { grid-template-columns: repeat(4, 1fr); }
+.ui-tabs:has(> :nth-child(4)) button { font-size: 15px; padding: 0 2px; }
+.ui-bar { display: flex; height: 14px; border-radius: 7px; background: #eeede8; overflow: hidden; }
+.ui-bar i { display: block; height: 100%; background: #9db58f; }
+.ui-bar i.mine { background: var(--ana); }
+.ui-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #9db58f; margin-right: 4px; vertical-align: -1px; }
+.ui-dot.mine { background: var(--ana); }

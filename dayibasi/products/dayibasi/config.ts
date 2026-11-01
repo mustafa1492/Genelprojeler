@@ -15,6 +15,7 @@ export const config = {
     // Ekip içi sınıflandırma: dayıbaşı kendi gruplarını açar (custom.grup)
     groupKey: "grup",
     customFields: [
+      { key: "dogum", label: "Doğum tarihi", type: "date", required: true },
       { key: "koy", label: "Köyü", type: "text" },
     ],
   },

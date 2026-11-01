@@ -8,6 +8,7 @@ import { setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
 import { BackButton, Card, ContactButtons, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
 import { listEvents, type EventRow } from "@/core/events/api";
 import { listPlaces, type Place } from "@/core/places/api";
+import { ageOf, birthText } from "@/core/people/birth";
 import { config } from "../config";
 import { dayText, PUANTAJ, split, workerAccounts } from "../hesap";
 
@@ -85,7 +86,9 @@ export default function KisiKarti({ person, answer, onBack, onEdit, onAnswer }: 
       <Card>
         <InfoRows rows={[
           ["Telefonu", person.phone ? prettyPhone(person.phone) : "Yok"],
-          ...config.people.customFields.map((f) => [f.label, person.custom?.[f.key] || "Yok"] as [string, string]),
+          ...config.people.customFields.map((f) => [f.label,
+            f.key === "dogum" ? (person.custom?.dogum ? `${birthText(person.custom.dogum)} (${ageOf(person.custom.dogum)} yaş)` : "Yok")
+              : person.custom?.[f.key] || "Yok"] as [string, string]),
           ["Grubu", (person.custom?.[config.people.groupKey] as string) || "Yok"],
           ...(person.notes ? [["Not", person.notes] as [string, string]] : []),
         ]} />

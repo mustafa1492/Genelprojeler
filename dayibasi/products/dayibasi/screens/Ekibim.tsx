@@ -5,6 +5,7 @@ import { fillTemplate, telLink, waLink } from "@/core/messaging/links";
 import { getTemplate } from "@/core/messaging/templates";
 import { addPerson, deletePerson, forgetPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
+import { ageOf, birthText, birthYear } from "@/core/people/birth";
 import { listAnswers, setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
 import { BackButton, BottomNav, CallIconButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
@@ -36,6 +37,9 @@ export default function Ekibim() {
   const [tpl, setTpl] = useState(YOKLAMA_VARSAYILAN);
   const [sent, setSent] = useState<Record<string, boolean>>({});
   const [quickName, setQuickName] = useState("");
+  const [quickBirth, setQuickBirth] = useState("");
+  const [quickError, setQuickError] = useState("");
+  const [answerFilter, setAnswerFilter] = useState<Answer | "bekliyor" | null>(null);
   const [removing, setRemoving] = useState(false);
   const tomorrow = tomorrowIstanbul();
 
@@ -54,11 +58,16 @@ export default function Ekibim() {
   const quickAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const name = quickName.trim();
+    setQuickError("");
     if (!name) return;
+    if (!quickBirth) { setQuickError("Doğum tarihini seç. Aynı adlı kişileri ayırmak için gerekli."); return; }
+    const same = (people ?? []).find((p) => p.full_name.toLocaleLowerCase("tr") === name.toLocaleLowerCase("tr") && p.custom?.dogum === quickBirth);
+    if (same) { setQuickError(`${same.full_name} (${birthText(quickBirth)}) zaten ekipte.`); return; }
     const g = filter !== "Hepsi" && filter !== NO_GROUP ? filter : "";
-    const p = await addPerson(biz.id, KIND, { full_name: name, phone: null, tags: [], custom: g ? { [GK]: g } : {}, notes: null });
-    setQuickName("");
-    setDone({ message: `Ekledim: ${p.full_name}${g ? ` (${g})` : ""}. Telefonu için ismine dokun.`, run: () => deletePerson(p.id) });
+    const p = await addPerson(biz.id, KIND, { full_name: name, phone: null, tags: [], custom: { dogum: quickBirth, ...(g ? { [GK]: g } : {}) }, notes: null });
+    setQuickName(""); setQuickBirth("");
+    const age = ageOf(quickBirth);
+    setDone({ message: `Ekledim: ${p.full_name}${g ? ` (${g})` : ""}.${age !== null && age < 18 ? ` Dikkat: ${age} yaşında, 18’den küçük.` : " Telefonu için ismine dokun."}`, run: () => deletePerson(p.id) });
     load();
   };
 
@@ -124,11 +133,15 @@ export default function Ekibim() {
   const yes = all.filter((p) => answers[p.id] === "evet").length;
   const no = all.filter((p) => answers[p.id] === "hayir").length;
   const wait = all.length - yes - no;
+  const statBtn = (key: "evet" | "hayir" | "bekliyor", cls: string, n: number, label: string) => (
+    <button type="button" className={cls} aria-pressed={answerFilter === key}
+      onClick={() => setAnswerFilter(answerFilter === key ? null : key)}><b>{n}</b><span>{label}</span></button>
+  );
   const stats = (
     <div className="ui-stats">
-      <div className="tamam"><b>{yes}</b><span>geliyor</span></div>
-      <div className="gecti"><b>{no}</b><span>gelmiyor</span></div>
-      <div className="bekliyor"><b>{wait}</b><span>bekleniyor</span></div>
+      {statBtn("evet", "tamam", yes, "geliyor")}
+      {statBtn("hayir", "gecti", no, "gelmiyor")}
+      {statBtn("bekliyor", "bekliyor", wait, "bekleniyor")}
     </div>
   );
 
@@ -160,7 +173,9 @@ export default function Ekibim() {
   }
 
   // --- Liste
-  const matches = (p: Person) => filter === "Hepsi" || (filter === NO_GROUP ? !groupOf(p) : groupOf(p) === filter);
+  const ansOf = (p: Person) => answers[p.id] ?? "bekliyor";
+  const matches = (p: Person) => (filter === "Hepsi" || (filter === NO_GROUP ? !groupOf(p) : groupOf(p) === filter))
+    && (!answerFilter || ansOf(p) === answerFilter);
   const shown = all.filter(matches);
   const sections = filter === "Hepsi" && groups.length
     ? [...groups, NO_GROUP].map((g) => ({ g, list: shown.filter((p) => (groupOf(p) || NO_GROUP) === g) })).filter((x) => x.list.length)
@@ -169,7 +184,8 @@ export default function Ekibim() {
   const row = (p: Person) => (
     <div key={p.id} className="ui-card row">
       <button type="button" disabled={removing} onClick={() => { setDone(null); setView({ v: "card", id: p.id }); }}>
-        <PersonRow name={p.full_name} sub={filter === "Hepsi" && groups.length ? undefined : groupOf(p) || undefined}
+        <PersonRow name={p.full_name}
+          sub={[birthYear(p.custom?.dogum), filter === "Hepsi" && groups.length ? "" : groupOf(p)].filter(Boolean).join(" · ") || undefined}
           right={removing ? undefined : pill(answers[p.id] ?? null)} />
       </button>
       {removing
@@ -185,10 +201,18 @@ export default function Ekibim() {
 
       {loadError && <ErrorText>Listeyi getiremedim. İnterneti kontrol et. <button type="button" className="ui-link" onClick={load}>Tekrar dene</button></ErrorText>}
       {people === null && !loadError && <div className="ui-empty">Yükleniyor…</div>}
-      <form onSubmit={quickAdd} className="ui-quickadd">
-        <TextField id="quick_name" label={`Ekibe ekle${filter !== "Hepsi" && filter !== NO_GROUP ? ` (${filter})` : ""}`}
-          placeholder="Adı soyadı" maxLength={100} autoComplete="off" value={quickName} onChange={(e) => setQuickName(e.target.value)} />
-        <button type="submit" disabled={!quickName.trim()}>Ekle</button>
+      <form onSubmit={quickAdd} className="ui-card ui-stack" style={{ gap: 10 }}>
+        <b style={{ fontSize: 17 }}>Ekibe ekle{filter !== "Hepsi" && filter !== NO_GROUP ? ` (${filter})` : ""}</b>
+        <div className="ui-quickadd">
+          <TextField id="quick_name" label="Adı soyadı" placeholder="Örnek: Ayşe Kaya" maxLength={100} autoComplete="off"
+            value={quickName} onChange={(e) => setQuickName(e.target.value)} />
+        </div>
+        <div className="ui-quickadd">
+          <TextField id="quick_birth" label="Doğum tarihi" type="date" max={new Date().toISOString().slice(0, 10)}
+            value={quickBirth} onChange={(e) => setQuickBirth(e.target.value)} />
+          <button type="submit" disabled={!quickName.trim() || !quickBirth}>Ekle</button>
+        </div>
+        {quickError && <ErrorText>{quickError}</ErrorText>}
       </form>
 
       {people && people.length === 0 && <div className="ui-empty">Ekibinde henüz kimse yok. Yukarıya ismini yazıp Ekle’ye bas.</div>}
@@ -217,7 +241,12 @@ export default function Ekibim() {
               {list.map(row)}
             </div>
           ))}
-          {shown.length === 0 && <div className="ui-empty">Bu grupta kimse yok.</div>}
+          {answerFilter && (
+            <button type="button" className="ui-link" onClick={() => setAnswerFilter(null)}>
+              Sadece “{answerFilter === "evet" ? "geliyor" : answerFilter === "hayir" ? "gelmiyor" : "bekleniyor"}” gösteriliyor · hepsini göster
+            </button>
+          )}
+          {shown.length === 0 && <div className="ui-empty">{answerFilter ? "Bu durumda kimse yok." : "Bu grupta kimse yok."}</div>}
         </>
       )}
       <BottomNav items={navItems} current="/ekip" />

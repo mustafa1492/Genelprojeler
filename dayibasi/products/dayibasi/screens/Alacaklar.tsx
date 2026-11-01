@@ -7,6 +7,7 @@ import { fillTemplate, prettyPhone, telLink, waLink } from "@/core/messaging/lin
 import { getTemplate } from "@/core/messaging/templates";
 import { addPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
+import { displayName } from "@/core/people/birth";
 import { listPlaces, type Place } from "@/core/places/api";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, BottomNav, Card, Chip, ContactButtons, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
@@ -24,7 +25,7 @@ const tl = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 }
 const SENT = "ko:hesap-gonderildi";
 const TAB = "ko:alacak-sekme";
 
-type Tab = "ciftci" | "isci" | "puantaj";
+type Tab = "ciftci" | "isci" | "puantaj" | "ozet";
 type View = { v: "list" } | { v: "card"; id: string } | { v: "form"; id?: string } | { v: "odeme"; id: string } | { v: "ayar"; key: "wage" | "fee" };
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -194,7 +195,7 @@ export default function Alacaklar() {
         </div>
       </div>
       <div className="ui-tabs" role="tablist">
-        {([["ciftci", "Çiftçiler"], ["isci", "İşçiler"], ["puantaj", "Puantaj"]] as [Tab, string][]).map(([k, l]) => (
+        {([["ciftci", "Çiftçiler"], ["isci", "İşçiler"], ["puantaj", "Puantaj"], ["ozet", "Özet"]] as [Tab, string][]).map(([k, l]) => (
           <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
@@ -255,6 +256,7 @@ export default function Alacaklar() {
       )}
 
       {tab === "puantaj" && <Puantaj events={events} workers={workers} placeLabel={placeLabel} />}
+      {tab === "ozet" && <Ozet events={events} entries={entries} farmers={farmers ?? []} workers={workers} />}
 
       <h2 className="ui-section">Ücretler</h2>
       <Card>
@@ -279,17 +281,17 @@ function Puantaj({ events, workers, placeLabel }: { events: EventRow[]; workers:
   const [copied, setCopied] = useState(false);
   const ev = events.filter((e) => e.occurred_on.startsWith(m));
   const monthName = (x: string) => new Date(x + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
-  const name = (id: string) => workers.find((w) => w.id === id)?.full_name ?? "Silinmiş işçi";
+  const name = (id: string) => { const w = workers.find((x) => x.id === id); return w ? displayName(w, workers) : "Silinmiş işçi"; };
   const rows = workerAccounts(workers, ev, [], biz).filter((a) => a.gun > 0).sort((a, b) => b.gun - a.gun);
   const unnamed = ev.filter((e) => workersOf(e).length === 0).reduce((t, e) => t + (e.quantity ?? 0), 0);
   const days = [...new Set(ev.map((e) => e.occurred_on))].sort().reverse();
 
   const text = [
     `PUANTAJ · ${monthName(m)} · ${biz.name}`, "",
-    ...rows.map((a) => `${a.worker.full_name}: ${a.gun} gün, ${formatTL(a.kazanc)}`),
+    ...rows.map((a) => `${displayName(a.worker, workers)}: ${a.gun} gün, ${formatTL(a.kazanc)}`),
     ...(unnamed ? [`İsimsiz kayıt: ${unnamed} kişi-gün`] : []), "",
     ...days.flatMap((d) => ev.filter((e) => e.occurred_on === d).map((e) =>
-      `${dayText(d)} · ${placeLabel(e.place_id)} · ${e.quantity} kişi${workersOf(e).length ? `: ${workersOf(e).map((id) => name(id).split(" ")[0]).join(", ")}` : ""}`)),
+      `${dayText(d)} · ${placeLabel(e.place_id)} · ${e.quantity} kişi${workersOf(e).length ? `: ${workersOf(e).map((id) => { const w = workers.find((x) => x.id === id); return w ? displayName(w, workers, true) : "?"; }).join(", ")}` : ""}`)),
   ].join("\n");
 
   const copy = async () => {
@@ -304,7 +306,7 @@ function Puantaj({ events, workers, placeLabel }: { events: EventRow[]; workers:
       {ev.length === 0 && <div className="ui-empty">Bu ay kayıt yok.</div>}
       {rows.length > 0 && (
         <Card>
-          <InfoRows rows={rows.map((a) => [a.worker.full_name, `${a.gun} gün · ${formatTL(a.kazanc)}`] as [string, string])} />
+          <InfoRows rows={rows.map((a) => [displayName(a.worker, workers), `${a.gun} gün · ${formatTL(a.kazanc)}`] as [string, string])} />
         </Card>
       )}
       {unnamed > 0 && <p style={{ margin: "0 4px", fontSize: 15, color: "var(--sessiz2)" }}>İsim seçilmeden girilen: {unnamed} kişi-gün (işçi hesabına girmez).</p>}
@@ -314,7 +316,7 @@ function Puantaj({ events, workers, placeLabel }: { events: EventRow[]; workers:
           {ev.filter((e) => e.occurred_on === d).map((e) => (
             <div key={e.id} className="ui-moneyrow" style={{ background: "var(--kart)" }}>
               <b style={{ minWidth: 0 }}>{placeLabel(e.place_id)}
-                <small>{workersOf(e).length ? workersOf(e).map((id) => name(id).split(" ")[0]).join(", ") : "İsim seçilmedi"}</small></b>
+                <small>{workersOf(e).length ? workersOf(e).map((id) => { const w = workers.find((x) => x.id === id); return w ? displayName(w, workers, true) : "?"; }).join(", ") : "İsim seçilmedi"}</small></b>
               <strong>{e.quantity} kişi</strong>
             </div>
           ))}
@@ -325,6 +327,99 @@ function Puantaj({ events, workers, placeLabel }: { events: EventRow[]; workers:
           <a className="ui-segbtn" href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer">WhatsApp’ta paylaş</a>
           <button type="button" onClick={copy}>{copied ? "Kopyalandı ✓" : "Kopyala"}</button>
         </div>
+      )}
+    </>
+  );
+}
+
+/** Uzun vadeli özet: yıl yıl, ay ay; en çok iş yapılan çiftçiler; yevmiyenin seyri. */
+function Ozet({ events, entries, farmers, workers }: { events: EventRow[]; entries: LedgerEntry[]; farmers: Person[]; workers: Person[] }) {
+  const biz = useBusiness();
+  const years = [...new Set(events.map((e) => e.occurred_on.slice(0, 4)))].sort().reverse();
+  const thisYear = monthStart().slice(0, 4);
+  if (!years.includes(thisYear)) years.unshift(thisYear);
+  const [y, setY] = useState(thisYear);
+  const farmerIds = new Set(farmers.map((f) => f.id));
+  const workerIds = new Set(workers.map((w) => w.id));
+
+  const ev = events.filter((e) => e.occurred_on.startsWith(y));
+  const sum = (xs: EventRow[], f: (e: EventRow) => number) => xs.reduce((t, e) => t + (e.quantity ?? 0) * f(e), 0);
+  const tahsil = (pre: string) => entries.filter((e) => e.kind === "odeme" && farmerIds.has(e.person_id ?? "") && e.occurred_on.startsWith(pre)).reduce((t, e) => t + e.amount, 0);
+  const isciOdeme = (pre: string) => entries.filter((e) => workerIds.has(e.person_id ?? "") && e.occurred_on.startsWith(pre)).reduce((t, e) => t + e.amount, 0);
+
+  const months = Array.from({ length: 12 }, (_, i) => `${y}-${String(i + 1).padStart(2, "0")}`).map((m) => {
+    const me = ev.filter((e) => e.occurred_on.startsWith(m));
+    const kisiGun = me.reduce((t, e) => t + (e.quantity ?? 0), 0);
+    const wageAvg = kisiGun ? sum(me, (e) => split(e, biz).wage) / kisiGun : 0;
+    return { m, kisiGun, ciro: sum(me, (e) => split(e, biz).rate), isci: sum(me, (e) => split(e, biz).wage), pay: sum(me, (e) => split(e, biz).fee), tahsil: tahsil(m), wageAvg, gun: new Set(me.map((e) => e.occurred_on)).size };
+  }).filter((x) => x.kisiGun || x.tahsil);
+  const max = Math.max(1, ...months.map((x) => x.ciro));
+  const T = { kisiGun: months.reduce((t, x) => t + x.kisiGun, 0), ciro: months.reduce((t, x) => t + x.ciro, 0), pay: months.reduce((t, x) => t + x.pay, 0),
+    isci: months.reduce((t, x) => t + x.isci, 0), tahsil: tahsil(y), odenen: isciOdeme(y), gun: new Set(ev.map((e) => e.occurred_on)).size };
+  const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long" });
+
+  const topFarmers = farmers.map((f) => {
+    const fe = ev.filter((e) => e.person_id === f.id);
+    return { f, kisiGun: fe.reduce((t, e) => t + (e.quantity ?? 0), 0), ciro: sum(fe, (e) => split(e, biz).rate), pay: sum(fe, (e) => split(e, biz).fee) };
+  }).filter((x) => x.kisiGun).sort((a, b) => b.ciro - a.ciro).slice(0, 5);
+  const topWorkers = workerAccounts(workers, ev, [], biz).filter((a) => a.gun).sort((a, b) => b.gun - a.gun).slice(0, 5);
+
+  return (
+    <>
+      <div className="ui-chips" role="group" aria-label="Yıl seç">
+        {years.map((x) => <Chip key={x} selected={y === x} onClick={() => setY(x)}>{x}</Chip>)}
+      </div>
+      {ev.length === 0 && <div className="ui-empty">{y} yılında kayıt yok.</div>}
+      {ev.length > 0 && (
+        <>
+          <div className="ui-split">
+            <div className="mine"><span>{y} senin payın</span><b>{formatTL(T.pay)}</b><small>{T.gun} iş günü</small></div>
+            <div><span>Toplam iş</span><b>{T.kisiGun}</b><small>kişi-gün</small></div>
+          </div>
+          <Card>
+            <InfoRows rows={[
+              ["Çiftçilerin toplam borcu", formatTL(T.ciro)], ["Çiftçilerden alınan", formatTL(T.tahsil)],
+              ["Tahsil oranı", T.ciro ? `%${Math.round((T.tahsil / T.ciro) * 100)}` : "—"],
+              ["İşçilerin hak ettiği", formatTL(T.isci)], ["İşçilere ödenen (avans dahil)", formatTL(T.odenen)],
+            ]} />
+          </Card>
+
+          <h2 className="ui-section">Ay ay</h2>
+          <div className="ui-card ui-stack" style={{ gap: 14 }}>
+            {months.map((x) => (
+              <div key={x.m} className="ui-stack" style={{ gap: 6 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 16 }}>
+                  <b>{monthName(x.m)}</b><span style={{ color: "var(--sessiz)" }}>{x.kisiGun} kişi-gün · {x.gun} gün</span>
+                </div>
+                <div className="ui-bar" aria-hidden="true">
+                  <i style={{ width: `${(x.isci / max) * 100}%` }} />
+                  <i className="mine" style={{ width: `${(x.pay / max) * 100}%` }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 14, color: "var(--sessiz2)", fontWeight: 600, flexWrap: "wrap" }}>
+                  <span>İş {formatTL(x.ciro)} · alınan {formatTL(x.tahsil)}</span>
+                  <span style={{ color: "var(--ana-yazi)", fontWeight: 800 }}>Payın {formatTL(x.pay)}</span>
+                </div>
+                {x.wageAvg > 0 && <span style={{ fontSize: 14, color: "var(--sessiz2)" }}>Ortalama yevmiye {formatTL(Math.round(x.wageAvg))}</span>}
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 14, fontSize: 13, color: "var(--sessiz2)", fontWeight: 700 }}>
+              <span><i className="ui-dot" /> İşçilere</span><span><i className="ui-dot mine" /> Senin payın</span>
+            </div>
+          </div>
+
+          {topFarmers.length > 0 && (
+            <>
+              <h2 className="ui-section">En çok iş yaptığın çiftçiler</h2>
+              <Card><InfoRows rows={topFarmers.map((x) => [x.f.full_name, `${x.kisiGun} kişi-gün · payın ${formatTL(x.pay)}`] as [string, string])} /></Card>
+            </>
+          )}
+          {topWorkers.length > 0 && (
+            <>
+              <h2 className="ui-section">En çok çalışan işçiler</h2>
+              <Card><InfoRows rows={topWorkers.map((a) => [a.worker.full_name, `${a.gun} gün · ${formatTL(a.kazanc)}`] as [string, string])} /></Card>
+            </>
+          )}
+        </>
       )}
     </>
   );

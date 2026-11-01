@@ -8,6 +8,11 @@
 ## Ekranlar ve akışlar
 
 ### 1. Bugün (açılış ekranı)
+- (1 Kasım 2026) Kayıt 3 adım: tarla → kimler gitti → **Ücretler**: işçi başı yevmiye ve senin payın ayrı ayrı − / + ile; altta "İşçilere" ve "Senin payın" ayrı hesap
+- Gün değiştirme (önceki gün / bugüne dön): unutulan günün kaydı sonradan girilir
+- "Dünkü gibi": son iş gününün kayıtları tek dokunuşla tekrar eklenir
+- Kayda dokununca: kimler gitti, para dökümü, Sil (geri alınabilir)
+- Yarının yoklama özeti, bu haftanın kişi-gün ve payın
 - En üstte, varsa **kırmızı uyarı:** süresi geçmiş izin kâğıdı ("Bu arabayla işçi taşıma, ceza yazılır") → "Kâğıdı yeniledim" düğmesi yeni bitiş tarihini sorar
 - "Bugün tarlada X kişi" büyük sayı
 - Bugünün kayıtları: tarla adı, kişi sayısı, araba
@@ -25,7 +30,9 @@
 - ~~Beceriye göre filtre~~ kaldırıldı (Mustafa, 1 Kasım 2026): beceri etiketi yok
 - Ekip içi sınıflandırma: dayıbaşının kendi açtığı **gruplar** (ör. "Kınık ekibi"); liste gruplara bölünür, gruba göre süzülür
 - Ekleme/çıkarma çok kolay: listenin üstünde tek kutu "Ekibe ekle" (seçili gruba eklenir); "Çıkar…" ile her satırda Çıkar düğmesi; her işlemde Geri al
-- İşçi kartı: ad, baş harfler, grubu, yarın durumu
+- Ekibe eklerken **doğum tarihi zorunlu** (aynı adlı kişileri ayırmak için); aynı ad + aynı doğum tarihi ikinci kez eklenemez; aynı adlılar listede doğum yılıyla görünür. 18 yaşından küçükse uyarı (engel değil).
+- Geliyor / Gelmiyor / Bekleniyor kutularına dokununca liste o duruma süzülür.
+- İşçi kartı: ad, baş harfler, grubu, doğum tarihi ve yaşı, yarın durumu
 - Kişi kartı detayı: telefon, köy, beceriler, çalıştığı günler, avans/ödeme geçmişi
 
 ### 3. Arabalar
@@ -47,7 +54,7 @@
 - İşçilere parayı **dayıbaşı öder**.
 - Kimin çalıştığı her kayıtta **elle seçilir**; istenirse isim seçmeden sadece sayı girilir (o zaman işçi hesabına yazılmaz).
 - Rakamlar kayıt anında kaydın içine yazılır; ayar sonradan değişse de eski kayıtların hesabı değişmez.
-- Alacaklarım: Çiftçiler (borç, ödeme aldım, WhatsApp hesap) · İşçiler (kalan, Öde, Herkese öde, WhatsApp hesap) · Puantaj (ay ay, kim kaç gün, gün gün kim nerede; WhatsApp'ta paylaş / kopyala).
+- Alacaklarım: Çiftçiler (borç, ödeme aldım, WhatsApp hesap) · İşçiler (kalan, Öde, Herkese öde, WhatsApp hesap) · Puantaj (ay ay, kim kaç gün, gün gün kim nerede; WhatsApp'ta paylaş / kopyala) · Özet (yıl yıl: payın, toplam iş, tahsil oranı, işçilere ödenen; ay ay çubuk grafik ve ortalama yevmiye; en çok iş yapılan çiftçiler ve en çok çalışan işçiler).
 
 ## Hesap mantığı (ilk taslak)
 - Çiftçinin borcu = Σ (kayıttaki kişi sayısı × kişi başı ücret) − Σ ödemeler
