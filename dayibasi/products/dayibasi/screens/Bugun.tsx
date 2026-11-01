@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { BottomNav, Card, PageHeader, ChoiceButton, Counter, DoneCard, MainButton, StatusPill, WarningCard } from "@/core/ui";
 import { useBusiness } from "@/core/auth/AuthGate";
-import { navItems } from "../nav";
+import { HistoryLink, navItems } from "../nav";
 
 // Şimdilik örnek verilerle (Supabase bağlantısı giriş ekranından sonra gelecek).
 const tarlalar = ["Hasan Ağa", "Fatma Hanım", "Mehmet Bey"];
@@ -31,7 +31,7 @@ export default function Bugun() {
 
   return (
     <main className="ui-has-nav" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-<PageHeader sub={bugun} title="Bugün" right={<span className="ui-pill ornek">Örnek</span>} />
+<PageHeader sub={bugun} title="Bugün" right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}><span className="ui-pill ornek">Örnek</span><HistoryLink /></span>} />
 
       {adim === 0 && (
         <>

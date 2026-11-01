@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { NavItem } from "@/core/ui";
 import { config } from "./config";
 
@@ -11,3 +12,11 @@ export const navItems: NavItem[] = [
   { href: "/arabalar", label: config.screens.arac, icon: ic(<><path d="M3 17V7a2 2 0 0 1 2-2h11l5 5v7" /><circle cx="7.5" cy="17.5" r="2" /><circle cx="17.5" cy="17.5" r="2" /><path d="M9.5 17.5h6" /></>) },
   { href: "/alacaklar", label: "Alacaklar", icon: ic(<><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6 12h.01M18 12h.01" /></>) },
 ];
+
+/** Başlıktaki "Geçmiş" düğmesi. */
+export const HistoryLink = () => (
+  <Link href="/gecmis" className="ui-history">
+    {ic(<><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>)}
+    Geçmiş
+  </Link>
+);

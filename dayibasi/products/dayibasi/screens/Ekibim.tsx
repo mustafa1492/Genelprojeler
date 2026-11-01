@@ -8,7 +8,7 @@ import { PersonForm } from "@/core/people/PersonForm";
 import { listAnswers, setAnswer, tomorrowIstanbul, type Answer } from "@/core/rsvp/api";
 import { BackButton, BottomNav, CallIconButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, PersonRow, StatusPill } from "@/core/ui";
 import { config } from "../config";
-import { navItems } from "../nav";
+import { HistoryLink, navItems } from "../nav";
 import KisiKarti from "./KisiKarti";
 
 const KIND = "isci";
@@ -145,7 +145,7 @@ export default function Ekibim() {
 
   return (
     <main className="ui-has-nav ui-stack">
-      <PageHeader sub={sub} title={config.screens.ekip} />
+      <PageHeader sub={sub} title={config.screens.ekip} right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={undo} />}
 
       {loadError && <ErrorText>Listeyi getiremedim. İnterneti kontrol et. <button type="button" className="ui-link" onClick={load}>Tekrar dene</button></ErrorText>}

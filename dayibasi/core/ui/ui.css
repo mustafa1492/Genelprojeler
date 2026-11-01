@@ -115,3 +115,6 @@ button.ui-card { width: 100%; border: 0; font: inherit; color: inherit; text-ali
 .ui-moneyrow b { font-size: 17px; }
 .ui-moneyrow small { display: block; font-size: 14px; color: var(--sessiz2); font-weight: 600; }
 .ui-moneyrow strong { font-size: 18px; white-space: nowrap; }
+.ui-history { display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 12px; border-radius: 14px;
+  background: var(--kart); border: 2px solid var(--cizgi); color: var(--yazi); font-size: 15px; font-weight: 800; text-decoration: none; }
+.ui-history svg { width: 20px; height: 20px; }
