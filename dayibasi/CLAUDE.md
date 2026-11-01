@@ -89,7 +89,8 @@ docs/
 - Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).
 - **Bekleyen (Supabase panelinde, kullanıcı yapar):** Authentication > Providers > Email: şifre en az 8, "leaked password protection" açık. Authentication > URL Configuration: yayın adresi Site URL + Redirect URLs'e `<adres>/sifre` eklenecek (şifremi unuttum için).
 - Bugün (tarla → kişi, araba adımı yok; kullanıcı "arabaların önemi yok" dedi) ve Alacaklarım gerçek veriyle çalışıyor. Hesap kuralları `docs/urun.md` ve `products/dayibasi/hesap.ts`; kayıtta `events.data` = {wage, fee, workers[]} (eski kayıtlarda yalnız rate). Arabalar "yakında".
-- Uygulama yayında değil (Vercel önerildi, kullanıcı henüz açmadı).
+- Yayında: https://genelprojeler.vercel.app (Vercel, Root Directory `dayibasi`, main'e her push'ta güncellenir; veri Supabase'te, deploy veri silmez).
+- Test hesapları (şifreler depoda YOK, kullanıcıda): `admin@dayibasi.test` (platform_admins, /yonetim), `ornek@dayibasi.test` ("Mehmet Yılmaz ekibi (örnek)", 8 işçi, 3 çiftçi, 10 günlük kayıt). Gerçek kullanıma geçmeden silinecek.
 - Güvenlik planı ve açık listesi: `docs/guvenlik.md`. KVKK aydınlatma metni `/kvkk` TASLAK, avukata gösterilmeli.
 - İnternetsiz çalışma (`core/offline/`): yazmalar `mutate()` ile yerel aynaya + giden kutusuna, internet gelince sırayla gönderilir; okumalar `query()` ile. Yeni tablo yazan her kod buradan geçmeli (doğrudan supabase insert/update yazma). Kimlikler istemcide `crypto.randomUUID()`. `public/sw.js` sayfaları ve dosyaları saklar; önbellek adını değiştirince `RegisterSW.tsx`'teki de değişmeli. Geri alma, Geçmiş ve "tamamen sil" internet ister.
 - Sıradaki iş: yayına alma (Vercel). Kullanıcı "işe yarar hale gelmeden yayına gerek yok" dedi; Bugün + Alacaklarım bitti, artık yayına alınabilir.
