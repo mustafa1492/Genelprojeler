@@ -9,7 +9,7 @@ import { formatTL } from "@/core/ledger/api";
 import { BackButton, BottomNav, Card, Chip, ChoiceButton, Counter, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, PersonRow, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
 import { defaults, PUANTAJ, workersOf } from "../hesap";
-import { HistoryLink, navItems } from "../nav";
+import { HistoryLink, navItems, SignOutLink } from "../nav";
 
 const LAST_COUNT = "ko:son-kisi";
 const LAST_WAGE = "ko:son-yevmiye";
@@ -188,6 +188,7 @@ export default function Bugun() {
       ))}
       {events?.length === 0 && <div className="ui-empty">Bugün henüz kayıt yok.</div>}
       <MainButton onClick={() => { setDone(null); setStep("tarla"); }}>+ Bugünün kaydını ekle</MainButton>
+      <SignOutLink />
       <BottomNav items={navItems} current="/" />
     </main>
   );

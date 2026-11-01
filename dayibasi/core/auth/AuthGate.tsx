@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { clearLocal, startSync } from "@/core/offline/store";
 import { SyncBar } from "@/core/offline/SyncBar";
@@ -27,10 +27,14 @@ const PUBLIC_PATHS = ["/sifre", "/kvkk"];
 export function AuthGate(props: { product: string; texts: Texts; children: React.ReactNode }) {
   const path = usePathname();
   if (PUBLIC_PATHS.includes(path)) return <>{props.children}</>;
-  return <Gate {...props} />;
+  return <Gate {...props} path={path} />;
 }
 
-function Gate({ product, texts, children }: { product: string; texts: Texts; children: React.ReactNode }) {
+/** Girişi isteyen ama işletme istemeyen sayfalar (platform yöneticisi). */
+const SESSION_ONLY_PATHS = ["/yonetim"];
+
+function Gate({ product, texts, children, path }: { product: string; texts: Texts; children: React.ReactNode; path: string }) {
+  const router = useRouter();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [biz, setBiz] = useState<Business | null | undefined>(undefined);
 
@@ -62,6 +66,14 @@ function Gate({ product, texts, children }: { product: string; texts: Texts; chi
 
   useEffect(() => (session && biz ? startSync() : undefined), [session, biz]);
 
+  // İşletmesi olmayan yönetici doğrudan Yönetim sayfasına
+  useEffect(() => {
+    if (session && biz === null && !SESSION_ONLY_PATHS.includes(path)) {
+      supabase().rpc("is_platform_admin").then(({ data }) => { if (data === true) router.replace("/yonetim"); });
+    }
+  }, [session, biz, path, router]);
+
+  if (session && SESSION_ONLY_PATHS.includes(path)) return <>{children}</>;
   if (session === undefined || (session && biz === undefined)) {
     return <main><div className="ui-empty">Yükleniyor… İnternet yoksa ilk açılış için bir kere internet lazım.</div></main>;
   }

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { clearLocal, status } from "@/core/offline/store";
+import { supabase } from "@/core/supabase/client";
 import type { NavItem } from "@/core/ui";
 import { config } from "./config";
 
@@ -19,4 +21,12 @@ export const HistoryLink = () => (
     {ic(<><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>)}
     Geçmiş
   </Link>
+);
+
+/** Çıkış: telefondaki kopyayı da siler. Gönderilmemiş kayıt varsa uyarır. */
+export const SignOutLink = () => (
+  <button type="button" className="ui-link" style={{ fontSize: 15, color: "var(--sessiz2)" }} onClick={async () => {
+    if (status().pending > 0) { window.dispatchEvent(new Event("online")); return; }
+    clearLocal(); await supabase().auth.signOut(); location.href = "/";
+  }}>Çıkış yap</button>
 );
