@@ -256,3 +256,33 @@ a.ui-warn { color: inherit; }
 .tab-shell main { padding-bottom: 120px !important; }
 .tab-shell main:has(.ui-sticky-bottom) { padding-bottom: 220px !important; }
 .tab-shell .ui-sticky-bottom { bottom: calc(76px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--zemin) 35%); }
+
+/* --- Sezon raporu (ekranda ve PDF'te) --- */
+.rapor-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; border-bottom: 3px solid var(--ana); padding-bottom: 10px; }
+.rapor-head h1 { margin: 2px 0; font-size: 1.6rem; }
+.rapor-head small { color: var(--sessiz2); font-weight: 700; }
+.rapor-kpi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.rapor-kpi > div { background: var(--kart); border: 1px solid var(--cizgi2); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; }
+.rapor-kpi span { font-size: 0.8rem; color: var(--sessiz2); font-weight: 700; }
+.rapor-kpi b { font-size: 1.1rem; }
+.rapor-kpi .pos { background: var(--ana-acik); } .rapor-kpi .neg { background: var(--tehlike-acik); }
+.rapor-bar { display: grid; grid-template-columns: minmax(80px, 30%) 1fr auto; align-items: center; gap: 8px; font-size: 0.9rem; }
+.rapor-bar i { display: block; height: 12px; border-radius: 6px; background: var(--ana); min-width: 2px; }
+.rapor-bar i.m { background: var(--ana-orta); }
+.rapor-table { overflow-x: auto; background: var(--kart); border: 1px solid var(--cizgi2); border-radius: 14px; }
+.rapor-table table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.rapor-table th { background: var(--ana); color: #fff; text-align: left; padding: 8px; white-space: nowrap; }
+.rapor-table td { padding: 7px 8px; border-top: 1px solid var(--cizgi2); }
+.rapor-table td:last-child, .rapor-table th:last-child { text-align: right; white-space: nowrap; }
+.rapor-table tfoot td { font-weight: 800; background: var(--ana-acik); }
+.rapor-table .neg { color: var(--tehlike); font-weight: 700; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  .ui-nav, .no-print, .ui-sync, .tab-shell section[hidden] { display: none !important; }
+  .tab-shell main { padding: 0 !important; max-width: none; }
+  .ui-card, .rapor-table, .rapor-kpi > div { box-shadow: none !important; break-inside: avoid; }
+  .rapor-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .rapor-bar i, .rapor-kpi .pos, .rapor-kpi .neg, .rapor-table tfoot td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h2.ui-section { break-after: avoid; }
+}

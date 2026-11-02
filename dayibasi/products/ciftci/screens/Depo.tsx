@@ -64,7 +64,7 @@ export default function Depo() {
           </div>
         </div>
       ))}
-      {all.length > 0 && <MainButton secondary onClick={() => downloadXlsx("depo", [{ name: "Depo", rows: [["Malzeme", "Tür", "Miktar", "Birim", "Not"],
+      {all.length > 0 && <MainButton secondary onClick={() => downloadXlsx("depo", [{ name: "Depo", title: `${biz.name} · Depo · ${new Date().toLocaleDateString("tr-TR")}`, rows: [["Malzeme", "Tür", "Miktar", "Birim", "Not"],
         ...all.map((i) => [i.name, i.category, i.quantity, i.unit, i.note ?? ""])] }])}>Excel’e indir</MainButton>}
     </main>
   );

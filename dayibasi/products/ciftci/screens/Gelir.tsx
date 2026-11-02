@@ -9,9 +9,10 @@ import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
-import { dayText, GELIR, incomeOpen, num, thisYear, todayStr, year } from "../kayit";
+import { dayText, GELIR, incomeOpen, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
-import { useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { inSeason, SeasonPicker, useSeason } from "../sezon";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -22,7 +23,8 @@ export default function Gelir() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [form, setForm] = useState<{ type?: string; edit?: EventRow } | null>(null);
   const [done, setDone] = useState<Done>(null);
-  const [y, setY] = useState(thisYear());
+  const { selected: S } = useSeason();
+  const go = useGo();
   const load = useCallback(() => {
     listEvents(biz.id, GELIR).then((r) => setRows(r.slice().reverse())).catch(() => setRows([]));
     listPlaces(biz.id).then(setPlaces).catch(() => {});
@@ -42,14 +44,13 @@ export default function Gelir() {
       } else {
         const e = await addEvent(biz.id, { kind: GELIR, person_id: null, ...v });
         setDone({ message: `Kaydettim: ${String(v.data.type)} ${formatTL(Number(v.quantity))}${incomeOpen(e) ? `, alınacak ${formatTL(incomeOpen(e))}` : ""}.`, undo: () => deleteEvent(e.id) });
-        setY(year(v.occurred_on));
       }
       setForm(null); load();
     }} />;
 
   const all = rows ?? [];
-  const years = [...new Set([thisYear(), ...all.map((e) => year(e.occurred_on))])].sort().reverse();
-  const inY = all.filter((e) => year(e.occurred_on) === y);
+  const inY = all.filter((e) => inSeason(e.occurred_on, S));
+  const y = S.name;
   const total = inY.reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   const open = inY.reduce((t, e) => t + incomeOpen(e), 0);
   const placeName = (id: string | null) => places.find((p) => p.id === id)?.name ?? "";
@@ -59,15 +60,15 @@ export default function Gelir() {
       <PageHeader sub="Satış, destek, diğer" title="Gelir" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <MainButton onClick={() => { setDone(null); setForm({}); }}>+ Gelir ekle</MainButton>
-      {years.length > 1 && <div className="ui-chips">{years.map((x) => <Chip key={x} selected={x === y} onClick={() => setY(x)}>{x}</Chip>)}</div>}
+      <SeasonPicker onManage={() => go("sezonlar")} />
       <div className="ui-total">
-        <span>{y} toplam gelir</span><b>{formatTL(total)}</b>
+        <span>{y} sezonu gelir</span><b>{formatTL(total)}</b>
         <div className="ui-total-row">
           <div><span>Alınan</span><strong>{formatTL(total - open)}</strong></div>
           <div><span>Alınacak</span><strong>{formatTL(open)}</strong></div>
         </div>
       </div>
-      {rows && inY.length === 0 && <div className="ui-empty">{y} yılında gelir yok.</div>}
+      {rows && inY.length === 0 && <div className="ui-empty">{y} sezonunda gelir yok.</div>}
       {inY.map((e) => (
         <button key={e.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }} onClick={() => { setDone(null); setForm({ edit: e }); }}>
           <b style={{ minWidth: 0 }}>{String(e.data.type)}{e.data.crop ? ` · ${String(e.data.crop)}` : ""}
@@ -76,7 +77,7 @@ export default function Gelir() {
           <strong>{formatTL(Number(e.quantity))}</strong>
         </button>
       ))}
-      {inY.length > 0 && <MainButton secondary onClick={() => downloadXlsx(`gelir-${y}`, [{ name: "Gelir", rows: [
+      {inY.length > 0 && <MainButton secondary onClick={() => downloadXlsx(`gelir-${y.replace(/\s+/g, "-")}`, [{ name: "Gelir", title: `${biz.name} · Gelir · ${y} sezonu`, rows: [
         ["Tarih", "Tür", "Tarla", "Ürün", "Miktar", "Birim", "Fiyat (TL)", "Toplam (TL)", "Alıcı", "Alınan (TL)", "Alınacak (TL)", "Vade", "Giren"],
         ...inY.slice().reverse().map((e) => [e.occurred_on, String(e.data.type), placeName(e.place_id), String(e.data.crop ?? ""), Number(e.data.qty ?? 0) || "", String(e.data.unit ?? ""),
           Number(e.data.price ?? 0) || "", Number(e.quantity), String(e.data.buyer ?? ""), Number(e.data.received ?? 0), incomeOpen(e), String(e.data.due_on ?? ""), nameOf(e.created_by)]),

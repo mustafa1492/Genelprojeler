@@ -9,6 +9,8 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { config } from "../config";
 import { GELIR } from "../kayit";
 import { HistoryLink } from "../nav";
+import { useGo, useOnActivate } from "@/core/shell/TabShell";
+import { inSeason, SeasonPicker, useSeason } from "../sezon";
 
 /** Çiftçi masrafı: tarla seçimi, ayın geliriyle kâr, kim girdi. */
 export default function Masraf() {
@@ -16,22 +18,27 @@ export default function Masraf() {
   const { nameOf } = useMembers(biz.id);
   const [places, setPlaces] = useState<Place[]>([]);
   const [income, setIncome] = useState<EventRow[]>([]);
-  useEffect(() => {
+  const load = () => {
     listPlaces(biz.id).then(setPlaces).catch(() => {});
     listEvents(biz.id, GELIR).then(setIncome).catch(() => {});
-  }, [biz.id]);
-  const gelir = (m: string) => income.filter((e) => e.occurred_on.startsWith(m)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
+  };
+  useEffect(load, [biz.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useOnActivate(load);
+  const { selected: S } = useSeason();
+  const go = useGo();
+  const gelirS = income.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
     <ExpenseScreen categories={config.expenses.categories} places={places} headerRight={<HistoryLink />} memberName={nameOf}
-      summary={(m, total) => (
+      period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}
+      periodSummary={(total) => (
         <div className="ui-total">
-          <span>Bu ay masraf</span><b>{formatTL(total)}</b>
+          <span>{S.name} sezonu masraf</span><b>{formatTL(total)}</b>
           <div className="ui-total-row">
-            <div><span>Bu ay gelir</span><strong>{formatTL(gelir(m))}</strong></div>
-            <div><span>Fark</span><strong>{formatTL(gelir(m) - total)}</strong></div>
+            <div><span>Sezon geliri</span><strong>{formatTL(gelirS)}</strong></div>
+            <div><span>Kâr / zarar</span><strong>{formatTL(gelirS - total)}</strong></div>
           </div>
         </div>
       )}
-      summaryRows={(m, total) => [["Bu ay gelir", gelir(m)], ["Bu ay masraf", -total], ["Fark", gelir(m) - total], []]} />
+    />
   );
 }

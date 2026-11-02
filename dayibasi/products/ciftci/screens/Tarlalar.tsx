@@ -12,7 +12,8 @@ import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, Page
 import { config } from "../config";
 import { dayText, dayYear, GELIR, harvestFrom, ISLEM, num, thisYear, todayStr, VERIM, year } from "../kayit";
 import { HistoryLink } from "../nav";
-import { TabLink, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { TabLink, useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { inSeason, SeasonPicker, useSeason, type Season } from "../sezon";
 
 type View = { v: "list" } | { v: "yeni"; edit?: Place } | { v: "tarla"; id: string } | { v: "islem"; id: string; type?: string } | { v: "verim"; id: string };
 type Done = { message: string; undo?: () => Promise<void> } | null;
@@ -26,7 +27,9 @@ export default function Tarlalar() {
   const [items, setItems] = useState<Item[]>([]);
   const [view, setView] = useState<View>({ v: "list" });
   const [done, setDone] = useState<Done>(null);
-  const [y, setY] = useState(thisYear());
+  const { selected: S, seasons } = useSeason();
+  const go = useGo();
+  const y = S.name;
 
   const load = useCallback(() => {
     Promise.all([listPlaces(biz.id), listEvents(biz.id, ISLEM), listEvents(biz.id, VERIM), listEvents(biz.id, GELIR), listExpenses(biz.id), listItems(biz.id)])
@@ -38,9 +41,9 @@ export default function Tarlalar() {
   useEffect(() => { if (tp.p.tarla) setView({ v: "tarla", id: String(tp.p.tarla) }); }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
-  const statsOf = (p: Place, yy: string) => {
-    const m = expenses.filter((e) => e.place_id === p.id && year(e.occurred_on) === yy).reduce((t, e) => t + e.amount, 0);
-    const g = events.filter((e) => e.kind === GELIR && e.place_id === p.id && year(e.occurred_on) === yy).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
+  const statsOf = (p: Place, ss: Season) => {
+    const m = expenses.filter((e) => e.place_id === p.id && inSeason(e.occurred_on, ss)).reduce((t, e) => t + e.amount, 0);
+    const g = events.filter((e) => e.kind === GELIR && e.place_id === p.id && inSeason(e.occurred_on, ss)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
     const donum = Number(p.custom?.donum) || 0;
     return { m, g, kar: g - m, donum, perDonum: donum ? m / donum : 0 };
   };
@@ -81,7 +84,7 @@ export default function Tarlalar() {
 
   if (view.v === "verim") {
     const p = find(view.id);
-    if (p) return <VerimForm place={p} onCancel={() => setView({ v: "tarla", id: p.id })}
+    if (p) return <VerimForm place={p} seasons={seasons} current={S} onCancel={() => setView({ v: "tarla", id: p.id })}
       onSave={async (yy, crop, amount, unit) => {
         const ev = await addEvent(biz.id, { kind: VERIM, occurred_on: todayStr(), place_id: p.id, person_id: null, quantity: amount, data: { year: yy, crop, unit } });
         setDone({ message: `Kaydettim: ${p.name} ${yy} verimi ${amount.toLocaleString("tr-TR")} ${unit}.`, undo: () => deleteEvent(ev.id) });
@@ -92,11 +95,11 @@ export default function Tarlalar() {
   if (view.v === "tarla") {
     const p = find(view.id);
     if (p) {
-      const st = statsOf(p, y);
+      const st = statsOf(p, S);
       const ops = events.filter((e) => e.kind === ISLEM && e.place_id === p.id).sort((a, b) => (b.occurred_on + (b.created_at ?? "")).localeCompare(a.occurred_on + (a.created_at ?? "")));
       const yields = events.filter((e) => e.kind === VERIM && e.place_id === p.id).sort((a, b) => String(b.data.year).localeCompare(String(a.data.year)));
       const wait = ops.map((e) => ({ e, h: harvestFrom(e) })).filter((x) => x.h && x.h > todayStr()).sort((a, b) => b.h!.localeCompare(a.h!))[0];
-      const pExp = expenses.filter((e) => e.place_id === p.id && year(e.occurred_on) === y);
+      const pExp = expenses.filter((e) => e.place_id === p.id && inSeason(e.occurred_on, S));
       return (
         <main className="ui-stack">
           <BackButton onClick={() => { setDone(null); setView({ v: "list" }); }} label="Tarlalar" />
@@ -131,8 +134,8 @@ export default function Tarlalar() {
           {yields.length > 0 && <Card><InfoRows rows={yields.map((e) => [`${String(e.data.year)} · ${String(e.data.crop || p.custom?.urun || "")}`,
             `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}${st.donum ? ` · dönüm başı ${Math.round(Number(e.quantity) / st.donum).toLocaleString("tr-TR")}` : ""}`] as [string, string])} /></Card>}
 
-          <h2 className="ui-section">{y} masrafları</h2>
-          {pExp.length === 0 ? <div className="ui-empty">Bu tarlaya bu yıl masraf girilmedi.</div>
+          <h2 className="ui-section">{y} sezonu masrafları</h2>
+          {pExp.length === 0 ? <div className="ui-empty">Bu tarlaya bu sezon masraf girilmedi.</div>
             : <Card><InfoRows rows={pExp.map((e) => [`${dayText(e.occurred_on)} · ${e.category}`, formatTL(e.amount)] as [string, string])} /></Card>}
           <MainButton secondary onClick={() => setView({ v: "yeni", edit: p })}>Tarla bilgilerini değiştir</MainButton>
         </main>
@@ -141,15 +144,14 @@ export default function Tarlalar() {
   }
 
   // --- Liste
-  const years = [...new Set([thisYear(), ...expenses.map((e) => year(e.occurred_on)), ...events.map((e) => year(e.occurred_on))])].sort().reverse();
   return (
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={`${(places ?? []).length} tarla`} title="Tarlalar" right={<HistoryLink />} />
       {doneCard}
-      {years.length > 1 && <div className="ui-chips">{years.map((x) => <Chip key={x} selected={x === y} onClick={() => setY(x)}>{x}</Chip>)}</div>}
+      <SeasonPicker onManage={() => go("sezonlar")} />
       {places?.length === 0 && <div className="ui-empty">Henüz tarla yok. İlk tarlanı ekle.</div>}
       {(places ?? []).map((p) => {
-        const st = statsOf(p, y);
+        const st = statsOf(p, S);
         const last = events.filter((e) => e.kind === ISLEM && e.place_id === p.id).sort((a, b) => b.occurred_on.localeCompare(a.occurred_on))[0];
         return (
           <button key={p.id} type="button" className="ui-card ui-stack" style={{ gap: 6 }} onClick={() => { setDone(null); setView({ v: "tarla", id: p.id }); }}>
@@ -259,13 +261,13 @@ function IslemForm({ place, items, initialType, onSave, onCancel }: {
   );
 }
 
-function VerimForm({ place, onSave, onCancel }: { place: Place; onSave: (y: string, crop: string, amount: number, unit: string) => Promise<void>; onCancel: () => void }) {
-  const [yy, setYy] = useState(thisYear());
+function VerimForm({ place, seasons, current, onSave, onCancel }: { place: Place; seasons: Season[]; current: Season; onSave: (y: string, crop: string, amount: number, unit: string) => Promise<void>; onCancel: () => void }) {
+  const [yy, setYy] = useState(current.name);
   const [crop, setCrop] = useState(place.custom?.urun ?? "");
   const [amount, setAmount] = useState("");
   const [unit, setUnit] = useState("kg");
   const [error, setError] = useState("");
-  const ys = [0, 1, 2, 3].map((i) => String(Number(thisYear()) - i));
+  const ys = seasons.map((x) => x.name);
   return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />

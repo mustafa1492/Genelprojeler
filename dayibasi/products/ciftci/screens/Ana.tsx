@@ -9,10 +9,11 @@ import { listExpenses, owed, type Expense } from "@/core/expenses/api";
 import { listItems, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { Chip, PageHeader } from "@/core/ui";
-import { TabLink, useOnActivate } from "@/core/shell/TabShell";
+import { PageHeader } from "@/core/ui";
+import { TabLink, useGo, useOnActivate } from "@/core/shell/TabShell";
+import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
-import { dayText, dayYear, GELIR, harvestFrom, incomeOpen, ISLEM, thisYear, todayStr, year } from "../kayit";
+import { dayText, dayYear, GELIR, harvestFrom, incomeOpen, ISLEM, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
@@ -25,7 +26,8 @@ export default function Ana() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
-  const [y, setY] = useState(thisYear());
+  const { selected: S } = useSeason();
+  const go = useGo();
   const load = useCallback(() => {
     listExpenses(biz.id).then(setExp).catch(() => {});
     Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM)]).then(([a, b]) => setEv([...a, ...b])).catch(() => {});
@@ -38,9 +40,8 @@ export default function Ana() {
   useOnActivate(load);
 
   const today = todayStr();
-  const masraf = exp.filter((e) => year(e.occurred_on) === y).reduce((t, e) => t + e.amount, 0);
-  const gelir = ev.filter((e) => e.kind === GELIR && year(e.occurred_on) === y).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
-  const years = [...new Set([thisYear(), ...exp.map((e) => year(e.occurred_on)), ...ev.map((e) => year(e.occurred_on))])].sort().reverse();
+  const masraf = exp.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + e.amount, 0);
+  const gelir = ev.filter((e) => e.kind === GELIR && inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   const place = (id: string | null) => places.find((p) => p.id === id)?.name ?? "Tarla";
 
   // Uyarılar
@@ -62,9 +63,9 @@ export default function Ana() {
   return (
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={biz.name} title="Özet" right={<HistoryLink />} />
-      {years.length > 1 && <div className="ui-chips">{years.map((x) => <Chip key={x} selected={x === y} onClick={() => setY(x)}>{x}</Chip>)}</div>}
+      <SeasonPicker onManage={() => go("sezonlar")} />
       <div className="ui-total">
-        <span>{y} kâr / zarar</span>
+        <span>{S.name} sezonu kâr / zarar</span>
         <b>{formatTL(gelir - masraf)}</b>
         <div className="ui-total-row">
           <div><span>Gelir</span><strong>{formatTL(gelir)}</strong></div>
@@ -95,6 +96,7 @@ export default function Ana() {
       {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten: {empty.map((i) => i.name).join(", ")}</span></div></TabLink>}
 
       <div className="ui-links">
+        <TabLink to="rapor"><b>Sezon raporu (PDF / Excel)</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
         <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
         <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
         <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>

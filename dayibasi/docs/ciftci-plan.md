@@ -31,3 +31,9 @@ Babanın hesabı (`abdullahsedat`) "Aile defteri" (product=ciftci) işletmesine 
 Mustafa'nın kendi hesabı: Aile ekranından davet kodu → Mustafa yeni hesap açar → "Davet kodum var".
 Sahte sunucuyla uçtan uca denendi (depo düşme, vadeler, hasat bekleme uyarısı, kâr). Gerçek cihazda denenmedi.
 Sonra: takvim (istekler.md), bildirimler, sezon karşılaştırma, ortaklık/yarıcılık (sorulacak).
+
+## 2 Kasım 2026 (gelistirme dalı, onay bekliyor)
+- [x] Sekmeli kabuk: alt menü her ekranda, sekmeler kaldığı yerde kalır (yazılanlar kaybolmaz), aynı sekmeye dokununca başa döner.
+- [x] Sezonlar: kullanıcı açar (ad, başlangıç, bitiş; "Sonraki sezonu aç"). Gelir/özet/tarla sezona göre; masraf **Ay ay / Sezon** (sezon içinde ay ay döküm). Ayda gelir gösterilmez (Mustafa: gelir aylık hesaplanmaz).
+- [x] Güzel Excel (exceljs) ve PDF sezon raporu (Özet → Sezon raporu; yazdır → PDF; tüm sezon tek Excel, 6 sayfa).
+- Fikirler: `docs/fikirler/08-ciftci-sorunlari-ve-simsir.md` (seçilmedi).

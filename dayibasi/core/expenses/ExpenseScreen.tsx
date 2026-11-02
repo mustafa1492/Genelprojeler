@@ -27,6 +27,10 @@ export type ExpenseScreenProps = {
   summaryRows?: (month: string, monthTotal: number) => (string | number)[][];
   navItems?: NavItem[]; current?: string; headerRight?: React.ReactNode;
   memberName?: (userId: string | null | undefined) => string;   // kim girdi
+  /** Sezon görünümü (çiftçi): seçili dönem + seçici + özet kartı. Verilirse "Ay ay / Sezon" düğmeleri çıkar. */
+  period?: { name: string; start: string; end: string };
+  periodPicker?: React.ReactNode;
+  periodSummary?: (total: number) => React.ReactNode;
 };
 
 type View = { v: "list" } | { v: "tur" } | { v: "form"; cat: string; edit?: Expense } | { v: "veresiye" } | { v: "ode"; vendor: string } | { v: "foto"; url: string };
@@ -34,7 +38,7 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 
-export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName }: ExpenseScreenProps) {
+export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
   const [items, setItems] = useState<Expense[] | null>(null);
@@ -42,6 +46,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   const [view, setView] = useState<View>({ v: "list" });
   const [presetPlace, setPresetPlace] = useState<string | null>(null);
   const [month, setMonth] = useState(todayIstanbul().slice(0, 7));
+  const [mode, setMode] = useState<"ay" | "sezon">("ay");
+  const bySeason = !!period && mode === "sezon";
   const [done, setDone] = useState<Done>(null);
   const [error, setError] = useState("");
 
@@ -154,7 +160,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
 
   // --- Liste + özet
   const months = [...new Set([todayIstanbul().slice(0, 7), ...all.map((e) => e.occurred_on.slice(0, 7))])].sort().reverse();
-  const inMonth = all.filter((e) => e.occurred_on.startsWith(month));
+  const inMonth = bySeason ? all.filter((e) => e.occurred_on >= period!.start && e.occurred_on <= period!.end) : all.filter((e) => e.occurred_on.startsWith(month));
+  const label = bySeason ? `${period!.name} sezonu` : monthName(month);
   const mine = inMonth.filter((e) => !e.charge_to);
   const total = mine.reduce((t, e) => t + e.amount, 0);
   const charged = inMonth.filter((e) => e.charge_to).reduce((t, e) => t + e.amount, 0);
@@ -163,35 +170,59 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
     .sort((a, b) => b.t - a.t);
   const max = Math.max(1, ...byCat.map((x) => x.t));
   const days = [...new Set(inMonth.map((e) => e.occurred_on))].sort().reverse();
+  // Sezon içinde ay ay toplam
+  const perMonth = [...new Set(mine.map((e) => e.occurred_on.slice(0, 7)))].sort().map((m) => ({ m, t: mine.filter((e) => e.occurred_on.startsWith(m)).reduce((s, e) => s + e.amount, 0) }));
+  const maxM = Math.max(1, ...perMonth.map((x) => x.t));
 
-  const excel = () => downloadXlsx(`masraflar-${month}`, [
-    { name: "Masraflar", rows: [
+  const excel = () => downloadXlsx(`masraflar-${bySeason ? period!.name.replace(/\s+/g, "-") : month}`, [
+    { name: "Masraflar", title: `${biz.name} · Masraflar · ${label}`, rows: [
       ["Tarih", "Tür", "Tutar (TL)", ...(places.length ? ["Tarla"] : []), "Not", "Veresiye (kime)", "Kalan borç (TL)", ...(farmers.length ? ["Çiftçiye yansıtıldı"] : []), "Fiş", ...(memberName ? ["Giren"] : [])],
       ...inMonth.slice().sort((a, b) => a.occurred_on.localeCompare(b.occurred_on)).map((e) => [
         `${e.occurred_on.slice(8)}.${e.occurred_on.slice(5, 7)}.${e.occurred_on.slice(0, 4)}`, e.category, e.amount, ...(places.length ? [placeName(e.place_id)] : []), e.note ?? "",
         e.on_credit ? e.vendor ?? "" : "", e.on_credit ? owed(e) : "", ...(farmers.length ? [farmerName(e.charge_to)] : []), e.photo_path ? "var" : "",
         ...(memberName ? [memberName((e as Expense & { created_by?: string }).created_by)] : [])]),
     ] },
-    { name: "Özet", rows: [
-      [monthName(month), ""], [],
+    { name: "Özet", title: `${biz.name} · Masraf özeti · ${label}`, rows: [
+      [label, ""], [],
       ["Tür", "Toplam (TL)"], ...byCat.map((x) => [x.c, x.t]), ["Toplam masraf", total], [],
-      ...(summaryRows ? summaryRows(month, total) : []),
+      ...(bySeason ? [["Ay", "Toplam (TL)"], ...perMonth.map((x) => [monthName(x.m), x.t]), []] : summaryRows ? summaryRows(month, total) : []),
       ...(charged ? [["Çiftçiye yansıtılan", charged]] : []), ["Veresiye borcun (bugün)", totalOwed],
     ] },
   ]);
 
   return (
     <main className="ui-has-nav ui-stack">
-      <PageHeader sub={monthName(month)} title="Masraf" right={headerRight} />
+      <PageHeader sub={label} title="Masraf" right={headerRight} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={() => { setDone(null); setView({ v: "tur" }); }}>+ Masraf ekle</MainButton>
 
-      <div className="ui-chips" role="group" aria-label="Ay seç">
-        {months.map((m) => <Chip key={m} selected={m === month} onClick={() => setMonth(m)}>{monthName(m)}</Chip>)}
-      </div>
+      {period && (
+        <div className="ui-tabs" role="tablist" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          <button type="button" role="tab" aria-selected={mode === "ay"} onClick={() => setMode("ay")}>Ay ay</button>
+          <button type="button" role="tab" aria-selected={mode === "sezon"} onClick={() => setMode("sezon")}>Sezon</button>
+        </div>
+      )}
+      {bySeason ? periodPicker : (
+        <div className="ui-chips" role="group" aria-label="Ay seç">
+          {months.map((m) => <Chip key={m} selected={m === month} onClick={() => setMonth(m)}>{monthName(m)}</Chip>)}
+        </div>
+      )}
 
-      {summary ? summary(month, total) : <div className="ui-total"><span>Bu ay masraf</span><b>{formatTL(total)}</b></div>}
+      {bySeason
+        ? (periodSummary ? periodSummary(total) : <div className="ui-total"><span>{label} masraf</span><b>{formatTL(total)}</b></div>)
+        : summary ? summary(month, total) : <div className="ui-total"><span>Bu ay masraf</span><b>{formatTL(total)}</b></div>}
+      {bySeason && perMonth.length > 0 && (
+        <div className="ui-card ui-stack" style={{ gap: 10 }}>
+          <b>Ay ay</b>
+          {perMonth.map((x) => (
+            <div key={x.m} className="ui-stack" style={{ gap: 4 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><span>{monthName(x.m)}</span><span>{formatTL(x.t)}</span></div>
+              <div className="ui-bar"><i style={{ width: `${(x.t / maxM) * 100}%` }} /></div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {totalOwed > 0 && (
         <button type="button" className="ui-card late" onClick={() => setView({ v: "veresiye" })}
@@ -213,7 +244,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
         </div>
       )}
 
-      {items && inMonth.length === 0 && <div className="ui-empty">Bu ay masraf yok.</div>}
+      {items && inMonth.length === 0 && <div className="ui-empty">{bySeason ? "Bu sezon masraf yok." : "Bu ay masraf yok."}</div>}
       {days.map((d) => (
         <section key={d} className="ui-stack" style={{ gap: 8 }}>
           <h2 style={{ margin: "6px 4px 0", fontSize: "1.05rem" }}>{dayText(d)}</h2>
@@ -227,7 +258,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
           ))}
         </section>
       ))}
-      {inMonth.length > 0 && <MainButton secondary onClick={excel}>Excel’e indir ({monthName(month)})</MainButton>}
+      {inMonth.length > 0 && <MainButton secondary onClick={excel}>Excel’e indir ({label})</MainButton>}
       {navItems && <BottomNav items={navItems} current={current ?? ""} />}
     </main>
   );
