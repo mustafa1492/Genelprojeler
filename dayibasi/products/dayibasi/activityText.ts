@@ -48,6 +48,23 @@ export function describe(a: Activity, names: Record<string, string>): string {
       const day = new Date(s(d.occurred_on) + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
       return `${who === "Bir kişi" ? "Tarla" : who}: ${day}, ${s(d.quantity)} kişi kaydı ${a.action === "insert" ? "eklendi" : a.action === "delete" ? "silindi" : "değişti"}`;
     }
+    case "expenses": {
+      const what = `${s(d.category)} ${formatTL(Number(d.amount))}`;
+      if (a.action === "insert") return `Masraf: ${what}${d.on_credit ? ` (veresiye: ${s(d.vendor)})` : ""}`;
+      if (a.action === "delete") return `Masraf silindi: ${what}`;
+      if (Number(o.paid_amount) !== Number(d.paid_amount)) return `Veresiye ödendi: ${s(d.vendor)}, ${formatTL(Number(d.paid_amount) - Number(o.paid_amount))}`;
+      return `Masraf değişti: ${what}`;
+    }
+    case "lists": {
+      if (a.action === "insert") return `“${s(d.name)}” listesi açıldı`;
+      if (a.action === "delete") return `“${s(d.name)}” listesi silindi`;
+      const om = (o.members as string[] | undefined) ?? [], nm = (d.members as string[] | undefined) ?? [];
+      const added = nm.filter((x) => !om.includes(x)), removed = om.filter((x) => !nm.includes(x));
+      if (added.length === 1 && !removed.length) return `${names[added[0]] ?? "Bir kişi"} “${s(d.name)}” listesine eklendi`;
+      if (removed.length === 1 && !added.length) return `${names[removed[0]] ?? "Bir kişi"} “${s(d.name)}” listesinden çıktı`;
+      if (o.name !== d.name) return `Liste adı “${s(o.name)}” → “${s(d.name)}”`;
+      return `“${s(d.name)}” listesi değişti`;
+    }
     default: return "Bir değişiklik yapıldı";
   }
 }

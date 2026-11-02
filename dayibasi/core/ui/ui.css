@@ -64,7 +64,7 @@ button.ui-card { width: 100%; border: 1px solid var(--cizgi2); font: inherit; co
 .ui-done button { font: inherit; font-size: 0.889rem; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px;
   border: 2px solid var(--ana); background: transparent; color: var(--ana-yazi); cursor: pointer; }
 
-.ui-nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+.ui-nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
   background: #fff; border-top: 1px solid var(--cizgi2); box-shadow: 0 -2px 10px rgba(20, 45, 25, 0.06); padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); }
 .ui-nav a { display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 14px; padding: 8px 2px;
   min-height: 60px; font-size: 0.778rem; font-weight: 800; color: var(--sessiz); text-decoration: none; }
@@ -204,3 +204,10 @@ button.ui-card { display: block; }
 .ui-card.late { border: 2px solid var(--tehlike-cizgi); }
 .ui-check { display: flex; align-items: center; gap: 10px; font-weight: 700; margin: 0 4px; min-height: 48px; }
 .ui-check input { width: 24px; height: 24px; accent-color: var(--ana); }
+.ui-nav a { font-size: 0.75rem; }
+.ui-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ui-tiles button { font: inherit; min-height: 84px; border-radius: 16px; border: 2px solid var(--cizgi2); background: var(--kart); box-shadow: var(--golge);
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; padding: 12px 14px; cursor: pointer; color: var(--yazi); text-align: left; }
+.ui-tiles button b { font-size: 1.1rem; }
+.ui-tiles button small { font-size: 0.8rem; color: var(--sessiz2); font-weight: 600; }
+.ui-tiles button.add { border-style: dashed; color: var(--ana-yazi); }

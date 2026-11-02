@@ -266,6 +266,7 @@ export default function Bugun() {
       {allEvents && events.length === 0 && <div className="ui-empty">{isToday ? "Bugün henüz kayıt yok." : "Bu gün kayıt yok."}</div>}
 
       <MainButton onClick={() => { setDone(null); setStep("tarla"); }}>+ {isToday ? "Bugünün" : `${dayTitle} için`} kaydını ekle</MainButton>
+      <Link href="/masraf?yeni=1" className="ui-main-btn ikincil" style={{ minHeight: 56, textDecoration: "none" }}>+ Masraf ekle</Link>
 
       {repeatable.length > 0 && prevDay && (
         <div className="ui-card ui-stack" style={{ gap: 10 }}>

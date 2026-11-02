@@ -36,12 +36,16 @@ export type FarmerAccount = {
   /** Ödenmemiş en eski işin günü (ödemeler eski işlerden başlayarak düşülür). Borç yoksa null. */
   bekleyenSince: string | null;
 };
-export function farmerAccounts(farmers: Person[], events: EventRow[], entries: LedgerEntry[], b: Business): FarmerAccount[] {
+/** Çiftçiye yansıtılan masraf (core/expenses) — yalnız gereken alanlar. */
+export type ChargedExpense = { charge_to: string | null; amount: number; occurred_on: string };
+
+export function farmerAccounts(farmers: Person[], events: EventRow[], entries: LedgerEntry[], b: Business, charged: ChargedExpense[] = []): FarmerAccount[] {
   return farmers.map((f) => {
     const ev = events.filter((e) => e.person_id === f.id);
     const pay = entries.filter((e) => e.person_id === f.id && e.kind === "odeme");
     const kisiGun = ev.reduce((t, e) => t + (e.quantity ?? 0), 0);
-    const tutar = ev.reduce((t, e) => t + (e.quantity ?? 0) * split(e, b).rate, 0);
+    const ex = charged.filter((x) => x.charge_to === f.id);
+    const tutar = ev.reduce((t, e) => t + (e.quantity ?? 0) * split(e, b).rate, 0) + ex.reduce((t, x) => t + x.amount, 0);
     const odenen = pay.reduce((t, e) => t + e.amount, 0);
     // Ödemeler en eski işten başlayarak düşülür; kapanmayan ilk işin günü = borcun başladığı gün
     let kalanOdeme = odenen, bekleyenSince: string | null = null;

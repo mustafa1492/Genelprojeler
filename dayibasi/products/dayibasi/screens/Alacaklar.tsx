@@ -8,6 +8,7 @@ import { getTemplate } from "@/core/messaging/templates";
 import { addPerson, listPeople, updatePerson, type Person, type PersonInput } from "@/core/people/api";
 import { PersonForm } from "@/core/people/PersonForm";
 import { displayName } from "@/core/people/birth";
+import { listExpenses, type Expense } from "@/core/expenses/api";
 import { downloadCsv, trDate } from "@/core/export/csv";
 import { listPlaces, type Place } from "@/core/places/api";
 import { supabase } from "@/core/supabase/client";
@@ -39,6 +40,7 @@ export default function Alacaklar() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
+  const [charged, setCharged] = useState<Expense[]>([]);
   const [tpl, setTpl] = useState(HESAP_VARSAYILAN);
   const [tab, setTabState] = useState<Tab>("ciftci");
   const [view, setView] = useState<View>({ v: "list" });
@@ -52,6 +54,7 @@ export default function Alacaklar() {
       .catch(() => setError("Bilgileri getiremedim."));
   }, [biz.id]);
   useEffect(load, [load]);
+  useEffect(() => { listExpenses(biz.id).then((x) => setCharged(x.filter((e) => e.charge_to))).catch(() => {}); }, [biz.id]);
   useEffect(() => { getTemplate(biz.id, "hesap_dokumu", HESAP_VARSAYILAN).then(setTpl).catch(() => {}); }, [biz.id]);
   useEffect(() => {
     try { setSent(JSON.parse(localStorage.getItem(SENT) ?? "{}")); const t = localStorage.getItem(TAB) as Tab | null; if (t) setTabState(t); } catch { /* yok */ }
@@ -60,7 +63,7 @@ export default function Alacaklar() {
 
   const late = remindDays(biz);
   const isLate = (a: FarmerAccount) => a.kalan > 0 && waitingDays(a) >= late;
-  const fAcc = farmerAccounts(farmers ?? [], events, entries, biz)
+  const fAcc = farmerAccounts(farmers ?? [], events, entries, biz, charged)
     .sort((a, b) => Number(isLate(b)) - Number(isLate(a)) || waitingDays(b) - waitingDays(a) || b.kalan - a.kalan);
   const wAcc = workerAccounts(workers, events, entries, biz).sort((a, b) => b.kalan - a.kalan);
   const alacak = fAcc.reduce((t, a) => t + Math.max(0, a.kalan), 0);
@@ -81,7 +84,7 @@ export default function Alacaklar() {
 
   const payWorker = async (a: WorkerAccount) => {
     const id = await addEntry(biz.id, a.worker.id, "odeme", a.kalan);
-    setDone({ message: `Kaydettim: ${a.worker.full_name}’a ${formatTL(a.kalan)} ödedin.`, undo: () => deleteEntry(id) });
+    setDone({ message: `Ödedin: ${a.worker.full_name}, ${formatTL(a.kalan)}.`, undo: () => deleteEntry(id) });
     load();
   };
   const payAll = async () => {
@@ -208,6 +211,14 @@ export default function Alacaklar() {
               </div>
             );
           })}
+          {charged.some((x) => x.charge_to === f.id) && (
+            <>
+              <h2 className="ui-section">Yansıtılan masraflar</h2>
+              {charged.filter((x) => x.charge_to === f.id).map((x) => (
+                <div key={x.id} className="ui-moneyrow"><b>{x.category}<small>{dayText(x.occurred_on)}{x.note ? ` · ${x.note}` : ""}</small></b><strong>{formatTL(x.amount)}</strong></div>
+              ))}
+            </>
+          )}
           <h2 className="ui-section">Ödemeler</h2>
           {pays.length === 0 && <div className="ui-empty">Henüz ödeme yok.</div>}
           {pays.map((e) => <div key={e.id} className="ui-moneyrow"><b>Ödeme aldım<small>{dayText(e.occurred_on)}</small></b><strong>{formatTL(e.amount)}</strong></div>)}

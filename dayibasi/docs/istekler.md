@@ -29,7 +29,7 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
   - Puantaj sekmesi: ay takvimi (her günde o gün kaç kişi)
 - [ ] **Kişi kartında takvim:** işçinin çalıştığı günler alt alta liste yerine **ay takvimi** olarak görünsün (çalıştığı günler işaretli; ay ileri/geri; güne dokununca o günün tarlası ve yevmiyesi). Ay toplamı (gün, kazanç) takvimin üstünde.
 
-## Masraflar — kararlar (Mustafa, 2 Kasım 2026). SIRADAKİ İŞ BU.
+## [x] Masraflar — YAPILDI (2 Kasım 2026; `core/expenses`, ekran `products/dayibasi/screens/Masraf.tsx`, migration 0007, fiş kovası `receipts`)
 Ortak parça `core/expenses` (dayıbaşı + çiftçi defteri aynısını kullanır), ürün farkları config'te.
 - **Yer:** alt menüde **ayrı sekme** (Bugün · Ekibim · Kayıtlar · Masraf · Alacaklar); Bugün'de küçük "+ Masraf".
 - **Türler:** hazır liste (dayıbaşı: Yakıt, Şoför, Lastik, Tamir, Yemek, Diğer; çiftçi: Tohum, Gübre, İlaç, Mazot, İşçilik, Kira…) **+ kullanıcı kendi türünü ekler**.

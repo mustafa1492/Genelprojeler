@@ -51,6 +51,11 @@ export const config = {
     businessPlaceholder: "Örnek: Mehmet Yılmaz ekibi",
   },
 
+  // Masraf türleri (hazır liste; kullanıcı kendi türünü de ekler → businesses.settings.expense_categories)
+  expenses: {
+    categories: ["Yakıt", "Şoför", "Lastik", "Tamir", "Yemek", "Diğer"],
+  },
+
   screens: {
     bugun: "Bugün",
     ekip: "Ekibim",

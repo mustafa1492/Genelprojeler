@@ -37,6 +37,13 @@
 - İşçi kartı: ad, baş harfler, grubu, doğum tarihi ve yaşı, yarın durumu
 - Kişi kartı detayı: telefon, köy, beceriler, çalıştığı günler, avans/ödeme geçmişi
 
+### Masraf (2 Kasım 2026, alt menüde ayrı sekme)
+- "+ Masraf ekle" (Bugün'de de): tür kutuları (hazır + "+ Yeni tür") → tutar ("Geçen sefer: …" düğmesi) → Kaydet; Geri al
+- İsteğe bağlı: tarih, not, Ödedim / **Veresiye (kime)**, **Çiftçiye yansıt** (çiftçinin borcuna eklenir, masrafa sayılmaz), fiş/fatura fotoğrafı (internet ister)
+- Ay seçilir: **Net kazanç = payın − masraflar**, tür tür çubuklar, gün gün liste (dokun → düzenle/sil)
+- Veresiye: "Borçlu olduğun yerler" → Ödedim (kısmi olabilir, en eski borçtan kapanır)
+- Excel (.xlsx): Masraflar + Özet sayfaları
+
 ### Kayıtlar (1 Kasım 2026, alt menüde Arabalar'ın yerine)
 - Gün gün bütün kayıtlar (yeniden eskiye): tarla, kimler gitti, yevmiye, payın
 - "Kişiye göre" seçince yalnız o işçinin çalıştığı günler + "X gün çalıştı"
