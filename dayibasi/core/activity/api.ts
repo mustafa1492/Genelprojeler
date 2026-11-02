@@ -10,11 +10,12 @@ export type Activity = {
   undo_of: number | null;
   undone_at: string | null;
   created_at: string;
+  user_id?: string | null;
 };
 
 export async function listActivity(businessId: string, limit = 100) {
   const { data, error } = await supabase().from("activity_log")
-    .select("id, table_name, action, old_data, new_data, undo_of, undone_at, created_at")
+    .select("id, table_name, action, old_data, new_data, undo_of, undone_at, created_at, user_id")
     .eq("business_id", businessId).order("id", { ascending: false }).limit(limit);
   if (error) throw error;
   return data as Activity[];

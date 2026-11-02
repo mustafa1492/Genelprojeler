@@ -21,3 +21,14 @@ html, body { margin: 0; background: var(--zemin); color: var(--yazi); }
 body { font-size: 1rem; line-height: 1.4; }
 main { max-width: 480px; margin: 0 auto; padding: 16px; }
 h1 { font-size: 1.556rem; margin: 8px 0 16px; }
+
+/* Arka plan: üstte yumuşak tepeler + çok hafif tarla sıraları (tek SVG, kaydırmada yeniden çizilmez) */
+body {
+  background-color: var(--zemin);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 160' preserveAspectRatio='none'%3E%3Cpath d='M0 110 C70 70 140 80 200 95 S330 70 400 85 V0 H0Z' fill='%23dce8d6'/%3E%3Cpath d='M0 125 C90 95 170 115 250 105 S360 90 400 100 V0 H0Z' fill='%23e5eee0' opacity='.9'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(-12deg, transparent 0 22px, rgba(46, 106, 43, 0.035) 22px 24px);
+  background-repeat: no-repeat, repeat;
+  background-size: 100% 190px, auto;
+  background-position: top center, 0 0;
+}

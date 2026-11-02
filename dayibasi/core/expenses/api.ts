@@ -6,11 +6,11 @@ export type Expense = {
   id: string; business_id: string; occurred_on: string; category: string; amount: number;
   note: string | null; vendor: string | null; paid_amount: number; on_credit: boolean;
   charge_to: string | null; place_id: string | null; photo_path: string | null;
-  data: Record<string, unknown>; created_at?: string;
+  data: Record<string, unknown>; created_at?: string; created_by?: string | null;
 };
 export type ExpenseInput = Omit<Expense, "id" | "business_id" | "created_at" | "paid_amount" | "data"> & { paid_amount?: number; data?: Record<string, unknown> };
 
-const cols = "id, business_id, occurred_on, category, amount, note, vendor, paid_amount, on_credit, charge_to, place_id, photo_path, data, created_at";
+const cols = "id, business_id, occurred_on, category, amount, note, vendor, paid_amount, on_credit, charge_to, place_id, photo_path, data, created_at, created_by";
 const num = (e: Expense) => ({ ...e, amount: Number(e.amount), paid_amount: Number(e.paid_amount ?? 0) });
 
 export async function listExpenses(businessId: string) {

@@ -5,9 +5,9 @@ import { supabase } from "@/core/supabase/client";
 export type EventRow = {
   id: string; business_id: string; kind: string; occurred_on: string;
   place_id: string | null; person_id: string | null; quantity: number | null;
-  data: Record<string, unknown>; created_at?: string;
+  data: Record<string, unknown>; created_at?: string; created_by?: string | null;
 };
-const cols = "id, business_id, kind, occurred_on, place_id, person_id, quantity, data, created_at";
+const cols = "id, business_id, kind, occurred_on, place_id, person_id, quantity, data, created_at, created_by";
 
 export const todayIstanbul = () => new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Istanbul" });
 
