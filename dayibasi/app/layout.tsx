@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
-import { AuthGate } from "@/core/auth/AuthGate";
 import { RegisterSW } from "@/core/offline/RegisterSW";
-import { config } from "@/products/dayibasi/config";
 
 const manrope = Manrope({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700", "800"] });
 
@@ -20,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr">
       <body className={manrope.className}>
         <RegisterSW />
-        <AuthGate product={config.product} texts={config.texts}>{children}</AuthGate>
+        {children}
       </body>
     </html>
   );

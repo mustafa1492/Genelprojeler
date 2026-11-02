@@ -28,7 +28,7 @@ const toEmail = (x: string) => { const v = x.trim().toLocaleLowerCase("tr"); ret
 /** Girişsiz açılan sayfalar (şifre yenileme, aydınlatma metni). */
 const PUBLIC_PATHS = ["/sifre", "/kvkk"];
 
-export function AuthGate(props: { product: string; texts: Texts; children: React.ReactNode }) {
+export function AuthGate(props: { product: string; texts: Texts; children: React.ReactNode; otherHomes?: Record<string, string> }) {
   const path = usePathname();
   if (PUBLIC_PATHS.includes(path)) return <>{props.children}</>;
   return <Gate {...props} path={path} />;
@@ -37,7 +37,7 @@ export function AuthGate(props: { product: string; texts: Texts; children: React
 /** Girişi isteyen ama işletme istemeyen sayfalar (platform yöneticisi). */
 const SESSION_ONLY_PATHS = ["/yonetim"];
 
-function Gate({ product, texts, children, path }: { product: string; texts: Texts; children: React.ReactNode; path: string }) {
+function Gate({ product, texts, children, path, otherHomes = {} }: { product: string; texts: Texts; children: React.ReactNode; path: string; otherHomes?: Record<string, string> }) {
   const router = useRouter();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [biz, setBiz] = useState<Business | null | undefined>(undefined);
@@ -60,13 +60,16 @@ function Gate({ product, texts, children, path }: { product: string; texts: Text
       .select("business_id, businesses(id, name, product, settings)")
       .then(({ data, error }) => {
         if (error) { if (!cached) setBiz(undefined); return; } // internet yok: önbellekle devam
-        const row = (data ?? []).map((m) => m.businesses as unknown as Business & { product: string })
-          .find((b) => b && b.product === product);
+        const rows = (data ?? []).map((m) => m.businesses as unknown as Business & { product: string }).filter(Boolean);
+        const row = rows.find((b) => b.product === product);
+        // Başka ürünün hesabı: o ürünün sayfasına gönder (ör. çiftçi defteri → /ciftci)
+        const other = !row && rows.find((b) => otherHomes[b.product]);
+        if (other) { router.replace(otherHomes[other.product]); return; }
         const b = row ? { id: row.id, name: row.name, settings: row.settings ?? {} } : null;
         try { localStorage.setItem(cacheKey, JSON.stringify(b)); } catch { /* yok */ }
         setBiz(b);
       });
-  }, [session, product]);
+  }, [session, product, otherHomes, router]);
 
   useEffect(() => (session && biz ? startSync() : undefined), [session, biz]);
 
