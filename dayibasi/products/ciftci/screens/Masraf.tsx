@@ -8,7 +8,7 @@ import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { config } from "../config";
 import { GELIR } from "../kayit";
-import { HistoryLink, navItems } from "../nav";
+import { HistoryLink } from "../nav";
 
 /** Çiftçi masrafı: tarla seçimi, ayın geliriyle kâr, kim girdi. */
 export default function Masraf() {
@@ -22,7 +22,7 @@ export default function Masraf() {
   }, [biz.id]);
   const gelir = (m: string) => income.filter((e) => e.occurred_on.startsWith(m)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
-    <ExpenseScreen categories={config.expenses.categories} places={places} navItems={navItems} current="/ciftci/masraf" headerRight={<HistoryLink />} memberName={nameOf}
+    <ExpenseScreen categories={config.expenses.categories} places={places} headerRight={<HistoryLink />} memberName={nameOf}
       summary={(m, total) => (
         <div className="ui-total">
           <span>Bu ay masraf</span><b>{formatTL(total)}</b>

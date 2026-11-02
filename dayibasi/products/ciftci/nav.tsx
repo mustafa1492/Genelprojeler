@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TabLink } from "@/core/shell/TabShell";
 import type { NavItem } from "@/core/ui";
 import { BASE } from "./config";
 
@@ -15,8 +15,8 @@ export const navItems: NavItem[] = [
 ];
 
 export const HistoryLink = () => (
-  <Link href={`${BASE}/gecmis`} className="ui-history">
+  <TabLink to="gecmis" className="ui-history">
     {ic(<><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>)}
     Geçmiş
-  </Link>
+  </TabLink>
 );

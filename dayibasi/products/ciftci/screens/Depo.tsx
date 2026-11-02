@@ -4,10 +4,11 @@ import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
 import { addItem, deleteItem, listItems, restoreItem, updateItem, type Item } from "@/core/inventory/api";
 import { downloadXlsx } from "@/core/export/xlsx";
-import { BackButton, BottomNav, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
+import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
 import { num } from "../kayit";
-import { HistoryLink, navItems } from "../nav";
+import { HistoryLink } from "../nav";
+import { useOnActivate } from "@/core/shell/TabShell";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
@@ -22,6 +23,7 @@ export default function Depo() {
   const [cat, setCat] = useState("Hepsi");
   const load = useCallback(() => { listItems(biz.id).then(setItems).catch(() => setItems([])); }, [biz.id]);
   useEffect(load, [load]);
+  useOnActivate(load);
 
   const step = async (i: Item, d: number) => {
     const q = Math.max(0, i.quantity + d);
@@ -64,7 +66,6 @@ export default function Depo() {
       ))}
       {all.length > 0 && <MainButton secondary onClick={() => downloadXlsx("depo", [{ name: "Depo", rows: [["Malzeme", "Tür", "Miktar", "Birim", "Not"],
         ...all.map((i) => [i.name, i.category, i.quantity, i.unit, i.note ?? ""])] }])}>Excel’e indir</MainButton>}
-      <BottomNav items={navItems} current="/ciftci/depo" />
     </main>
   );
 }

@@ -7,10 +7,11 @@ import { downloadXlsx } from "@/core/export/xlsx";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
-import { BackButton, BottomNav, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
+import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
 import { dayText, GELIR, incomeOpen, num, thisYear, todayStr, year } from "../kayit";
-import { HistoryLink, navItems } from "../nav";
+import { HistoryLink } from "../nav";
+import { useOnActivate, useTabParams } from "@/core/shell/TabShell";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -27,7 +28,9 @@ export default function Gelir() {
     listPlaces(biz.id).then(setPlaces).catch(() => {});
   }, [biz.id]);
   useEffect(load, [load]);
-  useEffect(() => { try { if (new URLSearchParams(location.search).get("yeni")) setForm({}); } catch { /* yok */ } }, []);
+  useOnActivate(load);
+  const tp = useTabParams();
+  useEffect(() => { if (tp.p.yeni) { setDone(null); setForm({}); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (form) return <GelirForm places={places} type={form.type} edit={form.edit} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)} ${formatTL(Number(e.quantity))}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
@@ -78,7 +81,6 @@ export default function Gelir() {
         ...inY.slice().reverse().map((e) => [e.occurred_on, String(e.data.type), placeName(e.place_id), String(e.data.crop ?? ""), Number(e.data.qty ?? 0) || "", String(e.data.unit ?? ""),
           Number(e.data.price ?? 0) || "", Number(e.quantity), String(e.data.buyer ?? ""), Number(e.data.received ?? 0), incomeOpen(e), String(e.data.due_on ?? ""), nameOf(e.created_by)]),
       ] }])}>Excel’e indir ({y})</MainButton>}
-      <BottomNav items={navItems} current="/ciftci/gelir" />
     </main>
   );
 }

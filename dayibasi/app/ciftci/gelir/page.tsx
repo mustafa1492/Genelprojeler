@@ -1,2 +1,2 @@
-import S from "@/products/ciftci/screens/Gelir";
-export default function Page() { return <S />; }
+import CiftciApp from "@/products/ciftci/App";
+export default function Page() { return <CiftciApp initial="gelir" />; }

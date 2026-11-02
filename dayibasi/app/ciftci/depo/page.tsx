@@ -1,2 +1,2 @@
-import S from "@/products/ciftci/screens/Depo";
-export default function Page() { return <S />; }
+import CiftciApp from "@/products/ciftci/App";
+export default function Page() { return <CiftciApp initial="depo" />; }

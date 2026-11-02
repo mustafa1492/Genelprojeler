@@ -1,4 +1,5 @@
 "use client";
+import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -7,7 +8,7 @@ import { listEvents, updateEvent, type EventRow } from "@/core/events/api";
 import { listExpenses, owed, payVendor, updateExpense, type Expense } from "@/core/expenses/api";
 import { formatTL } from "@/core/ledger/api";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
-import { config, BASE } from "../config";
+import { config } from "../config";
 import { dayYear, GELIR, incomeOpen, num, todayStr } from "../kayit";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
@@ -16,6 +17,7 @@ type Row = { key: string; dir: "borc" | "alacak"; party: string; kind: string; l
 /** Borç ve vadeler: kendi girdiklerin + vadeli satışlar (alacak) + veresiye masraflar (borç). */
 export default function Vadeler() {
   const biz = useBusiness();
+  const go = useGo();
   const { nameOf } = useMembers(biz.id);
   const [dues, setDues] = useState<Due[]>([]);
   const [income, setIncome] = useState<EventRow[]>([]);
@@ -29,6 +31,7 @@ export default function Vadeler() {
     listExpenses(biz.id).then(setExps).catch(() => {});
   }, [biz.id]);
   useEffect(load, [load]);
+  useOnActivate(load);
 
   const vendors = [...new Set(exps.filter((e) => owed(e) > 0).map((e) => e.vendor!))];
   const rows: Row[] = [
@@ -78,7 +81,7 @@ export default function Vadeler() {
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => (location.href = BASE)} label="Özet" />
+      <BackButton onClick={() => go("ozet")} label="Özet" />
       <PageHeader sub="Kredi, kooperatif, bayi, tüccar, çek" title="Borç ve vadeler" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <div className="ui-split">

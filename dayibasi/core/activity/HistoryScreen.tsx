@@ -16,7 +16,7 @@ const when = (iso: string) => {
 };
 
 /** İşlem geçmişi: yapılan her şey, kim yaptı, her satırda "Geri al". Cümleler ürüne göre `describe` ile. */
-export function HistoryScreen({ describe }: { describe: (a: Activity, names: Record<string, string>) => string }) {
+export function HistoryScreen({ describe, onBack }: { describe: (a: Activity, names: Record<string, string>) => string; onBack?: () => void }) {
   const biz = useBusiness();
   const router = useRouter();
   const { nameOf } = useMembers(biz.id);
@@ -49,7 +49,7 @@ export function HistoryScreen({ describe }: { describe: (a: Activity, names: Rec
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => router.back()} />
+      <BackButton onClick={() => (onBack ? onBack() : router.back())} />
       <PageHeader sub="Yapılan her şey burada" title="Geçmiş" />
       <p style={{ margin: "0 4px", fontSize: "0.944rem" }}>Yanlışlıkla bir şey yaptıysan o satırdaki <b>Geri al</b>’a dokun.</p>
       {done && <DoneCard message={done} />}

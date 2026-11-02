@@ -8,10 +8,11 @@ import { listItems, updateItem, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
 import { addPlace, listPlaces, type Place } from "@/core/places/api";
-import { BackButton, BottomNav, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
+import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
 import { dayText, dayYear, GELIR, harvestFrom, ISLEM, num, thisYear, todayStr, VERIM, year } from "../kayit";
-import { HistoryLink, navItems } from "../nav";
+import { HistoryLink } from "../nav";
+import { TabLink, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 
 type View = { v: "list" } | { v: "yeni"; edit?: Place } | { v: "tarla"; id: string } | { v: "islem"; id: string; type?: string } | { v: "verim"; id: string };
 type Done = { message: string; undo?: () => Promise<void> } | null;
@@ -32,7 +33,9 @@ export default function Tarlalar() {
       .then(([p, a, b, c, x, i]) => { setPlaces(p.sort((m, n) => m.name.localeCompare(n.name, "tr"))); setEvents([...a, ...b, ...c]); setExpenses(x); setItems(i); });
   }, [biz.id]);
   useEffect(load, [load]);
-  useEffect(() => { try { const q = new URLSearchParams(location.search); const t = q.get("tarla"); if (t) setView({ v: q.get("islem") ? "islem" : "tarla", id: t }); } catch { /* yok */ } }, []);
+  useOnActivate(load);
+  const tp = useTabParams();
+  useEffect(() => { if (tp.p.tarla) setView({ v: "tarla", id: String(tp.p.tarla) }); }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
   const statsOf = (p: Place, yy: string) => {
@@ -108,7 +111,7 @@ export default function Tarlalar() {
             <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: p.id }); }}><b>+ İşlem</b><small>ilaç, gübre, sulama…</small></button>
             <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: "İlaçlama" }); }}><b>+ İlaçlama</b><small>ilaç, doz, bekleme</small></button>
             <button type="button" onClick={() => { setDone(null); setView({ v: "verim", id: p.id }); }}><b>+ Verim</b><small>bu yıl kaç kg</small></button>
-            <a href={`/ciftci/masraf?yeni=1`}><b>+ Masraf</b><small>bu tarla için</small></a>
+            <TabLink to="masraf" params={{ yeni: 1, tarla: p.id }}><b>+ Masraf</b><small>bu tarla için</small></TabLink>
           </div>
 
           <h2 className="ui-section">Tarla günlüğü</h2>
@@ -162,7 +165,6 @@ export default function Tarlalar() {
         );
       })}
       <MainButton onClick={() => { setDone(null); setView({ v: "yeni" }); }}>+ Tarla ekle</MainButton>
-      <BottomNav items={navItems} current="/ciftci/tarlalar" />
     </main>
   );
 }

@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -10,10 +9,11 @@ import { listExpenses, owed, type Expense } from "@/core/expenses/api";
 import { listItems, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { BottomNav, Chip, PageHeader } from "@/core/ui";
-import { BASE, config } from "../config";
+import { Chip, PageHeader } from "@/core/ui";
+import { TabLink, useOnActivate } from "@/core/shell/TabShell";
+import { config } from "../config";
 import { dayText, dayYear, GELIR, harvestFrom, incomeOpen, ISLEM, thisYear, todayStr, year } from "../kayit";
-import { HistoryLink, navItems } from "../nav";
+import { HistoryLink } from "../nav";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
 export default function Ana() {
@@ -35,6 +35,7 @@ export default function Ana() {
     listPlaces(biz.id).then(setPlaces).catch(() => {});
   }, [biz.id]);
   useEffect(load, [load]);
+  useOnActivate(load);
 
   const today = todayStr();
   const masraf = exp.filter((e) => year(e.occurred_on) === y).reduce((t, e) => t + e.amount, 0);
@@ -72,31 +73,31 @@ export default function Ana() {
       </div>
 
       <div className="ui-tiles">
-        <Link href={`${BASE}/masraf?yeni=1`}><b>+ Masraf</b><small>gübre, mazot, ilaç…</small></Link>
-        <Link href={`${BASE}/tarlalar`}><b>+ Tarla işi</b><small>ilaçlama, sulama…</small></Link>
-        <Link href={`${BASE}/gelir?yeni=1`}><b>+ Gelir</b><small>satış, destek</small></Link>
-        <Link href={`${BASE}/depo`}><b>Depo</b><small>{items.length} malzeme</small></Link>
+        <TabLink to="masraf" params={{ yeni: 1 }}><b>+ Masraf</b><small>gübre, mazot, ilaç…</small></TabLink>
+        <TabLink to="tarlalar"><b>+ Tarla işi</b><small>ilaçlama, sulama…</small></TabLink>
+        <TabLink to="gelir" params={{ yeni: 1 }}><b>+ Gelir</b><small>satış, destek</small></TabLink>
+        <TabLink to="depo"><b>Depo</b><small>{items.length} malzeme</small></TabLink>
       </div>
 
       {lastWait.map(({ e, h }) => (
         <div key={e.id} className="ui-warn yakin"><div className="ui-warn-row"><span><b>{place(e.place_id)}</b>: hasat en erken {dayYear(h)} ({String(e.data.product ?? "ilaç")}).</span></div></div>
       ))}
       {dueSoon.map((d, i) => (
-        <Link key={i} href={`${BASE}/vadeler`} className={`ui-warn ${d.due < today ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
+        <TabLink key={i} to="vadeler" className={`ui-warn ${d.due < today ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
           <div className="ui-warn-row"><span>{d.dir === "borc" ? "Ödenecek" : "Alınacak"}: <b>{d.who}</b> {formatTL(d.left)} · vade {dayText(d.due)}{d.due < today ? " (geçti)" : ""}</span></div>
-        </Link>
+        </TabLink>
       ))}
       {docSoon.map((d) => (
-        <Link key={d.id} href={`${BASE}/belgeler`} className={`ui-warn ${(daysLeft(d.expires_on) ?? 0) < 0 ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
+        <TabLink key={d.id} to="belgeler" className={`ui-warn ${(daysLeft(d.expires_on) ?? 0) < 0 ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
           <div className="ui-warn-row"><span><b>{d.title}</b>: {(daysLeft(d.expires_on) ?? 0) < 0 ? "süresi geçti" : `${daysLeft(d.expires_on)} gün kaldı`} ({dayYear(d.expires_on!)})</span></div>
-        </Link>
+        </TabLink>
       ))}
-      {empty.length > 0 && <Link href={`${BASE}/depo`} className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten: {empty.map((i) => i.name).join(", ")}</span></div></Link>}
+      {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten: {empty.map((i) => i.name).join(", ")}</span></div></TabLink>}
 
       <div className="ui-links">
-        <Link href={`${BASE}/vadeler`}><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></Link>
-        <Link href={`${BASE}/belgeler`}><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></Link>
-        <Link href={`${BASE}/aile`}><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></Link>
+        <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
+        <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
+        <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>
       </div>
 
       {recent.length > 0 && (
@@ -107,7 +108,6 @@ export default function Ana() {
           </div>
         </>
       )}
-      <BottomNav items={navItems} current={BASE} />
     </main>
   );
 }

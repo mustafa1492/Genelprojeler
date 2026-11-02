@@ -253,3 +253,6 @@ a.ui-warn { color: inherit; }
 .ui-nav a[aria-current="page"] { background: linear-gradient(180deg, var(--ana-acik), #d4e8cb); }
 .ui-header h1 { letter-spacing: -0.01em; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.tab-shell main { padding-bottom: 120px !important; }
+.tab-shell main:has(.ui-sticky-bottom) { padding-bottom: 220px !important; }
+.tab-shell .ui-sticky-bottom { bottom: calc(76px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--zemin) 35%); }

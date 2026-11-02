@@ -1,7 +1,7 @@
 "use client";
 // Ortak masraf ekranı (dayıbaşı + çiftçi defteri). Ürün farkları prop olarak gelir.
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { useBusiness, useSetBusiness } from "@/core/auth/AuthGate";
 import { todayIstanbul } from "@/core/events/api";
 import {
@@ -25,7 +25,7 @@ export type ExpenseScreenProps = {
   summary?: (month: string, monthTotal: number) => React.ReactNode;
   /** Excel "Özet" sayfasına ek satırlar. */
   summaryRows?: (month: string, monthTotal: number) => (string | number)[][];
-  navItems: NavItem[]; current: string; headerRight?: React.ReactNode;
+  navItems?: NavItem[]; current?: string; headerRight?: React.ReactNode;
   memberName?: (userId: string | null | undefined) => string;   // kim girdi
 };
 
@@ -37,10 +37,10 @@ const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString
 export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
-  const params = useSearchParams();
   const [items, setItems] = useState<Expense[] | null>(null);
   const farmers = chargeTargets;
-  const [view, setView] = useState<View>({ v: params.get("yeni") ? "tur" : "list" });
+  const [view, setView] = useState<View>({ v: "list" });
+  const [presetPlace, setPresetPlace] = useState<string | null>(null);
   const [month, setMonth] = useState(todayIstanbul().slice(0, 7));
   const [done, setDone] = useState<Done>(null);
   const [error, setError] = useState("");
@@ -50,6 +50,11 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
       .catch(() => setError("Masrafları getiremedim."));
   }, [biz.id]);
   useEffect(load, [load]);
+  useOnActivate(load);
+  // "Yeni masraf" isteği: adresten (?yeni=1) ya da sekme kabuğundan ({yeni, tarla})
+  useEffect(() => { try { if (new URLSearchParams(location.search).get("yeni")) setView({ v: "tur" }); } catch { /* yok */ } }, []);
+  const tp = useTabParams();
+  useEffect(() => { if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setView({ v: "tur" }); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const custom = (Array.isArray(biz.settings?.expense_categories) ? biz.settings!.expense_categories : []) as string[];
   const categories = [...baseCats.filter((c) => c !== "Diğer"), ...custom.filter((c) => !baseCats.includes(c)), "Diğer"];
@@ -74,7 +79,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places}
+    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace}
       onCancel={() => setView({ v: "list" })}
       onSave={async (input) => {
         if (ed) {
@@ -223,7 +228,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
         </section>
       ))}
       {inMonth.length > 0 && <MainButton secondary onClick={excel}>Excel’e indir ({monthName(month)})</MainButton>}
-      <BottomNav items={navItems} current={current} />
+      {navItems && <BottomNav items={navItems} current={current ?? ""} />}
     </main>
   );
 }
@@ -260,8 +265,8 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory }: {
   );
 }
 
-function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, onSave, onCancel, onDelete, onPhoto }: {
-  cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[];
+function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPlace, onSave, onCancel, onDelete, onPhoto }: {
+  cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
   onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data">) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
 }) {
@@ -272,7 +277,7 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, onSave, o
   const [credit, setCredit] = useState(edit?.on_credit ?? false);
   const [vendor, setVendor] = useState(edit?.vendor ?? "");
   const [chargeTo, setChargeTo] = useState<string | null>(edit?.charge_to ?? null);
-  const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? null);
+  const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? presetPlace ?? null);
   const [photo, setPhoto] = useState<string | null>(edit?.photo_path ?? null);
   const [more, setMore] = useState(!!edit && !!(edit.note || edit.on_credit || edit.charge_to || edit.photo_path || edit.occurred_on !== todayIstanbul()));
   const [busy, setBusy] = useState(false);

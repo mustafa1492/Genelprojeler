@@ -1,3 +1,2 @@
-import { Suspense } from "react";
-import S from "@/products/ciftci/screens/Masraf";
-export default function Page() { return <Suspense><S /></Suspense>; }
+import CiftciApp from "@/products/ciftci/App";
+export default function Page() { return <CiftciApp initial="masraf" />; }

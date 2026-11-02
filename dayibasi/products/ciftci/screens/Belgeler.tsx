@@ -1,9 +1,10 @@
 "use client";
+import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { addDoc, daysLeft, deleteDoc, listDocs, restoreDoc, updateDoc, type Doc } from "@/core/documents/api";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { config, BASE } from "../config";
+import { config } from "../config";
 import { dayYear } from "../kayit";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
@@ -11,11 +12,13 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 /** Belgeler ve bitiş tarihleri (ÇKS, TARSİM, kira sözleşmesi, destek başvurusu…). */
 export default function Belgeler() {
   const biz = useBusiness();
+  const go = useGo();
   const [docs, setDocs] = useState<Doc[] | null>(null);
   const [form, setForm] = useState<{ edit?: Doc } | null>(null);
   const [done, setDone] = useState<Done>(null);
   const load = useCallback(() => { listDocs(biz.id).then(setDocs).catch(() => setDocs([])); }, [biz.id]);
   useEffect(load, [load]);
+  useOnActivate(load);
 
   if (form) return <DocForm edit={form.edit} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const d = form.edit!; await deleteDoc(d.id); setDone({ message: `Sildim: ${d.title}.`, undo: () => restoreDoc(d) }); setForm(null); load(); } : undefined}
@@ -28,7 +31,7 @@ export default function Belgeler() {
   const list = (docs ?? []).slice().sort((a, b) => (a.expires_on ?? "9999").localeCompare(b.expires_on ?? "9999"));
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => (location.href = BASE)} label="Özet" />
+      <BackButton onClick={() => go("ozet")} label="Özet" />
       <PageHeader sub="Bitiş tarihleri ve hatırlatma" title="Belgeler" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <MainButton onClick={() => { setDone(null); setForm({}); }}>+ Belge ekle</MainButton>

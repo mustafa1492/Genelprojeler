@@ -1,15 +1,16 @@
 "use client";
+import { useGo } from "@/core/shell/TabShell";
 import { useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { createInvite, setMyName, useMembers } from "@/core/auth/members";
 import { clearLocal } from "@/core/offline/store";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
-import { BASE } from "../config";
 
 /** Aile / ortak defter: üyeler, adın, davet kodu. */
 export default function Aile() {
   const biz = useBusiness();
+  const go = useGo();
   const { members, me, reload } = useMembers(biz.id);
   const mine = members.find((m) => m.user_id === me);
   const [name, setName] = useState("");
@@ -21,7 +22,7 @@ export default function Aile() {
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => (location.href = BASE)} label="Özet" />
+      <BackButton onClick={() => go("ozet")} label="Özet" />
       <PageHeader sub={biz.name} title="Aile ve ortak defter" />
       {msg && <DoneCard message={msg} />}
       <p className="ui-note">Ailenden biri kendi hesabıyla bu deftere katılabilir. Herkes aynı kayıtları görür; her kaydın yanında kimin girdiği yazar.</p>
