@@ -11,6 +11,8 @@ import { GELIR } from "../kayit";
 import { HistoryLink } from "../nav";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
+import { listLots, type Lot } from "@/core/lots/api";
+import { hasFidan } from "../fidan";
 
 /** Çiftçi masrafı: tarla seçimi, ayın geliriyle kâr, kim girdi. */
 export default function Masraf() {
@@ -18,9 +20,11 @@ export default function Masraf() {
   const { nameOf } = useMembers(biz.id);
   const [places, setPlaces] = useState<Place[]>([]);
   const [income, setIncome] = useState<EventRow[]>([]);
+  const [lots, setLots] = useState<Lot[]>([]);
   const load = () => {
     listPlaces(biz.id).then(setPlaces).catch(() => {});
     listEvents(biz.id, GELIR).then(setIncome).catch(() => {});
+    if (hasFidan(biz)) listLots(biz.id).then(setLots).catch(() => {});
   };
   useEffect(load, [biz.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useOnActivate(load);
@@ -29,6 +33,7 @@ export default function Masraf() {
   const gelirS = income.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
     <ExpenseScreen categories={config.expenses.categories} places={places} headerRight={<HistoryLink />} memberName={nameOf}
+      link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
       period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}
       periodSummary={(total) => (
         <div className="ui-total">

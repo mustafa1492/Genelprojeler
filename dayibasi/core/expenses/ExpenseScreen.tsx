@@ -31,6 +31,8 @@ export type ExpenseScreenProps = {
   period?: { name: string; start: string; end: string };
   periodPicker?: React.ReactNode;
   periodSummary?: (total: number) => React.ReactNode;
+  /** Ek bağlantı (ör. fidan partisi): seçilen id data[key]'e yazılır. */
+  link?: { label: string; key: string; options: { id: string; name: string }[]; param: string };
 };
 
 type View = { v: "list" } | { v: "tur" } | { v: "form"; cat: string; edit?: Expense } | { v: "veresiye" } | { v: "ode"; vendor: string } | { v: "foto"; url: string };
@@ -38,13 +40,14 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 
-export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary }: ExpenseScreenProps) {
+export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
   const [items, setItems] = useState<Expense[] | null>(null);
   const farmers = chargeTargets;
   const [view, setView] = useState<View>({ v: "list" });
   const [presetPlace, setPresetPlace] = useState<string | null>(null);
+  const [presetLink, setPresetLink] = useState<string | null>(null);
   const [month, setMonth] = useState(todayIstanbul().slice(0, 7));
   const [mode, setMode] = useState<"ay" | "sezon">("ay");
   const bySeason = !!period && mode === "sezon";
@@ -60,7 +63,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // "Yeni masraf" isteği: adresten (?yeni=1) ya da sekme kabuğundan ({yeni, tarla})
   useEffect(() => { try { if (new URLSearchParams(location.search).get("yeni")) setView({ v: "tur" }); } catch { /* yok */ } }, []);
   const tp = useTabParams();
-  useEffect(() => { if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setView({ v: "tur" }); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setPresetLink(link && tp.p[link.param] ? String(tp.p[link.param]) : null); setView({ v: "tur" }); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const custom = (Array.isArray(biz.settings?.expense_categories) ? biz.settings!.expense_categories : []) as string[];
   const categories = [...baseCats.filter((c) => c !== "Diğer"), ...custom.filter((c) => !baseCats.includes(c)), "Diğer"];
@@ -85,7 +88,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace}
+    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink}
       onCancel={() => setView({ v: "list" })}
       onSave={async (input) => {
         if (ed) {
@@ -296,9 +299,10 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory }: {
   );
 }
 
-function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPlace, onSave, onCancel, onDelete, onPhoto }: {
+function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, onSave, onCancel, onDelete, onPhoto }: {
   cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
-  onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data">) => Promise<void>; onCancel: () => void;
+  link?: ExpenseScreenProps["link"]; presetLink?: string | null;
+  onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data"> & { data?: Record<string, unknown> }) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
 }) {
   const biz = useBusiness();
@@ -309,6 +313,7 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPla
   const [vendor, setVendor] = useState(edit?.vendor ?? "");
   const [chargeTo, setChargeTo] = useState<string | null>(edit?.charge_to ?? null);
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? presetPlace ?? null);
+  const [linkId, setLinkId] = useState<string | null>(link ? ((edit?.data?.[link.key] as string) ?? presetLink ?? null) : null);
   const [photo, setPhoto] = useState<string | null>(edit?.photo_path ?? null);
   const [more, setMore] = useState(!!edit && !!(edit.note || edit.on_credit || edit.charge_to || edit.photo_path || edit.occurred_on !== todayIstanbul()));
   const [busy, setBusy] = useState(false);
@@ -323,6 +328,7 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPla
       await onSave({
         occurred_on: day, category: cat, amount: n, note: note.trim() || null, on_credit: credit, vendor: credit ? vendor.trim() : null,
         paid_amount: edit?.paid_amount ?? 0, charge_to: chargeTo, place_id: placeId, photo_path: photo,
+        ...(link ? { data: { ...(edit?.data ?? {}), [link.key]: linkId } } : {}),
       });
     } catch { setError("Kaydedemedim, tekrar dene."); setBusy(false); }
   };
@@ -348,6 +354,15 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPla
           <div className="ui-chips wrap">
             <Chip selected={!placeId} onClick={() => setPlaceId(null)}>Genel</Chip>
             {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => setPlaceId(p.id)}>{p.name}</Chip>)}
+          </div>
+        </div>
+      )}
+      {link && link.options.length > 0 && (
+        <div className="ui-stack" style={{ gap: 8 }}>
+          <span className="ui-label">{link.label}</span>
+          <div className="ui-chips wrap">
+            <Chip selected={!linkId} onClick={() => setLinkId(null)}>Hiçbiri</Chip>
+            {link.options.map((o) => <Chip key={o.id} selected={linkId === o.id} onClick={() => setLinkId(o.id)}>{o.name}</Chip>)}
           </div>
         </div>
       )}

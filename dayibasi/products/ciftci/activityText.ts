@@ -15,7 +15,13 @@ export function describe(a: Activity, names: Record<string, string>): string {
     case "expenses":
       if (a.action === "update" && Number(o.paid_amount) !== Number(d.paid_amount)) return `Veresiye ödendi: ${s(d.vendor)}, ${formatTL(Number(d.paid_amount) - Number(o.paid_amount))}`;
       return `Masraf ${verb(a)}: ${s(d.category)} ${formatTL(Number(d.amount))}${place ? ` (${place})` : ""}`;
+    case "lots":
+      if (a.action === "update" && o.status !== d.status) return `Parti ${d.status === "bitti" ? "bitti" : "yeniden aktif"}: ${s(d.name)}`;
+      return `Parti ${verb(a)}: ${s(d.name)} (${Number(d.initial_count).toLocaleString("tr-TR")} fidan)`;
     case "events":
+      if (d.kind === "sayim") return `Sayım ${verb(a)}: ${Number(data.alive).toLocaleString("tr-TR")} canlı fidan`;
+      if (d.kind === "siparis") return `Sipariş ${a.action === "update" && (o.data as Row)?.status !== data.status ? s(data.status) : verb(a)}: ${s(data.customer)}, ${Number(data.qty).toLocaleString("tr-TR")} adet`;
+      if (d.kind === "foto") return `Fotoğraf ${verb(a)}`;
       if (d.kind === "gelir") return `Gelir ${verb(a)}: ${s(data.type)} ${formatTL(Number(d.quantity))}`;
       if (d.kind === "verim") return `Verim ${verb(a)}: ${place} ${s(data.year)}, ${Number(d.quantity).toLocaleString("tr-TR")} ${s(data.unit)}`;
       return `${place || "Tarla"}: ${s(data.type)}${data.product ? ` (${s(data.product)})` : ""} ${verb(a)}`;

@@ -13,6 +13,8 @@ import { dayText, GELIR, incomeOpen, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
+import { listLots, type Lot } from "@/core/lots/api";
+import { FIDAN_SATIS, hasFidan, sizesOf } from "../fidan";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -21,20 +23,23 @@ export default function Gelir() {
   const { nameOf } = useMembers(biz.id);
   const [rows, setRows] = useState<EventRow[] | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
-  const [form, setForm] = useState<{ type?: string; edit?: EventRow } | null>(null);
+  const [lots, setLots] = useState<Lot[]>([]);
+  const fidan = hasFidan(biz);
+  const [form, setForm] = useState<{ type?: string; edit?: EventRow; prefill?: Record<string, string | number | boolean> } | null>(null);
   const [done, setDone] = useState<Done>(null);
   const { selected: S } = useSeason();
   const go = useGo();
   const load = useCallback(() => {
     listEvents(biz.id, GELIR).then((r) => setRows(r.slice().reverse())).catch(() => setRows([]));
     listPlaces(biz.id).then(setPlaces).catch(() => {});
-  }, [biz.id]);
+    if (fidan) listLots(biz.id).then(setLots).catch(() => {});
+  }, [biz.id, fidan]);
   useEffect(load, [load]);
   useOnActivate(load);
   const tp = useTabParams();
-  useEffect(() => { if (tp.p.yeni) { setDone(null); setForm({}); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tp.p.yeni) { setDone(null); setForm(tp.p.parti || tp.p.adet ? { type: FIDAN_SATIS, prefill: tp.p } : {}); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (form) return <GelirForm places={places} type={form.type} edit={form.edit} onCancel={() => setForm(null)}
+  if (form) return <GelirForm places={places} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prefill={form.prefill} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)} ${formatTL(Number(e.quantity))}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
       if (form.edit) {
@@ -87,41 +92,47 @@ export default function Gelir() {
 }
 
 type GelirValues = { occurred_on: string; place_id: string | null; quantity: number; data: Record<string, unknown> };
-function GelirForm({ places, type: t0, edit, onSave, onCancel, onDelete }: {
-  places: Place[]; type?: string; edit?: EventRow; onSave: (v: GelirValues) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
+function GelirForm({ places, type: t0, edit, lots = [], sizes = [], prefill = {}, onSave, onCancel, onDelete }: {
+  places: Place[]; type?: string; edit?: EventRow; lots?: Lot[]; sizes?: string[]; prefill?: Record<string, string | number | boolean>; onSave: (v: GelirValues) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
   const d = edit?.data ?? {};
   const [type, setType] = useState<string | null>((d.type as string) ?? t0 ?? null);
   const [day, setDay] = useState(edit?.occurred_on ?? todayStr());
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? null);
   const [crop, setCrop] = useState(String(d.crop ?? ""));
-  const [qty, setQty] = useState(d.qty ? String(d.qty) : "");
+  const [lotId, setLotId] = useState<string | null>((d.lot_id as string) ?? (prefill.parti ? String(prefill.parti) : null));
+  const [size, setSize] = useState<string | null>((d.size as string) ?? (prefill.boy ? String(prefill.boy) : null));
+  const [qty, setQty] = useState(d.qty ? String(d.qty) : prefill.adet ? String(prefill.adet) : "");
   const [unit, setUnit] = useState(String(d.unit ?? "kg"));
-  const [price, setPrice] = useState(d.price ? String(d.price) : "");
+  const [price, setPrice] = useState(d.price ? String(d.price) : prefill.fiyat ? String(prefill.fiyat) : "");
   const [total, setTotal] = useState(edit ? String(edit.quantity) : "");
-  const [buyer, setBuyer] = useState(String(d.buyer ?? ""));
+  const [buyer, setBuyer] = useState(String(d.buyer ?? prefill.alici ?? ""));
   const [pay, setPay] = useState<"hepsi" | "kismen" | "vadeli">(edit ? (incomeOpen(edit) === 0 ? "hepsi" : Number(d.received ?? 0) > 0 ? "kismen" : "vadeli") : "hepsi");
   const [received, setReceived] = useState(d.received ? String(d.received) : "");
   const [due, setDue] = useState(String(d.due_on ?? ""));
   const [error, setError] = useState("");
-  const isSale = type === "Hasat satışı";
+  const isPlant = type === FIDAN_SATIS;
+  const isSale = type === "Hasat satışı" || isPlant;
   const autoTotal = isSale && num(qty) > 0 && num(price) > 0 ? num(qty) * num(price) : 0;
 
   if (!type) return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Yeni gelir" title="Ne geliri?" />
-      <div className="ui-tiles">{config.incomeKinds.map((k) => <button key={k} type="button" onClick={() => setType(k)}><b>{k}</b></button>)}</div>
+      <div className="ui-tiles">{[...(lots.length ? [FIDAN_SATIS] : []), ...config.incomeKinds].map((k) => <button key={k} type="button" onClick={() => setType(k)}><b>{k}</b></button>)}</div>
     </main>
   );
 
   const save = async () => {
     const tot = autoTotal || num(total);
     if (!(tot > 0)) { setError(isSale ? "Miktar ve fiyatı ya da toplamı yaz." : "Tutarı yaz."); return; }
+    if (isPlant && !lotId) { setError("Hangi partiden satıldığını seç."); return; }
+    if (isPlant && !(num(qty) > 0)) { setError("Kaç adet satıldığını yaz."); return; }
     const rec = pay === "hepsi" ? tot : pay === "kismen" ? num(received) : 0;
     if (pay === "kismen" && !(rec > 0 && rec < tot)) { setError("Alınan tutarı yaz (toplamdan az)."); return; }
     await onSave({ occurred_on: day, place_id: placeId, quantity: tot, data: {
-      type, ...(crop.trim() ? { crop: crop.trim() } : {}), ...(isSale && num(qty) > 0 ? { qty: num(qty), unit, ...(num(price) > 0 ? { price: num(price) } : {}) } : {}),
+      type, ...(crop.trim() ? { crop: crop.trim() } : {}), ...(isSale && num(qty) > 0 ? { qty: num(qty), unit: isPlant ? "adet" : unit, ...(num(price) > 0 ? { price: num(price) } : {}) } : {}),
+      ...(isPlant ? { lot_id: lotId, ...(size ? { size } : {}) } : {}),
       ...(buyer.trim() ? { buyer: buyer.trim() } : {}), received: rec, ...(pay !== "hepsi" && due ? { due_on: due } : {}),
     } });
   };
@@ -140,7 +151,19 @@ function GelirForm({ places, type: t0, edit, onSave, onCancel, onDelete }: {
           </div>
         </div>
       )}
-      {isSale && (
+      {isPlant && (
+        <>
+          <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Hangi parti?</span>
+            <div className="ui-chips wrap">{lots.map((l) => <Chip key={l.id} selected={lotId === l.id} onClick={() => { setLotId(l.id); if (l.place_id) setPlaceId(l.place_id); }}>{l.name}</Chip>)}</div></div>
+          {sizes.length > 0 && <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Boy</span>
+            <div className="ui-chips wrap">{sizes.map((x) => <Chip key={x} selected={size === x} onClick={() => setSize(size === x ? null : x)}>{x}</Chip>)}</div></div>}
+          <div className="ui-quickadd">
+            <TextField id="g_adet" label="Kaç adet?" inputMode="numeric" maxLength={9} value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} />
+            <TextField id="g_afiyat" label="Adet fiyatı (TL)" inputMode="decimal" maxLength={10} value={price} onChange={(e) => setPrice(e.target.value)} />
+          </div>
+        </>
+      )}
+      {isSale && !isPlant && (
         <>
           <TextField id="g_urun" label="Ürün" placeholder="Örnek: Zeytin" maxLength={40} value={crop} onChange={(e) => setCrop(e.target.value)} />
           <div className="ui-quickadd">

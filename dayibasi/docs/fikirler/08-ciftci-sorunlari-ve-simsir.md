@@ -42,6 +42,13 @@ Henüz hiçbiri seçilmedi. Önce Mustafa seçer; kural (bekleme süresi, fiyat 
 → İşletme bazında **açılıp kapanan modül**: `businesses.settings.modules = ["fidan"]`. Yalnız bu ayarı açık olan defterde "Fidan" sekmesi ve ilgili raporlar çıkar. Onlara ayrı hesap + ayrı defter açılır (aile daveti gibi kendi aralarında ortak kullanırlar). Yönetici panelinden aç/kapa.
 Teknik: yeni ürün türü gerekmez; çiftçi defterine **"Parti / fidan"** modülü (lots tablosu: places + sayımlar + boy sınıfları) eklenir. Sezon sistemi çok yıllık sezonlarla da çalışır.
 
+## Durum (2 Kasım 2026, gelistirme dalı): Fidan modülü YAPILDI
+`settings.modules=["fidan"]` olan defterde "Fidan" sekmesi (yönetim panelinden aç/kapa; kullanıcı kendi açamaz — tetikleyici `keep_modules`).
+Parti (geçmiş tarihli + alış maliyeti + uygulama öncesi masraf toplamı), sayım (boylara göre), canlı/satılan/fire, boy stoku ve siparişte ayrılan,
+fidan başı maliyet = (alış + önceki masraf + partiye masraf + parsel masrafından canlı fidana göre pay) ÷ canlı, satış (Gelir → Fidan satışı),
+sipariş (teslim → satış formu dolu açılır), bakım/işlem, hatırlatıcı (her N gün; kullanıcı belirler), fotoğraf günlüğü, Excel (partiler, boy stoku, siparişler),
+belge önerileri (fidan üretim izni, bitki pasaportu). Boy sınıfları kullanıcı tanımlı. Migration 0011.
+
 ## C. Çıktılar
 - Var: güzel Excel (renkli başlık, TL biçimi, toplamlar, sabit başlık), PDF sezon raporu (yazdır → PDF).
 - Ek seçenekler: WhatsApp özet mesajı; muhasebeci için tek dosya (yıl sonu); grafikli PDF kapak sayfası; banka/kredi için çok sezonlu özet.

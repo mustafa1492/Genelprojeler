@@ -5,6 +5,7 @@ import { useBusiness } from "@/core/auth/AuthGate";
 import { addDoc, daysLeft, deleteDoc, listDocs, restoreDoc, updateDoc, type Doc } from "@/core/documents/api";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
 import { config } from "../config";
+import { hasFidan } from "../fidan";
 import { dayYear } from "../kayit";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
@@ -20,7 +21,7 @@ export default function Belgeler() {
   useEffect(load, [load]);
   useOnActivate(load);
 
-  if (form) return <DocForm edit={form.edit} onCancel={() => setForm(null)}
+  if (form) return <DocForm edit={form.edit} fidan={hasFidan(biz)} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const d = form.edit!; await deleteDoc(d.id); setDone({ message: `Sildim: ${d.title}.`, undo: () => restoreDoc(d) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
       if (form.edit) { const b = { ...form.edit }; await updateDoc(b.id, v); setDone({ message: `Değiştirdim: ${v.title}.`, undo: () => updateDoc(b.id, b) }); }
@@ -51,7 +52,8 @@ export default function Belgeler() {
   );
 }
 
-function DocForm({ edit, onSave, onCancel, onDelete }: {
+function DocForm({ edit, fidan, onSave, onCancel, onDelete }: {
+  fidan?: boolean;
   edit?: Doc; onSave: (v: Pick<Doc, "title" | "expires_on" | "notes">) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
   const [title, setTitle] = useState(edit?.title ?? "");
@@ -62,7 +64,7 @@ function DocForm({ edit, onSave, onCancel, onDelete }: {
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Belge" title={edit ? "Belgeyi düzenle" : "Yeni belge"} />
-      <div className="ui-chips wrap">{config.documents.map((t) => <Chip key={t} selected={t === title} onClick={() => setTitle(t)}>{t}</Chip>)}</div>
+      <div className="ui-chips wrap">{[...config.documents, ...(fidan ? ["Fidan üretim izni", "Bitki pasaportu", "Fidan sertifikası"] : [])].map((t) => <Chip key={t} selected={t === title} onClick={() => setTitle(t)}>{t}</Chip>)}</div>
       <TextField id="b_ad" label="Belgenin adı" maxLength={100} value={title} onChange={(e) => setTitle(e.target.value)} />
       <TextField id="b_bitis" label="Bitiş / son tarih" type="date" value={exp} onChange={(e) => setExp(e.target.value)} />
       <TextField id="b_not" label="Not (isteğe bağlı)" placeholder="Örnek: poliçe no, hangi tarla" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} />
