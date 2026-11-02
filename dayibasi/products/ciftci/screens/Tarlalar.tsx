@@ -10,7 +10,7 @@ import { mutate } from "@/core/offline/store";
 import { addPlace, listPlaces, type Place } from "@/core/places/api";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
-import { dayText, dayYear, GELIR, harvestFrom, ISLEM, num, thisYear, todayStr, VERIM, year } from "../kayit";
+import { breakEven, dayText, dayYear, GELIR, harvestFrom, ISLEM, num, thisYear, todayStr, VERIM, year } from "../kayit";
 import { HistoryLink } from "../nav";
 import { TabLink, useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason, type Season } from "../sezon";
@@ -67,7 +67,7 @@ export default function Tarlalar() {
 
   if (view.v === "islem") {
     const p = find(view.id);
-    if (p) return <IslemForm place={p} items={items} initialType={view.type} onCancel={() => setView({ v: "tarla", id: p.id })}
+    if (p) return <IslemForm place={p} items={items} history={events.filter((e) => e.kind === ISLEM)} initialType={view.type} onCancel={() => setView({ v: "tarla", id: p.id })}
       onSave={async (type, day, data, use) => {
         const ev = await addEvent(biz.id, { kind: ISLEM, occurred_on: day, place_id: p.id, person_id: null, quantity: null, data: { type, ...data } });
         let undoStock: (() => Promise<void>) | null = null;
@@ -100,6 +100,7 @@ export default function Tarlalar() {
       const yields = events.filter((e) => e.kind === VERIM && e.place_id === p.id).sort((a, b) => String(b.data.year).localeCompare(String(a.data.year)));
       const wait = ops.map((e) => ({ e, h: harvestFrom(e) })).filter((x) => x.h && x.h > todayStr()).sort((a, b) => b.h!.localeCompare(a.h!))[0];
       const pExp = expenses.filter((e) => e.place_id === p.id && inSeason(e.occurred_on, S));
+      const be = breakEven(st.m, yields.filter((e) => String(e.data.year) === S.name));
       return (
         <main className="ui-stack">
           <BackButton onClick={() => { setDone(null); setView({ v: "list" }); }} label="Tarlalar" />
@@ -110,6 +111,13 @@ export default function Tarlalar() {
             <div><span>{y} masraf</span><b>{formatTL(st.m)}</b>{st.donum ? <small>dönüm başı {formatTL(Math.round(st.perDonum))}</small> : <small>&nbsp;</small>}</div>
             <div className="mine"><span>{y} kâr</span><b>{formatTL(st.kar)}</b><small>gelir {formatTL(st.g)}</small></div>
           </div>
+          {be ? (
+            <div className="ui-card ui-stack" style={{ gap: 4 }}>
+              <span className="ui-note" style={{ margin: 0 }}>Başabaş fiyatı ({y})</span>
+              <b style={{ fontSize: "1.5rem" }}>{formatTL(Math.round(be.perUnit * 100) / 100)} / {be.unit}</b>
+              <span className="ui-note" style={{ margin: 0 }}>{formatTL(st.m)} masraf ÷ {be.qty.toLocaleString("tr-TR")} {be.unit} verim. Bundan aşağıya satarsan bu tarlada zarar edersin.</span>
+            </div>
+          ) : <button type="button" className="ui-empty" style={{ font: "inherit", cursor: "pointer", width: "100%" }} onClick={() => { setDone(null); setView({ v: "verim", id: p.id }); }}>Başabaş fiyatını görmek için bu sezonun verimini gir ›</button>}
           <div className="ui-tiles">
             <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: p.id }); }}><b>+ İşlem</b><small>ilaç, gübre, sulama…</small></button>
             <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: "İlaçlama" }); }}><b>+ İlaçlama</b><small>ilaç, doz, bekleme</small></button>
@@ -190,8 +198,8 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
   );
 }
 
-function IslemForm({ place, items, initialType, onSave, onCancel }: {
-  place: Place; items: Item[]; initialType?: string; onCancel: () => void;
+function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
+  place: Place; items: Item[]; history: EventRow[]; initialType?: string; onCancel: () => void;
   onSave: (type: string, day: string, data: Record<string, unknown>, use: { id: string; amount: number } | null) => Promise<void>;
 }) {
   const [type, setType] = useState<string | null>(initialType ?? null);
@@ -206,6 +214,20 @@ function IslemForm({ place, items, initialType, onSave, onCancel }: {
   const needsProduct = type === "İlaçlama" || type === "Gübreleme";
   const stock = items.filter((i) => (type === "İlaçlama" ? i.category === "İlaç" : type === "Gübreleme" ? i.category === "Gübre" : false));
   const item = items.find((i) => i.id === itemId);
+  // İlaç hafızası: bu ürünün en son kullanımı (doz, bekleme) + depodaki ilaç kartı (etiket bilgileri)
+  const lastUse = (name: string) => history.filter((e) => String(e.data.product ?? "").toLocaleLowerCase("tr") === name.toLocaleLowerCase("tr"))
+    .sort((a, b) => b.occurred_on.localeCompare(a.occurred_on))[0];
+  const card = (item?.data ?? items.find((i) => i.name.toLocaleLowerCase("tr") === product.trim().toLocaleLowerCase("tr"))?.data ?? {}) as Record<string, string | number | null>;
+  const last = product.trim() ? lastUse(product.trim()) : undefined;
+  const pick = (name: string, it?: Item) => {
+    setProduct(name);
+    const c = (it?.data ?? {}) as Record<string, string | number | null>;
+    const l = lastUse(name);
+    setDose(String(l?.data.dose ?? c.label_dose ?? ""));
+    const w = l?.data.wait_days ?? c.wait_days;
+    setWait(w ? String(w) : "");
+  };
+  const usedBefore = [...new Set(history.filter((e) => e.data.type === type && e.data.product).map((e) => String(e.data.product)))].filter((n) => !stock.some((i) => i.name === n));
 
   if (!type) {
     return (
@@ -227,12 +249,25 @@ function IslemForm({ place, items, initialType, onSave, onCancel }: {
             <div className="ui-stack" style={{ gap: 8 }}>
               <span className="ui-label">Depodan seç</span>
               <div className="ui-chips wrap">
-                {stock.map((i) => <Chip key={i.id} selected={itemId === i.id} onClick={() => { setItemId(itemId === i.id ? null : i.id); setProduct(i.name); }}>{i.name} · {i.quantity.toLocaleString("tr-TR")} {i.unit}</Chip>)}
+                {stock.map((i) => <Chip key={i.id} selected={itemId === i.id} onClick={() => { setItemId(itemId === i.id ? null : i.id); pick(i.name, i); }}>{i.name} · {i.quantity.toLocaleString("tr-TR")} {i.unit}</Chip>)}
+                {usedBefore.map((n) => <Chip key={n} selected={product === n && !itemId} onClick={() => { setItemId(null); pick(n); }}>{n} (önceden)</Chip>)}
               </div>
             </div>
           )}
           <TextField id="i_urun" label={type === "İlaçlama" ? "Hangi ilaç?" : "Hangi gübre?"} placeholder={type === "İlaçlama" ? "Örnek: Decis" : "Örnek: 20-20-0"} maxLength={60}
-            value={product} onChange={(e) => { setProduct(e.target.value); setItemId(null); }} />
+            value={product} onChange={(e) => { setProduct(e.target.value); setItemId(null); }}
+            onBlur={() => { if (product.trim() && !dose && !wait) { const l = lastUse(product.trim()); if (l) pick(product.trim()); } }} />
+          {(card.label_dose || card.target || card.method || card.wait_days || last) && (
+            <div className="ui-card ui-stack ilac-kart" style={{ gap: 4 }}>
+              <b>{product} · ilaç kartı</b>
+              {card.label_dose ? <span>Etiketteki doz: <b>{String(card.label_dose)}</b></span> : null}
+              {card.wait_days ? <span>Hasat öncesi bekleme: <b>{String(card.wait_days)} gün</b></span> : null}
+              {card.target ? <span>Neye karşı: {String(card.target)}</span> : null}
+              {card.method ? <span>Uygulama: {String(card.method)}</span> : null}
+              {last && <span className="ui-note" style={{ margin: 0 }}>En son {dayYear(last.occurred_on)} kullanıldı{last.data.dose ? `, doz ${String(last.data.dose)}` : ""}{last.data.wait_days ? `, bekleme ${String(last.data.wait_days)} gün` : ""}.</span>}
+              <span className="ui-note" style={{ margin: 0 }}>Bu bilgiler senin girdiklerin; emin değilsen ilacın etiketine bak.</span>
+            </div>
+          )}
           <TextField id="i_doz" label="Doz (isteğe bağlı)" placeholder="Örnek: 50 ml / 100 litre suya" maxLength={60} value={dose} onChange={(e) => setDose(e.target.value)} />
           {type === "İlaçlama" && (
             <TextField id="i_bekleme" label="Hasat öncesi bekleme süresi (gün, ilacın etiketinde yazar)" inputMode="numeric" placeholder="Örnek: 14" maxLength={3}

@@ -55,3 +55,7 @@ export function lotStats(lot: Lot, lots: Lot[], counts: EventRow[], sales: Event
 }
 
 export const ageText = (m: number | null) => (m == null ? "" : m < 12 ? `${m} aylık` : `${Math.floor(m / 12)} yıl ${m % 12 ? `${m % 12} ay` : ""}`.trim());
+
+/** Kâr oranı (%): kullanıcı belirler (settings.fidan_margin); yoksa öneri gösterilmez. */
+export const marginOf = (b: Business) => (Number(b.settings?.fidan_margin) > 0 ? Number(b.settings!.fidan_margin) : null);
+export const suggestedPrice = (perPlant: number, margin: number | null) => (margin && perPlant > 0 ? Math.ceil(perPlant * (1 + margin / 100) * 100) / 100 : null);

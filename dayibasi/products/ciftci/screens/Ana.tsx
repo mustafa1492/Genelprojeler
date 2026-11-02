@@ -6,7 +6,7 @@ import { daysLeft, listDocs, type Doc } from "@/core/documents/api";
 import { listDues, remaining, type Due } from "@/core/dues/api";
 import { listEvents, type EventRow } from "@/core/events/api";
 import { listExpenses, owed, type Expense } from "@/core/expenses/api";
-import { listItems, type Item } from "@/core/inventory/api";
+import { isLow, listItems, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { PageHeader } from "@/core/ui";
@@ -55,7 +55,7 @@ export default function Ana() {
     ...ev.filter((e) => e.kind === GELIR && incomeOpen(e) > 0 && e.data.due_on).map((e) => ({ who: String(e.data.buyer || e.data.type), dir: "alacak" as const, left: incomeOpen(e), due: String(e.data.due_on) })),
   ].filter((x) => (Date.parse(x.due) - Date.parse(today)) / 86400000 <= config.remindDays.dues).sort((a, b) => a.due.localeCompare(b.due));
   const docSoon = docs.filter((d) => { const n = daysLeft(d.expires_on); return n !== null && n <= config.remindDays.documents; });
-  const empty = items.filter((i) => i.quantity <= 0);
+  const empty = items.filter(isLow);
   const recent = [...exp.map((e) => ({ at: e.created_at ?? e.occurred_on, t: `Masraf · ${e.category} ${formatTL(e.amount)}`, by: e.created_by })),
     ...ev.map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by }))]
     .sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
@@ -93,7 +93,7 @@ export default function Ana() {
           <div className="ui-warn-row"><span><b>{d.title}</b>: {(daysLeft(d.expires_on) ?? 0) < 0 ? "süresi geçti" : `${daysLeft(d.expires_on)} gün kaldı`} ({dayYear(d.expires_on!)})</span></div>
         </TabLink>
       ))}
-      {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten: {empty.map((i) => i.name).join(", ")}</span></div></TabLink>}
+      {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten / az kalan: {empty.map((i) => `${i.name} (${i.quantity.toLocaleString("tr-TR")} ${i.unit})`).join(", ")}</span></div></TabLink>}
 
       <div className="ui-links">
         <TabLink to="rapor"><b>Sezon raporu (PDF / Excel)</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>

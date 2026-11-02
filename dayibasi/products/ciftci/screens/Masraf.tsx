@@ -34,6 +34,7 @@ export default function Masraf() {
   return (
     <ExpenseScreen categories={config.expenses.categories} places={places} headerRight={<HistoryLink />} memberName={nameOf}
       link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
+      stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: config.inventory.units }}
       period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}
       periodSummary={(total) => (
         <div className="ui-total">

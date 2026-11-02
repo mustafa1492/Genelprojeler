@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
-import { addItem, deleteItem, listItems, restoreItem, updateItem, type Item } from "@/core/inventory/api";
+import { addItem, deleteItem, isLow, listItems, restoreItem, updateItem, type Item } from "@/core/inventory/api";
 import { downloadXlsx } from "@/core/export/xlsx";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
@@ -52,10 +52,10 @@ export default function Depo() {
       {cats.length > 2 && <div className="ui-chips">{cats.map((c) => <Chip key={c} selected={c === cat} onClick={() => setCat(c)}>{c}</Chip>)}</div>}
       {items && all.length === 0 && <div className="ui-empty">Depo boş. Gübre, ilaç, tohum ya da malzemeleri tek tek ekle.</div>}
       {shown.map((i) => (
-        <div key={i.id} className={`ui-card ui-stock${i.quantity <= 0 ? " empty" : ""}`}>
+        <div key={i.id} className={`ui-card ui-stock${isLow(i) ? " empty" : ""}`}>
           <button type="button" className="ui-plain" style={{ flex: 1, minWidth: 0 }} onClick={() => { setDone(null); setForm({ edit: i }); }}>
             <b style={{ fontSize: "1.05rem" }}>{i.name}</b>
-            <span className="ui-note" style={{ margin: 0 }}>{[i.category, i.quantity <= 0 ? "Bitti" : "", nameOf(i.created_by)].filter(Boolean).join(" · ")}</span>
+            <span className="ui-note" style={{ margin: 0 }}>{[i.category, i.quantity <= 0 ? "Bitti" : isLow(i) ? "Az kaldı" : "", i.data?.wait_days ? `bekleme ${String(i.data.wait_days)} gün` : "", nameOf(i.created_by)].filter(Boolean).join(" · ")}</span>
           </button>
           <div className="ui-stepper">
             <button type="button" aria-label={`${i.name} azalt`} onClick={() => step(i, -1)} disabled={i.quantity <= 0}>−</button>
@@ -71,13 +71,19 @@ export default function Depo() {
 }
 
 function ItemForm({ edit, onSave, onCancel, onDelete }: {
-  edit?: Item; onSave: (v: Pick<Item, "name" | "category" | "unit" | "quantity" | "note">) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
+  edit?: Item; onSave: (v: Pick<Item, "name" | "category" | "unit" | "quantity" | "note" | "min_qty" | "data">) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
   const [name, setName] = useState(edit?.name ?? "");
   const [category, setCategory] = useState(edit?.category ?? "Gübre");
   const [unit, setUnit] = useState(edit?.unit ?? "kg");
   const [qty, setQty] = useState(edit ? String(edit.quantity) : "");
   const [note, setNote] = useState(edit?.note ?? "");
+  const [minQ, setMinQ] = useState(edit?.min_qty ? String(edit.min_qty) : "");
+  const card = (edit?.data ?? {}) as Record<string, string>;
+  const [dose, setDose] = useState(String(card.label_dose ?? ""));
+  const [wait, setWait] = useState(card.wait_days ? String(card.wait_days) : "");
+  const [target, setTarget] = useState(String(card.target ?? ""));
+  const [method, setMethod] = useState(String(card.method ?? ""));
   const [error, setError] = useState("");
   return (
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
@@ -89,6 +95,17 @@ function ItemForm({ edit, onSave, onCancel, onDelete }: {
       <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Birimi</span>
         <div className="ui-chips wrap">{config.inventory.units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div></div>
       <TextField id="d_miktar" label={`Miktar (${unit})`} inputMode="decimal" placeholder="Örnek: 10" maxLength={12} value={qty} onChange={(e) => setQty(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
+      <TextField id="d_min" label={`Az kaldı uyarısı: kaç ${unit}’ın altına düşünce? (isteğe bağlı)`} inputMode="decimal" maxLength={10} value={minQ} onChange={(e) => setMinQ(e.target.value)} />
+      {category === "İlaç" && (
+        <div className="ui-card ui-stack" style={{ gap: 10 }}>
+          <b>İlaç kartı (etiketinden yaz)</b>
+          <p className="ui-note" style={{ margin: 0 }}>Bunları ilacın etiketine bakarak bir kere yaz; ilaçlama girerken önüne çıkar ve hazır dolar. Doğru bilgi her zaman etikettedir.</p>
+          <TextField id="d_doz" label="Etiketteki doz" placeholder="Örnek: 50 ml / 100 litre su" maxLength={80} value={dose} onChange={(e) => setDose(e.target.value)} />
+          <TextField id="d_bekleme" label="Hasat öncesi bekleme süresi (gün)" inputMode="numeric" maxLength={3} value={wait} onChange={(e) => setWait(e.target.value.replace(/\D/g, ""))} />
+          <TextField id="d_hedef" label="Hangi zararlı / hastalığa karşı" placeholder="Örnek: zeytin sineği" maxLength={80} value={target} onChange={(e) => setTarget(e.target.value)} />
+          <TextField id="d_sekil" label="Uygulama şekli / dikkat" placeholder="Örnek: sabah serinde, rüzgârsız havada" maxLength={200} value={method} onChange={(e) => setMethod(e.target.value)} />
+        </div>
+      )}
       <TextField id="d_not" label="Not (isteğe bağlı)" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
       {onDelete && <MainButton className="tehlike" onClick={onDelete}>Depodan sil</MainButton>}
@@ -96,7 +113,8 @@ function ItemForm({ edit, onSave, onCancel, onDelete }: {
         const q = qty === "" ? 0 : num(qty);
         if (!name.trim()) { setError("Adını yaz."); return; }
         if (!(q >= 0)) { setError("Miktarı doğru yaz."); return; }
-        await onSave({ name: name.trim(), category, unit, quantity: q, note: note.trim() || null });
+        await onSave({ name: name.trim(), category, unit, quantity: q, note: note.trim() || null, min_qty: minQ ? num(minQ) : null,
+          data: { ...(edit?.data ?? {}), ...(category === "İlaç" ? { label_dose: dose.trim(), wait_days: wait ? Number(wait) : null, target: target.trim(), method: method.trim() } : {}) } });
       }}>Kaydet</MainButton></div>
     </main>
   );

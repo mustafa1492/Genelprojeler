@@ -9,12 +9,13 @@ import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { config } from "../config";
-import { dayText, GELIR, incomeOpen, num, todayStr } from "../kayit";
+import { breakEven, dayText, GELIR, incomeOpen, num, todayStr, VERIM } from "../kayit";
 import { HistoryLink } from "../nav";
 import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
+import { listExpenses, type Expense } from "@/core/expenses/api";
 import { listLots, type Lot } from "@/core/lots/api";
-import { FIDAN_SATIS, hasFidan, sizesOf } from "../fidan";
+import { FIDAN_SATIS, hasFidan, lotStats, marginOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -24,6 +25,9 @@ export default function Gelir() {
   const [rows, setRows] = useState<EventRow[] | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [lots, setLots] = useState<Lot[]>([]);
+  const [exps, setExps] = useState<Expense[]>([]);
+  const [yields, setYields] = useState<EventRow[]>([]);
+  const [counts, setCounts] = useState<EventRow[]>([]);
   const fidan = hasFidan(biz);
   const [form, setForm] = useState<{ type?: string; edit?: EventRow; prefill?: Record<string, string | number | boolean> } | null>(null);
   const [done, setDone] = useState<Done>(null);
@@ -33,13 +37,26 @@ export default function Gelir() {
     listEvents(biz.id, GELIR).then((r) => setRows(r.slice().reverse())).catch(() => setRows([]));
     listPlaces(biz.id).then(setPlaces).catch(() => {});
     if (fidan) listLots(biz.id).then(setLots).catch(() => {});
+    listExpenses(biz.id).then(setExps).catch(() => {});
+    listEvents(biz.id, VERIM).then(setYields).catch(() => {});
+    if (fidan) listEvents(biz.id, SAYIM).then(setCounts).catch(() => {});
   }, [biz.id, fidan]);
   useEffect(load, [load]);
   useOnActivate(load);
   const tp = useTabParams();
   useEffect(() => { if (tp.p.yeni) { setDone(null); setForm(tp.p.parti || tp.p.adet ? { type: FIDAN_SATIS, prefill: tp.p } : {}); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (form) return <GelirForm places={places} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prefill={form.prefill} onCancel={() => setForm(null)}
+  const beOf = (placeId: string | null) => {
+    if (!placeId) return null;
+    const cost = exps.filter((e) => e.place_id === placeId && inSeason(e.occurred_on, S)).reduce((t, e) => t + e.amount, 0);
+    return breakEven(cost, yields.filter((e) => e.place_id === placeId && String(e.data.year) === S.name));
+  };
+  const lotInfo = (id: string | null) => {
+    const l = lots.find((x) => x.id === id); if (!l) return null;
+    const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps);
+    return { alive: st.alive, perPlant: st.perPlant, suggested: suggestedPrice(st.perPlant, marginOf(biz)) };
+  };
+  if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prefill={form.prefill} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)} ${formatTL(Number(e.quantity))}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
       if (form.edit) {
@@ -92,7 +109,9 @@ export default function Gelir() {
 }
 
 type GelirValues = { occurred_on: string; place_id: string | null; quantity: number; data: Record<string, unknown> };
-function GelirForm({ places, type: t0, edit, lots = [], sizes = [], prefill = {}, onSave, onCancel, onDelete }: {
+function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [], prefill = {}, onSave, onCancel, onDelete }: {
+  beOf?: (placeId: string | null) => { perUnit: number; unit: string } | null;
+  lotInfo?: (id: string | null) => { alive: number; perPlant: number; suggested: number | null } | null;
   places: Place[]; type?: string; edit?: EventRow; lots?: Lot[]; sizes?: string[]; prefill?: Record<string, string | number | boolean>; onSave: (v: GelirValues) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
   const d = edit?.data ?? {};
@@ -157,6 +176,12 @@ function GelirForm({ places, type: t0, edit, lots = [], sizes = [], prefill = {}
             <div className="ui-chips wrap">{lots.map((l) => <Chip key={l.id} selected={lotId === l.id} onClick={() => { setLotId(l.id); if (l.place_id) setPlaceId(l.place_id); }}>{l.name}</Chip>)}</div></div>
           {sizes.length > 0 && <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Boy</span>
             <div className="ui-chips wrap">{sizes.map((x) => <Chip key={x} selected={size === x} onClick={() => setSize(size === x ? null : x)}>{x}</Chip>)}</div></div>}
+          {(() => { const li = lotInfo?.(lotId); if (!li) return null; return (
+            <div className="ui-card ui-stack" style={{ gap: 2 }}>
+              <span>Partide <b>{li.alive.toLocaleString("tr-TR")}</b> canlı fidan · fidan başı maliyet <b>{formatTL(Math.round(li.perPlant * 100) / 100)}</b></span>
+              {li.suggested && <span>Önerilen fiyat: <b>{formatTL(li.suggested)}</b> / adet {!price && <button type="button" className="ui-link inline" onClick={() => setPrice(String(li.suggested))}>kullan</button>}</span>}
+              {price && num(price) < li.perPlant && <span style={{ color: "var(--tehlike)", fontWeight: 800 }}>Bu fiyat maliyetin altında.</span>}
+            </div>); })()}
           <div className="ui-quickadd">
             <TextField id="g_adet" label="Kaç adet?" inputMode="numeric" maxLength={9} value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} />
             <TextField id="g_afiyat" label="Adet fiyatı (TL)" inputMode="decimal" maxLength={10} value={price} onChange={(e) => setPrice(e.target.value)} />
@@ -171,6 +196,14 @@ function GelirForm({ places, type: t0, edit, lots = [], sizes = [], prefill = {}
             <TextField id="g_fiyat" label="Birim fiyat (TL)" inputMode="decimal" placeholder="38" maxLength={12} value={price} onChange={(e) => setPrice(e.target.value)} />
           </div>
           <div className="ui-chips">{config.units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div>
+          {(() => {
+            const be = beOf?.(placeId); if (!be) return null;
+            const p = num(price) * (unit === "ton" && be.unit === "kg" ? 0.001 : 1);
+            const same = be.unit === unit || (be.unit === "kg" && unit === "ton");
+            return <div className={`ui-warn ${!price || !same ? "yakin" : p >= be.perUnit ? "" : "gecti"}`} style={!price || !same || p < be.perUnit ? undefined : { background: "var(--ana-acik)", color: "var(--ana-yazi)" }}>
+              <div className="ui-warn-row"><span>Bu tarlanın başabaş fiyatı: <b>{formatTL(Math.round(be.perUnit * 100) / 100)} / {be.unit}</b>{price && same ? (p >= be.perUnit ? " · bu fiyat kârda" : " · bu fiyat zararda") : ""}</span></div>
+            </div>;
+          })()}
         </>
       )}
       {autoTotal ? <div className="ui-done"><p>Toplam: <b>{formatTL(autoTotal)}</b></p></div>

@@ -17,3 +17,14 @@ export const num = (s: string) => Number(String(s).replace(/\./g, "").replace(",
 export const harvestFrom = (e: EventRow) => (Number(e.data?.wait_days) > 0 ? addDays(e.occurred_on, Number(e.data.wait_days)) : null);
 /** Gelirin tahsil edilmeyen kısmı. */
 export const incomeOpen = (e: EventRow) => Math.max(0, Number(e.quantity ?? 0) - Number(e.data?.received ?? 0));
+
+/** Başabaş: tarlanın sezondaki masrafı ÷ sezon verimi. ton → kg; kasa/adet kendi biriminde. */
+export function breakEven(cost: number, yields: EventRow[]): { perUnit: number; unit: string; qty: number } | null {
+  if (!yields.length || !(cost > 0)) return null;
+  const toKg = (e: EventRow) => (String(e.data.unit) === "ton" ? Number(e.quantity) * 1000 : String(e.data.unit) === "kg" ? Number(e.quantity) : null);
+  const kg = yields.map(toKg);
+  if (kg.every((x) => x != null)) { const q = (kg as number[]).reduce((t, x) => t + x, 0); return q > 0 ? { perUnit: cost / q, unit: "kg", qty: q } : null; }
+  const u = String(yields[0].data.unit);
+  if (yields.every((e) => String(e.data.unit) === u)) { const q = yields.reduce((t, e) => t + Number(e.quantity), 0); return q > 0 ? { perUnit: cost / q, unit: u, qty: q } : null; }
+  return null;
+}

@@ -49,6 +49,10 @@ fidan başı maliyet = (alış + önceki masraf + partiye masraf + parsel masraf
 sipariş (teslim → satış formu dolu açılır), bakım/işlem, hatırlatıcı (her N gün; kullanıcı belirler), fotoğraf günlüğü, Excel (partiler, boy stoku, siparişler),
 belge önerileri (fidan üretim izni, bitki pasaportu). Boy sınıfları kullanıcı tanımlı. Migration 0011.
 
+## Durum (3 Kasım 2026, gelistirme dalı)
+Mustafa seçti: 1 (başabaş), 3 (masraf+depo, az kaldı), 4 (ilaç hafızası + ilaç kartı), 9 (fidan fiyat önerisi) → YAPILDI. 5 ve 8 yapılmayacak; 7 (sezon karşılaştırma) sonra.
+İlaç "önerilen kullanım şekli" uygulama tarafından YAZILMAZ: kullanıcı etiketten bir kere girer (ilaç kartı), ilaçlamada önüne çıkar/dolar.
+
 ## C. Çıktılar
 - Var: güzel Excel (renkli başlık, TL biçimi, toplamlar, sabit başlık), PDF sezon raporu (yazdır → PDF).
 - Ek seçenekler: WhatsApp özet mesajı; muhasebeci için tek dosya (yıl sonu); grafikli PDF kapak sayfası; banka/kredi için çok sezonlu özet.

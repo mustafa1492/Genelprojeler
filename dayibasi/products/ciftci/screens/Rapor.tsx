@@ -10,7 +10,7 @@ import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { BackButton, MainButton } from "@/core/ui";
-import { dayYear, GELIR, incomeOpen, ISLEM, VERIM } from "../kayit";
+import { breakEven, dayYear, GELIR, incomeOpen, ISLEM, VERIM } from "../kayit";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 
 const tr = (d: string) => `${d.slice(8)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
@@ -52,7 +52,8 @@ export default function Rapor() {
     const g = G.filter((e) => e.place_id === id).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
     const p = places.find((x) => x.id === id); const d = Number(p?.custom?.donum) || 0;
     const v = V.filter((e) => e.place_id === id).map((e) => `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}`).join(", ");
-    return { id, name: pName(id), m, g, kar: g - m, d, v };
+    const b = breakEven(m, V.filter((e) => e.place_id === id));
+    return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
   }).filter((x) => x.m || x.g || x.v);
   const borc = dues.filter((d) => d.direction === "borc").reduce((t, d) => t + remaining(d), 0) + exp.reduce((t, e) => t + owed(e), 0);
   const alacak = dues.filter((d) => d.direction === "alacak").reduce((t, d) => t + remaining(d), 0) + ev.filter((e) => e.kind === GELIR).reduce((t, e) => t + incomeOpen(e), 0);
@@ -63,8 +64,8 @@ export default function Rapor() {
       ["Masraf türü", "Toplam (TL)"], ...cats.map((x) => [x.c, x.t]), ["Toplam masraf", masraf], [],
       ["Ay", "Masraf (TL)"], ...months.map((x) => [monthName(x.m), x.t]),
     ] },
-    { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dönüm", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dönüm başı masraf (TL)", "Verim"],
-      ...fields.map((f) => [f.name, f.d || "", f.m, f.g, f.kar, f.d ? Math.round(f.m / f.d) : "", f.v])] },
+    { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dönüm", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dönüm başı masraf (TL)", "Verim", "Başabaş fiyatı"],
+      ...fields.map((f) => [f.name, f.d || "", f.m, f.g, f.kar, f.d ? Math.round(f.m / f.d) : "", f.v, f.be])] },
     { name: "Masraflar", title: `Masraflar · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not", "Veresiye (kime)"],
       ...E.map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? "", e.on_credit ? e.vendor ?? "" : ""]), ["Toplam", "", "", masraf]] },
     { name: "Gelir", title: `Gelir · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Ürün", "Miktar", "Birim", "Toplam (TL)", "Alıcı", "Alınacak (TL)"],
@@ -115,8 +116,8 @@ export default function Rapor() {
       <h2 className="ui-section">Tarla tarla</h2>
       <div className="rapor-table">
         <table>
-          <thead><tr><th>Tarla</th><th>Masraf</th><th>Gelir</th><th>Kâr</th><th>Dönüm başı</th><th>Verim</th></tr></thead>
-          <tbody>{fields.map((f) => <tr key={f.name}><td>{f.name}</td><td>{formatTL(f.m)}</td><td>{formatTL(f.g)}</td><td className={f.kar < 0 ? "neg" : ""}>{formatTL(f.kar)}</td><td>{f.d ? formatTL(Math.round(f.m / f.d)) : "—"}</td><td>{f.v || "—"}</td></tr>)}</tbody>
+          <thead><tr><th>Tarla</th><th>Masraf</th><th>Gelir</th><th>Kâr</th><th>Dönüm başı</th><th>Verim</th><th>Başabaş</th></tr></thead>
+          <tbody>{fields.map((f) => <tr key={f.name}><td>{f.name}</td><td>{formatTL(f.m)}</td><td>{formatTL(f.g)}</td><td className={f.kar < 0 ? "neg" : ""}>{formatTL(f.kar)}</td><td>{f.d ? formatTL(Math.round(f.m / f.d)) : "—"}</td><td>{f.v || "—"}</td><td>{f.be || "—"}</td></tr>)}</tbody>
         </table>
       </div>
 

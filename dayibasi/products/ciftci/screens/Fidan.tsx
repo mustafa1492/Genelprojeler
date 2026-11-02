@@ -12,13 +12,13 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { ageText, FIDAN_SATIS, FOTO, lotStats, SAYIM, SIPARIS, sizesOf, type LotStats } from "../fidan";
+import { ageText, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
 import { addDays, dayText, dayYear, GELIR, ISLEM, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" };
 const BAKIM = ["Budama", "Güve kontrolü", "İlaçlama", "Gübreleme", "Sulama", "Yaprak hastalığı kontrolü", "Diğer"];
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
@@ -35,6 +35,7 @@ export default function Fidan() {
   const [view, setView] = useState<View>({ v: "list" });
   const [done, setDone] = useState<Done>(null);
   const sizes = sizesOf(biz);
+  const margin = marginOf(biz);
 
   const load = useCallback(() => {
     listLots(biz.id).then(setLots).catch(() => setLots([]));
@@ -80,6 +81,13 @@ export default function Fidan() {
     const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
     if (error) throw error;
     setBiz({ ...biz, settings }); setDone({ message: "Boy sınıfları kaydedildi." }); setView({ v: "list" });
+  }} />;
+
+  if (view.v === "kar") return <KarOrani value={margin} onCancel={back} onSave={async (n) => {
+    const settings = { ...biz.settings, fidan_margin: n };
+    const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
+    if (error) throw error;
+    setBiz({ ...biz, settings }); setDone({ message: n ? `Kâr oranı %${n}.` : "Fiyat önerisi kapatıldı." }); setView({ v: "list" });
   }} />;
 
   if (view.v === "siparis") return <SiparisForm edit={view.edit} lots={all} sizes={sizes} onCancel={back}
@@ -150,6 +158,7 @@ export default function Fidan() {
           ["Son sayım", st.counted ? dayYear(st.counted) : "Sayım yok (dikilen adet esas)"],
           ["Maliyet dökümü", `partiye ${formatTL(Math.round(st.costDirect))}${st.costShare ? ` + parselden pay ${formatTL(Math.round(st.costShare))}` : ""}`],
           ["Kâr / zarar (şimdiye kadar)", formatTL(Math.round(st.income - st.cost))],
+          ["Önerilen satış fiyatı", suggestedPrice(st.perPlant, margin) ? `${formatTL(suggestedPrice(st.perPlant, margin)!)} / adet (maliyet + %${margin})` : "Kâr oranı girilmedi"],
         ]} /></Card>
         {Object.keys(st.bySize).length > 0 && (
           <div className="ui-card ui-stack" style={{ gap: 8 }}>
@@ -210,10 +219,10 @@ export default function Fidan() {
 
   const excel = () => downloadXlsx(`${biz.name}-partiler`.replace(/\s+/g, "-"), [
     { name: "Partiler", title: `${biz.name} · Fidan partileri · ${new Date().toLocaleDateString("tr-TR")}`, rows: [
-      ["Parti", "Parsel", "Dikim", "Yaş", "Dikilen", "Canlı", "Satılan", "Fire", "Fire %", "Toplam maliyet (TL)", "Fidan başı maliyet (TL)", "Satış geliri (TL)", "Kâr / zarar (TL)", "Durum"],
+      ["Parti", "Parsel", "Dikim", "Yaş", "Dikilen", "Canlı", "Satılan", "Fire", "Fire %", "Toplam maliyet (TL)", "Fidan başı maliyet (TL)", "Önerilen fiyat (TL)", "Satış geliri (TL)", "Kâr / zarar (TL)", "Durum"],
       ...all.map(stats).map((s) => [s.lot.name, place(s.lot.place_id), s.lot.planted_on ? dayYear(s.lot.planted_on) : "", ageText(s.ageMonths), s.lot.initial_count, s.alive, s.sold, s.dead,
-        Math.round(s.firePct * 10) / 10, Math.round(s.cost), Math.round(s.perPlant * 100) / 100, s.income, Math.round(s.income - s.cost), s.lot.status]),
-      ["Toplam (aktif)", "", "", "", "", totAlive, "", "", "", Math.round(totCost), totAlive ? Math.round((totCost / totAlive) * 100) / 100 : "", "", "", ""],
+        Math.round(s.firePct * 10) / 10, Math.round(s.cost), Math.round(s.perPlant * 100) / 100, suggestedPrice(s.perPlant, margin) ?? "", s.income, Math.round(s.income - s.cost), s.lot.status]),
+      ["Toplam (aktif)", "", "", "", "", totAlive, "", "", "", Math.round(totCost), totAlive ? Math.round((totCost / totAlive) * 100) / 100 : "", "", "", "", ""],
     ] },
     { name: "Boy stoku", title: "Satışa hazır (son sayımlardan, satılanlar düşülmüş)", rows: [["Boy", "Adet", "Siparişte ayrılan", "Serbest"],
       ...sizes.map((k) => [k, ready[k] ?? 0, reserved[k] ?? 0, (ready[k] ?? 0) - (reserved[k] ?? 0)])] },
@@ -280,9 +289,10 @@ export default function Fidan() {
         <button key={l.id} type="button" className="ui-card ui-stack" style={{ gap: 6, opacity: l.status === "bitti" ? 0.6 : 1 }} onClick={() => { setDone(null); setView({ v: "lot", id: l.id }); }}>
           <span style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><b style={{ fontSize: "1.1rem" }}>{l.name}</b>
             {l.status === "bitti" ? <StatusPill status="bekliyor">Bitti</StatusPill> : <span className="ui-amount">{fmt(s.alive)} adet</span>}</span>
-          <span className="ui-note" style={{ margin: 0 }}>{[place(l.place_id), l.planted_on ? dayYear(l.planted_on) : "", ageText(s.ageMonths), `fire %${s.firePct.toFixed(1)}`, s.alive ? `fidan başı ${formatTL(Math.round(s.perPlant * 100) / 100)}` : ""].filter(Boolean).join(" · ")}</span>
+          <span className="ui-note" style={{ margin: 0 }}>{[place(l.place_id), l.planted_on ? dayYear(l.planted_on) : "", ageText(s.ageMonths), `fire %${s.firePct.toFixed(1)}`, s.alive ? `fidan başı ${formatTL(Math.round(s.perPlant * 100) / 100)}` : "", suggestedPrice(s.perPlant, margin) ? `öneri ${formatTL(suggestedPrice(s.perPlant, margin)!)}` : ""].filter(Boolean).join(" · ")}</span>
         </button>); })}
       {all.length > 0 && <MainButton secondary onClick={excel}>Excel’e indir (partiler, boy stoku, siparişler)</MainButton>}
+      <button type="button" className="ui-link" onClick={() => setView({ v: "kar" })}>{margin ? `Kâr oranı: %${margin} · değiştir` : "Satış fiyatı önerisi için kâr oranı gir"}</button>
       <button type="button" className="ui-link" onClick={() => setView({ v: "boylar" })}>Boy sınıflarını düzenle ({sizes.join(", ")})</button>
     </main>
   );
@@ -464,6 +474,21 @@ function Boylar({ sizes, onSave, onCancel }: { sizes: string[]; onCancel: () => 
         <button type="button" disabled={!nw.trim()} onClick={() => { if (!list.includes(nw.trim())) setList([...list, nw.trim()]); setNw(""); }}>Ekle</button></div>
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={async () => { if (!list.length) { setError("En az bir sınıf olmalı."); return; } try { await onSave(list); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+    </main>
+  );
+}
+
+function KarOrani({ value, onSave, onCancel }: { value: number | null; onCancel: () => void; onSave: (n: number) => Promise<void> }) {
+  const [v, setV] = useState(value ? String(value) : "");
+  const [error, setError] = useState("");
+  return (
+    <main className="ui-stack">
+      <BackButton onClick={onCancel} label="Vazgeç" />
+      <PageHeader sub="Fidan" title="Kâr oranı" />
+      <p className="ui-note">Fidan başı maliyetin üstüne yüzde kaç kâr koymak istiyorsun? Her partiye “önerilen satış fiyatı” bu orana göre çıkar. Boş bırakırsan öneri gösterilmez.</p>
+      <TextField id="kar" label="Kâr oranı (%)" inputMode="numeric" maxLength={4} placeholder="Örnek: 40" value={v} onChange={(e) => setV(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
+      {error && <ErrorText>{error}</ErrorText>}
+      <MainButton onClick={async () => { try { await onSave(Number(v) || 0); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
     </main>
   );
 }
