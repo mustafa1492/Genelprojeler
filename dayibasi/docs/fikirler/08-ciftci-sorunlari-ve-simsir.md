@@ -38,6 +38,8 @@ Henüz hiçbiri seçilmedi. Önce Mustafa seçer; kural (bekleme süresi, fiyat 
 9. **Fotoğraf günlüğü:** partinin aylara göre gelişimi (müşteriye göstermek için de).
 10. **Belgeler:** fidan üretim/satış izni (İl Tarım), bitki pasaportu/etiket, sertifika bitiş tarihleri.
 11. **Sezon yerine "parti ömrü" raporu:** dikimden satışa toplam masraf, gelir, bitki başı kâr.
+**Kimler görür (Mustafa, 2 Kasım 2026):** yalnız şimşir işini yapan arkadaşı ve babası. Mustafa ve babasının defterinde **görünmez**.
+→ İşletme bazında **açılıp kapanan modül**: `businesses.settings.modules = ["fidan"]`. Yalnız bu ayarı açık olan defterde "Fidan" sekmesi ve ilgili raporlar çıkar. Onlara ayrı hesap + ayrı defter açılır (aile daveti gibi kendi aralarında ortak kullanırlar). Yönetici panelinden aç/kapa.
 Teknik: yeni ürün türü gerekmez; çiftçi defterine **"Parti / fidan"** modülü (lots tablosu: places + sayımlar + boy sınıfları) eklenir. Sezon sistemi çok yıllık sezonlarla da çalışır.
 
 ## C. Çıktılar
