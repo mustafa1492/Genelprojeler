@@ -87,6 +87,7 @@ docs/
 - İstemci: `core/supabase/client.ts`.
 
 ## Kaldığımız yer (1 Kasım 2026)
+- **İLK HEDEF: çiftçi defteri — `docs/ciftci-plan.md`** (Mustafa 2 Kasım 2026: önce bu bitecek). Sonra `docs/istekler.md`.
 - **Sıradaki işler: `docs/istekler.md`** (Mustafa'nın not ettirdiği istekler; önce onu oku).
 - Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).
 - **Bekleyen (Supabase panelinde, kullanıcı yapar):** Authentication > Providers > Email: şifre en az 8, "leaked password protection" açık. Authentication > URL Configuration: yayın adresi Site URL + Redirect URLs'e `<adres>/sifre` eklenecek (şifremi unuttum için).
