@@ -29,6 +29,18 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
   - Puantaj sekmesi: ay takvimi (her günde o gün kaç kişi)
 - [ ] **Kişi kartında takvim:** işçinin çalıştığı günler alt alta liste yerine **ay takvimi** olarak görünsün (çalıştığı günler işaretli; ay ileri/geri; güne dokununca o günün tarlası ve yevmiyesi). Ay toplamı (gün, kazanç) takvimin üstünde.
 
+## Masraflar — kararlar (Mustafa, 2 Kasım 2026). SIRADAKİ İŞ BU.
+Ortak parça `core/expenses` (dayıbaşı + çiftçi defteri aynısını kullanır), ürün farkları config'te.
+- **Yer:** alt menüde **ayrı sekme** (Bugün · Ekibim · Kayıtlar · Masraf · Alacaklar); Bugün'de küçük "+ Masraf".
+- **Türler:** hazır liste (dayıbaşı: Yakıt, Şoför, Lastik, Tamir, Yemek, Diğer; çiftçi: Tohum, Gübre, İlaç, Mazot, İşçilik, Kira…) **+ kullanıcı kendi türünü ekler**.
+- **Giriş:** tür → tutar → Kaydet (3 dokunuş); son tutar hazır düğme; tarih (bugün), not isteğe bağlı; Geri al; internetsiz.
+- **Fiş/fatura fotoğrafı:** isteğe bağlı, **ilk sürümde var** (Supabase Storage, gizli kova, yalnız işletme üyeleri).
+- **Veresiye:** masraf "Ödendi" ya da "Veresiye: kime" (ör. Petrol Ofisi, gübre bayisi). "Borçlu olduğum yerler" listesi, ödeyince kapanır (kısmi ödeme).
+- **Dayıbaşına özel:** "Çiftçiye yansıt" (masraf çiftçinin borcuna eklenir, net kazançtan düşmez). Net kazanç = payın − masraflar (yansıtılanlar hariç).
+- **Çiftçiye özel (sonra):** tarla/sezon bağlantısı, gelirle karşılaştırma.
+- **Rapor:** ay / tarih aralığı, tür tür toplam + çubuk, liste; **gerçek .xlsx** (Masraflar + Özet sayfaları).
+- 9. madde (abonelik) ertelendi.
+
 ## Para kuralları (Mustafa, 1 Kasım 2026) — hesap motorunu değiştirir, dikkat
 - [ ] **Kasa / kilo başı ücret:** bazı hasatlarda yevmiye yerine kasa ya da kilo başına ücret. Kayıtta ücret türü seçilecek (günlük / kasa / kilo); kasa-kilo ise kişi başı ya da toplam miktar girilecek. Sorulacak: miktar kişi kişi mi tutulur, ekip toplamı mı? Dayıbaşı payı bu işlerde nasıl (kasa başı mı, sabit mi)?
 - [ ] **Yarım gün / tam gün:** kayıtta kişi bazında yarım gün işaretlenebilsin. Sorulacak: yarım gün = yevmiyenin yarısı mı, ayrı bir tutar mı? Çiftçiye yansıyan da yarım mı, dayıbaşı payı da yarım mı?
