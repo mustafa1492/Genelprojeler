@@ -17,6 +17,10 @@ export const useBusiness = () => useContext(BusinessCtx)!;
 
 type Texts = { appName: string; businessPlaceholder: string };
 
+/** Kullanıcı adıyla giriş: "@" yoksa iç e-postaya çevrilir (gerçek e-posta gerekmez). */
+export const USERNAME_DOMAIN = "kullanici.dayibasi.app";
+const toEmail = (x: string) => { const v = x.trim().toLocaleLowerCase("tr"); return v.includes("@") ? v : `${v}@${USERNAME_DOMAIN}`; };
+
 /**
  * Giriş + işletme kapısı: giriş yoksa giriş ekranı, işletme yoksa "işletmeni oluştur",
  * ikisi de varsa içeriği gösterir. Ürüne özel kelimeler `texts` ve `product` ile gelir.
@@ -99,6 +103,7 @@ function Login({ appName }: { appName: string }) {
     setError(""); setInfo(""); setBusy(true);
     const sb = supabase().auth;
     if (mode === "unuttum") {
+      if (!email.includes("@")) { setBusy(false); setError("Kullanıcı adıyla girenler şifreyi yöneticiden yeniletir."); return; }
       const { error } = await sb.resetPasswordForEmail(email, { redirectTo: `${location.origin}/sifre` });
       setBusy(false);
       if (error) setError(error.code === "over_email_send_rate_limit" ? "Çok sık denedin. Birkaç dakika sonra tekrar dene." : "Gönderemedim, tekrar dene.");
@@ -106,13 +111,13 @@ function Login({ appName }: { appName: string }) {
       return;
     }
     const { data, error } = mode === "giris"
-      ? await sb.signInWithPassword({ email, password })
-      : await sb.signUp({ email, password });
+      ? await sb.signInWithPassword({ email: toEmail(email), password })
+      : await sb.signUp({ email: toEmail(email), password });
     setBusy(false);
     if (error) {
       const c = error.code ?? "";
       setError(
-        c === "invalid_credentials" ? "E-posta ya da şifre yanlış." :
+        c === "invalid_credentials" ? "Kullanıcı adı / e-posta ya da şifre yanlış." :
         c === "user_already_exists" ? "Bu e-postayla hesap var. Giriş yap." :
         c === "weak_password" ? "Şifre en az 8 harf ya da rakam olmalı." :
         c === "over_request_rate_limit" || c === "over_email_send_rate_limit" ? "Çok sık denedin. Birkaç dakika sonra tekrar dene." :
@@ -131,7 +136,7 @@ function Login({ appName }: { appName: string }) {
       <h1 style={{ marginBottom: 0 }}>{appName}</h1>
       <p style={{ margin: 0, fontSize: "1.0rem" }}>{mode === "giris" ? "Hoş geldin. Giriş yap." : mode === "kayit" ? "Yeni hesap aç." : "E-postanı yaz, şifre yenileme bağlantısı göndereyim."}</p>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <TextField id="email" label="E-posta" type="email" maxLength={254} autoComplete="email" inputMode="email" required
+        <TextField id="email" label={mode === "giris" ? "E-posta ya da kullanıcı adı" : "E-posta"} type={mode === "giris" ? "text" : "email"} maxLength={254} autoCapitalize="none" autoCorrect="off" autoComplete="email" inputMode="email" required
           value={email} onChange={(e) => setEmail(e.target.value)} />
         {mode !== "unuttum" && (
           <TextField id="password" label={mode === "kayit" ? "Şifre (en az 8 harf ya da rakam)" : "Şifre"} type="password" required
