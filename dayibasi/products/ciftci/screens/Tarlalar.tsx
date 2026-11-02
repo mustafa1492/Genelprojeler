@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -202,6 +203,8 @@ function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
   place: Place; items: Item[]; history: EventRow[]; initialType?: string; onCancel: () => void;
   onSave: (type: string, day: string, data: Record<string, unknown>, use: { id: string; amount: number } | null) => Promise<void>;
 }) {
+  const operations = useCList("operations");
+  const go = useGo();
   const [type, setType] = useState<string | null>(initialType ?? null);
   const [day, setDay] = useState(todayStr());
   const [product, setProduct] = useState("");
@@ -234,7 +237,8 @@ function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
       <main className="ui-stack">
         <BackButton onClick={onCancel} label="Vazgeç" />
         <PageHeader sub={place.name} title="Ne yapıldı?" />
-        <div className="ui-tiles">{config.operations.map((o) => <button key={o} type="button" onClick={() => setType(o)}><b>{o}</b></button>)}</div>
+        <div className="ui-tiles">{operations.map((o) => <button key={o} type="button" onClick={() => setType(o)}><b>{o}</b></button>)}
+          <button type="button" className="add" onClick={() => go("listeler", { liste: "operations", geri: "tarlalar" })}><b>İşleri düzenle</b></button></div>
       </main>
     );
   }
@@ -297,6 +301,7 @@ function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
 }
 
 function VerimForm({ place, seasons, current, onSave, onCancel }: { place: Place; seasons: Season[]; current: Season; onSave: (y: string, crop: string, amount: number, unit: string) => Promise<void>; onCancel: () => void }) {
+  const units = useCList("units");
   const [yy, setYy] = useState(current.name);
   const [crop, setCrop] = useState(place.custom?.urun ?? "");
   const [amount, setAmount] = useState("");
@@ -310,7 +315,7 @@ function VerimForm({ place, seasons, current, onSave, onCancel }: { place: Place
       <div className="ui-chips">{ys.map((x) => <Chip key={x} selected={x === yy} onClick={() => setYy(x)}>{x}</Chip>)}</div>
       <TextField id="v_urun" label="Ürün" placeholder="Örnek: Zeytin" maxLength={40} value={crop} onChange={(e) => setCrop(e.target.value)} />
       <TextField id="v_miktar" label="Ne kadar alındı?" inputMode="decimal" placeholder="Örnek: 4500" maxLength={12} value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
-      <div className="ui-chips">{config.units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div>
+      <div className="ui-chips">{units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div>
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={async () => { const n = num(amount); if (!(n > 0)) { setError("Miktarı yaz."); return; } await onSave(yy, crop.trim(), n, unit); }}>Kaydet</MainButton>
     </main>

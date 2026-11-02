@@ -15,6 +15,7 @@ import Masraf from "./screens/Masraf";
 import Tarlalar from "./screens/Tarlalar";
 import Sezonlar from "./screens/Sezonlar";
 import Rapor from "./screens/Rapor";
+import Listeler from "./lists";
 import Vadeler from "./screens/Vadeler";
 import { SeasonProvider } from "./sezon";
 
@@ -30,6 +31,7 @@ const TABS: ShellTab[] = [
   { id: "belgeler", label: "Belgeler", path: `${BASE}/belgeler`, inNav: false, render: () => <Belgeler /> },
   { id: "aile", label: "Aile", path: `${BASE}/aile`, inNav: false, render: () => <Aile /> },
   { id: "sezonlar", label: "Sezonlar", path: `${BASE}/sezonlar`, inNav: false, render: () => <Sezonlar /> },
+  { id: "listeler", label: "Listeler", path: `${BASE}/listeler`, inNav: false, render: () => <Listeler /> },
   { id: "rapor", label: "Sezon raporu", path: `${BASE}/rapor`, inNav: false, render: () => <Rapor /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
 ];

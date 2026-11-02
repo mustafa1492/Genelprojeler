@@ -19,7 +19,10 @@ type Texts = { appName: string; businessPlaceholder: string };
 
 /** Kullanıcı adıyla giriş: "@" yoksa iç e-postaya çevrilir (gerçek e-posta gerekmez). */
 export const USERNAME_DOMAIN = "kullanici.dayibasi.app";
-const toEmail = (x: string) => { const v = x.trim().toLocaleLowerCase("tr"); return v.includes("@") ? v : `${v}@${USERNAME_DOMAIN}`; };
+/** Türkçe harfleri düz harfe çevirir (giriş sistemi e-postada yalnız ASCII kabul eder): "hüseyinköprü" → "huseyinkopru". */
+export const asciiUser = (x: string) => x.trim().toLocaleLowerCase("tr")
+  .replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i").replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u").replace(/\s+/g, "");
+const toEmail = (x: string) => { const v = x.trim().toLocaleLowerCase("tr"); return v.includes("@") ? v : `${asciiUser(v)}@${USERNAME_DOMAIN}`; };
 
 /**
  * Giriş + işletme kapısı: giriş yoksa giriş ekranı, işletme yoksa "işletmeni oluştur",

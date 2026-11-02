@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
@@ -56,6 +57,7 @@ function DocForm({ edit, fidan, onSave, onCancel, onDelete }: {
   fidan?: boolean;
   edit?: Doc; onSave: (v: Pick<Doc, "title" | "expires_on" | "notes">) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
+  const docList = useCList("documents");
   const [title, setTitle] = useState(edit?.title ?? "");
   const [exp, setExp] = useState(edit?.expires_on ?? "");
   const [notes, setNotes] = useState(edit?.notes ?? "");
@@ -64,7 +66,7 @@ function DocForm({ edit, fidan, onSave, onCancel, onDelete }: {
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Belge" title={edit ? "Belgeyi düzenle" : "Yeni belge"} />
-      <div className="ui-chips wrap">{[...config.documents, ...(fidan ? ["Fidan üretim izni", "Bitki pasaportu", "Fidan sertifikası"] : [])].map((t) => <Chip key={t} selected={t === title} onClick={() => setTitle(t)}>{t}</Chip>)}</div>
+      <div className="ui-chips wrap">{[...docList, ...(fidan ? ["Fidan üretim izni", "Bitki pasaportu", "Fidan sertifikası"] : [])].map((t) => <Chip key={t} selected={t === title} onClick={() => setTitle(t)}>{t}</Chip>)}</div>
       <TextField id="b_ad" label="Belgenin adı" maxLength={100} value={title} onChange={(e) => setTitle(e.target.value)} />
       <TextField id="b_bitis" label="Bitiş / son tarih" type="date" value={exp} onChange={(e) => setExp(e.target.value)} />
       <TextField id="b_not" label="Not (isteğe bağlı)" placeholder="Örnek: poliçe no, hangi tarla" maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} />

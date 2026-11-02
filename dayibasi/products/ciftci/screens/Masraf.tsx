@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -29,12 +30,14 @@ export default function Masraf() {
   useEffect(load, [biz.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useOnActivate(load);
   const { selected: S } = useSeason();
+  const cats = useCList("expense");
+  const invUnits = useCList("inv_units");
   const go = useGo();
   const gelirS = income.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
-    <ExpenseScreen categories={config.expenses.categories} places={places} headerRight={<HistoryLink />} memberName={nameOf}
+    <ExpenseScreen categories={cats} onEditCategories={() => go("listeler", { liste: "expense" })} places={places} headerRight={<HistoryLink />} memberName={nameOf}
       link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
-      stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: config.inventory.units }}
+      stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: invUnits }}
       period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}
       periodSummary={(total) => (
         <div className="ui-total">

@@ -53,6 +53,11 @@ belge önerileri (fidan üretim izni, bitki pasaportu). Boy sınıfları kullan�
 Mustafa seçti: 1 (başabaş), 3 (masraf+depo, az kaldı), 4 (ilaç hafızası + ilaç kartı), 9 (fidan fiyat önerisi) → YAPILDI. 5 ve 8 yapılmayacak; 7 (sezon karşılaştırma) sonra.
 İlaç "önerilen kullanım şekli" uygulama tarafından YAZILMAZ: kullanıcı etiketten bir kere girer (ilaç kartı), ilaçlamada önüne çıkar/dolar.
 
+## Durum (3 Kasım 2026, gelistirme)
+Fidan önerileri 2 (büyüme: sayımdan sayıma boy dağılımı), 5 (fire sebebi: sayımda sebep başına adet), 6 (kapora: siparişte, teslimde satışa "alınan" olarak), 7 (sevk listesi PDF, bitki pasaportu no) YAPILDI.
+Düzenleme modu: `core/settings/lists.tsx` (settings.lists[key] = {added, hidden}); çiftçide Özet → "Listeleri düzenle" + masraf/işlem seçiminde "düzenle".
+Hesap: hüseyinköprü (→ huseyinkopru@kullanici…; kullanıcı adındaki Türkçe harf düz harfe çevrilir), defter "Köprü fidancılık", fidan modülü açık.
+
 ## C. Çıktılar
 - Var: güzel Excel (renkli başlık, TL biçimi, toplamlar, sabit başlık), PDF sezon raporu (yazdır → PDF).
 - Ek seçenekler: WhatsApp özet mesajı; muhasebeci için tek dosya (yıl sonu); grafikli PDF kapak sayfası; banka/kredi için çok sezonlu özet.

@@ -287,3 +287,5 @@ a.ui-warn { color: inherit; }
   h2.ui-section { break-after: avoid; }
 }
 .ilac-kart { background: var(--uyari-acik); border-color: var(--uyari-cizgi); color: var(--uyari-yazi); font-size: 0.92rem; }
+.buyume { display: flex; height: 16px; border-radius: 8px; overflow: hidden; background: var(--notr); }
+.buyume i { display: block; height: 100%; background: var(--ana); }

@@ -99,6 +99,7 @@ export default function Ana() {
         <TabLink to="rapor"><b>Sezon raporu (PDF / Excel)</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
         <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
         <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
+        <TabLink to="listeler"><b>Listeleri düzenle</b><span>Masraf türleri, tarla işleri, birimler… ekle / kaldır</span></TabLink>
         <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>
       </div>
 

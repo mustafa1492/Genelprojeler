@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
@@ -102,6 +103,7 @@ function DueForm({ dir, edit, onSave, onCancel, onDelete }: {
   dir: "borc" | "alacak"; edit?: Due; onCancel: () => void; onDelete?: () => Promise<void>;
   onSave: (v: Pick<Due, "direction" | "party" | "kind" | "amount" | "due_on" | "note">) => Promise<void>;
 }) {
+  const dueKinds = useCList("due_kinds");
   const [party, setParty] = useState(edit?.party ?? "");
   const [kind, setKind] = useState(edit?.kind ?? (dir === "borc" ? "Kredi" : "Diğer"));
   const [amount, setAmount] = useState(edit ? String(edit.amount) : "");
@@ -112,7 +114,7 @@ function DueForm({ dir, edit, onSave, onCancel, onDelete }: {
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub={edit ? "Düzenle" : "Yeni"} title={dir === "borc" ? "Borç" : "Alacak"} />
-      <div className="ui-chips wrap">{config.dueKinds.map((k) => <Chip key={k} selected={k === kind} onClick={() => setKind(k)}>{k}</Chip>)}</div>
+      <div className="ui-chips wrap">{dueKinds.map((k) => <Chip key={k} selected={k === kind} onClick={() => setKind(k)}>{k}</Chip>)}</div>
       <TextField id="v_kim" label={dir === "borc" ? "Kime borçlusun?" : "Kimden alacaksın?"} placeholder={dir === "borc" ? "Örnek: Ziraat Bankası, Tarım Kredi" : "Örnek: Tüccar Ahmet"} maxLength={80} value={party} onChange={(e) => setParty(e.target.value)} />
       <TextField id="v_tutar" label="Tutar (TL)" inputMode="decimal" maxLength={12} value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       <TextField id="v_vade" label="Vade günü (isteğe bağlı)" type="date" value={due} onChange={(e) => setDue(e.target.value)} />

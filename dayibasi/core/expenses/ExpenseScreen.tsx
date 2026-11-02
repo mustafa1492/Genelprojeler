@@ -36,6 +36,8 @@ export type ExpenseScreenProps = {
   link?: { label: string; key: string; options: { id: string; name: string }[]; param: string };
   /** Masrafla birlikte depoya ekleme: masraf türü → depo türü (yoksa null). */
   stock?: { categoryOf: (expenseCategory: string) => string | null; units: readonly string[] };
+  /** Verilirse türler hazır (düzenlenmiş) liste olarak gelir ve "Türleri düzenle" bağlantısı çıkar. */
+  onEditCategories?: () => void;
 };
 type StockAdd = { itemId: string | null; name: string; qty: number; unit: string; category: string };
 
@@ -44,7 +46,7 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 
-export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock }: ExpenseScreenProps) {
+export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
   const [items, setItems] = useState<Expense[] | null>(null);
@@ -72,7 +74,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   useEffect(() => { if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setPresetLink(link && tp.p[link.param] ? String(tp.p[link.param]) : null); setView({ v: "tur" }); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const custom = (Array.isArray(biz.settings?.expense_categories) ? biz.settings!.expense_categories : []) as string[];
-  const categories = [...baseCats.filter((c) => c !== "Diğer"), ...custom.filter((c) => !baseCats.includes(c)), "Diğer"];
+  const categories = onEditCategories ? [...baseCats] : [...baseCats.filter((c) => c !== "Diğer"), ...custom.filter((c) => !baseCats.includes(c)), "Diğer"];
   const all = items ?? [];
   const lastOf = (cat: string) => all.find((e) => e.category === cat)?.amount;
   const vendors = [...new Set(all.map((e) => e.vendor).filter(Boolean) as string[])];
@@ -80,7 +82,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
 
   // --- Tür seç
   if (view.v === "tur") {
-    return <TurSec categories={categories} lastOf={lastOf} onCancel={() => setView({ v: "list" })}
+    return <TurSec categories={categories} lastOf={lastOf} onEdit={onEditCategories} onCancel={() => setView({ v: "list" })}
       onPick={(cat) => setView({ v: "form", cat })}
       onAddCategory={async (name) => {
         const settings = { ...biz.settings, expense_categories: [...custom, name] };
@@ -281,8 +283,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   );
 }
 
-function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory }: {
-  categories: string[]; lastOf: (c: string) => number | undefined; onPick: (c: string) => void; onCancel: () => void; onAddCategory: (n: string) => Promise<void>;
+function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }: {
+  categories: string[]; onEdit?: () => void; lastOf: (c: string) => number | undefined; onPick: (c: string) => void; onCancel: () => void; onAddCategory: (n: string) => Promise<void>;
 }) {
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
@@ -297,7 +299,7 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory }: {
             <b>{c}</b>{lastOf(c) ? <small>son: {formatTL(lastOf(c)!)}</small> : null}
           </button>
         ))}
-        <button type="button" className="add" onClick={() => setAdding(true)}><b>+ Yeni tür</b></button>
+        <button type="button" className="add" onClick={() => (onEdit ? onEdit() : setAdding(true))}><b>{onEdit ? "Türleri düzenle" : "+ Yeni tür"}</b></button>
       </div>
       {adding && (
         <div className="ui-card ui-stack" style={{ gap: 10 }}>

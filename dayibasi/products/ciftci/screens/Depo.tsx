@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -21,6 +22,7 @@ export default function Depo() {
   const [form, setForm] = useState<{ edit?: Item } | null>(null);
   const [done, setDone] = useState<Done>(null);
   const [cat, setCat] = useState("Hepsi");
+  const invCats = useCList("inv_categories");
   const load = useCallback(() => { listItems(biz.id).then(setItems).catch(() => setItems([])); }, [biz.id]);
   useEffect(load, [load]);
   useOnActivate(load);
@@ -41,7 +43,7 @@ export default function Depo() {
     }} />;
 
   const all = items ?? [];
-  const cats = ["Hepsi", ...config.inventory.categories.filter((c) => all.some((i) => i.category === c))];
+  const cats = ["Hepsi", ...[...invCats, ...all.map((i) => i.category)].filter((c, i, a) => a.indexOf(c) === i && all.some((x) => x.category === c))];
   const shown = all.filter((i) => cat === "Hepsi" || i.category === cat);
 
   return (
@@ -73,9 +75,11 @@ export default function Depo() {
 function ItemForm({ edit, onSave, onCancel, onDelete }: {
   edit?: Item; onSave: (v: Pick<Item, "name" | "category" | "unit" | "quantity" | "note" | "min_qty" | "data">) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
+  const invCats = useCList("inv_categories");
+  const invUnits = useCList("inv_units");
   const [name, setName] = useState(edit?.name ?? "");
-  const [category, setCategory] = useState(edit?.category ?? "Gübre");
-  const [unit, setUnit] = useState(edit?.unit ?? "kg");
+  const [category, setCategory] = useState(edit?.category ?? invCats[0] ?? "Diğer");
+  const [unit, setUnit] = useState(edit?.unit ?? invUnits[0] ?? "kg");
   const [qty, setQty] = useState(edit ? String(edit.quantity) : "");
   const [note, setNote] = useState(edit?.note ?? "");
   const [minQ, setMinQ] = useState(edit?.min_qty ? String(edit.min_qty) : "");
@@ -91,9 +95,9 @@ function ItemForm({ edit, onSave, onCancel, onDelete }: {
       <PageHeader sub="Depo" title={edit ? "Malzemeyi düzenle" : "Yeni malzeme"} />
       <TextField id="d_ad" label="Adı" placeholder="Örnek: 20-20-0 gübre, Decis, Budama makası" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
       <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Türü</span>
-        <div className="ui-chips wrap">{config.inventory.categories.map((c) => <Chip key={c} selected={c === category} onClick={() => setCategory(c)}>{c}</Chip>)}</div></div>
+        <div className="ui-chips wrap">{invCats.map((c) => <Chip key={c} selected={c === category} onClick={() => setCategory(c)}>{c}</Chip>)}</div></div>
       <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Birimi</span>
-        <div className="ui-chips wrap">{config.inventory.units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div></div>
+        <div className="ui-chips wrap">{invUnits.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div></div>
       <TextField id="d_miktar" label={`Miktar (${unit})`} inputMode="decimal" placeholder="Örnek: 10" maxLength={12} value={qty} onChange={(e) => setQty(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       <TextField id="d_min" label={`Az kaldı uyarısı: kaç ${unit}’ın altına düşünce? (isteğe bağlı)`} inputMode="decimal" maxLength={10} value={minQ} onChange={(e) => setMinQ(e.target.value)} />
       {category === "İlaç" && (

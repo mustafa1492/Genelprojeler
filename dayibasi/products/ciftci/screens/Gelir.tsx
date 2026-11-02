@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -114,6 +115,8 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
   lotInfo?: (id: string | null) => { alive: number; perPlant: number; suggested: number | null } | null;
   places: Place[]; type?: string; edit?: EventRow; lots?: Lot[]; sizes?: string[]; prefill?: Record<string, string | number | boolean>; onSave: (v: GelirValues) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
+  const incomeKinds = useCList("income");
+  const units = useCList("units");
   const d = edit?.data ?? {};
   const [type, setType] = useState<string | null>((d.type as string) ?? t0 ?? null);
   const [day, setDay] = useState(edit?.occurred_on ?? todayStr());
@@ -126,8 +129,8 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
   const [price, setPrice] = useState(d.price ? String(d.price) : prefill.fiyat ? String(prefill.fiyat) : "");
   const [total, setTotal] = useState(edit ? String(edit.quantity) : "");
   const [buyer, setBuyer] = useState(String(d.buyer ?? prefill.alici ?? ""));
-  const [pay, setPay] = useState<"hepsi" | "kismen" | "vadeli">(edit ? (incomeOpen(edit) === 0 ? "hepsi" : Number(d.received ?? 0) > 0 ? "kismen" : "vadeli") : "hepsi");
-  const [received, setReceived] = useState(d.received ? String(d.received) : "");
+  const [pay, setPay] = useState<"hepsi" | "kismen" | "vadeli">(edit ? (incomeOpen(edit) === 0 ? "hepsi" : Number(d.received ?? 0) > 0 ? "kismen" : "vadeli") : prefill.alinan ? "kismen" : "hepsi");
+  const [received, setReceived] = useState(d.received ? String(d.received) : prefill.alinan ? String(prefill.alinan) : "");
   const [due, setDue] = useState(String(d.due_on ?? ""));
   const [error, setError] = useState("");
   const isPlant = type === FIDAN_SATIS;
@@ -138,7 +141,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Yeni gelir" title="Ne geliri?" />
-      <div className="ui-tiles">{[...(lots.length ? [FIDAN_SATIS] : []), ...config.incomeKinds].map((k) => <button key={k} type="button" onClick={() => setType(k)}><b>{k}</b></button>)}</div>
+      <div className="ui-tiles">{[...(lots.length ? [FIDAN_SATIS] : []), ...incomeKinds].map((k) => <button key={k} type="button" onClick={() => setType(k)}><b>{k}</b></button>)}</div>
     </main>
   );
 
@@ -195,7 +198,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
             <TextField id="g_miktar" label="Miktar" inputMode="decimal" placeholder="4500" maxLength={12} value={qty} onChange={(e) => setQty(e.target.value)} />
             <TextField id="g_fiyat" label="Birim fiyat (TL)" inputMode="decimal" placeholder="38" maxLength={12} value={price} onChange={(e) => setPrice(e.target.value)} />
           </div>
-          <div className="ui-chips">{config.units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div>
+          <div className="ui-chips">{units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div>
           {(() => {
             const be = beOf?.(placeId); if (!be) return null;
             const p = num(price) * (unit === "ton" && be.unit === "kg" ? 0.001 : 1);

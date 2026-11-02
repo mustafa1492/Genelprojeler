@@ -1,4 +1,5 @@
 "use client";
+import { useCList } from "../lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness, useSetBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -18,8 +19,7 @@ import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" };
-const BAKIM = ["Budama", "Güve kontrolü", "İlaçlama", "Gübreleme", "Sulama", "Yaprak hastalığı kontrolü", "Diğer"];
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -83,6 +83,41 @@ export default function Fidan() {
     setBiz({ ...biz, settings }); setDone({ message: "Boy sınıfları kaydedildi." }); setView({ v: "list" });
   }} />;
 
+  if (view.v === "sevk") {
+    const o = view.order; const l = find(String(o.data.lot_id ?? ""));
+    const qty = Number(o.data.qty ?? 0), price = Number(o.data.price ?? 0), dep = Number(o.data.deposit ?? 0);
+    return (
+      <main className="ui-stack rapor">
+        <div className="no-print ui-stack">
+          <BackButton onClick={back} label="Fidan" />
+          <MainButton onClick={() => window.print()}>PDF olarak kaydet / yazdır</MainButton>
+        </div>
+        <header className="rapor-head">
+          <div><small>Sevk listesi</small><h1>{biz.name}</h1><span>Tarih: {dayYear(todayStr())}</span></div>
+          <small>Müşteri: <b>{String(o.data.customer)}</b></small>
+        </header>
+        <div className="rapor-table"><table>
+          <thead><tr><th>Ürün</th><th>Parti</th><th>Boy</th><th>Adet</th><th>Birim fiyat</th><th>Tutar</th></tr></thead>
+          <tbody><tr><td>Şimşir fidanı</td><td>{l?.name ?? "—"}</td><td>{String(o.data.size ?? "—")}</td><td>{fmt(qty)}</td><td>{price ? formatTL(price) : "—"}</td><td>{price ? formatTL(qty * price) : "—"}</td></tr></tbody>
+          {price > 0 && <tfoot>
+            <tr><td colSpan={5}>Toplam</td><td>{formatTL(qty * price)}</td></tr>
+            {dep > 0 && <tr><td colSpan={5}>Alınan kapora</td><td>− {formatTL(dep)}</td></tr>}
+            {dep > 0 && <tr><td colSpan={5}>Kalan</td><td>{formatTL(qty * price - dep)}</td></tr>}
+          </tfoot>}
+        </table></div>
+        <div className="ui-card"><InfoRows rows={[
+          ["Bitki pasaportu no", String(l?.data.passport ?? "—")],
+          ["Dikim tarihi", l?.planted_on ? dayYear(l.planted_on) : "—"],
+          ["Not", String(o.data.note ?? "—")],
+        ]} /></div>
+        <div className="ui-split" style={{ marginTop: 30 }}>
+          <div><span>Teslim eden</span><b style={{ minHeight: 50 }}>&nbsp;</b></div>
+          <div><span>Teslim alan</span><b style={{ minHeight: 50 }}>&nbsp;</b></div>
+        </div>
+      </main>
+    );
+  }
+
   if (view.v === "kar") return <KarOrani value={margin} onCancel={back} onSave={async (n) => {
     const settings = { ...biz.settings, fidan_margin: n };
     const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
@@ -109,8 +144,8 @@ export default function Fidan() {
 
   const lotV = "id" in view ? find((view as { id: string }).id) : undefined;
   if (lotV && view.v === "sayim") return <SayimForm lot={lotV} st={stats(lotV)} sizes={sizes} onCancel={() => setView({ v: "lot", id: lotV.id })}
-    onSave={async (day, alive, bySize, note) => {
-      const e = await addEvent(biz.id, { kind: SAYIM, occurred_on: day, place_id: lotV.place_id, person_id: null, quantity: alive, data: { lot_id: lotV.id, alive, sizes: bySize, ...(note ? { note } : {}) } });
+    onSave={async (day, alive, bySize, note, loss) => {
+      const e = await addEvent(biz.id, { kind: SAYIM, occurred_on: day, place_id: lotV.place_id, person_id: null, quantity: alive, data: { lot_id: lotV.id, alive, sizes: bySize, ...(note ? { note } : {}), ...(Object.keys(loss).length ? { loss } : {}) } });
       setDone({ message: `Sayım: ${lotV.name}, ${fmt(alive)} canlı fidan.`, undo: () => deleteEvent(e.id) }); setView({ v: "lot", id: lotV.id }); load();
     }} />;
   if (lotV && view.v === "islem") return <BakimForm lot={lotV} onCancel={() => setView({ v: "lot", id: lotV.id })}
@@ -166,6 +201,31 @@ export default function Fidan() {
             {sizes.filter((s) => st.bySize[s] != null).map((s) => <div key={s} className="rapor-bar"><span>{s}</span><i style={{ width: `${(st.bySize[s] / maxS) * 100}%` }} /><b>{fmt(st.bySize[s])}</b></div>)}
           </div>
         )}
+        {(() => {
+          const lossTot: Record<string, number> = {};
+          for (const c of myCounts) for (const [k, v] of Object.entries((c.data.loss ?? {}) as Record<string, number>)) lossTot[k] = (lossTot[k] ?? 0) + Number(v);
+          const ent = Object.entries(lossTot).sort((a, b) => b[1] - a[1]); if (!ent.length) return null;
+          const mx = Math.max(...ent.map((e) => e[1]));
+          return <div className="ui-card ui-stack" style={{ gap: 8 }}><b>Fire sebepleri</b>
+            {ent.map(([k, v]) => <div key={k} className="rapor-bar"><span>{k}</span><i style={{ width: `${(v / mx) * 100}%`, background: "var(--tehlike)" }} /><b>{fmt(v)}</b></div>)}</div>;
+        })()}
+        {(() => {
+          const chron = myCounts.slice().reverse().filter((c) => Object.keys((c.data.sizes ?? {}) as object).length);
+          if (chron.length < 1) return null;
+          const shares = (c: EventRow) => { const z = (c.data.sizes ?? {}) as Record<string, number>; const t = Object.values(z).reduce((a, b) => a + Number(b), 0) || 1; return sizes.map((k) => (Number(z[k] ?? 0) / t) * 100); };
+          const top = sizes.length > 1 ? sizes.slice(Math.floor(sizes.length / 2)) : sizes;
+          const topShare = (c: EventRow) => shares(c).slice(sizes.length - top.length).reduce((a, b) => a + b, 0);
+          return <div className="ui-card ui-stack" style={{ gap: 8 }}><b>Büyüme (sayımdan sayıma boy dağılımı)</b>
+            {chron.map((c) => (
+              <div key={c.id} className="ui-stack" style={{ gap: 4 }}>
+                <span className="ui-note" style={{ margin: 0 }}>{dayYear(c.occurred_on)} · {top.join(", ")}: %{Math.round(topShare(c))}</span>
+                <div className="buyume">{shares(c).map((v, i) => <i key={i} style={{ width: `${v}%`, opacity: 0.35 + (0.65 * (i + 1)) / sizes.length }} title={`${sizes[i]} %${Math.round(v)}`} />)}</div>
+              </div>
+            ))}
+            <span className="ui-note" style={{ margin: 0 }}>{sizes.map((k, i) => `${i + 1}. ${k}`).join(" · ")} (açıktan koyuya)</span>
+            {chron.length > 1 && <span><b>{top.join(", ")}</b> oranı: %{Math.round(topShare(chron[0]))} → %{Math.round(topShare(chron[chron.length - 1]))}</span>}
+          </div>;
+        })()}
         <div className="ui-tiles">
           <button type="button" onClick={() => { setDone(null); setView({ v: "sayim", id: lotV.id }); }}><b>+ Sayım</b><small>canlı adet, boylar</small></button>
           <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: lotV.id }); }}><b>+ Bakım / işlem</b><small>budama, güve, ilaç…</small></button>
@@ -226,8 +286,8 @@ export default function Fidan() {
     ] },
     { name: "Boy stoku", title: "Satışa hazır (son sayımlardan, satılanlar düşülmüş)", rows: [["Boy", "Adet", "Siparişte ayrılan", "Serbest"],
       ...sizes.map((k) => [k, ready[k] ?? 0, reserved[k] ?? 0, (ready[k] ?? 0) - (reserved[k] ?? 0)])] },
-    { name: "Siparişler", title: "Siparişler", rows: [["Tarih", "Müşteri", "Parti", "Boy", "Adet", "Fiyat (TL)", "Teslim", "Durum"],
-      ...orders.map((o) => [dayYear(o.occurred_on), String(o.data.customer ?? ""), find(String(o.data.lot_id ?? ""))?.name ?? "", String(o.data.size ?? ""), Number(o.data.qty ?? 0), Number(o.data.price ?? 0) || "", o.data.due_on ? dayYear(String(o.data.due_on)) : "", String(o.data.status)])] },
+    { name: "Siparişler", title: "Siparişler", rows: [["Tarih", "Müşteri", "Parti", "Boy", "Adet", "Fiyat (TL)", "Kapora (TL)", "Teslim", "Durum"],
+      ...orders.map((o) => [dayYear(o.occurred_on), String(o.data.customer ?? ""), find(String(o.data.lot_id ?? ""))?.name ?? "", String(o.data.size ?? ""), Number(o.data.qty ?? 0), Number(o.data.price ?? 0) || "", Number(o.data.deposit ?? 0) || "", o.data.due_on ? dayYear(String(o.data.due_on)) : "", String(o.data.status)])] },
   ]);
 
   return (
@@ -268,13 +328,15 @@ export default function Fidan() {
               <div key={o.id} className={`ui-card ui-stack${late ? " late" : ""}`} style={{ gap: 8 }}>
                 <button type="button" className="ui-plain" onClick={() => setView({ v: "siparis", edit: o })}>
                   <span style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><b>{String(o.data.customer)}</b><span className="ui-amount">{fmt(Number(o.data.qty))} adet</span></span>
-                  <span className="ui-note" style={{ margin: 0 }}>{[o.data.size, find(String(o.data.lot_id ?? ""))?.name, o.data.price ? `${formatTL(Number(o.data.price))}/adet` : "", o.data.due_on ? `teslim ${dayText(String(o.data.due_on))}` : ""].filter(Boolean).map(String).join(" · ")}</span>
+                  <span className="ui-note" style={{ margin: 0 }}>{[o.data.size, find(String(o.data.lot_id ?? ""))?.name, o.data.price ? `${formatTL(Number(o.data.price))}/adet` : "", o.data.due_on ? `teslim ${dayText(String(o.data.due_on))}` : "",
+                    o.data.deposit ? `kapora ${formatTL(Number(o.data.deposit))}` : "", o.data.deposit && o.data.price ? `kalan ${formatTL(Number(o.data.qty) * Number(o.data.price) - Number(o.data.deposit))}` : ""].filter(Boolean).map(String).join(" · ")}</span>
                 </button>
                 <div className="ui-seg">
                   <button type="button" onClick={async () => {
                     await updateEvent(o.id, { data: { ...o.data, status: "teslim" } });
-                    go("gelir", { yeni: 1, ...(o.data.lot_id ? { parti: String(o.data.lot_id) } : {}), ...(o.data.size ? { boy: String(o.data.size) } : {}), adet: Number(o.data.qty), ...(o.data.price ? { fiyat: Number(o.data.price) } : {}), alici: String(o.data.customer) });
+                    go("gelir", { yeni: 1, ...(o.data.lot_id ? { parti: String(o.data.lot_id) } : {}), ...(o.data.size ? { boy: String(o.data.size) } : {}), adet: Number(o.data.qty), ...(o.data.price ? { fiyat: Number(o.data.price) } : {}), alici: String(o.data.customer), ...(o.data.deposit ? { alinan: Number(o.data.deposit) } : {}) });
                   }}>Teslim et → satış</button>
+                  <button type="button" onClick={() => setView({ v: "sevk", order: o })}>Sevk listesi</button>
                   <button type="button" onClick={async () => { await updateEvent(o.id, { data: { ...o.data, status: "iptal" } }); setDone({ message: "Sipariş iptal.", undo: () => updateEvent(o.id, { data: o.data }) }); load(); }}>İptal</button>
                 </div>
               </div>
@@ -303,6 +365,7 @@ function LotForm({ edit, places, onSave, onCancel, onDelete }: {
   onSave: (v: Omit<Lot, "id" | "business_id" | "created_at" | "created_by" | "status">) => Promise<void>;
 }) {
   const [name, setName] = useState(edit?.name ?? "");
+  const sources = useCList("sources");
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? null);
   const [planted, setPlanted] = useState(edit?.planted_on ?? "");
   const [count, setCount] = useState(edit ? String(edit.initial_count) : "");
@@ -310,6 +373,7 @@ function LotForm({ edit, places, onSave, onCancel, onDelete }: {
   const [initialCost, setInitialCost] = useState(edit?.data.initial_cost ? String(edit.data.initial_cost) : "");
   const [prior, setPrior] = useState(edit?.data.prior_cost ? String(edit.data.prior_cost) : "");
   const [note, setNote] = useState(edit?.note ?? "");
+  const [passport, setPassport] = useState(String(edit?.data.passport ?? ""));
   const [error, setError] = useState("");
   return (
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
@@ -321,10 +385,11 @@ function LotForm({ edit, places, onSave, onCancel, onDelete }: {
       <TextField id="l_dikim" label="Dikim tarihi (geçmiş tarih olabilir)" type="date" max={todayStr()} value={planted} onChange={(e) => setPlanted(e.target.value)} />
       <TextField id="l_adet" label="Kaç adet dikildi?" inputMode="numeric" maxLength={9} value={count} onChange={(e) => setCount(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.5rem", fontWeight: 800 }} />
       <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Kaynak</span>
-        <div className="ui-chips wrap">{["Çelik", "Fide", "Tohum", "Hazır fidan"].map((s) => <Chip key={s} selected={source === s} onClick={() => setSource(source === s ? "" : s)}>{s}</Chip>)}</div></div>
+        <div className="ui-chips wrap">{sources.map((s) => <Chip key={s} selected={source === s} onClick={() => setSource(source === s ? "" : s)}>{s}</Chip>)}</div></div>
       <TextField id="l_alis" label="Fidan / çelik alış maliyeti, toplam TL (isteğe bağlı)" inputMode="decimal" maxLength={12} value={initialCost} onChange={(e) => setInitialCost(e.target.value)} />
       <TextField id="l_onceki" label="Uygulamadan önce bu partiye yapılan masraf, toplam TL (isteğe bağlı)" inputMode="decimal" maxLength={12} value={prior} onChange={(e) => setPrior(e.target.value)} />
       <p className="ui-note">Geçmiş yılların masraflarını tek tek girmek yerine burada toplam olarak yazabilirsin; fidan başı maliyete eklenir.</p>
+      <TextField id="l_pasaport" label="Bitki pasaportu no (isteğe bağlı, sevk listesinde çıkar)" maxLength={60} value={passport} onChange={(e) => setPassport(e.target.value)} />
       <TextField id="l_not" label="Not (isteğe bağlı)" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
       {onDelete && <MainButton className="tehlike" onClick={onDelete}>Partiyi sil</MainButton>}
@@ -333,14 +398,16 @@ function LotForm({ edit, places, onSave, onCancel, onDelete }: {
         if (!name.trim()) { setError("Partinin adını yaz."); return; }
         if (!(n > 0)) { setError("Kaç adet dikildiğini yaz."); return; }
         await onSave({ name: name.trim(), place_id: placeId, planted_on: planted || null, initial_count: n, source: source || null, note: note.trim() || null,
-          data: { ...(edit?.data ?? {}), initial_cost: initialCost ? num(initialCost) : 0, prior_cost: prior ? num(prior) : 0 } });
+          data: { ...(edit?.data ?? {}), initial_cost: initialCost ? num(initialCost) : 0, prior_cost: prior ? num(prior) : 0, passport: passport.trim() } });
       }}>Kaydet</MainButton></div>
     </main>
   );
 }
 
 function SayimForm({ lot, st, sizes, onSave, onCancel }: { lot: Lot; st: LotStats; sizes: string[]; onCancel: () => void;
-  onSave: (day: string, alive: number, bySize: Record<string, number>, note: string) => Promise<void> }) {
+  onSave: (day: string, alive: number, bySize: Record<string, number>, note: string, loss: Record<string, number>) => Promise<void> }) {
+  const reasons = useCList("fire");
+  const [loss, setLoss] = useState<Record<string, string>>({});
   const [day, setDay] = useState(todayStr());
   const [vals, setVals] = useState<Record<string, string>>({});
   const [total, setTotal] = useState("");
@@ -356,19 +423,25 @@ function SayimForm({ lot, st, sizes, onSave, onCancel }: { lot: Lot; st: LotStat
       {sizes.map((s) => <TextField key={s} id={`sy_${s}`} label={s} inputMode="numeric" maxLength={9} value={vals[s] ?? ""} onChange={(e) => setVals({ ...vals, [s]: e.target.value.replace(/\D/g, "") })} />)}
       {sum > 0 ? <div className="ui-done"><p>Toplam canlı: <b>{fmt(sum)}</b> adet</p></div>
         : <TextField id="sy_toplam" label="Toplam canlı fidan" inputMode="numeric" maxLength={9} value={total} onChange={(e) => setTotal(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.5rem", fontWeight: 800 }} />}
-      <TextField id="sy_not" label="Not (ör. ölenlerin sebebi)" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
+      <div className="ui-card ui-stack" style={{ gap: 8 }}>
+        <b>Ölen / kayıp fidan (isteğe bağlı)</b>
+        <span className="ui-note" style={{ margin: 0 }}>Son sayımdan beri kaç tane, neden kayboldu? Fire sebeplerini “Listeleri düzenle”den değiştirebilirsin.</span>
+        {reasons.map((x) => <TextField key={x} id={`fire_${x}`} label={x} inputMode="numeric" maxLength={7} value={loss[x] ?? ""} onChange={(e) => setLoss({ ...loss, [x]: e.target.value.replace(/\D/g, "") })} />)}
+      </div>
+      <TextField id="sy_not" label="Not (isteğe bağlı)" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
       <div className="ui-sticky-bottom"><MainButton onClick={async () => {
         const alive = sum || Number(total);
         if (!(alive >= 0) || (!sum && !total)) { setError("Boylara göre ya da toplam adet yaz."); return; }
         const bySize = Object.fromEntries(Object.entries(vals).filter(([, v]) => v !== "").map(([k, v]) => [k, Number(v)]));
-        await onSave(day, alive, bySize, note.trim());
+        await onSave(day, alive, bySize, note.trim(), Object.fromEntries(Object.entries(loss).filter(([, v]) => Number(v) > 0).map(([k, v]) => [k, Number(v)])));
       }}>Kaydet</MainButton></div>
     </main>
   );
 }
 
 function BakimForm({ lot, onSave, onCancel }: { lot: Lot; onCancel: () => void; onSave: (day: string, type: string, data: Record<string, unknown>) => Promise<void> }) {
+  const BAKIM = useCList("bakim");
   const [type, setType] = useState(BAKIM[0]);
   const [day, setDay] = useState(todayStr());
   const [product, setProduct] = useState("");
@@ -390,6 +463,7 @@ function BakimForm({ lot, onSave, onCancel }: { lot: Lot; onCancel: () => void; 
 }
 
 function HatirlatForm({ lot, onSave, onCancel }: { lot: Lot; onCancel: () => void; onSave: (r: Record<string, number>) => Promise<void> }) {
+  const BAKIM = useCList("bakim");
   const cur = (lot.data.reminders ?? {}) as Record<string, number>;
   const [vals, setVals] = useState<Record<string, string>>(Object.fromEntries(BAKIM.filter((b) => b !== "Diğer").map((b) => [b, cur[b] ? String(cur[b]) : ""])));
   return (
@@ -412,6 +486,7 @@ function SiparisForm({ edit, lots, sizes, onSave, onCancel, onDelete }: { edit?:
   const [qty, setQty] = useState(d.qty ? String(d.qty) : "");
   const [price, setPrice] = useState(d.price ? String(d.price) : "");
   const [due, setDue] = useState(String(d.due_on ?? ""));
+  const [deposit, setDeposit] = useState(d.deposit ? String(d.deposit) : "");
   const [note, setNote] = useState(String(d.note ?? ""));
   const [error, setError] = useState("");
   return (
@@ -426,6 +501,7 @@ function SiparisForm({ edit, lots, sizes, onSave, onCancel, onDelete }: { edit?:
         <TextField id="sp_adet" label="Adet" inputMode="numeric" maxLength={9} value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} />
         <TextField id="sp_fiyat" label="Adet fiyatı TL (isteğe bağlı)" inputMode="decimal" maxLength={10} value={price} onChange={(e) => setPrice(e.target.value)} />
       </div>
+      <TextField id="sp_kapora" label="Alınan kapora, TL (isteğe bağlı)" inputMode="decimal" maxLength={10} value={deposit} onChange={(e) => setDeposit(e.target.value)} />
       <TextField id="sp_teslim" label="Teslim günü (isteğe bağlı)" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
       <TextField id="sp_not" label="Not (isteğe bağlı)" placeholder="Örnek: saksılı, kapora alındı" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
@@ -433,7 +509,7 @@ function SiparisForm({ edit, lots, sizes, onSave, onCancel, onDelete }: { edit?:
       <div className="ui-sticky-bottom"><MainButton onClick={async () => {
         if (!customer.trim()) { setError("Müşteriyi yaz."); return; }
         if (!(Number(qty) > 0)) { setError("Adedi yaz."); return; }
-        await onSave({ customer: customer.trim(), lot_id: lotId, size, qty: Number(qty), ...(price ? { price: num(price) } : {}), ...(due ? { due_on: due } : {}), ...(note.trim() ? { note: note.trim() } : {}) }, todayStr());
+        await onSave({ customer: customer.trim(), lot_id: lotId, size, qty: Number(qty), ...(price ? { price: num(price) } : {}), ...(due ? { due_on: due } : {}), ...(deposit ? { deposit: num(deposit) } : {}), ...(note.trim() ? { note: note.trim() } : {}) }, todayStr());
       }}>Kaydet</MainButton></div>
     </main>
   );
