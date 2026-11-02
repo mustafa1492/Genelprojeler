@@ -29,6 +29,7 @@
 - Geliyor / Gelmiyor / Bekleniyor sayıları
 - ~~Beceriye göre filtre~~ kaldırıldı (Mustafa, 1 Kasım 2026): beceri etiketi yok
 - ~~Gruplar~~ ekrandan kaldırıldı (Mustafa, 1 Kasım 2026): liste yalnız **yarın durumuna** göre bölünür: Cevap bekleniyor / Geliyor / Gelmiyor
+- (2 Kasım 2026) Üstte liste seçici: **Bütün ekip** + dayıbaşının **sınırsız listeleri** (ör. Manisa, Aydın). Bir kişi birden çok listede olabilir; listeye havuzdan tek dokunuşla eklenir/çıkarılır. Açılışta son seçilen görünüm. Liste içindeyken yoklama sayıları ve paylaşım yalnız o liste için. “Geliyor musun?” sor → Listeden (bir ya da birden çok, ortak kişi bir kez) ya da Kişi seç; varsayılan “sadece cevap vermeyenler”.
 - Her satırda doğrudan Geliyor / Gelmiyor düğmesi; "Bekleyenlere sor" (yalnız cevap vermeyenlere WhatsApp), "Gelenleri paylaş" (gelenlerin listesi tek mesajla, ör. şoföre)
 - Ekleme/çıkarma çok kolay: listenin üstünde tek kutu "Ekibe ekle" (seçili gruba eklenir); "Çıkar…" ile her satırda Çıkar düğmesi; her işlemde Geri al
 - Ekibe eklerken **doğum tarihi zorunlu** (aynı adlı kişileri ayırmak için); aynı ad + aynı doğum tarihi ikinci kez eklenemez; aynı adlılar listede doğum yılıyla görünür. 18 yaşından küçükse uyarı (engel değil).

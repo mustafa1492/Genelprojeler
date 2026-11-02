@@ -4,7 +4,7 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
 
 ## 1 Kasım 2026 (not alındı, henüz yapılmadı)
 
-- [ ] **Ekibim'i ayır**
+- [x] **Ekibim'i ayır** (2 Kasım 2026: Bütün ekip + sınırsız liste, liste içinde yoklama, “Geliyor musun?” sor: listeden/çoklu liste/kişi seç + sadece cevap vermeyenler; Bugün'de liste düğmeleri. Tablo: `lists`, migration 0006)
   - Bütün ekip listesi ayrı dursun.
   - Dayıbaşı **kendi listelerini** oluşturabilsin (ör. "Yarın Hasan Ağa'ya gidecekler", "Kınık minibüsü"). Bir kişi birden çok listede olabilir.
   - **Netleşti (Mustafa):** Dayıbaşının 50-60 kişilik **işçi havuzu** var ama her gün hepsi gelmiyor; herkese durmadan mesaj atmak saçma, kesin gelmeyecek biri listenin üstünde durmamalı.
@@ -17,7 +17,8 @@ Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de i�
     - Birden çok liste seç (ör. 2 liste birlikte) → hepsine (aynı kişi iki listedeyse bir kez)
     - Bütün işçiler (havuz) arasından tek tek seç → seçilenlere gönder
     - Seçimden sonra mevcut "Bekleyenlere sor" akışı (WhatsApp sırayla açılır)
-  - Hâlâ sorulacak: kayıt eklerken "Kimler gitti?" ekranında önce seçili listenin kişileri mi gösterilsin? Aynı kişi iki listede "Geliyor" olursa uyarı verilsin mi?
+  - Varsayılan seçildi (Mustafa'ya söylendi): Bugün'de “Kimler gitti?”te liste düğmeleri var (listedeki gelenleri, yoksa hepsini seçer). Yoklama kişi başına tek (iki listede aynı cevap), uyarı gerekmiyor.
+  - Eski not: kayıt eklerken "Kimler gitti?" ekranında önce seçili listenin kişileri mi gösterilsin? Aynı kişi iki listede "Geliyor" olursa uyarı verilsin mi?
 - [ ] **Estetik:** genel görünüm daha güzel olsun. Somut yön alınmadı; önce 2-3 seçenek (ekran görüntüsüyle) göster, Mustafa seçsin.
 - [ ] **Hesap gönderme: seçerek gönder.** Toplu gönderimde (çiftçi ve işçi) kişilerin yanına seçim kutusu; "Seçilenlere gönder". Hepsini seç / hiçbirini seçme.
 - [ ] **Takvim, uygun her yerde** (Mustafa: "ekleyebileceğin diğer yerlere de ekle"). Adaylar:

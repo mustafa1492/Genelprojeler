@@ -7,6 +7,7 @@ import { formatTL } from "@/core/ledger/api";
 import { addPerson, listPeople, type Person } from "@/core/people/api";
 import { birthYear, displayName } from "@/core/people/birth";
 import { addPlace, listPlaces, type Place } from "@/core/places/api";
+import { listLists, type PersonList } from "@/core/lists/api";
 import { listAnswers, tomorrowIstanbul } from "@/core/rsvp/api";
 import {
   BackButton, BottomNav, Card, Chip, ChoiceButton, Counter, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, PersonRow, StatusPill, TextField,
@@ -35,6 +36,7 @@ export default function Bugun() {
   const [farmers, setFarmers] = useState<Person[]>([]);
   const [workers, setWorkers] = useState<Person[]>([]);
   const [yesIds, setYesIds] = useState<string[]>([]);
+  const [lists, setLists] = useState<PersonList[]>([]);
   const [tomorrow, setTomorrow] = useState({ yes: 0, no: 0 });
   const [step, setStep] = useState<Step>("list");
   const [place, setPlace] = useState<Place | null>(null);
@@ -52,6 +54,7 @@ export default function Bugun() {
       listAnswers(biz.id, day).catch(() => ({})), listAnswers(biz.id, tomorrowIstanbul()).catch(() => ({})),
     ]).then(([ev, pl, fa, wo, ans, tom]) => {
       setAllEvents(ev); setPlaces(pl); setFarmers(fa); setWorkers(wo);
+      listLists(biz.id).then(setLists).catch(() => {});
       setYesIds(Object.entries(ans).filter(([, a]) => a === "evet").map(([id]) => id));
       const t = Object.values(tom);
       setTomorrow({ yes: t.filter((a) => a === "evet").length, no: t.filter((a) => a === "hayir").length });
@@ -136,6 +139,12 @@ export default function Bugun() {
         <PageHeader sub={`2 / 3 · ${placeLabel(place)}`} title="Kimler gitti?" />
         <div className="ui-chips wrap">
           {yesHere.length > 0 && <Chip onClick={() => setPicked(yesHere)}>Yoklamada gelenler ({yesHere.length})</Chip>}
+          {lists.map((l) => {
+            const m = l.members.filter((id) => workers.some((w) => w.id === id));
+            const yesM = m.filter((id) => yesIds.includes(id));
+            return m.length ? <Chip key={l.id} onClick={() => setPicked([...new Set([...picked, ...(yesM.length ? yesM : m)])])}>
+              {l.name} ({yesM.length ? `${yesM.length} geliyor` : m.length})</Chip> : null;
+          })}
           <Chip onClick={() => setPicked(workers.map((w) => w.id))}>Hepsi</Chip>
           {picked.length > 0 && <Chip onClick={() => setPicked([])}>Temizle</Chip>}
         </div>

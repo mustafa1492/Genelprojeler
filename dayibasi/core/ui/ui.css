@@ -202,3 +202,5 @@ button.ui-card { display: block; }
 .ui-seg button:disabled { opacity: 0.45; }
 .ui-person-text b { overflow-wrap: anywhere; }
 .ui-card.late { border: 2px solid var(--tehlike-cizgi); }
+.ui-check { display: flex; align-items: center; gap: 10px; font-weight: 700; margin: 0 4px; min-height: 48px; }
+.ui-check input { width: 24px; height: 24px; accent-color: var(--ana); }
