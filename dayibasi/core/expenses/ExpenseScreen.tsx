@@ -101,7 +101,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
+    return <MasrafForm categories={categories} cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
       stockCategory={stock && !ed ? stock.categoryOf(view.cat) : null} stockUnits={stock?.units ?? []} stockItems={stockItems}
       onCancel={() => setView({ v: "list" })}
       onSave={async (input, add) => {
@@ -320,15 +320,16 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }:
   );
 }
 
-function MasrafForm({ branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
+function MasrafForm({ categories = [], branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
   stockCategory?: string | null; stockUnits?: readonly string[]; stockItems?: Item[];
-  cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
+  categories?: string[]; cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
   link?: ExpenseScreenProps["link"]; presetLink?: string | null; branches?: readonly string[]; onAddBranch?: (name: string) => Promise<void>;
   onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data"> & { data?: Record<string, unknown> }, stockAdd?: StockAdd | null) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
 }) {
   const biz = useBusiness();
   const [amount, setAmount] = useState(edit ? String(edit.amount) : "");
+  const [category, setCategory] = useState(cat);
   const [day, setDay] = useState(edit?.occurred_on ?? todayIstanbul());
   const [note, setNote] = useState(edit?.note ?? "");
   const [credit, setCredit] = useState(edit?.on_credit ?? false);
@@ -359,7 +360,7 @@ function MasrafForm({ branches = [], onAddBranch, cat, edit, lastAmount, vendors
     setBusy(true);
     try {
       await onSave({
-        occurred_on: day, category: cat, amount: n, note: note.trim() || null, on_credit: credit, vendor: credit ? vendor.trim() : null,
+        occurred_on: day, category, amount: n, note: note.trim() || null, on_credit: credit, vendor: credit ? vendor.trim() : null,
         paid_amount: edit?.paid_amount ?? 0, charge_to: chargeTo, place_id: placeId, photo_path: photo,
         ...(link || branches.length > 1 || onAddBranch ? { data: { ...(edit?.data ?? {}), ...(link ? { [link.key]: linkId } : {}), ...(branches.length > 1 || onAddBranch ? { branch } : {}) } } : {}),
       }, toStock && stockCategory ? { itemId: stItem, name: stName.trim() || cat, qty: num(stQty) || 0, unit: stUnit, category: stockCategory } : null);
@@ -377,7 +378,15 @@ function MasrafForm({ branches = [], onAddBranch, cat, edit, lastAmount, vendors
   return (
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
       <BackButton onClick={onCancel} label="Vazgeç" />
-      <PageHeader sub={edit ? "Masrafı düzenle" : "Yeni masraf"} title={cat} />
+      <PageHeader sub={edit ? "Masrafı düzenle" : "Yeni masraf"} title={category} />
+      {edit && categories.length > 0 && (
+        <div className="ui-stack" style={{ gap: 8 }}>
+          <span className="ui-label">Masrafın türü</span>
+          <div className="ui-chips wrap">
+            {[...categories, ...(categories.includes(cat) ? [] : [cat])].map((c) => <Chip key={c} selected={category === c} onClick={() => setCategory(c)}>{c}</Chip>)}
+          </div>
+        </div>
+      )}
       <TextField id="masraf_tutar" label="Kaç TL?" inputMode="decimal" autoFocus={!edit} maxLength={12} placeholder="Örnek: 2000"
         value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: "1.8rem", fontWeight: 800 }} />
       {!edit && lastAmount && <Chip onClick={() => setAmount(String(lastAmount))}>Geçen sefer: {formatTL(lastAmount)}</Chip>}
