@@ -44,6 +44,8 @@ export type ExpenseScreenProps = {
   branches?: readonly string[];
   /** Verilirse "Hangi iş için?" her zaman çıkar ve yerinde yeni iş eklenir. */
   onAddBranch?: (name: string) => Promise<void>;
+  /** Liste üstünde (ör. onay bekleyen fişler). start(foto, not, tarla, kaydedilince) ile masraf formunu açar. */
+  inbox?: (start: (photo: string, note: string | null, placeId: string | null, saved: (expenseId: string) => void) => void) => React.ReactNode;
 };
 type StockAdd = { itemId: string | null; name: string; qty: number; unit: string; category: string };
 
@@ -52,13 +54,14 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 
-export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories, branches = [], onAddBranch }: ExpenseScreenProps) {
+export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories, branches = [], onAddBranch, inbox }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
   const [items, setItems] = useState<Expense[] | null>(null);
   const farmers = chargeTargets;
   const [view, setView] = useState<View>({ v: "list" });
   const [presetPlace, setPresetPlace] = useState<string | null>(null);
+  const [fromInbox, setFromInbox] = useState<{ photo: string; note: string | null; saved: (id: string) => void } | null>(null);
   const [presetLink, setPresetLink] = useState<string | null>(null);
   const [stockItems, setStockItems] = useState<Item[]>([]);
   const [month, setMonth] = useState(todayIstanbul().slice(0, 7));
@@ -102,9 +105,9 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm categories={categories} cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
+    return <MasrafForm categories={categories} cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} presetPhoto={ed ? null : fromInbox?.photo} presetNote={ed ? null : fromInbox?.note} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
       stockCategory={stock && !ed ? stock.categoryOf(view.cat) : null} stockUnits={stock?.units ?? []} stockItems={stockItems}
-      onCancel={() => setView({ v: "list" })}
+      onCancel={() => { setFromInbox(null); setView({ v: "list" }); }}
       onSave={async (input, add) => {
         if (ed) {
           const before = { ...ed };
@@ -129,6 +132,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
           setMonth(input.occurred_on.slice(0, 7));
         } else {
           const e = await addExpense(biz.id, input);
+          if (fromInbox) { fromInbox.saved(e.id); setFromInbox(null); }
           let undoStock: (() => Promise<void>) | null = null, stockMsg = "";
           if (add && add.qty > 0) {
             const it = add.itemId ? stockItems.find((i) => i.id === add.itemId) : undefined;
@@ -237,7 +241,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
       <PageHeader sub={label} title="Masraf" right={headerRight} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       {error && <ErrorText>{error}</ErrorText>}
-      <MainButton onClick={() => { setDone(null); setView({ v: "tur" }); }}>+ Masraf ekle</MainButton>
+      <MainButton onClick={() => { setDone(null); setFromInbox(null); setView({ v: "tur" }); }}>+ Masraf ekle</MainButton>
+      {inbox?.((photo, note, placeId, saved) => { setDone(null); setPresetPlace(placeId); setFromInbox({ photo, note, saved }); setView({ v: "tur" }); })}
 
       {period && (
         <div className="ui-tabs" role="tablist" style={{ gridTemplateColumns: "1fr 1fr" }}>
@@ -338,9 +343,9 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }:
   );
 }
 
-function MasrafForm({ categories = [], branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
+function MasrafForm({ presetPhoto, presetNote, categories = [], branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
   stockCategory?: string | null; stockUnits?: readonly string[]; stockItems?: Item[];
-  categories?: string[]; cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
+  presetPhoto?: string | null; presetNote?: string | null; categories?: string[]; cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
   link?: ExpenseScreenProps["link"]; presetLink?: string | null; branches?: readonly string[]; onAddBranch?: (name: string) => Promise<void>;
   onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data"> & { data?: Record<string, unknown> }, stockAdd?: StockAdd | null) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
@@ -349,7 +354,7 @@ function MasrafForm({ categories = [], branches = [], onAddBranch, cat, edit, la
   const [amount, setAmount] = useState(edit ? String(edit.amount) : "");
   const [category, setCategory] = useState(cat);
   const [day, setDay] = useState(edit?.occurred_on ?? todayIstanbul());
-  const [note, setNote] = useState(edit?.note ?? "");
+  const [note, setNote] = useState(edit?.note ?? presetNote ?? "");
   const [credit, setCredit] = useState(edit?.on_credit ?? false);
   const [vendor, setVendor] = useState(edit?.vendor ?? "");
   const [chargeTo, setChargeTo] = useState<string | null>(edit?.charge_to ?? null);
@@ -364,8 +369,8 @@ function MasrafForm({ categories = [], branches = [], onAddBranch, cat, edit, la
   const [stUnit, setStUnit] = useState(stockUnits[0] ?? "adet");
   const sameCat = stockItems.filter((i) => i.category === stockCategory);
   const [linkId, setLinkId] = useState<string | null>(link ? ((edit?.data?.[link.key] as string) ?? presetLink ?? null) : null);
-  const [photo, setPhoto] = useState<string | null>(edit?.photo_path ?? null);
-  const [more, setMore] = useState(!!edit && !!(edit.note || edit.on_credit || edit.charge_to || edit.photo_path || edit.occurred_on !== todayIstanbul()));
+  const [photo, setPhoto] = useState<string | null>(edit?.photo_path ?? presetPhoto ?? null);
+  const [more, setMore] = useState(!!presetPhoto || (!!edit && !!(edit.note || edit.on_credit || edit.charge_to || edit.photo_path || edit.occurred_on !== todayIstanbul())));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 

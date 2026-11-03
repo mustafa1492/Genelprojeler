@@ -21,6 +21,7 @@ import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
 import { exportAll } from "../disaAktar";
 import { Weather } from "../hava";
+import { useRole } from "../rol";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
 export default function Ana() {
@@ -34,6 +35,7 @@ export default function Ana() {
   const [places, setPlaces] = useState<Place[]>([]);
   const { selected: S } = useSeason();
   const go = useGo();
+  const { money } = useRole();
   const load = useCallback(() => {
     listExpenses(biz.id).then(setExp).catch(() => {});
     Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM), listEvents(biz.id, HATIRLAT)]).then(([a, b, c]) => setEv([...a, ...b, ...c])).catch(() => {});
@@ -75,7 +77,7 @@ export default function Ana() {
     const k = x.e.place_id ?? ""; if (!m[k] || m[k].h < x.h!) m[k] = { e: x.e, h: x.h! }; return m; }, {}));
   const borc = dues.filter((d) => d.direction === "borc").reduce((t, d) => t + remaining(d), 0) + exp.reduce((t, e) => t + owed(e), 0);
   const alacak = dues.filter((d) => d.direction === "alacak").reduce((t, d) => t + remaining(d), 0) + ev.filter((e) => e.kind === GELIR).reduce((t, e) => t + incomeOpen(e), 0);
-  const dueSoon = [
+  const dueSoon = !money ? [] : [
     ...dues.filter((d) => remaining(d) > 0 && d.due_on).map((d) => ({ who: d.party, dir: d.direction, left: remaining(d), due: d.due_on! })),
     ...ev.filter((e) => e.kind === GELIR && incomeOpen(e) > 0 && e.data.due_on).map((e) => ({ who: String(e.data.buyer || e.data.type), dir: "alacak" as const, left: incomeOpen(e), due: String(e.data.due_on) })),
   ].filter((x) => (Date.parse(x.due) - Date.parse(today)) / 86400000 <= config.remindDays.dues).sort((a, b) => a.due.localeCompare(b.due));
@@ -85,7 +87,7 @@ export default function Ana() {
   const recent = [...exp.map((e) => ({ at: e.created_at ?? e.occurred_on, t: `Masraf · ${e.category} ${formatTL(e.amount)}`, by: e.created_by, open: () => go("masraf", { duzenle: e.id }) })),
     ...ev.map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by,
       open: () => (e.kind === GELIR ? go("gelir", { duzenle: e.id }) : go("tarlalar", { islem: e.id })) }))]
-    .sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
+    .filter((r) => money || !/^(Masraf|Gelir) ·/.test(r.t)).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
 
   const fresh = me && seenAt ? [...exp.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: "masraf" })), ...ev.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: e.kind === GELIR ? "gelir" : e.kind === HATIRLAT ? "hatırlatma" : "tarla işi" }))]
     .filter((x) => x.by && x.by !== me && x.at > seenAt) : [];
@@ -94,8 +96,8 @@ export default function Ana() {
   return (
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={biz.name} title="Özet" right={<HistoryLink />} />
-      <SeasonPicker onManage={() => go("sezonlar")} />
-      <div className="ui-total">
+      {money && <SeasonPicker onManage={() => go("sezonlar")} />}
+      {money && <div className="ui-total">
         <PrivacyButton />
         <span>{S.name} sezonu kâr / zarar</span>
         <b>{formatTL(gelir - masraf)}</b>
@@ -103,7 +105,7 @@ export default function Ana() {
           <div><span>Gelir</span><strong>{formatTL(gelir)}</strong></div>
           <div><span>Masraf</span><strong>{formatTL(masraf)}</strong></div>
         </div>
-      </div>
+      </div>}
 
       {(() => {
         // Hava: konumu girilmiş tarlalar (aynı yer bir kez)
@@ -122,9 +124,10 @@ export default function Ana() {
         </div>
       )}
       <div className="ui-tiles">
-        <TabLink to="masraf" params={{ yeni: 1 }}><b>+ Masraf</b><small>gübre, mazot, ilaç…</small></TabLink>
+        {money && <TabLink to="masraf" params={{ yeni: 1 }}><b>+ Masraf</b><small>gübre, mazot, ilaç…</small></TabLink>}
         <TabLink to="tarlalar"><b>+ Tarla işi</b><small>ilaçlama, sulama…</small></TabLink>
-        <TabLink to="gelir" params={{ yeni: 1 }}><b>+ Gelir</b><small>satış, destek</small></TabLink>
+        {money ? <TabLink to="gelir" params={{ yeni: 1 }}><b>+ Gelir</b><small>satış, destek</small></TabLink>
+          : <TabLink to="fis"><b>Fiş yükle</b><small>fotoğrafını çek, gönder</small></TabLink>}
         <TabLink to="depo"><b>Depo</b><small>{items.length} malzeme</small></TabLink>
       </div>
 
@@ -165,19 +168,20 @@ export default function Ana() {
       })()}
 
       <div className="ui-links">
-        <TabLink to="rapor"><b>Sezon raporu</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
-        <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
+        {money && <TabLink to="rapor"><b>Sezon raporu</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>}
+        {money && <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>}
         <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
         <TabLink to="takvim"><b>Takvim ve hatırlatmalar</b><span>Tarla işleri, hasat, vadeler; hatırlatma kur</span></TabLink>
-        <TabLink to="kayitlar"><b>Kayıtlar</b><span>Bütün masraf, gelir, tarla işleri: ara, düzelt, sil</span></TabLink>
+        {money && <TabLink to="fis"><b>Fiş yükle</b><span>Fişin fotoğrafını çek, sonra tutarını gir</span></TabLink>}
+        {money && <TabLink to="kayitlar"><b>Kayıtlar</b><span>Bütün masraf, gelir, tarla işleri: ara, düzelt, sil</span></TabLink>}
         <TabLink to="listeler"><b>Listeleri düzenle</b><span>Masraf türleri, tarla işleri, birimler… ekle / kaldır</span></TabLink>
-        <button type="button" disabled={exporting} onClick={async () => {
+        {money && <button type="button" disabled={exporting} onClick={async () => {
           if (!navigator.onLine) { setOutMsg("İndirmek için internet lazım."); return; }
           setExporting(true); setOutMsg("");
           try { await exportAll(biz); setOutMsg("İndirildi: Excel (okumak için) ve .json (yedek). İkisini de iCloud'a ya da bilgisayara kaydet."); }
           catch { setOutMsg("İndiremedim, tekrar dene."); }
           setExporting(false);
-        }}><b>{exporting ? "Hazırlanıyor…" : "Bütün verimi indir"}</b><span>Yedek: bütün kayıtlar Excel ve yedek dosyası olarak</span></button>
+        }}><b>{exporting ? "Hazırlanıyor…" : "Bütün verimi indir"}</b><span>Yedek: bütün kayıtlar Excel ve yedek dosyası olarak</span></button>}
         <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>
       </div>
 

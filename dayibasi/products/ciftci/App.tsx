@@ -19,6 +19,7 @@ import Listeler from "./lists";
 import Vadeler from "./screens/Vadeler";
 import Kayitlar from "./screens/Kayitlar";
 import Takvim from "./screens/Takvim";
+import Fis from "./screens/Fis";
 import { SeasonProvider } from "./sezon";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
@@ -36,6 +37,7 @@ const TABS: ShellTab[] = [
   { id: "listeler", label: "Listeler", path: `${BASE}/listeler`, inNav: false, render: () => <Listeler /> },
   { id: "rapor", label: "Sezon raporu", path: `${BASE}/rapor`, inNav: false, render: () => <Rapor /> },
   { id: "kayitlar", label: "Kayıtlar", path: `${BASE}/kayitlar`, inNav: false, render: () => <Kayitlar /> },
+  { id: "fis", label: "Fiş yükle", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
   { id: "takvim", label: "Takvim", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
 ];
@@ -43,7 +45,9 @@ const TABS: ShellTab[] = [
 /** Çiftçi defteri: tek sayfalık sekmeli uygulama (sekmeler kaldığı yerde kalır). */
 export default function CiftciApp({ initial }: { initial: string }) {
   const biz = useBusiness();
-  const tabs = hasFidan(biz) ? TABS : TABS.filter((t) => t.id !== "fidan");
+  // Çalışan: para ekranları yok (veritabanı da izin vermez)
+  const WORKER_HIDDEN = ["masraf", "gelir", "fidan", "rapor", "vadeler", "kayitlar", "gecmis", "sezonlar"];
+  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (biz.role !== "calisan" || !WORKER_HIDDEN.includes(t.id)));
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
   if (!tabs.some((t) => t.id === start)) start = "ozet";

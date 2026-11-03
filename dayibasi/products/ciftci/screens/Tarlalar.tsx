@@ -59,7 +59,7 @@ export default function Tarlalar() {
   // Fidan modülü: tarladaki aktif partilerin canlı fidan sayısı ve maliyeti
   const multi = useCList("isler").length > 1;
   const fidanOf = (pid: string) => {
-    if (!fidan) return null;
+    if (!fidan || !money) return null;
     const counts = events.filter((e) => e.kind === SAYIM), sales = events.filter((e) => e.kind === GELIR && e.data.type === FIDAN_SATIS), moves = events.filter((e) => e.kind === AKTARIM);
     const S = lots.filter((l) => l.place_id === pid && l.status === "aktif").map((l) => lotStats(l, lots, counts, sales, expenses, moves, multi));
     if (!S.length) return null;
@@ -141,11 +141,11 @@ export default function Tarlalar() {
           <PageHeader sub={[p.custom?.urun, st.donum ? `${st.donum} dönüm` : ""].filter(Boolean).join(" · ") || "Tarla"} title={p.name} />
           {doneCard}
           {wait && <div className="ui-warn yakin"><div className="ui-warn-row"><span>Hasat en erken <b>{dayYear(wait.h!)}</b> ({String(wait.e.data.product ?? "ilaç")}, {dayText(wait.e.occurred_on)} ilaçlaması).</span></div></div>}
-          <div className="ui-split">
+          {money && <div className="ui-split">
             <div><span>{y} masraf</span><b>{formatTL(st.m)}</b>{st.donum ? <small>dönüm başı {formatTL(Math.round(st.perDonum))}</small> : <small>&nbsp;</small>}</div>
             <div className="mine"><span>{y} kâr</span><b>{formatTL(st.kar)}</b><small>gelir {formatTL(st.g)}</small></div>
-          </div>
-          {be ? (
+          </div>}
+          {!money ? null : be ? (
             <div className="ui-card ui-stack" style={{ gap: 4 }}>
               <span className="ui-note" style={{ margin: 0 }}>Başabaş fiyatı ({y})</span>
               <b style={{ fontSize: "1.5rem" }}>{formatTL(Math.round(be.perUnit * 100) / 100)} / {be.unit}</b>
@@ -156,7 +156,8 @@ export default function Tarlalar() {
             <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: p.id }); }}><b>+ İşlem</b><small>ilaç, gübre, sulama…</small></button>
             <button type="button" onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: "İlaçlama" }); }}><b>+ İlaçlama</b><small>ilaç, doz, bekleme</small></button>
             <button type="button" onClick={() => { setDone(null); setView({ v: "verim", id: p.id }); }}><b>+ Verim</b><small>bu yıl kaç kg</small></button>
-            <TabLink to="masraf" params={{ yeni: 1, tarla: p.id }}><b>+ Masraf</b><small>bu tarla için</small></TabLink>
+            {money ? <TabLink to="masraf" params={{ yeni: 1, tarla: p.id }}><b>+ Masraf</b><small>bu tarla için</small></TabLink>
+              : <TabLink to="fis"><b>Fiş yükle</b><small>fotoğrafını gönder</small></TabLink>}
           </div>
 
           {(() => { const f = fidanOf(p.id); if (!f) return null; return (
@@ -170,7 +171,7 @@ export default function Tarlalar() {
           {(() => {
             const su = ops.filter((e) => e.data.type === "Sulama" && inSeason(e.occurred_on, S));
             if (!su.length) return null;
-            const h = su.reduce((t, e) => t + Number(e.data.hours ?? 0), 0), k = su.reduce((t, e) => t + Number(e.data.kwh ?? 0), 0), f = su.reduce((t, e) => t + Number(e.data.water_fee ?? 0), 0);
+            const h = su.reduce((t, e) => t + Number(e.data.hours ?? 0), 0), k = su.reduce((t, e) => t + Number(e.data.kwh ?? 0), 0), f = pExp.filter((e) => e.note?.startsWith("Su ücreti")).reduce((t, e) => t + e.amount, 0);
             return <Card><InfoRows rows={[["Sulama (bu sezon)", `${su.length} kez`], ...(h ? [["Toplam süre", `${h.toLocaleString("tr-TR")} saat`] as [string, string]] : []), ...(k ? [["Elektrik", `${k.toLocaleString("tr-TR")} kWh`] as [string, string]] : []), ...(f && money ? [["Su ücreti", formatTL(f)] as [string, string]] : []), ["Son sulama", `${dayYear(su[0].occurred_on)}${su[0].data.method ? ` · ${String(su[0].data.method)}` : ""}`]]} /></Card>;
           })()}
           <h2 className="ui-section">Tarla günlüğü</h2>
@@ -190,9 +191,9 @@ export default function Tarlalar() {
           {yields.length > 0 && <Card><InfoRows rows={yields.map((e) => [`${String(e.data.year)} · ${String(e.data.crop || p.custom?.urun || "")}`,
             `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}${st.donum ? ` · dönüm başı ${Math.round(Number(e.quantity) / st.donum).toLocaleString("tr-TR")}` : ""}`] as [string, string])} /></Card>}
 
-          <h2 className="ui-section">{y} sezonu masrafları</h2>
-          {pExp.length === 0 ? <div className="ui-empty">Bu tarlaya bu sezon masraf girilmedi.</div>
-            : <Card><InfoRows rows={pExp.map((e) => [`${dayText(e.occurred_on)} · ${e.category}`, formatTL(e.amount)] as [string, string])} /></Card>}
+          {money && <h2 className="ui-section">{y} sezonu masrafları</h2>}
+          {money && (pExp.length === 0 ? <div className="ui-empty">Bu tarlaya bu sezon masraf girilmedi.</div>
+            : <Card><InfoRows rows={pExp.map((e) => [`${dayText(e.occurred_on)} · ${e.category}`, formatTL(e.amount)] as [string, string])} /></Card>)}
           <MainButton secondary onClick={() => setView({ v: "yeni", edit: p })}>Tarla bilgilerini değiştir</MainButton>
         </main>
       );
@@ -213,10 +214,10 @@ export default function Tarlalar() {
           <button key={p.id} type="button" className="ui-card ui-stack" style={{ gap: 6 }} onClick={() => { setDone(null); setView({ v: "tarla", id: p.id }); }}>
             <span style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
               <b style={{ fontSize: "1.15rem" }}>{p.name}</b>
-              <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(st.kar)}</span>
+              {money && <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(st.kar)}</span>}
             </span>
             <span className="ui-note" style={{ margin: 0 }}>
-              {[p.custom?.urun, st.donum ? `${st.donum} dönüm` : "", `masraf ${formatTL(st.m)}`, `gelir ${formatTL(st.g)}`].filter(Boolean).join(" · ")}
+              {[p.custom?.urun, st.donum ? `${st.donum} dönüm` : "", money ? `masraf ${formatTL(st.m)}` : "", money ? `gelir ${formatTL(st.g)}` : ""].filter(Boolean).join(" · ")}
             </span>
             {last && <span className="ui-note" style={{ margin: 0 }}>Son iş: {String(last.data.type)} · {dayText(last.occurred_on)}</span>}
             {(() => { const f = fidanOf(p.id); return f ? <span style={{ fontWeight: 800, color: "var(--ana-yazi)" }}>{f.alive.toLocaleString("tr-TR")} fidan · fidan başı {formatTL(Math.round(f.per * 100) / 100)}</span> : null; })()}
@@ -304,7 +305,7 @@ function IslemForm({ place, items, history, initialType, edit, onSave, onCancel,
   const [m1, setM1] = useState(ed.meter_start != null ? String(ed.meter_start) : "");
   const [m2, setM2] = useState(ed.meter_end != null ? String(ed.meter_end) : "");
   const lastSu = history.filter((e) => e.data.type === "Sulama" && e.place_id === place.id).sort((a, b) => b.occurred_on.localeCompare(a.occurred_on))[0];
-  const [waterFee, setWaterFee] = useState(ed.water_fee ? String(ed.water_fee) : "");
+  const [waterFee, setWaterFee] = useState("");   // tutar tarla işine yazılmaz (çalışan görmesin); masraf olarak kaydedilir
   const [feeToExpense, setFeeToExpense] = useState(!edit);
   const calcHours = (() => { if (!tStart || !tEnd) return 0; const [a1, a2] = tStart.split(":").map(Number), [b1, b2] = tEnd.split(":").map(Number); let d = b1 * 60 + b2 - (a1 * 60 + a2); if (d < 0) d += 24 * 60; return Math.round((d / 60) * 10) / 10; })();
   const kwh = m1 && m2 && num(m2) >= num(m1) ? Math.round((num(m2) - num(m1)) * 10) / 10 : 0;
@@ -396,10 +397,10 @@ function IslemForm({ place, items, history, initialType, edit, onSave, onCancel,
           </div>
           {!m1 && lastSu?.data.meter_end != null && <Chip onClick={() => setM1(String(lastSu.data.meter_end))}>Geçen seferki son değer: {String(lastSu.data.meter_end)}</Chip>}
           {kwh > 0 && <span className="ui-note" style={{ margin: 0 }}>Harcanan elektrik: <b>{kwh.toLocaleString("tr-TR")} kWh</b></span>}
-          {money && (
+          {money && !edit && (
             <>
               <TextField id="su_ucret" label="Su ücreti ödendiyse (TL, kooperatif / DSİ)" inputMode="decimal" placeholder="Örnek: 600" maxLength={10} value={waterFee} onChange={(e) => setWaterFee(e.target.value)} />
-              {!edit && num(waterFee) > 0 && <label className="ui-check"><input type="checkbox" checked={feeToExpense} onChange={(e) => setFeeToExpense(e.target.checked)} /> Masraflara da ekle (Sulama / elektrik)</label>}
+              {!edit && num(waterFee) > 0 && <label className="ui-check"><input type="checkbox" checked={feeToExpense} onChange={(e) => setFeeToExpense(e.target.checked)} /> Masraflara ekle (Sulama / elektrik)</label>}
             </>
           )}
         </>
@@ -419,7 +420,6 @@ function IslemForm({ place, items, history, initialType, edit, onSave, onCancel,
               ...(method ? { method } : {}), ...(tStart ? { t_start: tStart } : {}), ...(tEnd ? { t_end: tEnd } : {}),
               ...((calcHours || num(hours)) > 0 ? { hours: calcHours || num(hours) } : {}),
               ...(m1 ? { meter_start: num(m1) } : {}), ...(m2 ? { meter_end: num(m2) } : {}), ...(kwh ? { kwh } : {}),
-              ...(num(waterFee) > 0 ? { water_fee: num(waterFee) } : {}),
             } : {}),
           }, item && u ? { id: item.id, amount: u } : null, isSu && !edit && feeToExpense && num(waterFee) > 0 ? num(waterFee) : 0);
         }}>Kaydet</MainButton>

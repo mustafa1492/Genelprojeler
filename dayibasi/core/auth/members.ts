@@ -34,8 +34,13 @@ export async function setMyName(businessId: string, userId: string, name: string
   const { error } = await supabase().from("memberships").update({ display_name: name }).eq("business_id", businessId).eq("user_id", userId);
   if (error) throw error;
 }
-export async function createInvite(businessId: string) {
-  const { data, error } = await supabase().rpc("create_invite", { p_business: businessId });
+export async function createInvite(businessId: string, role: "sahip" | "calisan" = "sahip") {
+  const { data, error } = await supabase().rpc("create_invite", { p_business: businessId, p_role: role });
   if (error) throw error;
   return data as string;
+}
+/** Üyenin rolünü değiştir ("sahip" | "calisan") ya da çıkar ("cikar"). */
+export async function setMemberRole(businessId: string, userId: string, role: "sahip" | "calisan" | "cikar") {
+  const { error } = await supabase().rpc("set_member_role", { p_business: businessId, p_user: userId, p_role: role });
+  if (error) throw error;
 }
