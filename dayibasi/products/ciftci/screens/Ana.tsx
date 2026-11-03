@@ -9,8 +9,10 @@ import { listExpenses, owed, type Expense } from "@/core/expenses/api";
 import { isLow, listItems, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { PageHeader } from "@/core/ui";
+import { MainButton, PageHeader } from "@/core/ui";
 import { PrivacyButton } from "@/core/ui/privacy";
+import { clearLocal, flush, status } from "@/core/offline/store";
+import { supabase } from "@/core/supabase/client";
 import { TabLink, useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
@@ -42,6 +44,14 @@ export default function Ana() {
 
   const today = todayStr();
   const [showAlerts, setShowAlerts] = useState(false);
+  const [outMsg, setOutMsg] = useState("");
+  const signOut = async () => {
+    if (status().pending > 0) {
+      await flush();
+      if (status().pending > 0) { setOutMsg(`${status().pending} kayıt henüz gönderilmedi. İnternet gelince gönderilsin, sonra çıkış yap; yoksa bu kayıtlar kaybolur.`); return; }
+    }
+    clearLocal(); await supabase().auth.signOut(); location.href = "/";
+  };
   const masraf = exp.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + e.amount, 0);
   const gelir = ev.filter((e) => e.kind === GELIR && inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   const place = (id: string | null) => places.find((p) => p.id === id)?.name ?? "Tarla";
@@ -129,6 +139,8 @@ export default function Ana() {
           </div>
         </>
       )}
+      {outMsg && <div className="ui-warn yakin"><div className="ui-warn-row"><span>{outMsg}</span></div></div>}
+      <MainButton secondary onClick={signOut}>Çıkış yap</MainButton>
     </main>
   );
 }
