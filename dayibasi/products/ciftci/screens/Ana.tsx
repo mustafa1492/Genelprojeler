@@ -10,6 +10,7 @@ import { isLow, listItems, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { PageHeader } from "@/core/ui";
+import { PrivacyButton } from "@/core/ui/privacy";
 import { TabLink, useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
@@ -40,6 +41,7 @@ export default function Ana() {
   useOnActivate(load);
 
   const today = todayStr();
+  const [showAlerts, setShowAlerts] = useState(false);
   const masraf = exp.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + e.amount, 0);
   const gelir = ev.filter((e) => e.kind === GELIR && inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   const place = (id: string | null) => places.find((p) => p.id === id)?.name ?? "Tarla";
@@ -65,6 +67,7 @@ export default function Ana() {
       <PageHeader sub={biz.name} title="Özet" right={<HistoryLink />} />
       <SeasonPicker onManage={() => go("sezonlar")} />
       <div className="ui-total">
+        <PrivacyButton />
         <span>{S.name} sezonu kâr / zarar</span>
         <b>{formatTL(gelir - masraf)}</b>
         <div className="ui-total-row">
@@ -80,23 +83,38 @@ export default function Ana() {
         <TabLink to="depo"><b>Depo</b><small>{items.length} malzeme</small></TabLink>
       </div>
 
+      {(() => {
+        const n = lastWait.length + dueSoon.length + docSoon.length + (empty.length ? 1 : 0);
+        if (!n) return null;
+        const red = dueSoon.some((d) => d.due < today) || docSoon.some((d) => (daysLeft(d.expires_on) ?? 0) < 0);
+        return (
+          <div className={`ui-alerts${red ? " gecti" : ""}`}>
+            <button type="button" aria-expanded={showAlerts} onClick={() => setShowAlerts(!showAlerts)}>
+              <span>Uyarılar ({n})</span><span>{showAlerts ? "Kapat ▲" : "Gör ▼"}</span>
+            </button>
+            {showAlerts && <div className="list">
       {lastWait.map(({ e, h }) => (
-        <div key={e.id} className="ui-warn yakin"><div className="ui-warn-row"><span><b>{place(e.place_id)}</b>: hasat en erken {dayYear(h)} ({String(e.data.product ?? "ilaç")}).</span></div></div>
-      ))}
-      {dueSoon.map((d, i) => (
-        <TabLink key={i} to="vadeler" className={`ui-warn ${d.due < today ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
-          <div className="ui-warn-row"><span>{d.dir === "borc" ? "Ödenecek" : "Alınacak"}: <b>{d.who}</b> {formatTL(d.left)} · vade {dayText(d.due)}{d.due < today ? " (geçti)" : ""}</span></div>
-        </TabLink>
-      ))}
-      {docSoon.map((d) => (
-        <TabLink key={d.id} to="belgeler" className={`ui-warn ${(daysLeft(d.expires_on) ?? 0) < 0 ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
-          <div className="ui-warn-row"><span><b>{d.title}</b>: {(daysLeft(d.expires_on) ?? 0) < 0 ? "süresi geçti" : `${daysLeft(d.expires_on)} gün kaldı`} ({dayYear(d.expires_on!)})</span></div>
-        </TabLink>
-      ))}
-      {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten / az kalan: {empty.map((i) => `${i.name} (${i.quantity.toLocaleString("tr-TR")} ${i.unit})`).join(", ")}</span></div></TabLink>}
+                <div key={e.id} className="ui-warn yakin"><div className="ui-warn-row"><span><b>{place(e.place_id)}</b>: hasat en erken {dayYear(h)} ({String(e.data.product ?? "ilaç")}).</span></div></div>
+              ))}
+              {dueSoon.map((d, i) => (
+                <TabLink key={i} to="vadeler" className={`ui-warn ${d.due < today ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
+                  <div className="ui-warn-row"><span>{d.dir === "borc" ? "Ödenecek" : "Alınacak"}: <b>{d.who}</b> <span className="ui-money">{formatTL(d.left)}</span> · vade {dayText(d.due)}{d.due < today ? " (geçti)" : ""}</span></div>
+                </TabLink>
+              ))}
+              {docSoon.map((d) => (
+                <TabLink key={d.id} to="belgeler" className={`ui-warn ${(daysLeft(d.expires_on) ?? 0) < 0 ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
+                  <div className="ui-warn-row"><span><b>{d.title}</b>: {(daysLeft(d.expires_on) ?? 0) < 0 ? "süresi geçti" : `${daysLeft(d.expires_on)} gün kaldı`} ({dayYear(d.expires_on!)})</span></div>
+                </TabLink>
+              ))}
+              {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten / az kalan: {empty.map((i) => `${i.name} (${i.quantity.toLocaleString("tr-TR")} ${i.unit})`).join(", ")}</span></div></TabLink>}
+
+            </div>}
+          </div>
+        );
+      })()}
 
       <div className="ui-links">
-        <TabLink to="rapor"><b>Sezon raporu (PDF / Excel)</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
+        <TabLink to="rapor"><b>Sezon raporu</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
         <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
         <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
         <TabLink to="listeler"><b>Listeleri düzenle</b><span>Masraf türleri, tarla işleri, birimler… ekle / kaldır</span></TabLink>
