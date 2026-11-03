@@ -87,3 +87,8 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - [ ] Sadeleştirme planı (Bugün ekranını toplamak, Raporlar sekmesi): Mustafa "karışık" demişti; Ekibim kısmen yapıldı.
 - [ ] Gerçek kullanıma geçmeden: test hesaplarını sil (admin@ / ornek@dayibasi.test), şifre e-postası için SMTP (Resend), Supabase uyuma sorunu (ücretli plan ya da uyandırma), KVKK metni avukata.
 - Erken (Mustafa: "daha çok erken"): kendi alan adı, dayıbaşılarla deneme.
+
+## Yedek (ertelendi, 3 Kasım 2026)
+- Mustafa: "acelemiz yok", proje daha profesyonel hale gelince yapılacak.
+- İç yedek hazır ama uygulanmadı: `supabase/migrations/0013_yedek.sql` (her gece `yedek.gunluk`, 90 gün, pg_cron). Supabase MCP onayı Mustafa'ya düşmüyor; SQL Editor'den çalıştırılacak.
+- Dış yedek (haftalık, şifreli, GitHub Actions → `yedek` dalı) Mustafa'nın açık izni gerekiyor ("dış yedeği kur, izin veriyorum"). Supabase Pro (25$/ay) pahalı bulundu.
