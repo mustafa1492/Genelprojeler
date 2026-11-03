@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Dayıbaşı",
-    short_name: "Dayıbaşı",
-    description: "Ekip, araba ve alacak takibi",
+    name: "Çiftçi Defteri",
+    short_name: "Çiftçi Defteri",
+    description: "Tarla, masraf, gelir ve hasat defteri",
     start_url: "/",
     display: "standalone",
     background_color: "#EEF2ED",

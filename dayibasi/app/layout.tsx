@@ -6,9 +6,10 @@ import { RegisterSW } from "@/core/offline/RegisterSW";
 const manrope = Manrope({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "Dayıbaşı",
-  description: "Ekip, araba ve alacak takibi",
-  appleWebApp: { capable: true, title: "Dayıbaşı", statusBarStyle: "default" },
+  title: "Çiftçi Defteri",
+  description: "Tarla, masraf, gelir ve hasat defteri",
+  openGraph: { title: "Çiftçi Defteri", description: "Tarla, masraf, gelir ve hasat defteri", siteName: "Çiftçi Defteri", locale: "tr_TR", type: "website" },
+  appleWebApp: { capable: true, title: "Çiftçi Defteri", statusBarStyle: "default" },
   icons: { apple: "/apple-touch-icon.png", icon: "/icon-192.png" },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, maximumScale: 1, themeColor: "#2E6A2B" };

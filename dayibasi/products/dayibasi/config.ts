@@ -47,7 +47,7 @@ export const config = {
   },
 
   texts: {
-    appName: "Dayıbaşı",
+    appName: "Çiftçi Defteri",   // giriş ekranı ortak; site adı artık Çiftçi Defteri
     businessPlaceholder: "Örnek: Mehmet Yılmaz ekibi",
   },
 
