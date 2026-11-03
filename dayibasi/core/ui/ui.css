@@ -336,3 +336,38 @@ html.klavye .tab-shell { padding-bottom: 24px; }
 .hava-gunler b { font-size: 1rem; }
 .hava-gunler small { color: var(--sessiz2); font-weight: 600; }
 .hava-uyari { background: #FFF4D6; color: #6B4A00; border-radius: 10px; padding: 8px 10px; font-weight: 700; font-size: 0.92rem; }
+
+/* ---------- Bilgisayar görünümü (geniş ekran) ---------- */
+.ui-nav-brand, .ui-nav-sep, .ui-nav-side { display: none; }
+@media (min-width: 900px) {
+  body { background: var(--zemin); }
+  .ui-nav { top: 0; bottom: 0; right: auto; width: 248px; display: flex; flex-direction: column; gap: 2px; padding: 18px 12px; border-top: 0;
+    border-right: 1px solid var(--cizgi2); box-shadow: none; overflow-y: auto; }
+  .ui-nav a { flex-direction: row; justify-content: flex-start; gap: 12px; min-height: 46px; padding: 8px 14px; font-size: 0.95rem; }
+  .ui-nav a svg { width: 22px; height: 22px; flex: none; }
+  .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
+  .ui-nav-brand img { border-radius: 10px; }
+  .ui-nav-brand span { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .ui-nav-brand small { color: var(--sessiz2); font-weight: 600; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ui-nav-sep { display: block; border-top: 1px solid var(--cizgi2); margin: 10px 8px; }
+  .ui-nav a.ui-nav-side { display: flex; min-height: 38px; font-size: 0.9rem; font-weight: 700; padding: 6px 14px 6px 48px; }
+  .tab-shell { margin-left: 248px; }
+  .tab-shell main { max-width: 1080px; padding: 28px 40px 60px !important; margin: 0 auto; }
+  .tab-shell main:has(.ui-sticky-bottom) { padding-bottom: 140px !important; }
+  .tab-shell .ui-sticky-bottom { left: 248px; bottom: 0; }
+  .tab-shell .ui-sticky-bottom > * { max-width: 520px; margin: 0 auto; }
+  .ui-has-nav { padding-bottom: 40px; }
+  .ui-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ui-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ui-header h1 { font-size: 2rem; }
+  /* Formlar çok uzamasın: tek sütun okunur genişlikte */
+  .tab-shell main:has(> .ui-sticky-bottom), .tab-shell main:has(form) { max-width: 720px; }
+  .ui-total { padding: 24px 28px; }
+  .takvim .gun { aspect-ratio: 1.6 / 1; }
+  .hava-gunler { max-width: 640px; }
+  .rapor-table table { font-size: 0.95rem; }
+  .ui-sync { left: 248px; }
+}
+@media (min-width: 1300px) {
+  .tab-shell main { max-width: 1180px; }
+}

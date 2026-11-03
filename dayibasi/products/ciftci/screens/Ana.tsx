@@ -51,6 +51,8 @@ export default function Ana() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [outMsg, setOutMsg] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [isAdm, setIsAdm] = useState(false);
+  useEffect(() => { supabase().rpc("is_platform_admin").then(({ data }) => setIsAdm(data === true)); }, []);
   // Kim ne girdi: son "Gördüm"den beri başkalarının girdiği kayıtlar
   const [me, setMe] = useState<string | null>(null);
   const [seenAt, setSeenAt] = useState<string>("");
@@ -182,6 +184,7 @@ export default function Ana() {
           catch { setOutMsg("İndiremedim, tekrar dene."); }
           setExporting(false);
         }}><b>{exporting ? "Hazırlanıyor…" : "Bütün verimi indir"}</b><span>Yedek: bütün kayıtlar Excel ve yedek dosyası olarak</span></button>}
+        {isAdm && <a href="/panel"><b>Yönetim paneli</b><span>Bütün hesaplar, defterler ve ayarlar (bilgisayardan)</span></a>}
         <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>
       </div>
 

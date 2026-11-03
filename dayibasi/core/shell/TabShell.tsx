@@ -6,14 +6,15 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
  * böylece sekme değiştirince yarım kalan form ve kaydırma yeri kaybolmaz.
  * Alt menü her ekranda görünür. Etkin sekmeye tekrar dokununca o sekme başa döner.
  */
-export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; render: () => React.ReactNode };
+/** side: bilgisayarda yan menüde ikinci grupta görünür (telefonda gizli). */
+export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; render: () => React.ReactNode };
 type Params = Record<string, string | number | boolean>;
 type Ctx = { active: string; go: (id: string, params?: Params) => void; params: (id: string) => { p: Params; n: number } };
 
 const ShellCtx = createContext<Ctx>({ active: "", go: () => {}, params: () => ({ p: {}, n: 0 }) });
 const TabIdCtx = createContext<string>("");
 
-export function TabShell({ tabs, initial, initialParams }: { tabs: ShellTab[]; initial: string; initialParams?: Params }) {
+export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellTab[]; initial: string; initialParams?: Params; brand?: React.ReactNode }) {
   const [active, setActive] = useState(initial);
   const [visited, setVisited] = useState<string[]>([initial]);
   const [resets, setResets] = useState<Record<string, number>>({});
@@ -63,11 +64,17 @@ export function TabShell({ tabs, initial, initialParams }: { tabs: ShellTab[]; i
         ))}
       </div>
       <nav className="ui-nav" aria-label="Ana menü">
+        {brand && <div className="ui-nav-brand">{brand}</div>}
         {navTabs.map((t) => (
           <a key={t.id} href={t.path} aria-current={navActive === t.id ? "page" : undefined}
             onClick={(e) => { e.preventDefault(); navTap(t.id); }}>
             {t.icon}<span>{t.label}</span>
           </a>
+        ))}
+        {tabs.some((t) => t.side) && <div className="ui-nav-sep" />}
+        {tabs.filter((t) => t.side).map((t) => (
+          <a key={t.id} href={t.path} className="ui-nav-side" aria-current={active === t.id ? "page" : undefined}
+            onClick={(e) => { e.preventDefault(); go(t.id); }}><span>{t.label}</span></a>
         ))}
       </nav>
     </ShellCtx.Provider>

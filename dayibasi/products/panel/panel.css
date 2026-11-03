@@ -73,3 +73,6 @@
   .pn-main { padding: 16px; }
   .pn-grid2 { grid-template-columns: 1fr; }
 }
+/* Uygulamanın telefon düzenini (main dar sütun) ezer */
+.pn .pn-main, .pn-main { max-width: none; width: auto; margin: 0; }
+.pn-input:disabled { background: #F3F5F2; color: #7A877A; }
