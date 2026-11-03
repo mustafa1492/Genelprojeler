@@ -13,6 +13,7 @@ import type { Person } from "@/core/people/api";
 import type { Place } from "@/core/places/api";
 import { addItem, deleteItem, listItems, updateItem, type Item } from "@/core/inventory/api";
 import { supabase } from "@/core/supabase/client";
+import { PickWithAdd } from "@/core/settings/lists";
 import { BackButton, BottomNav, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField, type NavItem } from "@/core/ui";
 
 const dayText = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
@@ -40,6 +41,8 @@ export type ExpenseScreenProps = {
   onEditCategories?: () => void;
   /** Birden çok iş varsa (ör. Fidan, Buğday): "Hangi iş için?" seçimi, data.branch'e yazılır. Tarlanın işi (custom.is) önceden seçilir. */
   branches?: readonly string[];
+  /** Verilirse "Hangi iş için?" her zaman çıkar ve yerinde yeni iş eklenir. */
+  onAddBranch?: (name: string) => Promise<void>;
 };
 type StockAdd = { itemId: string | null; name: string; qty: number; unit: string; category: string };
 
@@ -48,7 +51,7 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 
-export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories, branches = [] }: ExpenseScreenProps) {
+export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories, branches = [], onAddBranch }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
   const [items, setItems] = useState<Expense[] | null>(null);
@@ -98,7 +101,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink} branches={branches}
+    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
       stockCategory={stock && !ed ? stock.categoryOf(view.cat) : null} stockUnits={stock?.units ?? []} stockItems={stockItems}
       onCancel={() => setView({ v: "list" })}
       onSave={async (input, add) => {
@@ -317,10 +320,10 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }:
   );
 }
 
-function MasrafForm({ branches = [], cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
+function MasrafForm({ branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
   stockCategory?: string | null; stockUnits?: readonly string[]; stockItems?: Item[];
   cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
-  link?: ExpenseScreenProps["link"]; presetLink?: string | null; branches?: readonly string[];
+  link?: ExpenseScreenProps["link"]; presetLink?: string | null; branches?: readonly string[]; onAddBranch?: (name: string) => Promise<void>;
   onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data"> & { data?: Record<string, unknown> }, stockAdd?: StockAdd | null) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
 }) {
@@ -358,7 +361,7 @@ function MasrafForm({ branches = [], cat, edit, lastAmount, vendors, farmers, pl
       await onSave({
         occurred_on: day, category: cat, amount: n, note: note.trim() || null, on_credit: credit, vendor: credit ? vendor.trim() : null,
         paid_amount: edit?.paid_amount ?? 0, charge_to: chargeTo, place_id: placeId, photo_path: photo,
-        ...(link || branches.length > 1 ? { data: { ...(edit?.data ?? {}), ...(link ? { [link.key]: linkId } : {}), ...(branches.length > 1 ? { branch } : {}) } } : {}),
+        ...(link || branches.length > 1 || onAddBranch ? { data: { ...(edit?.data ?? {}), ...(link ? { [link.key]: linkId } : {}), ...(branches.length > 1 || onAddBranch ? { branch } : {}) } } : {}),
       }, toStock && stockCategory ? { itemId: stItem, name: stName.trim() || cat, qty: num(stQty) || 0, unit: stUnit, category: stockCategory } : null);
     } catch { setError("Kaydedemedim, tekrar dene."); setBusy(false); }
   };
@@ -387,15 +390,15 @@ function MasrafForm({ branches = [], cat, edit, lastAmount, vendors, farmers, pl
           </div>
         </div>
       )}
-      {branches.length > 1 && (
-        <div className="ui-stack" style={{ gap: 8 }}>
+      {(branches.length > 1 || onAddBranch) && (onAddBranch
+        ? <PickWithAdd label="Hangi iş için?" items={branches} value={branch} onChange={setBranch} noneLabel="Genel (hepsi)" onAdd={onAddBranch} addLabel="+ Yeni iş" placeholder="Örnek: Buğday" />
+        : <div className="ui-stack" style={{ gap: 8 }}>
           <span className="ui-label">Hangi iş için?</span>
           <div className="ui-chips wrap">
             <Chip selected={!branch} onClick={() => setBranch(null)}>Genel (hepsi)</Chip>
             {branches.map((b) => <Chip key={b} selected={branch === b} onClick={() => setBranch(b)}>{b}</Chip>)}
           </div>
-        </div>
-      )}
+        </div>)}
       {link && link.options.length > 0 && (
         <div className="ui-stack" style={{ gap: 8 }}>
           <span className="ui-label">{link.label}</span>

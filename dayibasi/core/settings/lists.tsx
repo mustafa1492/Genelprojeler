@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useBusiness, useSetBusiness, type Business } from "@/core/auth/AuthGate";
 import { supabase } from "@/core/supabase/client";
-import { BackButton, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
+import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 
 /**
  * Düzenlenebilir seçim listeleri (masraf türleri, işlem türleri, birimler…).
@@ -81,5 +81,54 @@ export function ListEditor({ title, listKey, defaults, legacyAdded = [], legacyK
       {error && <ErrorText>{error}</ErrorText>}
       <div className="ui-sticky-bottom"><MainButton onClick={save}>Kaydet</MainButton></div>
     </main>
+  );
+}
+
+/** Listeye tek madde ekler (ör. masraf ekranında yeni iş). İnternet ister. */
+export function useAddToList(key: string) {
+  const biz = useBusiness();
+  const setBiz = useSetBusiness();
+  return async (name: string) => {
+    const all = (biz.settings?.lists as Record<string, ListSetting> | undefined) ?? {};
+    const cur = all[key] ?? {};
+    const lists = { ...all, [key]: { added: [...(cur.added ?? []).filter((x) => x !== name), name], hidden: (cur.hidden ?? []).filter((x) => x !== name) } };
+    const settings = { ...biz.settings, lists };
+    const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
+    if (error) throw error;
+    setBiz({ ...biz, settings });
+  };
+}
+
+/** Çip seçimi + "+ Yeni" ile yerinde ekleme. */
+export function PickWithAdd({ label, items, value, onChange, noneLabel, onAdd, addLabel = "+ Yeni ekle", placeholder }: {
+  label: string; items: readonly string[]; value: string | null; onChange: (v: string | null) => void; noneLabel: string;
+  onAdd: (name: string) => Promise<void>; addLabel?: string; placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [nw, setNw] = useState("");
+  const [error, setError] = useState("");
+  const add = async () => {
+    const n = nw.trim(); if (!n) return;
+    const same = items.find((x) => x.toLocaleLowerCase("tr") === n.toLocaleLowerCase("tr"));
+    if (same) { onChange(same); setOpen(false); setNw(""); return; }
+    try { await onAdd(n); onChange(n); setOpen(false); setNw(""); setError(""); }
+    catch { setError(navigator.onLine ? "Ekleyemedim, tekrar dene." : "Yeni eklemek için internet lazım."); }
+  };
+  return (
+    <div className="ui-stack" style={{ gap: 8 }}>
+      <span className="ui-label">{label}</span>
+      <div className="ui-chips wrap">
+        <Chip selected={!value} onClick={() => onChange(null)}>{noneLabel}</Chip>
+        {items.map((b) => <Chip key={b} selected={value === b} onClick={() => onChange(b)}>{b}</Chip>)}
+        {!open && <Chip onClick={() => setOpen(true)}>{addLabel}</Chip>}
+      </div>
+      {open && (
+        <div className="ui-quickadd">
+          <TextField id={`yeni_${label.length}`} label="Adı" placeholder={placeholder} maxLength={40} autoFocus value={nw} onChange={(e) => setNw(e.target.value)} />
+          <button type="button" disabled={!nw.trim()} onClick={add}>Ekle</button>
+        </div>
+      )}
+      {error && <ErrorText>{error}</ErrorText>}
+    </div>
   );
 }

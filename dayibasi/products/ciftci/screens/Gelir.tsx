@@ -1,5 +1,6 @@
 "use client";
 import { useCList } from "../lists";
+import { useAddToList, PickWithAdd } from "@/core/settings/lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -120,6 +121,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
   const incomeKinds = useCList("income");
   const units = useCList("units");
   const isler = useCList("isler");
+  const addIs = useAddToList("isler");
   const d = edit?.data ?? {};
   const placeIs = (id: string | null) => places.find((p) => p.id === id)?.custom?.is || null;
   const [branch, setBranch] = useState<string | null>((d.branch as string) ?? placeIs(edit?.place_id ?? null));
@@ -159,7 +161,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
     if (pay === "kismen" && !(rec > 0 && rec < tot)) { setError("Alınan tutarı yaz (toplamdan az)."); return; }
     await onSave({ occurred_on: day, place_id: placeId, quantity: tot, data: {
       type, ...(crop.trim() ? { crop: crop.trim() } : {}), ...(isSale && num(qty) > 0 ? { qty: num(qty), unit: isPlant ? "adet" : unit, ...(num(price) > 0 ? { price: num(price) } : {}) } : {}),
-      ...(isler.length > 1 ? { branch: isPlant ? "Fidan" : branch } : {}),
+      ...(isPlant ? (isler.length > 1 ? { branch: "Fidan" } : {}) : branch ? { branch } : {}),
       ...(isPlant ? { lot_id: lotId, ...(size ? { size } : {}) } : {}),
       ...(buyer.trim() ? { buyer: buyer.trim() } : {}), received: rec, ...(pay !== "hepsi" && due ? { due_on: due } : {}),
     } });
@@ -179,15 +181,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
           </div>
         </div>
       )}
-      {isler.length > 1 && !isPlant && (
-        <div className="ui-stack" style={{ gap: 8 }}>
-          <span className="ui-label">Hangi işin geliri?</span>
-          <div className="ui-chips wrap">
-            <Chip selected={!branch} onClick={() => setBranch(null)}>Genel</Chip>
-            {isler.map((b) => <Chip key={b} selected={branch === b} onClick={() => setBranch(b)}>{b}</Chip>)}
-          </div>
-        </div>
-      )}
+      {!isPlant && <PickWithAdd label="Hangi işin geliri?" items={isler} value={branch} onChange={setBranch} noneLabel="Genel" onAdd={addIs} addLabel="+ Yeni iş" placeholder="Örnek: Buğday" />}
       {isPlant && (
         <>
           <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Hangi parti?</span>
