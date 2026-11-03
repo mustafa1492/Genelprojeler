@@ -168,7 +168,11 @@ function Login({ appName }: { appName: string }) {
   );
 }
 
-function CreateBusiness({ product, placeholder, onDone }: { product: string; placeholder: string; onDone: (b: Business) => void }) {
+function CreateBusiness({ product: asked, placeholder: ph, onDone: done }: { product: string; placeholder: string; onDone: (b: Business) => void }) {
+  // Dayıbaşı tarafı şimdilik kapalı (Mustafa, 3 Kasım 2026): yeni hesaplar çiftçi defteri açar.
+  const product = asked === "dayibasi" ? "ciftci" : asked;
+  const placeholder = asked === "dayibasi" ? "Örnek: Aile defteri" : ph;
+  const onDone = (b: Business) => (asked === product ? done(b) : location.assign("/ciftci"));
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -184,15 +188,47 @@ function CreateBusiness({ product, placeholder, onDone }: { product: string; pla
 
   return (
     <main style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <h1 style={{ marginBottom: 0 }}>İşletmeni oluştur</h1>
+      <h1 style={{ marginBottom: 0 }}>{product === "ciftci" ? "Defterini oluştur" : "İşletmeni oluştur"}</h1>
       <p style={{ margin: 0, fontSize: "1.0rem" }}>Bir kere yapacaksın. Sonra hep bu adla gireceksin.</p>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <TextField id="bizname" label="İşletmenin adı" maxLength={100} placeholder={placeholder} required
+        <TextField id="bizname" label={product === "ciftci" ? "Defterin adı" : "İşletmenin adı"} maxLength={100} placeholder={placeholder} required
           value={name} onChange={(e) => setName(e.target.value)} />
         {error && <ErrorText>{error}</ErrorText>}
         <MainButton type="submit" disabled={busy || !name.trim()}>{busy ? "Bekle…" : "Oluştur"}</MainButton>
       </form>
+      <JoinWithCode />
       <button type="button" className="ui-link" onClick={() => { clearLocal(); supabase().auth.signOut(); }}>Çıkış yap</button>
     </main>
+  );
+}
+
+/** Aileden biri davet kodu gönderdiyse: kodu yaz, o deftere katıl. */
+function JoinWithCode() {
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  if (!open) return <button type="button" className="ui-link" onClick={() => setOpen(true)}>Davet kodum var</button>;
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setError("");
+    const { error } = await supabase().rpc("join_business", { p_code: code.trim(), p_name: name.trim() });
+    setBusy(false);
+    if (!error) { location.reload(); return; }
+    const m = error.message ?? "";
+    setError(m.includes("cok_deneme") ? "Çok fazla yanlış kod denendi. Bir saat sonra tekrar dene." :
+      m.includes("kod_gecersiz") ? "Kod yanlış ya da süresi geçmiş. Kodu gönderen kişiden yenisini iste." :
+      navigator.onLine ? "Olmadı, tekrar dene." : "İnternet lazım.");
+  };
+  return (
+    <form onSubmit={submit} className="ui-card" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <b>Davet koduyla katıl</b>
+      <TextField id="davet_kod" label="Davet kodu" placeholder="Örnek: 7F3A9C21" maxLength={12} autoCapitalize="characters" autoComplete="off"
+        value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
+      <TextField id="davet_ad" label="Adın (kayıtlarda görünür)" placeholder="Örnek: Mustafa" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
+      {error && <ErrorText>{error}</ErrorText>}
+      <MainButton type="submit" disabled={busy || code.trim().length < 6}>{busy ? "Bekle…" : "Katıl"}</MainButton>
+    </form>
   );
 }
