@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { BackButton, PageHeader } from "@/core/ui";
 import { config } from "./config";
 import { hasFidan } from "./fidan";
+import { useAppConfig } from "@/core/appConfig";
 
 // Çiftçi defterinin düzenlenebilir listeleri (anahtar → başlık + hazır maddeler).
 export const LISTS = {
@@ -31,16 +32,20 @@ const defaultsOf = (key: ListKey, fidan: boolean): readonly string[] => (key ===
 
 export function useCList(key: ListKey) {
   const biz = useBusiness();
+  const cfg = useAppConfig();
   if (key === "isler") return resolveList(biz, key, defaultsOf(key, hasFidan(biz)));
   const legacy = key === "expense" && Array.isArray(biz.settings?.expense_categories) ? (biz.settings!.expense_categories as string[]) : [];
-  return resolveList(biz, key, LISTS[key].defaults, legacy);
+  // Yönetim panelinde "hazır liste" değiştirildiyse onu kullan
+  const over = cfg[`liste:${key}`];
+  return resolveList(biz, key, Array.isArray(over) && over.length ? (over as string[]) : LISTS[key].defaults, legacy);
 }
 
 /** Bir listenin "Düzenle" ekranını açar. */
 export function EditListScreen({ k, onDone }: { k: ListKey; onDone: () => void }) {
   const biz = useBusiness();
   const legacy = k === "expense" && Array.isArray(biz.settings?.expense_categories) ? (biz.settings!.expense_categories as string[]) : [];
-  return <ListEditor title={LISTS[k].title} listKey={k} defaults={defaultsOf(k, hasFidan(biz))} legacyAdded={legacy} legacyKey={k === "expense" ? "expense_categories" : undefined} onDone={onDone} />;
+  const over = useAppConfig()[`liste:${k}`];
+  return <ListEditor title={LISTS[k].title} listKey={k} defaults={k !== "isler" && Array.isArray(over) && over.length ? (over as string[]) : defaultsOf(k, hasFidan(biz))} legacyAdded={legacy} legacyKey={k === "expense" ? "expense_categories" : undefined} onDone={onDone} />;
 }
 
 /** Bütün listeler tek yerde. */

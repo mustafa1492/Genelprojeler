@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import { clearLocal, startSync } from "@/core/offline/store";
 import { SyncBar } from "@/core/offline/SyncBar";
 import { supabase } from "@/core/supabase/client";
+import { Announcement } from "@/core/appConfig";
 import { ErrorText, MainButton, TextField } from "@/core/ui";
 
 /** role: üyenin bu defterdeki rolü ("sahip" | "calisan"). Çalışan para ekranlarını görmez. */
@@ -23,7 +24,7 @@ export const USERNAME_DOMAIN = "kullanici.dayibasi.app";
 /** Türkçe harfleri düz harfe çevirir (giriş sistemi e-postada yalnız ASCII kabul eder): "hüseyinköprü" → "huseyinkopru". */
 export const asciiUser = (x: string) => x.trim().toLocaleLowerCase("tr")
   .replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i").replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u").replace(/\s+/g, "");
-const toEmail = (x: string) => { const v = x.trim().toLocaleLowerCase("tr"); return v.includes("@") ? v : `${asciiUser(v)}@${USERNAME_DOMAIN}`; };
+export const toEmail = (x: string) => { const v = x.trim().toLocaleLowerCase("tr"); return v.includes("@") ? v : `${asciiUser(v)}@${USERNAME_DOMAIN}`; };
 
 /**
  * Giriş + işletme kapısı: giriş yoksa giriş ekranı, işletme yoksa "işletmeni oluştur",
@@ -94,7 +95,7 @@ function Gate({ product, texts, children, path, otherHomes = {} }: { product: st
     try { localStorage.setItem(`ko:biz:${session.user.id}:${product}`, JSON.stringify(b)); } catch { /* yok */ }
     setBiz(b);
   };
-  return <BusinessCtx.Provider value={biz}><SetBusinessCtx.Provider value={update}><SyncBar />{children}</SetBusinessCtx.Provider></BusinessCtx.Provider>;
+  return <BusinessCtx.Provider value={biz}><SetBusinessCtx.Provider value={update}><SyncBar /><Announcement />{children}</SetBusinessCtx.Provider></BusinessCtx.Provider>;
 }
 
 function Login({ appName }: { appName: string }) {
@@ -183,7 +184,7 @@ function CreateBusiness({ product: asked, placeholder: ph, onDone: done }: { pro
     setBusy(true); setError("");
     const { data, error } = await supabase().rpc("create_business", { p_name: name.trim(), p_product: product });
     setBusy(false);
-    if (error) setError(error.message === "isletme_siniri" ? "En çok 3 işletme açabilirsin." : "Olmadı, tekrar dene.");
+    if (error) setError(error.message === "isletme_siniri" ? "En çok 3 işletme açabilirsin." : error.message === "kapali" ? "Şu an yeni defter açılamıyor. Yöneticiden davet kodu iste ya da “Davet kodum var”ı kullan." : "Olmadı, tekrar dene.");
     else onDone({ id: data as string, name: name.trim() });
   };
 
