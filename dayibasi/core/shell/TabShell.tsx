@@ -7,7 +7,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
  * Alt menü her ekranda görünür. Etkin sekmeye tekrar dokununca o sekme başa döner.
  */
 /** side: bilgisayarda yan menüde ikinci grupta görünür (telefonda gizli). */
-export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; readOnly?: boolean; render: () => React.ReactNode };
+export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; group?: string; emoji?: string; readOnly?: boolean; render: () => React.ReactNode };
 type Params = Record<string, string | number | boolean>;
 type Ctx = { active: string; go: (id: string, params?: Params) => void; params: (id: string) => { p: Params; n: number } };
 
@@ -65,18 +65,27 @@ export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellT
         ))}
       </div>
       <nav className="ui-nav" aria-label="Ana menü">
-        {brand && <div className="ui-nav-brand">{brand}</div>}
         {navTabs.map((t) => (
-          <a key={t.id} href={t.path} aria-current={navActive === t.id ? "page" : undefined}
+          <a key={t.id} href={t.path} className="m" aria-current={navActive === t.id ? "page" : undefined}
             onClick={(e) => { e.preventDefault(); navTap(t.id); }}>
             {t.icon}<span>{t.label}</span>
           </a>
         ))}
-        {tabs.some((t) => t.side) && <div className="ui-nav-sep" />}
-        {tabs.filter((t) => t.side).map((t) => (
-          <a key={t.id} href={t.path} className="ui-nav-side" aria-current={active === t.id ? "page" : undefined}
-            onClick={(e) => { e.preventDefault(); go(t.id); }}><span>{t.label}</span></a>
-        ))}
+        {/* Bilgisayar: gruplu yan menü (telefonda gizli) */}
+        <div className="ui-nav-desk">
+          {brand && <div className="ui-nav-brand">{brand}</div>}
+          {[...new Set(tabs.filter((t) => t.group).map((t) => t.group!))].map((g) => (
+            <div key={g} className="ui-nav-grp">
+              <div className="ui-nav-gl">{g}</div>
+              {tabs.filter((t) => t.group === g).map((t) => (
+                <a key={t.id} href={t.path} aria-current={active === t.id ? "page" : undefined}
+                  onClick={(e) => { e.preventDefault(); if (t.inNav) navTap(t.id); else go(t.id); }}>
+                  <em aria-hidden="true">{t.emoji}</em><span>{t.label}</span>
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
       </nav>
     </ShellCtx.Provider>
   );

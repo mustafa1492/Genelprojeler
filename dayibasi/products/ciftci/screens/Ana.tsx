@@ -26,14 +26,14 @@ import { useRole } from "../rol";
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
 export default function Ana() {
   const biz = useBusiness();
-  const { nameOf } = useMembers(biz.id);
+  const { nameOf, members } = useMembers(biz.id);
   const [exp, setExp] = useState<Expense[]>([]);
   const [ev, setEv] = useState<EventRow[]>([]);
   const [dues, setDues] = useState<Due[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
-  const { selected: S } = useSeason();
+  const { selected: S, seasons } = useSeason();
   const go = useGo();
   const { sees, writes } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
@@ -93,83 +93,81 @@ export default function Ana() {
       open: () => (e.kind === GELIR ? go("gelir", { duzenle: e.id }) : go("tarlalar", { islem: e.id })) }))]
     .filter((r) => (!r.t.startsWith("Masraf ·") || sees("masraf")) && (!r.t.startsWith("Gelir ·") || sees("gelir"))).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
 
+  // Selam, önceki sezon kârı, yaklaşanlar
+  const hr = Number(new Date().toLocaleString("en-GB", { hour: "2-digit", hour12: false, timeZone: "Europe/Istanbul" }));
+  const selam = hr < 11 ? "Günaydın" : hr < 18 ? "İyi günler" : "İyi akşamlar";
+  const myName = members.find((m) => m.user_id === me)?.display_name || "";
+  const nMasraf = exp.filter((e) => inSeason(e.occurred_on, S)).length;
+  const P = seasons.filter((x) => x.start < S.start).sort((a, b) => b.start.localeCompare(a.start))[0];
+  const prevKar = P ? ev.filter((e) => e.kind === GELIR && inSeason(e.occurred_on, P)).reduce((t, e) => t + Number(e.quantity ?? 0), 0) - exp.filter((e) => inSeason(e.occurred_on, P)).reduce((t, e) => t + e.amount, 0) : null;
+  type Up = { key: string; day: string; icon: string; tone: string; title: React.ReactNode; sub: string; right?: React.ReactNode; go?: () => void };
+  const when = (d: string) => (d === today ? "Bugün" : d === addDays(today, 1) ? "Yarın" : d < today ? `${dayText(d)} (geçti)` : dayText(d));
+  const upcoming: Up[] = [
+    ...remind.map((e): Up => ({ key: e.id, day: e.occurred_on, icon: "🔔", tone: e.occurred_on < today ? "kirmizi" : "ilac", title: String(e.data.title), sub: [when(e.occurred_on), e.place_id ? place(e.place_id) : ""].filter(Boolean).join(" · "),
+      right: <button type="button" className="ui-chip" onClick={async (x) => { x.stopPropagation(); await updateEvent(e.id, { data: { ...e.data, done: true } }); load(); }}>Yapıldı</button> })),
+    ...lastWait.map(({ e, h }): Up => ({ key: "h" + e.id, day: h!, icon: "🌾", tone: "", title: "Hasat edilebilir", sub: `${when(h!)} · ${place(e.place_id)} (${String(e.data.product ?? "ilaç")} beklemesi)` })),
+    ...dueSoon.map((d, i): Up => ({ key: "d" + i, day: d.due, icon: d.dir === "borc" ? "💳" : "💰", tone: d.due < today ? "kirmizi" : d.dir === "borc" ? "kirmizi" : "", title: `${d.dir === "borc" ? "Ödenecek" : "Alınacak"}: ${d.who}`, sub: when(d.due), right: <b className="ui-money">{formatTL(d.left)}</b>, go: () => go("vadeler") })),
+    ...docSoon.map((d): Up => ({ key: "b" + d.id, day: d.expires_on!, icon: "📄", tone: (daysLeft(d.expires_on) ?? 0) < 0 ? "kirmizi" : "mavi", title: `${d.title} bitiyor`, sub: when(d.expires_on!), go: () => go("belgeler") })),
+    ...(empty.length ? [{ key: "depo", day: "9999", icon: "📦", tone: "ilac", title: "Depoda az kalan", sub: empty.map((i) => `${i.name} (${i.quantity.toLocaleString("tr-TR")} ${i.unit})`).join(", "), go: () => go("depo") } as Up] : []),
+  ].sort((a, b) => a.day.localeCompare(b.day));
   const fresh = me && seenAt ? [...exp.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: "masraf" })), ...ev.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: e.kind === GELIR ? "gelir" : e.kind === HATIRLAT ? "hatırlatma" : "tarla işi" }))]
     .filter((x) => x.by && x.by !== me && x.at > seenAt) : [];
   const freshBy = Object.entries(fresh.reduce<Record<string, Record<string, number>>>((m, x) => { const n = nameOf(x.by); (m[n] ??= {})[x.k] = (m[n][x.k] ?? 0) + 1; return m; }, {}));
 
   return (
     <main className="ui-has-nav ui-stack">
-      <PageHeader sub={biz.name} title="Özet" right={<HistoryLink />} />
+      <div className="ozet-selam">{selam}{myName ? `, ${myName}` : ""}</div>
+      <PageHeader title={biz.name} right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}>{can("rapor") && <span className="ozet-gizle"><PrivacyButton /></span>}<HistoryLink /></span>} />
       {can("rapor") && <SeasonPicker onManage={() => go("sezonlar")} />}
-      {can("rapor") && <div className="ui-total">
-        <PrivacyButton />
-        <span>{S.name} sezonu kâr / zarar</span>
-        <b>{formatTL(gelir - masraf)}</b>
-        <div className="ui-total-row">
-          <div><span>Gelir</span><strong>{formatTL(gelir)}</strong></div>
-          <div><span>Masraf</span><strong>{formatTL(masraf)}</strong></div>
-        </div>
-      </div>}
-
-      {(() => {
-        // Hava: konumu girilmiş tarlalar (aynı yer bir kez)
-        const seen = new Set<string>();
-        const spots = places.filter((p) => p.custom?.lat).filter((p) => { const k = `${Number(p.custom.lat).toFixed(1)},${Number(p.custom.lon).toFixed(1)}`; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 2);
-        return spots.map((p) => <Weather key={p.id} lat={Number(p.custom.lat)} lon={Number(p.custom.lon)} title={p.custom.koy?.split(",")[0] || p.name} />);
-      })()}
-      {freshBy.length > 0 && (
-        <div className="ui-card ui-stack" style={{ gap: 6 }}>
-          <b>Yeni kayıtlar</b>
-          {freshBy.map(([who, ks]) => <span key={who}><b>{who}</b>: {Object.entries(ks).map(([k, n]) => `${n} ${k}`).join(", ")}</span>)}
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="button" className="ui-chip" onClick={() => go("kayitlar")}>Kayıtlarda gör</button>
-            <button type="button" className="ui-chip" onClick={() => { const t = new Date().toISOString(); setSeenAt(t); try { localStorage.setItem(`ko:gordu:${biz.id}:${me}`, t); } catch { /* yok */ } }}>Gördüm</button>
+      <div className="ozet-ust">
+        <div className="ui-stack" style={{ gap: 12 }}>
+          {can("rapor") && (
+            <div className="ozet-k2">
+              <div className="ui-card"><span>{S.name} kâr</span><b className="ui-money">{formatTL(gelir - masraf)}</b>{prevKar !== null && prevKar !== 0 && <small className={gelir - masraf < prevKar ? "kotu" : ""}>{gelir - masraf >= prevKar ? "▲" : "▼"} %{Math.abs(Math.round(((gelir - masraf - prevKar) / Math.abs(prevKar)) * 100))} geçen sezona göre</small>}</div>
+              <div className="ui-card"><span>Masraf</span><b className="ui-money">{formatTL(masraf)}</b><small style={{ color: "var(--sessiz2)" }}>{nMasraf} kalem</small></div>
+              <div className="ui-card"><span>Gelir</span><b className="ui-money">{formatTL(gelir)}</b></div>
+              <div className="ui-card"><span>Borç / alacak</span><b className="ui-money">{formatTL(borc)}</b><small style={{ color: "var(--sessiz2)" }}>alacak <span className="ui-money">{formatTL(alacak)}</span></small></div>
+            </div>
+          )}
+          <div className="ozet-btns">
+            {can("masraf", 2) && <TabLink to="masraf" params={{ yeni: 1 }}>+ Masraf</TabLink>}
+            {can("tarlalar", 2) && <TabLink to="tarlalar">+ Tarla işi</TabLink>}
+            {can("gelir", 2) && <TabLink to="gelir" params={{ yeni: 1 }}>+ Gelir</TabLink>}
+            {can("fis", 2) && <TabLink to="fis">📷 Fiş yükle</TabLink>}
           </div>
+          {freshBy.length > 0 && (
+            <div className="ui-card ui-stack" style={{ gap: 6 }}>
+              <b>Yeni kayıtlar</b>
+              {freshBy.map(([who, ks]) => <span key={who}><b>{who}</b>: {Object.entries(ks).map(([k, n]) => `${n} ${k}`).join(", ")}</span>)}
+              <div style={{ display: "flex", gap: 8 }}>
+                {can("kayitlar") && <button type="button" className="ui-chip" onClick={() => go("kayitlar")}>Kayıtlarda gör</button>}
+                <button type="button" className="ui-chip" onClick={() => { const t = new Date().toISOString(); setSeenAt(t); try { localStorage.setItem(`ko:gordu:${biz.id}:${me}`, t); } catch { /* yok */ } }}>Gördüm</button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-      <div className="ui-tiles">
-        {can("masraf", 2) && <TabLink to="masraf" params={{ yeni: 1 }}><b>+ Masraf</b><small>gübre, mazot, ilaç…</small></TabLink>}
-        {can("tarlalar", 2) && <TabLink to="tarlalar"><b>+ Tarla işi</b><small>ilaçlama, sulama…</small></TabLink>}
-        {can("gelir", 2) && <TabLink to="gelir" params={{ yeni: 1 }}><b>+ Gelir</b><small>satış, destek</small></TabLink>}
-        {!can("masraf", 2) && can("fis", 2) && <TabLink to="fis"><b>Fiş yükle</b><small>fotoğrafını çek, gönder</small></TabLink>}
-        {can("depo") && <TabLink to="depo"><b>Depo</b><small>{items.length} malzeme</small></TabLink>}
+        <div className="ui-stack" style={{ gap: 12 }}>
+          {(() => {
+            const seen = new Set<string>();
+            const spots = places.filter((p) => p.custom?.lat).filter((p) => { const k = `${Number(p.custom.lat).toFixed(1)},${Number(p.custom.lon).toFixed(1)}`; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 2);
+            return spots.map((p) => <Weather key={p.id} lat={Number(p.custom.lat)} lon={Number(p.custom.lon)} title={p.custom.koy?.split(",")[0] || p.name} />);
+          })()}
+          {upcoming.length > 0 && (
+            <div className="ui-card">
+              <div className="kart-bas">Yaklaşanlar {can("takvim") && <TabLink to="takvim">Takvim ›</TabLink>}</div>
+              <div className="liste-ic">
+                {upcoming.slice(0, 6).map((u) => (
+                  <div key={u.key} role={u.go ? "button" : undefined} onClick={u.go}>
+                    <i className={`ic ${u.tone}`}>{u.icon}</i>
+                    <div>{u.title}<small>{u.sub}</small></div>
+                    {u.right}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-
-      {(() => {
-        const n = remind.length + lastWait.length + dueSoon.length + docSoon.length + (empty.length ? 1 : 0);
-        if (!n) return null;
-        const red = remind.some((e) => e.occurred_on < today) || dueSoon.some((d) => d.due < today) || docSoon.some((d) => (daysLeft(d.expires_on) ?? 0) < 0);
-        return (
-          <div className={`ui-alerts${red ? " gecti" : ""}`}>
-            <button type="button" aria-expanded={showAlerts} onClick={() => setShowAlerts(!showAlerts)}>
-              <span>Uyarılar ({n})</span><span>{showAlerts ? "Kapat ▲" : "Gör ▼"}</span>
-            </button>
-            {showAlerts && <div className="list">
-              {remind.map((e) => (
-                <div key={e.id} className={`ui-warn ${e.occurred_on < today ? "gecti" : "yakin"}`}><div className="ui-warn-row" style={{ alignItems: "center" }}>
-                  <span style={{ flex: 1 }}><b>{String(e.data.title)}</b> · {e.occurred_on === today ? "bugün" : dayText(e.occurred_on)}{e.occurred_on < today ? " (geçti)" : ""}{e.place_id ? ` · ${place(e.place_id)}` : ""}</span>
-                  <button type="button" className="ui-chip" onClick={async () => { await updateEvent(e.id, { data: { ...e.data, done: true } }); load(); }}>Yapıldı</button>
-                </div></div>
-              ))}
-      {lastWait.map(({ e, h }) => (
-                <div key={e.id} className="ui-warn yakin"><div className="ui-warn-row"><span><b>{place(e.place_id)}</b>: hasat en erken {dayYear(h)} ({String(e.data.product ?? "ilaç")}).</span></div></div>
-              ))}
-              {dueSoon.map((d, i) => (
-                <TabLink key={i} to="vadeler" className={`ui-warn ${d.due < today ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
-                  <div className="ui-warn-row"><span>{d.dir === "borc" ? "Ödenecek" : "Alınacak"}: <b>{d.who}</b> <span className="ui-money">{formatTL(d.left)}</span> · vade {dayText(d.due)}{d.due < today ? " (geçti)" : ""}</span></div>
-                </TabLink>
-              ))}
-              {docSoon.map((d) => (
-                <TabLink key={d.id} to="belgeler" className={`ui-warn ${(daysLeft(d.expires_on) ?? 0) < 0 ? "gecti" : "yakin"}`} style={{ textDecoration: "none" }}>
-                  <div className="ui-warn-row"><span><b>{d.title}</b>: {(daysLeft(d.expires_on) ?? 0) < 0 ? "süresi geçti" : `${daysLeft(d.expires_on)} gün kaldı`} ({dayYear(d.expires_on!)})</span></div>
-                </TabLink>
-              ))}
-              {empty.length > 0 && <TabLink to="depo" className="ui-warn yakin" style={{ textDecoration: "none" }}><div className="ui-warn-row"><span>Depoda biten / az kalan: {empty.map((i) => `${i.name} (${i.quantity.toLocaleString("tr-TR")} ${i.unit})`).join(", ")}</span></div></TabLink>}
-
-            </div>}
-          </div>
-        );
-      })()}
 
       <div className="ui-links">
         {can("rapor") && <TabLink to="rapor"><b>Sezon raporu</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>}

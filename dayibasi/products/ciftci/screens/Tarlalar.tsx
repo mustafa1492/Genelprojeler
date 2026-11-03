@@ -177,8 +177,9 @@ export default function Tarlalar() {
           <h2 className="ui-section">Tarla günlüğü</h2>
           {ops.length === 0 && <div className="ui-empty">Henüz işlem yok.</div>}
           {ops.map((e) => (
-            <div key={e.id} className="ui-moneyrow" role="button" style={{ cursor: "pointer" }} onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: String(e.data.type), edit: e }); }}>
-              <b style={{ minWidth: 0 }}>{String(e.data.type)}{e.data.product ? ` · ${String(e.data.product)}` : ""}
+            <div key={e.id} className="ui-moneyrow" role="button" style={{ cursor: "pointer", justifyContent: "flex-start" }} onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: String(e.data.type), edit: e }); }}>
+              {(() => { const t = String(e.data.type); const [ic, tone] = t === "Sulama" ? ["💧", "su"] : t === "İlaçlama" ? ["🧪", "ilac"] : t === "Gübreleme" ? ["🌿", "gubre"] : t === "Hasat" ? ["🌾", ""] : t.startsWith("Ekim") ? ["🌱", ""] : t === "Budama" ? ["✂️", "gubre"] : ["🚜", "mavi"]; return <i className={`ic ${tone}`} aria-hidden="true">{ic}</i>; })()}
+              <b style={{ minWidth: 0, flex: 1 }}>{String(e.data.type)}{e.data.product ? ` · ${String(e.data.product)}` : ""}
                 <small>{[dayYear(e.occurred_on), e.data.method ? String(e.data.method) : "", e.data.hours ? `${String(e.data.hours)} saat` : "", e.data.kwh ? `${String(e.data.kwh)} kWh` : "", e.data.dose ? `doz ${String(e.data.dose)}` : "", harvestFrom(e) ? `hasat ≥ ${dayText(harvestFrom(e)!)}` : "", e.data.note ? String(e.data.note) : "", nameOf(e.created_by)].filter(Boolean).join(" · ")}</small></b>
               <button type="button" className="ui-link inline" style={{ color: "var(--tehlike)" }} onClick={async (x) => {
                 x.stopPropagation(); await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); load();

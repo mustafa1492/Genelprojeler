@@ -1,5 +1,6 @@
 "use client";
 import { useCList } from "../lists";
+import { DeskTable, Tag } from "@/core/ui/DeskTable";
 import { useAddToList, PickWithAdd } from "@/core/settings/lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
@@ -95,8 +96,18 @@ export default function Gelir() {
         </div>
       </div>
       {rows && inY.length === 0 && <div className="ui-empty">{y} sezonunda gelir yok.</div>}
+      <DeskTable rows={inY} rowKey={(e) => e.id} onRow={(e) => { setDone(null); setForm({ edit: e }); }}
+        cols={[
+          { label: "Tarih", cell: (e) => dayText(e.occurred_on), width: "120px" },
+          { label: "Tür", cell: (e) => <b>{String(e.data.type)}</b> },
+          { label: "Tarla / ürün", cell: (e) => [placeName(e.place_id), String(e.data.crop ?? "")].filter(Boolean).join(" · ") },
+          { label: "Miktar", cell: (e) => (e.data.qty ? `${Number(e.data.qty).toLocaleString("tr-TR")} ${String(e.data.unit)} × ${formatTL(Number(e.data.price))}` : "") },
+          { label: "Alıcı", cell: (e) => String(e.data.buyer ?? "") },
+          { label: "Durum", cell: (e) => (incomeOpen(e) ? <Tag tone="sari">Alınacak {formatTL(incomeOpen(e))}</Tag> : <Tag tone="yesil">Alındı</Tag>) },
+          { label: "Tutar", num: true, cell: (e) => <b>{formatTL(Number(e.quantity))}</b> },
+        ]} />
       {inY.map((e) => (
-        <button key={e.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }} onClick={() => { setDone(null); setForm({ edit: e }); }}>
+        <button key={e.id} type="button" className="ui-moneyrow only-mobile" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }} onClick={() => { setDone(null); setForm({ edit: e }); }}>
           <b style={{ minWidth: 0 }}>{String(e.data.type)}{e.data.crop ? ` · ${String(e.data.crop)}` : ""}
             <small>{[dayText(e.occurred_on), placeName(e.place_id), e.data.qty ? `${Number(e.data.qty).toLocaleString("tr-TR")} ${String(e.data.unit)} × ${formatTL(Number(e.data.price))}` : "",
               e.data.buyer ? String(e.data.buyer) : "", incomeOpen(e) ? `alınacak ${formatTL(incomeOpen(e))}${e.data.due_on ? ` (${dayText(String(e.data.due_on))})` : ""}` : "", nameOf(e.created_by)].filter(Boolean).join(" · ")}</small></b>

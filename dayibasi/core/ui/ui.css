@@ -337,40 +337,6 @@ html.klavye .tab-shell { padding-bottom: 24px; }
 .hava-gunler small { color: var(--sessiz2); font-weight: 600; }
 .hava-uyari { background: #FFF4D6; color: #6B4A00; border-radius: 10px; padding: 8px 10px; font-weight: 700; font-size: 0.92rem; }
 
-/* ---------- Bilgisayar görünümü (geniş ekran) ---------- */
-.ui-nav .ui-nav-brand, .ui-nav .ui-nav-sep, .ui-nav a.ui-nav-side { display: none; }
-@media (min-width: 900px) {
-  body { background: var(--zemin); }
-  .ui-nav { top: 0; bottom: 0; right: auto; width: 248px; display: flex; flex-direction: column; gap: 2px; padding: 18px 12px; border-top: 0;
-    border-right: 1px solid var(--cizgi2); box-shadow: none; overflow-y: auto; }
-  .ui-nav a { flex-direction: row; justify-content: flex-start; gap: 12px; min-height: 46px; padding: 8px 14px; font-size: 0.95rem; }
-  .ui-nav a svg { width: 22px; height: 22px; flex: none; }
-  .ui-nav .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
-  .ui-nav-brand img { border-radius: 10px; }
-  .ui-nav-brand span { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
-  .ui-nav-brand small { color: var(--sessiz2); font-weight: 600; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ui-nav .ui-nav-sep { display: block; border-top: 1px solid var(--cizgi2); margin: 10px 8px; }
-  .ui-nav a.ui-nav-side { display: flex; min-height: 38px; font-size: 0.9rem; font-weight: 700; padding: 6px 14px 6px 48px; }
-  .tab-shell { margin-left: 248px; }
-  .tab-shell main { max-width: 1080px; padding: 28px 40px 60px !important; margin: 0 auto; }
-  .tab-shell main:has(.ui-sticky-bottom) { padding-bottom: 140px !important; }
-  .tab-shell .ui-sticky-bottom { left: 248px; bottom: 0; }
-  .tab-shell .ui-sticky-bottom > * { max-width: 520px; margin: 0 auto; }
-  .ui-has-nav { padding-bottom: 40px; }
-  .ui-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .ui-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ui-header h1 { font-size: 2rem; }
-  /* Formlar çok uzamasın: tek sütun okunur genişlikte */
-  .tab-shell main:has(> .ui-sticky-bottom), .tab-shell main:has(form) { max-width: 720px; }
-  .ui-total { padding: 24px 28px; }
-  .takvim .gun { aspect-ratio: 1.6 / 1; }
-  .hava-gunler { max-width: 640px; }
-  .rapor-table table { font-size: 0.95rem; }
-  .ui-sync { left: 248px; }
-}
-@media (min-width: 1300px) {
-  .tab-shell main { max-width: 1180px; }
-}
 /* Yetki düzenleyici (Aile sayfası ve yönetim paneli) */
 .yetki { display: flex; flex-direction: column; gap: 12px; }
 .yetki-roller { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
@@ -389,3 +355,97 @@ html.klavye .tab-shell { padding-bottom: 24px; }
 .yetki-kaydet:disabled { opacity: 0.45; }
 .salt-okunur-not { background: #FFF4D6; color: #6B4A00; border-radius: 12px; padding: 10px 12px; font-weight: 700; margin: 0 0 10px; }
 section[data-ro] .ui-main-btn:not(.ikincil), section[data-ro] .ui-sticky-bottom, section[data-ro] .ui-tiles button, section[data-ro] .yaz-only { display: none !important; }
+
+/* ================= Yeni görünüm (4 Kasım 2026): telefonda sade kartlar, bilgisayarda yan menü + tablo ================= */
+:root { --zemin: #F6F7F2; --golge: 0 2px 10px rgba(30, 50, 30, 0.06); --cizgi2: #E8ECE5; }
+body { background-image: none; background-color: var(--zemin); }
+.ui-card, .ui-moneyrow, .ui-links a, .ui-links > button, .ui-tiles a, .ui-tiles button { border: 0; border-radius: 20px; box-shadow: var(--golge); background: #fff; }
+.ui-moneyrow { border-radius: 16px; padding: 13px 15px; }
+.ui-tiles button, .ui-tiles a { background: #fff; }
+.ui-total { border-radius: 22px; }
+.ui-empty { border-radius: 18px; background: #fff; border: 1.5px dashed #D5E0D1; }
+.ui-chip { border-radius: 999px; }
+.ui-main-btn { border-radius: 16px; }
+.ui-main-btn.ikincil { border: 2px solid #CFE0C9; box-shadow: none; color: var(--ana); }
+.ui-warn { border-radius: 16px; }
+/* Özet: selam, hava, iki kart, iki düğme, yaklaşanlar */
+.ozet-selam { color: var(--sessiz2); font-weight: 600; margin: 4px 4px -10px; }
+.ozet-k2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ozet-k2 .ui-card { display: flex; flex-direction: column; gap: 2px; }
+.ozet-k2 span { font-size: 0.8rem; color: var(--sessiz2); font-weight: 600; }
+.ozet-k2 b { font-size: 1.3rem; letter-spacing: -0.01em; }
+.ozet-k2 small { font-size: 0.75rem; font-weight: 700; color: var(--ana); }
+.ozet-k2 small.kotu { color: var(--tehlike); }
+.ozet-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ozet-btns a, .ozet-btns button { font: inherit; font-weight: 800; font-size: 1.05rem; min-height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  text-decoration: none; cursor: pointer; border: 2px solid #CFE0C9; background: #fff; color: var(--ana); }
+.ozet-btns > :first-child { background: var(--ana); color: #fff; border-color: var(--ana); }
+.liste-ic { display: flex; flex-direction: column; }
+.liste-ic > * { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid #F0F2EE; font: inherit; color: inherit; text-decoration: none; background: none; border-left: 0; border-right: 0; border-bottom: 0; text-align: left; width: 100%; cursor: pointer; }
+.liste-ic > *:first-child { border-top: 0; }
+.liste-ic .ic, .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 1.15rem; flex: none; background: #E7F2E2; font-style: normal; }
+.liste-ic div { flex: 1; min-width: 0; }
+.liste-ic small { display: block; color: var(--sessiz2); font-size: 0.8rem; font-weight: 600; }
+.liste-ic b { white-space: nowrap; }
+.kart-bas { display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
+.kart-bas a, .kart-bas button { all: unset; cursor: pointer; color: var(--ana); font-size: 0.85rem; font-weight: 700; }
+.ic.su { background: #E3F0F7; } .ic.ilac { background: #FFF1CF; } .ic.gubre { background: #F1E8DC; } .ic.kirmizi { background: #FDECEA; } .ic.mavi { background: #E3F0F7; }
+.hava { background: linear-gradient(135deg, #DDEFD6, #F6EFD6); box-shadow: none; }
+/* Alt menü: seçili sekme yeşil hap */
+.ui-nav { border-top: 1px solid #E8ECE5; box-shadow: none; }
+.ui-nav a.m[aria-current="page"] { background: transparent; color: var(--ana); }
+.ui-nav a.m[aria-current="page"] svg { background: var(--ana-acik); border-radius: 12px; padding: 3px 12px; box-sizing: content-box; }
+.ui-nav-desk { display: none; }
+.only-desk { display: none !important; }
+/* Tablo (bilgisayar) */
+.masa { background: #fff; border-radius: 16px; box-shadow: var(--golge); overflow: auto; }
+.masa table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.masa th { text-align: left; background: #F1F4EF; color: #5A6859; font-size: 0.78rem; font-weight: 700; padding: 10px 14px; white-space: nowrap; }
+.masa td { padding: 11px 14px; border-top: 1px solid #F0F2EE; vertical-align: middle; }
+.masa .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.masa tr.tik { cursor: pointer; } .masa tr.tik:hover td { background: #F5FAF2; }
+.masa .bos { color: var(--sessiz2); text-align: center; padding: 22px; }
+.etiket { border-radius: 7px; padding: 2px 9px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+.etiket.yesil { background: #E7F2E2; color: #22561F; } .etiket.sari { background: #FFF1CF; color: #7A5300; } .etiket.kirmizi { background: #FDECEA; color: #9B2620; } .etiket.gri { background: #EEF1EC; color: #4E5C4D; }
+
+@media (min-width: 900px) {
+  .only-desk { display: block !important; }
+  .only-mobile { display: none !important; }
+  /* Yan menü: koyu yeşil, gruplu */
+  .ui-nav { top: 0; bottom: 0; right: auto; width: 240px; display: block; padding: 18px 12px; background: #16301A; border: 0; overflow-y: auto; }
+  .ui-nav a.m { display: none; }
+  .ui-nav-desk { display: flex; flex-direction: column; gap: 2px; }
+  .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; color: #fff; }
+  .ui-nav-brand img { border-radius: 10px; background: #FDF4E3; }
+  .ui-nav-brand span { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .ui-nav-brand small { color: #9DB59A; font-weight: 600; font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ui-nav-gl { margin: 14px 12px 4px; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #7F9A7C; font-weight: 700; }
+  .ui-nav-desk a { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; color: #D6E4D3; text-decoration: none; font-weight: 600; font-size: 0.93rem; }
+  .ui-nav-desk a:hover { background: rgba(255,255,255,0.06); }
+  .ui-nav-desk a[aria-current="page"] { background: #2B5A2C; color: #fff; }
+  .ui-nav-desk em { font-style: normal; width: 22px; text-align: center; }
+  .tab-shell { margin-left: 240px; }
+  .tab-shell main { max-width: 1120px; padding: 26px 36px 60px !important; margin: 0 auto; }
+  .tab-shell main:has(.ui-sticky-bottom) { padding-bottom: 140px !important; max-width: 760px; }
+  .tab-shell .ui-sticky-bottom { left: 240px; bottom: 0; }
+  .tab-shell .ui-sticky-bottom > * { max-width: 560px; margin: 0 auto; }
+  .ui-has-nav { padding-bottom: 40px; }
+  .ui-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ui-links { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ozet-k2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ozet-btns { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ozet-ust { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; align-items: start; }
+  .ui-header h1 { font-size: 1.9rem; }
+  .takvim .gun { aspect-ratio: 1.6 / 1; }
+  .ui-sync { left: 240px; }
+  /* Ana buton bilgisayarda sağa yaslı, dar */
+  .tab-shell main > .ui-main-btn:not(.ikincil) { max-width: 300px; min-height: 52px; align-self: flex-start; font-size: 1rem; }
+}
+.ozet-gizle .ui-privacy { position: static; background: #fff; color: var(--ana); box-shadow: var(--golge); border: 0; }
+body.gizli .ozet-k2 b, body.gizli .masa .num { filter: blur(8px); user-select: none; }
+@media (min-width: 900px) {
+  .ui-nav-desk a { flex-direction: row; justify-content: flex-start; align-items: center; min-height: 0; text-align: left; }
+  .ui-nav-desk a span { font-size: 0.93rem; }
+  .ozet-ust:has(> :nth-child(2):empty) { grid-template-columns: 1fr; }
+}
+.ozet-ust > div:empty { display: none; }

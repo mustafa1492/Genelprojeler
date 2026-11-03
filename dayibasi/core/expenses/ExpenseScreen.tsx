@@ -13,6 +13,7 @@ import type { Person } from "@/core/people/api";
 import type { Place } from "@/core/places/api";
 import { addItem, deleteItem, listItems, updateItem, type Item } from "@/core/inventory/api";
 import { supabase } from "@/core/supabase/client";
+import { DeskTable, Tag } from "@/core/ui/DeskTable";
 import { PickWithAdd } from "@/core/settings/lists";
 import { BackButton, BottomNav, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField, type NavItem } from "@/core/ui";
 
@@ -292,8 +293,18 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
       )}
 
       {items && inMonth.length === 0 && <div className="ui-empty">{bySeason ? "Bu sezon masraf yok." : "Bu ay masraf yok."}</div>}
+      <DeskTable rows={inMonth} rowKey={(e) => e.id} onRow={(e) => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}
+        cols={[
+          { label: "Tarih", cell: (e) => `${e.occurred_on.slice(8)}.${e.occurred_on.slice(5, 7)}.${e.occurred_on.slice(0, 4)}`, width: "110px" },
+          { label: "Tür", cell: (e) => <b>{e.category}</b> },
+          ...(places.length ? [{ label: "Tarla", cell: (e: Expense) => placeName(e.place_id) }] : []),
+          { label: "Not", cell: (e) => [e.note, (e.data?.branch as string) || ""].filter(Boolean).join(" · ") },
+          { label: "Durum", cell: (e) => e.on_credit ? (owed(e) ? <Tag tone="kirmizi">Veresiye: {e.vendor}</Tag> : <Tag tone="yesil">Ödendi</Tag>) : e.charge_to ? <Tag tone="gri">Yansıtıldı</Tag> : <Tag tone="yesil">{e.photo_path ? "Ödendi · fişli" : "Ödendi"}</Tag> },
+          ...(memberName ? [{ label: "Giren", cell: (e: Expense) => memberName((e as Expense & { created_by?: string }).created_by) }] : []),
+          { label: "Tutar", num: true, cell: (e) => <b>{formatTL(e.amount)}</b> },
+        ]} />
       {days.map((d) => (
-        <section key={d} className="ui-stack" style={{ gap: 8 }}>
+        <section key={d} className="ui-stack only-mobile" style={{ gap: 8 }}>
           <h2 style={{ margin: "6px 4px 0", fontSize: "1.05rem" }}>{dayText(d)}</h2>
           {inMonth.filter((e) => e.occurred_on === d).map((e) => (
             <button key={e.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }}

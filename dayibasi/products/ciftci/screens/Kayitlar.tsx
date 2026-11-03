@@ -9,6 +9,7 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { BackButton, Chip, PageHeader, TextField } from "@/core/ui";
 import { GELIR, ISLEM } from "../kayit";
+import { DeskTable, Tag } from "@/core/ui/DeskTable";
 
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 type Row = { id: string; kind: "Masraf" | "Gelir" | "Tarla işi"; day: string; title: string; sub: string; amount: number | null; by?: string | null; open: () => void };
@@ -59,8 +60,17 @@ export default function Kayitlar() {
       <TextField id="k_ara" label="Ara (isteğe bağlı)" placeholder="Örnek: mazot, Kınık yolu" maxLength={40} value={q} onChange={(e) => setQ(e.target.value)} />
       <p className="ui-note" style={{ margin: 0 }}>Düzeltmek ya da silmek için kayda dokun.</p>
       {rows.length === 0 && <div className="ui-empty">Kayıt yok.</div>}
+      <DeskTable rows={shown} rowKey={(r) => r.kind + r.id} onRow={(r) => r.open()}
+        cols={[
+          { label: "Tarih", cell: (r) => `${r.day.slice(8)}.${r.day.slice(5, 7)}.${r.day.slice(0, 4)}`, width: "110px" },
+          { label: "Kayıt", cell: (r) => <Tag tone={r.kind === "Gelir" ? "yesil" : r.kind === "Masraf" ? "kirmizi" : "gri"}>{r.kind}</Tag>, width: "110px" },
+          { label: "Ne", cell: (r) => <b>{r.title}</b> },
+          { label: "Ayrıntı", cell: (r) => r.sub },
+          { label: "Giren", cell: (r) => nameOf(r.by) },
+          { label: "Tutar", num: true, cell: (r) => (r.amount === null ? "" : <b>{r.kind === "Gelir" ? "+" : "−"}{formatTL(r.amount)}</b>) },
+        ]} />
       {months.map((m) => (
-        <div key={m} className="ui-stack" style={{ gap: 8 }}>
+        <div key={m} className="ui-stack only-mobile" style={{ gap: 8 }}>
           <h2 className="ui-section">{monthName(m)}</h2>
           {shown.filter((r) => r.day.startsWith(m)).map((r) => (
             <button key={r.kind + r.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }} onClick={r.open}>
