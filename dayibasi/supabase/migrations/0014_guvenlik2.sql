@@ -1,4 +1,9 @@
 -- Güvenlik sıkılaştırma (3 Kasım 2026 testleri)
+-- UYGULANAN (3 Kasım 2026, execute_sql ile): sadece "defter silinemez" ve "urun degismez" kısıtlayıcı politikaları,
+-- join_attempts + join_business ve boyut sınırları. Aşağıdaki drop/revoke satırları UYGULANMADI (onay gerektiriyor);
+-- zararsız ek önlemler, SQL Editor'den çalıştırılabilir.
+create policy "defter silinemez" on businesses as restrictive for delete using (false);
+create policy "urun degismez" on businesses as restrictive for update using (true) with check (product = (select b.product from businesses b where b.id = businesses.id));
 -- 1) Defteri (businesses) üyeler silemez; sadece adı, telefonu ve ayarları değişebilir. Yeni defter create_business ile açılır.
 drop policy if exists "uye okur ve yazar" on businesses;
 create policy "uye okur" on businesses for select using (is_member(id));
