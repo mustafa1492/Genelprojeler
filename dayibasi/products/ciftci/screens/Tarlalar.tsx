@@ -5,7 +5,7 @@ import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, SAYIM } from "../fidan";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
-import { addEvent, deleteEvent, listEvents, type EventRow } from "@/core/events/api";
+import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@/core/events/api";
 import { listExpenses, type Expense } from "@/core/expenses/api";
 import { listItems, updateItem, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
@@ -18,7 +18,7 @@ import { HistoryLink } from "../nav";
 import { TabLink, useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason, type Season } from "../sezon";
 
-type View = { v: "list" } | { v: "yeni"; edit?: Place } | { v: "tarla"; id: string } | { v: "islem"; id: string; type?: string } | { v: "verim"; id: string };
+type View = { v: "list" } | { v: "yeni"; edit?: Place } | { v: "tarla"; id: string } | { v: "islem"; id: string; type?: string; edit?: EventRow } | { v: "verim"; id: string };
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
 export default function Tarlalar() {
@@ -47,7 +47,10 @@ export default function Tarlalar() {
   useEffect(load, [load]);
   useOnActivate(load);
   const tp = useTabParams();
-  useEffect(() => { if (tp.p.tarla) setView({ v: "tarla", id: String(tp.p.tarla) }); }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (tp.p.islem) { const e = events.find((x) => x.id === tp.p.islem); if (e?.place_id) { setDone(null); setView({ v: "islem", id: e.place_id, type: String(e.data.type), edit: e }); return; } }
+    if (tp.p.tarla) setView({ v: "tarla", id: String(tp.p.tarla) });
+  }, [tp.n, events.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
   // Fidan modülü: tarladaki aktif partilerin canlı fidan sayısı ve maliyeti
@@ -86,8 +89,16 @@ export default function Tarlalar() {
 
   if (view.v === "islem") {
     const p = find(view.id);
-    if (p) return <IslemForm place={p} items={items} history={events.filter((e) => e.kind === ISLEM)} initialType={view.type} onCancel={() => setView({ v: "tarla", id: p.id })}
+    if (p) return <IslemForm place={p} items={items} history={events.filter((e) => e.kind === ISLEM)} initialType={view.type} edit={view.edit} onCancel={() => setView({ v: "tarla", id: p.id })}
+      onDelete={view.edit ? async () => { const e = view.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setView({ v: "tarla", id: p.id }); load(); } : undefined}
       onSave={async (type, day, data, use) => {
+        if (view.edit) {
+          const old = view.edit;
+          const keep = Object.fromEntries(Object.entries(old.data).filter(([k]) => ["item_id", "used", "unit"].includes(k)));
+          await updateEvent(old.id, { occurred_on: day, data: { type, ...keep, ...data } });
+          setDone({ message: `Değiştirdim: ${p.name}, ${type}.`, undo: () => updateEvent(old.id, { occurred_on: old.occurred_on, data: old.data }) });
+          setView({ v: "tarla", id: p.id }); load(); return;
+        }
         const ev = await addEvent(biz.id, { kind: ISLEM, occurred_on: day, place_id: p.id, person_id: null, quantity: null, data: { type, ...data } });
         let undoStock: (() => Promise<void>) | null = null;
         if (use) {
@@ -154,11 +165,11 @@ export default function Tarlalar() {
           <h2 className="ui-section">Tarla günlüğü</h2>
           {ops.length === 0 && <div className="ui-empty">Henüz işlem yok.</div>}
           {ops.map((e) => (
-            <div key={e.id} className="ui-moneyrow">
+            <div key={e.id} className="ui-moneyrow" role="button" style={{ cursor: "pointer" }} onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: String(e.data.type), edit: e }); }}>
               <b style={{ minWidth: 0 }}>{String(e.data.type)}{e.data.product ? ` · ${String(e.data.product)}` : ""}
                 <small>{[dayYear(e.occurred_on), e.data.dose ? `doz ${String(e.data.dose)}` : "", harvestFrom(e) ? `hasat ≥ ${dayText(harvestFrom(e)!)}` : "", e.data.note ? String(e.data.note) : "", nameOf(e.created_by)].filter(Boolean).join(" · ")}</small></b>
-              <button type="button" className="ui-link inline" style={{ color: "var(--tehlike)" }} onClick={async () => {
-                await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); load();
+              <button type="button" className="ui-link inline" style={{ color: "var(--tehlike)" }} onClick={async (x) => {
+                x.stopPropagation(); await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); load();
               }}>Sil</button>
             </div>
           ))}
@@ -237,20 +248,21 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
   );
 }
 
-function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
-  place: Place; items: Item[]; history: EventRow[]; initialType?: string; onCancel: () => void;
+function IslemForm({ place, items, history, initialType, edit, onSave, onCancel, onDelete }: {
+  place: Place; items: Item[]; history: EventRow[]; initialType?: string; edit?: EventRow; onCancel: () => void; onDelete?: () => Promise<void>;
   onSave: (type: string, day: string, data: Record<string, unknown>, use: { id: string; amount: number } | null) => Promise<void>;
 }) {
   const operations = useCList("operations");
   const go = useGo();
   const [type, setType] = useState<string | null>(initialType ?? null);
-  const [day, setDay] = useState(todayStr());
-  const [product, setProduct] = useState("");
+  const ed = edit?.data ?? {};
+  const [day, setDay] = useState(edit?.occurred_on ?? todayStr());
+  const [product, setProduct] = useState(String(ed.product ?? ""));
   const [itemId, setItemId] = useState<string | null>(null);
-  const [dose, setDose] = useState("");
-  const [wait, setWait] = useState("");
+  const [dose, setDose] = useState(String(ed.dose ?? ""));
+  const [wait, setWait] = useState(ed.wait_days ? String(ed.wait_days) : "");
   const [used, setUsed] = useState("");
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(String(ed.note ?? ""));
   const [error, setError] = useState("");
   const needsProduct = type === "İlaçlama" || type === "Gübreleme";
   const stock = items.filter((i) => (type === "İlaçlama" ? i.category === "İlaç" : type === "Gübreleme" ? i.category === "Gübre" : false));
@@ -283,7 +295,7 @@ function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
   return (
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
       <BackButton onClick={() => (initialType ? onCancel() : setType(null))} />
-      <PageHeader sub={place.name} title={type} />
+      <PageHeader sub={edit ? `${place.name} · işlemi düzenle` : place.name} title={type} />
       <TextField id="i_gun" label="Tarih" type="date" max={todayStr()} value={day} onChange={(e) => setDay(e.target.value)} />
       {needsProduct && (
         <>
@@ -315,7 +327,7 @@ function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
             <TextField id="i_bekleme" label="Hasat öncesi bekleme süresi (gün, ilacın etiketinde yazar)" inputMode="numeric" placeholder="Örnek: 14" maxLength={3}
               value={wait} onChange={(e) => setWait(e.target.value.replace(/\D/g, ""))} />
           )}
-          {item && (
+          {item && !edit && (
             <TextField id="i_kullanilan" label={`Depodan ne kadar kullanıldı? (${item.unit}, depodan düşer)`} inputMode="decimal" placeholder="Örnek: 2" maxLength={10}
               value={used} onChange={(e) => setUsed(e.target.value)} />
           )}
@@ -334,6 +346,7 @@ function IslemForm({ place, items, history, initialType, onSave, onCancel }: {
           }, item && u ? { id: item.id, amount: u } : null);
         }}>Kaydet</MainButton>
       </div>
+      {onDelete && <button type="button" className="ui-link" style={{ color: "var(--tehlike)" }} onClick={onDelete}>Bu işlemi sil</button>}
     </main>
   );
 }

@@ -47,7 +47,7 @@ export default function Gelir() {
   useEffect(load, [load]);
   useOnActivate(load);
   const tp = useTabParams();
-  useEffect(() => { if (tp.p.yeni) { setDone(null); setForm(tp.p.parti || tp.p.adet ? { type: FIDAN_SATIS, prefill: tp.p } : {}); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tp.p.duzenle) { const e = (rows ?? []).find((x) => x.id === tp.p.duzenle); if (e) { setDone(null); setForm({ edit: e }); } return; } if (tp.p.yeni) { setDone(null); setForm(tp.p.parti || tp.p.adet ? { type: FIDAN_SATIS, prefill: tp.p } : {}); } }, [tp.n, !!rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const beOf = (placeId: string | null) => {
     if (!placeId) return null;

@@ -68,8 +68,9 @@ export default function Ana() {
   ].filter((x) => (Date.parse(x.due) - Date.parse(today)) / 86400000 <= config.remindDays.dues).sort((a, b) => a.due.localeCompare(b.due));
   const docSoon = docs.filter((d) => { const n = daysLeft(d.expires_on); return n !== null && n <= config.remindDays.documents; });
   const empty = items.filter(isLow);
-  const recent = [...exp.map((e) => ({ at: e.created_at ?? e.occurred_on, t: `Masraf · ${e.category} ${formatTL(e.amount)}`, by: e.created_by })),
-    ...ev.map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by }))]
+  const recent = [...exp.map((e) => ({ at: e.created_at ?? e.occurred_on, t: `Masraf · ${e.category} ${formatTL(e.amount)}`, by: e.created_by, open: () => go("masraf", { duzenle: e.id }) })),
+    ...ev.map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by,
+      open: () => (e.kind === GELIR ? go("gelir", { duzenle: e.id }) : go("tarlalar", { islem: e.id })) }))]
     .sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
 
   return (
@@ -127,6 +128,7 @@ export default function Ana() {
         <TabLink to="rapor"><b>Sezon raporu</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
         <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
         <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
+        <TabLink to="kayitlar"><b>Kayıtlar</b><span>Bütün masraf, gelir, tarla işleri: ara, düzelt, sil</span></TabLink>
         <TabLink to="listeler"><b>Listeleri düzenle</b><span>Masraf türleri, tarla işleri, birimler… ekle / kaldır</span></TabLink>
         <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>
       </div>
@@ -135,8 +137,9 @@ export default function Ana() {
         <>
           <h2 className="ui-section">Son kayıtlar</h2>
           <div className="ui-card ui-rows">
-            {recent.map((r, i) => <div key={i}><span>{r.t}</span><span>{nameOf(r.by)}</span></div>)}
+            {recent.map((r, i) => <button key={i} type="button" className="ui-row-btn" onClick={r.open}><span>{r.t}</span><span>{nameOf(r.by)} ›</span></button>)}
           </div>
+          <button type="button" className="ui-link" onClick={() => go("kayitlar")}>Bütün kayıtlar ›</button>
         </>
       )}
       {outMsg && <div className="ui-warn yakin"><div className="ui-warn-row"><span>{outMsg}</span></div></div>}

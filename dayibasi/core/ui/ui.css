@@ -301,3 +301,7 @@ body.gizli .ui-moneyrow strong, body.gizli .ui-links span { filter: blur(9px); u
 .ui-alerts.gecti { border-color: var(--tehlike-cizgi); background: var(--tehlike-acik); color: var(--tehlike-yazi); }
 body.gizli .ui-money { filter: blur(7px); user-select: none; }
 button.ui-card.ui-stack { display: flex; flex-direction: column; text-align: left; }
+.ui-rows > .ui-row-btn { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border: 0; border-top: 1px solid var(--cizgi2); background: none; font: inherit; font-size: 0.944rem; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+.ui-rows > .ui-row-btn:first-child { border-top: 0; padding-top: 0; }
+.ui-rows > .ui-row-btn span:first-child { color: var(--sessiz2); font-weight: 600; }
+.ui-rows > .ui-row-btn span:last-child { font-weight: 800; text-align: right; }

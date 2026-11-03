@@ -76,7 +76,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // "Yeni masraf" isteği: adresten (?yeni=1) ya da sekme kabuğundan ({yeni, tarla})
   useEffect(() => { try { if (new URLSearchParams(location.search).get("yeni")) setView({ v: "tur" }); } catch { /* yok */ } }, []);
   const tp = useTabParams();
-  useEffect(() => { if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setPresetLink(link && tp.p[link.param] ? String(tp.p[link.param]) : null); setView({ v: "tur" }); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tp.p.duzenle) { const e = (items ?? []).find((x) => x.id === tp.p.duzenle); if (e) { setDone(null); setView({ v: "form", cat: e.category, edit: e }); } return; } if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setPresetLink(link && tp.p[link.param] ? String(tp.p[link.param]) : null); setView({ v: "tur" }); } }, [tp.n, !!items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const custom = (Array.isArray(biz.settings?.expense_categories) ? biz.settings!.expense_categories : []) as string[];
   const categories = onEditCategories ? [...baseCats] : [...baseCats.filter((c) => c !== "Diğer"), ...custom.filter((c) => !baseCats.includes(c)), "Diğer"];
