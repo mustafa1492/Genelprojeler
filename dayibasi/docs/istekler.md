@@ -96,3 +96,10 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Dış yedek (haftalık, şifreli, GitHub Actions → `yedek` dalı) Mustafa'nın açık izni gerekiyor ("dış yedeği kur, izin veriyorum"). Supabase Pro (25$/ay) pahalı bulundu.
 - Plan: "Bütün verimi indir" düğmesi (çiftçi defteri, Özet bağlantıları). Tek Excel (tarlalar, masraflar, gelirler, tarla işleri, verim, depo, borçlar, belgeler, fidan) + geri yüklenebilir JSON. Kullanıcı iCloud/bilgisayarda saklar. Ücretsiz, yedeğin en kolay yolu.
 - Plan (uzak): Supabase'ten kendi sunucuya taşıma. Büyük iş, aylık 5-10$; şimdilik değmez.
+
+## Çiftçi defteri, 3 Kasım 2026 paketi (gelistirme dalında, yüklenmedi)
+- [x] Bütün verimi indir (Excel + JSON yedek), masrafı tarlalara dönüme göre böl, geçen sezonla karşılaştırma (rapor), takvim + hatırlatmalar (Özet uyarılarında "Yapıldı"), sulama kaydı (yöntem, saat, sayaç kWh, su ücreti → masraf), hava durumu (köy/ilçe, Open-Meteo, don/yağmur/rüzgâr uyarısı), kim ne girdi kartı.
+- [x] Çalışan modu: rol `calisan` (davet türü, Aile'de rol değiştir/çıkar). Para (masraf, gelir, borç, fidan maliyeti, geçmiş) veritabanında kısıtlayıcı politikalarla kapalı (0015). Tarla işi, verim, hatırlatma, depo, fiş yükleme açık.
+- [x] Fiş kutusu: fotoğraf yükle → sahip Masraf'ta "Aç" ile masrafa çevirir. Yapay zeka okuma **sonra** (Claude API anahtarı gerekecek, Mustafa "şimdilik yapay zekasız" dedi).
+- [ ] Devlet destekleri bölümü: araştırma `docs/fikirler/09-devlet-destekleri.md`, Mustafa'nın cevabı bekleniyor.
+- [ ] Telefona bildirim (push) ile hatırlatma: sonra (sunucu zamanlayıcı gerekir).
