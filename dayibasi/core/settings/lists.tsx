@@ -39,24 +39,24 @@ export function ListEditor({ title, listKey, defaults, legacyAdded = [], legacyK
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
-  const save = async () => {
-    setError("");
-    const lists = { ...((biz.settings?.lists as Record<string, ListSetting>) ?? {}), [listKey]: { added, hidden } };
+  // Her değişiklik hemen kaydedilir (ayrı "Kaydet" düğmesi unutuluyordu).
+  const persist = async (ad: string[], hi: string[]) => {
+    const pa = added, ph = hidden;
+    setAdded(ad); setHidden(hi); setError(""); setMsg("");
+    const lists = { ...((biz.settings?.lists as Record<string, ListSetting>) ?? {}), [listKey]: { added: ad, hidden: hi } };
     const settings = { ...biz.settings, lists, ...(legacyKey ? { [legacyKey]: [] } : {}) };   // eski ayar listeye taşındı
     const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
-    if (error) { setError(navigator.onLine ? "Kaydedemedim, tekrar dene." : "Listeyi kaydetmek için internet lazım."); return; }
+    if (error) { setAdded(pa); setHidden(ph); setError(navigator.onLine ? "Kaydedemedim, tekrar dene." : "Listeyi değiştirmek için internet lazım."); return; }
     setBiz({ ...biz, settings });
     setMsg("Kaydedildi.");
-    onDone();
   };
-  const toggle = (x: string) => setHidden(hidden.includes(x) ? hidden.filter((h) => h !== x) : [...hidden, x]);
+  const toggle = (x: string) => persist(added, hidden.includes(x) ? hidden.filter((h) => h !== x) : [...hidden, x]);
 
   return (
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
-      <BackButton onClick={onDone} label="Vazgeç" />
+      <BackButton onClick={onDone} label="Geri" />
       <PageHeader sub="Düzenleme" title={title} />
-      {msg && <DoneCard message={msg} />}
-      <p className="ui-note">Kullanmadığını kaldır, ihtiyacın olanı ekle. Kaldırmak eski kayıtları silmez; sadece seçerken çıkmaz.</p>
+      <p className="ui-note">Kullanmadığını kaldır, ihtiyacın olanı ekle. Kaldırmak eski kayıtları silmez; sadece seçerken çıkmaz. Değişiklikler hemen kaydedilir.</p>
       {defaults.map((d) => (
         <div key={d} className="ui-moneyrow" style={{ opacity: hidden.includes(d) ? 0.5 : 1 }}>
           <b>{d}<small>{hidden.includes(d) ? "Kaldırıldı" : "Hazır"}</small></b>
@@ -66,20 +66,21 @@ export function ListEditor({ title, listKey, defaults, legacyAdded = [], legacyK
       {added.map((a) => (
         <div key={a} className="ui-moneyrow">
           <b>{a}<small>Senin eklediğin</small></b>
-          <button type="button" className="ui-chip" onClick={() => setAdded(added.filter((x) => x !== a))}>Kaldır</button>
+          <button type="button" className="ui-chip" onClick={() => persist(added.filter((x) => x !== a), hidden)}>Kaldır</button>
         </div>
       ))}
       <div className="ui-quickadd">
         <TextField id={`liste_${listKey}`} label="Yeni ekle" maxLength={40} value={nw} onChange={(e) => setNw(e.target.value)} />
         <button type="button" disabled={!nw.trim()} onClick={() => {
           const v = nw.trim();
-          if (defaults.includes(v)) setHidden(hidden.filter((h) => h !== v));
-          else if (!added.includes(v)) setAdded([...added, v]);
+          if (defaults.includes(v)) persist(added, hidden.filter((h) => h !== v));
+          else if (!added.includes(v)) persist([...added, v], hidden);
           setNw("");
         }}>Ekle</button>
       </div>
+      {msg && <p className="ui-note" style={{ margin: 0 }}>✓ {msg}</p>}
       {error && <ErrorText>{error}</ErrorText>}
-      <div className="ui-sticky-bottom"><MainButton onClick={save}>Kaydet</MainButton></div>
+      <div className="ui-sticky-bottom"><MainButton onClick={onDone}>Bitti</MainButton></div>
     </main>
   );
 }
