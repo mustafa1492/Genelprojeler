@@ -36,6 +36,13 @@ export function TabShell({ tabs, initial, initialParams }: { tabs: ShellTab[]; i
     else go(id);
   };
 
+  // Klavye açılınca (görünen alan küçülünce) alt menüyü ve sabit düğmeyi gizle
+  useEffect(() => {
+    const vv = window.visualViewport; if (!vv) return;
+    const f = () => document.documentElement.classList.toggle("klavye", window.innerHeight - vv.height > 150);
+    vv.addEventListener("resize", f); f();
+    return () => { vv.removeEventListener("resize", f); document.documentElement.classList.remove("klavye"); };
+  }, []);
   useEffect(() => {
     const onPop = () => { const t = tabs.find((x) => x.path === location.pathname); if (t) setActive(t.id); };
     window.addEventListener("popstate", onPop);

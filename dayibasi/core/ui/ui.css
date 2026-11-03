@@ -305,3 +305,9 @@ button.ui-card.ui-stack { display: flex; flex-direction: column; text-align: lef
 .ui-rows > .ui-row-btn:first-child { border-top: 0; padding-top: 0; }
 .ui-rows > .ui-row-btn span:first-child { color: var(--sessiz2); font-weight: 600; }
 .ui-rows > .ui-row-btn span:last-child { font-weight: 800; text-align: right; }
+/* Telefonda klavye açıkken: yazı kutusu en az 16px (iPhone büyütmesin), alttaki menü ve sabit düğme gizlenir, yana kayma olmaz. */
+.ui-field input, .ui-field textarea, .ui-field select { font-size: max(16px, 1rem); }
+html, body { overflow-x: clip; }
+.ui-quickadd > button { flex-shrink: 0; }
+html.klavye .ui-nav, html.klavye .ui-sticky-bottom { display: none; }
+html.klavye .tab-shell { padding-bottom: 24px; }
