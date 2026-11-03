@@ -338,18 +338,18 @@ html.klavye .tab-shell { padding-bottom: 24px; }
 .hava-uyari { background: #FFF4D6; color: #6B4A00; border-radius: 10px; padding: 8px 10px; font-weight: 700; font-size: 0.92rem; }
 
 /* ---------- Bilgisayar görünümü (geniş ekran) ---------- */
-.ui-nav-brand, .ui-nav-sep, .ui-nav-side { display: none; }
+.ui-nav .ui-nav-brand, .ui-nav .ui-nav-sep, .ui-nav a.ui-nav-side { display: none; }
 @media (min-width: 900px) {
   body { background: var(--zemin); }
   .ui-nav { top: 0; bottom: 0; right: auto; width: 248px; display: flex; flex-direction: column; gap: 2px; padding: 18px 12px; border-top: 0;
     border-right: 1px solid var(--cizgi2); box-shadow: none; overflow-y: auto; }
   .ui-nav a { flex-direction: row; justify-content: flex-start; gap: 12px; min-height: 46px; padding: 8px 14px; font-size: 0.95rem; }
   .ui-nav a svg { width: 22px; height: 22px; flex: none; }
-  .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
+  .ui-nav .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; }
   .ui-nav-brand img { border-radius: 10px; }
   .ui-nav-brand span { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
   .ui-nav-brand small { color: var(--sessiz2); font-weight: 600; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ui-nav-sep { display: block; border-top: 1px solid var(--cizgi2); margin: 10px 8px; }
+  .ui-nav .ui-nav-sep { display: block; border-top: 1px solid var(--cizgi2); margin: 10px 8px; }
   .ui-nav a.ui-nav-side { display: flex; min-height: 38px; font-size: 0.9rem; font-weight: 700; padding: 6px 14px 6px 48px; }
   .tab-shell { margin-left: 248px; }
   .tab-shell main { max-width: 1080px; padding: 28px 40px 60px !important; margin: 0 auto; }
@@ -371,3 +371,21 @@ html.klavye .tab-shell { padding-bottom: 24px; }
 @media (min-width: 1300px) {
   .tab-shell main { max-width: 1180px; }
 }
+/* Yetki düzenleyici (Aile sayfası ve yönetim paneli) */
+.yetki { display: flex; flex-direction: column; gap: 12px; }
+.yetki-roller { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.yetki-roller button { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--cizgi2, #DDE5DA); background: var(--kart, #fff); cursor: pointer; color: inherit; }
+.yetki-roller button small { color: var(--sessiz2, #6E7B6D); font-weight: 600; font-size: 0.8rem; }
+.yetki-roller button.on { border-color: var(--ana, #2E6A2B); background: var(--ana-acik, #E6F2E3); }
+.yetki-tablo { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.yetki-tablo th { text-align: center; font-size: 0.78rem; color: var(--sessiz2, #6E7B6D); padding: 6px 4px; }
+.yetki-tablo th:first-child { text-align: left; }
+.yetki-tablo td { border-top: 1px solid var(--cizgi2, #EDF1EB); padding: 8px 4px; text-align: center; }
+.yetki-tablo td:first-child { text-align: left; }
+.yetki-tablo td small { display: block; color: var(--sessiz2, #6E7B6D); font-weight: 500; font-size: 0.78rem; }
+.yetki-tablo input { width: 22px; height: 22px; accent-color: var(--ana, #2E6A2B); }
+.yetki-not { color: var(--sessiz2, #6E7B6D); }
+.yetki-kaydet { font: inherit; font-weight: 800; min-height: 52px; border-radius: 14px; border: 0; background: var(--ana, #2E6A2B); color: #fff; cursor: pointer; }
+.yetki-kaydet:disabled { opacity: 0.45; }
+.salt-okunur-not { background: #FFF4D6; color: #6B4A00; border-radius: 12px; padding: 10px 12px; font-weight: 700; margin: 0 0 10px; }
+section[data-ro] .ui-main-btn:not(.ikincil), section[data-ro] .ui-sticky-bottom, section[data-ro] .ui-tiles button, section[data-ro] .yaz-only { display: none !important; }

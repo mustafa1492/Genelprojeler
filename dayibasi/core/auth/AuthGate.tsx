@@ -9,7 +9,7 @@ import { Announcement } from "@/core/appConfig";
 import { ErrorText, MainButton, TextField } from "@/core/ui";
 
 /** role: üyenin bu defterdeki rolü ("sahip" | "calisan"). Çalışan para ekranlarını görmez. */
-export type Business = { id: string; name: string; settings?: Record<string, unknown>; role?: string };
+export type Business = { id: string; name: string; settings?: Record<string, unknown>; role?: string; perms?: Record<string, number> };
 const BusinessCtx = createContext<Business | null>(null);
 const SetBusinessCtx = createContext<(b: Business) => void>(() => {});
 /** İşletme ayarı değişince ekranı güncellemek için. */
@@ -73,6 +73,13 @@ function Gate({ product, texts, children, path, otherHomes = {} }: { product: st
         const b = row ? { id: row.id, name: row.name, settings: row.settings ?? {}, role: row.role } : null;
         try { localStorage.setItem(cacheKey, JSON.stringify(b)); } catch { /* yok */ }
         setBiz(b);
+        // Ekran yetkileri (0 yok, 1 görür, 2 değiştirir); veritabanı da aynı kurala göre korur
+        if (b) supabase().rpc("my_perms", { bid: b.id }).then(({ data }) => {
+          if (!data || typeof data !== "object" || Array.isArray(data) || !("tarlalar" in data)) return;   // beklenmeyen cevap: eski kurala göre devam
+          const nb = { ...b, perms: data as Record<string, number> };
+          try { localStorage.setItem(cacheKey, JSON.stringify(nb)); } catch { /* yok */ }
+          setBiz(nb);
+        });
       });
   }, [session, product, otherHomes, router]);
 

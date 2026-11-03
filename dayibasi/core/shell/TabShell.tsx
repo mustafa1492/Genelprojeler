@@ -7,7 +7,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
  * Alt menü her ekranda görünür. Etkin sekmeye tekrar dokununca o sekme başa döner.
  */
 /** side: bilgisayarda yan menüde ikinci grupta görünür (telefonda gizli). */
-export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; render: () => React.ReactNode };
+export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; readOnly?: boolean; render: () => React.ReactNode };
 type Params = Record<string, string | number | boolean>;
 type Ctx = { active: string; go: (id: string, params?: Params) => void; params: (id: string) => { p: Params; n: number } };
 
@@ -58,7 +58,8 @@ export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellT
     <ShellCtx.Provider value={ctx}>
       <div className="tab-shell">
         {tabs.filter((t) => visited.includes(t.id)).map((t) => (
-          <section key={`${t.id}:${resets[t.id] ?? 0}`} hidden={t.id !== active} aria-hidden={t.id !== active}>
+          <section key={`${t.id}:${resets[t.id] ?? 0}`} hidden={t.id !== active} aria-hidden={t.id !== active} data-ro={t.readOnly ? "" : undefined}>
+            {t.readOnly && <p className="salt-okunur-not">Bu bölümü sadece görebilirsin, değiştiremezsin.</p>}
             <TabIdCtx.Provider value={t.id}>{t.render()}</TabIdCtx.Provider>
           </section>
         ))}

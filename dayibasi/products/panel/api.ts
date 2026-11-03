@@ -4,7 +4,7 @@ import { supabase } from "@/core/supabase/client";
 export type Col = { name: string; type: string; nullable: boolean; has_default: boolean };
 export type Row = Record<string, unknown>;
 export type User = { id: string; email: string; created_at: string; last_sign_in_at: string | null; is_admin: boolean; businesses: { id: string; name: string; product: string; role: string }[] };
-export type Member = { user_id: string; email: string; display_name: string | null; role: string; created_at: string };
+export type Member = { user_id: string; email: string; display_name: string | null; role: string; perms?: Record<string, unknown> };
 
 const msg = (e: { message?: string } | null) => {
   const m = e?.message ?? "";
@@ -26,7 +26,8 @@ export const columns = (table: string) => rpc<Col[]>("admin_columns", { p_table:
 export const rows = (table: string, business?: string | null) => rpc<Row[]>("admin_rows", { p_table: table, p_business: business ?? null });
 export const save = (table: string, row: Row) => rpc<Row>("admin_save", { p_table: table, p_row: row });
 export const remove = (table: string, id: string) => rpc<string>("admin_delete", { p_table: table, p_id: id });
-export const members = (business: string) => rpc<Member[]>("admin_members", { p_business: business });
+export const members = (business: string) => rpc<Member[]>("member_list", { p_business: business });
+export const setPerms = (business: string, user: string, perms: unknown) => rpc<string>("set_member_perms", { p_business: business, p_user: user, p_perms: perms });
 export const setMember = (business: string, user: string, role: "sahip" | "calisan" | "cikar", name?: string) =>
   rpc<string>("admin_member_set", { p_business: business, p_user: user, p_role: role, p_name: name ?? null });
 export const users = () => rpc<User[]>("admin_users");

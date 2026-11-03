@@ -1,9 +1,10 @@
 "use client";
 import { useGo } from "@/core/shell/TabShell";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { createInvite, setMemberRole, setMyName, useMembers } from "@/core/auth/members";
 import { useRole } from "../rol";
+import { PermEditor, presetLabel, presetOf, type Perms } from "../yetki";
 import { clearLocal } from "@/core/offline/store";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
@@ -17,7 +18,14 @@ export default function Aile() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [role, setRole] = useState<"sahip" | "calisan">("sahip");
-  const { money } = useRole();
+  const { writes } = useRole();
+  const manage = writes("uyeler");
+  const money = manage;
+  const [list, setList] = useState<{ user_id: string; display_name: string | null; role: string; perms: Perms; email: string }[]>([]);
+  const [open, setOpen] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const loadList = () => { supabase().rpc("member_list", { p_business: biz.id }).then(({ data }) => { if (data) setList(data as typeof list); }); };
+  useEffect(loadList, [biz.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const roleText = (r: string) => (r === "calisan" ? "Çalışan" : "Aile");
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
@@ -29,16 +37,27 @@ export default function Aile() {
       <BackButton onClick={() => go("ozet")} label="Özet" />
       <PageHeader sub={biz.name} title="Aile ve ortak defter" />
       {msg && <DoneCard message={msg} />}
-      <p className="ui-note">Ailenden biri kendi hesabıyla bu deftere katılabilir; her kaydın yanında kimin girdiği yazar. <b>Çalışan</b> olarak katılan para ile ilgili hiçbir şeyi (masraf, gelir, kâr, borç) göremez; tarla işi, depo, verim ve fiş girer.</p>
+      <p className="ui-note">Ailenden biri kendi hesabıyla bu deftere katılabilir; her kaydın yanında kimin girdiği yazar. Her üyenin hangi bölümü <b>görüp</b> hangisini <b>değiştirebileceğini</b> sen seçersin.</p>
       <div className="ui-stack" style={{ gap: 8 }}>
-        {members.map((m) => (
-          <div key={m.user_id} className="ui-moneyrow">
-            <b style={{ minWidth: 0 }}>{m.display_name || m.email}<small>{m.user_id === me ? `Sen · ${roleText(m.role)}` : roleText(m.role)}</small></b>
-            {money && m.user_id !== me && (
-              <span style={{ display: "flex", gap: 6 }}>
-                <button type="button" className="ui-chip" onClick={async () => { setError(""); try { await setMemberRole(biz.id, m.user_id, m.role === "calisan" ? "sahip" : "calisan"); setMsg(`${m.display_name || m.email} artık ${m.role === "calisan" ? "Aile" : "Çalışan"}.`); reload(); } catch { setError("Değiştiremedim, internet lazım."); } }}>{m.role === "calisan" ? "Aile yap" : "Çalışan yap"}</button>
-                <button type="button" className="ui-chip" onClick={async () => { if (!confirm(`${m.display_name || m.email} defterden çıkarılsın mı?`)) return; setError(""); try { await setMemberRole(biz.id, m.user_id, "cikar"); setMsg(`${m.display_name || m.email} defterden çıkarıldı.`); reload(); } catch { setError("Çıkaramadım, internet lazım."); } }}>Çıkar</button>
-              </span>
+        {list.map((m) => (
+          <div key={m.user_id} className="ui-card ui-stack" style={{ gap: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+              <b style={{ minWidth: 0 }}>{m.display_name || m.email}<small style={{ display: "block", color: "var(--sessiz2)", fontWeight: 600 }}>{m.user_id === me ? "Sen · " : ""}{presetLabel(presetOf(m.perms, m.role))}</small></b>
+              {manage && m.user_id !== me && (
+                <span style={{ display: "flex", gap: 6 }}>
+                  <button type="button" className="ui-chip" onClick={() => setOpen(open === m.user_id ? null : m.user_id)}>{open === m.user_id ? "Kapat" : "Yetkiyi değiştir"}</button>
+                  <button type="button" className="ui-chip" onClick={async () => { if (!confirm(`${m.display_name || m.email} defterden çıkarılsın mı?`)) return; setError(""); try { await setMemberRole(biz.id, m.user_id, "cikar"); setMsg(`${m.display_name || m.email} defterden çıkarıldı.`); loadList(); reload(); } catch { setError("Çıkaramadım, internet lazım."); } }}>Çıkar</button>
+                </span>
+              )}
+            </div>
+            {open === m.user_id && (
+              <PermEditor value={m.perms} role={m.role} busy={busy} onSave={async (pp) => {
+                setBusy(true); setError("");
+                const { error } = await supabase().rpc("set_member_perms", { p_business: biz.id, p_user: m.user_id, p_perms: pp });
+                setBusy(false);
+                if (error) { setError(error.message.includes("son_yonetici") ? "Defterde en az bir yönetici kalmalı." : "Kaydedemedim, internet lazım."); return; }
+                setMsg(`${m.display_name || m.email}: ${presetLabel(pp.preset!)} yetkisi kaydedildi. Uygulamayı yeniden açınca geçerli olur.`); setOpen(null); loadList();
+              }} />
             )}
           </div>
         ))}

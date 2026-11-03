@@ -6,8 +6,9 @@ import { supabase } from "@/core/supabase/client";
 import { toEmail } from "@/core/auth/AuthGate";
 import { clearLocal } from "@/core/offline/store";
 import { LISTS } from "@/products/ciftci/lists";
-import { account, config, isAdmin, members, rows, save, remove, setConfig, setMember, userName, users, when, type Member, type Row, type User } from "./api";
+import { account, config, isAdmin, members, setPerms, rows, save, remove, setConfig, setMember, userName, users, when, type Member, type Row, type User } from "./api";
 import { TableEditor } from "./TableEditor";
+import { PermEditor, presetLabel, presetOf, SCREENS, type Perms } from "@/products/ciftci/yetki";
 
 type Sec = "ozet" | "hesaplar" | "defterler" | "defter" | "genel" | "gecmis";
 type Biz = { id: string; name: string; product: string; settings: Record<string, unknown> | null; created_at: string };
@@ -225,6 +226,7 @@ function Bilgi({ biz, us, reload, onDeleted }: { biz: Biz; us: User[]; reload: (
   const [ms, setMs] = useState<Member[]>([]);
   const [name, setName] = useState(biz.name);
   const [add, setAdd] = useState({ user: "", role: "sahip", name: "" });
+  const [openP, setOpenP] = useState<string | null>(null);
   const [msg, setMsg] = useState(""); const [err, setErr] = useState("");
   const loadM = useCallback(() => { members(biz.id).then(setMs).catch((e) => setErr(e.message)); }, [biz.id]);
   useEffect(loadM, [loadM]);
@@ -246,13 +248,17 @@ function Bilgi({ biz, us, reload, onDeleted }: { biz: Biz; us: User[]; reload: (
         <div className="pn-card pn-stack">
           <h2>Üyeler</h2>
           <table className="pn-table"><tbody>{ms.map((m) => (
-            <tr key={m.user_id} className="static"><td><b>{m.display_name || userName(m.email)}</b><div className="pn-muted">{userName(m.email)}</div></td><td>{m.role === "calisan" ? "Çalışan" : "Sahip / aile"}</td>
+            <tr key={m.user_id} className="static"><td><b>{m.display_name || userName(m.email)}</b><div className="pn-muted">{userName(m.email)}</div></td><td>{presetLabel(presetOf(m.perms as Perms, m.role))}</td>
               <td className="pn-actions">
-                <button onClick={() => run(() => setMember(biz.id, m.user_id, m.role === "calisan" ? "sahip" : "calisan"), "Rol değişti.")}>{m.role === "calisan" ? "Sahip yap" : "Çalışan yap"}</button>
+                <button onClick={() => setOpenP(openP === m.user_id ? null : m.user_id)}>{openP === m.user_id ? "Kapat" : "Yetki"}</button>
                 <button onClick={() => { const n = prompt("Görünen ad:", m.display_name ?? ""); if (n !== null) run(() => setMember(biz.id, m.user_id, m.role as "sahip", n), "Ad değişti."); }}>Ad</button>
                 <button className="danger" onClick={() => { if (confirm("Defterden çıkarılsın mı?")) run(() => setMember(biz.id, m.user_id, "cikar"), "Çıkarıldı."); }}>Çıkar</button>
               </td></tr>
           ))}</tbody></table>
+          {openP && (() => { const m = ms.find((x) => x.user_id === openP); if (!m) return null; return (
+            <div className="pn-card"><h2>{m.display_name || userName(m.email)}: yetkiler</h2>
+              <PermEditor key={m.user_id} value={m.perms as Perms} role={m.role} onSave={(pp) => run(async () => { await setPerms(biz.id, m.user_id, pp); setOpenP(null); }, "Yetki kaydedildi.")} />
+            </div>); })()}
           <div className="pn-row">
             <label className="pn-field"><span>Hesap ekle</span><select className="pn-input" value={add.user} onChange={(e) => setAdd({ ...add, user: e.target.value })}><option value="">—</option>{us.filter((u) => !ms.some((m) => m.user_id === u.id)).map((u) => <option key={u.id} value={u.id}>{userName(u.email)}</option>)}</select></label>
             <label className="pn-field"><span>Rol</span><select className="pn-input" value={add.role} onChange={(e) => setAdd({ ...add, role: e.target.value })}><option value="sahip">Sahip / aile</option><option value="calisan">Çalışan</option></select></label>
@@ -295,6 +301,14 @@ function Ayarlar({ biz, reload }: { biz: Biz; reload: () => void }) {
           <div className="pn-card pn-stack">
             <h2>Modüller</h2>
             <label className="pn-check"><input type="checkbox" checked={mods.includes("fidan")} onChange={(e) => persist({ ...st, modules: e.target.checked ? [...mods, "fidan"] : mods.filter((m) => m !== "fidan") })} /> Fidan (şimşir) modülü</label>
+          </div>
+          <div className="pn-card pn-stack">
+            <h2>Bu defterde açık bölümler</h2>
+            <p className="pn-muted">Kapattığın bölüm bu defterde kimsede görünmez (yöneticide de). Kayıtlar silinmez, açınca geri gelir.</p>
+            <div className="pn-row">{SCREENS.filter((x) => !["uyeler", "ayarlar"].includes(x.key)).map((x) => {
+              const hid = ((st.hidden_screens as string[]) ?? []);
+              return <label key={x.key} className="pn-check"><input type="checkbox" checked={!hid.includes(x.key)} onChange={(e) => persist({ ...st, hidden_screens: e.target.checked ? hid.filter((h) => h !== x.key) : [...hid, x.key] })} /> {x.label}</label>;
+            })}</div>
           </div>
           <div className="pn-card pn-stack">
             <h2>Sezonlar</h2>

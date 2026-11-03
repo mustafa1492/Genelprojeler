@@ -2,6 +2,7 @@
 import { useBusiness } from "@/core/auth/AuthGate";
 import { TabShell, type ShellTab } from "@/core/shell/TabShell";
 import { hasFidan } from "./fidan";
+import { useRole } from "./rol";
 import Fidan from "./screens/Fidan";
 import { BASE } from "./config";
 import { navItems } from "./nav";
@@ -45,9 +46,13 @@ const TABS: ShellTab[] = [
 /** Çiftçi defteri: tek sayfalık sekmeli uygulama (sekmeler kaldığı yerde kalır). */
 export default function CiftciApp({ initial }: { initial: string }) {
   const biz = useBusiness();
-  // Çalışan: para ekranları yok (veritabanı da izin vermez)
-  const WORKER_HIDDEN = ["masraf", "gelir", "fidan", "rapor", "vadeler", "kayitlar", "gecmis", "sezonlar"];
-  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (biz.role !== "calisan" || !WORKER_HIDDEN.includes(t.id)));
+  // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
+  const { lvl } = useRole();
+  const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
+  const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", depo: "depo", tarlalar: "tarlalar", takvim: "takvim", rapor: "rapor",
+    vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
+  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
+    .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t));
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
   if (!tabs.some((t) => t.id === start)) start = "ozet";

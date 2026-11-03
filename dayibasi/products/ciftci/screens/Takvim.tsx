@@ -23,7 +23,9 @@ const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString
 export default function Takvim() {
   const biz = useBusiness();
   const go = useGo();
-  const { money } = useRole();
+  const { sees } = useRole();
+  const money = sees("gelir");
+  const vade = sees("vadeler");
   const [ev, setEv] = useState<EventRow[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
   const [dues, setDues] = useState<Due[]>([]);
@@ -37,9 +39,9 @@ export default function Takvim() {
     Promise.all([listEvents(biz.id, ISLEM), listEvents(biz.id, VERIM), listEvents(biz.id, HATIRLAT), money ? listEvents(biz.id, GELIR) : Promise.resolve([] as EventRow[])])
       .then((r) => setEv(r.flat())).catch(() => {});
     listPlaces(biz.id).then(setPlaces).catch(() => {});
-    if (money) listDues(biz.id).then(setDues).catch(() => {});
+    if (vade) listDues(biz.id).then(setDues).catch(() => {});
     listDocs(biz.id).then(setDocs).catch(() => {});
-  }, [biz.id, money]);
+  }, [biz.id, money, vade]);
   useEffect(load, [load]);
   useOnActivate(load);
   const tp = useTabParams();
