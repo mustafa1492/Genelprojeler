@@ -92,3 +92,5 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Mustafa: "acelemiz yok", proje daha profesyonel hale gelince yapılacak.
 - İç yedek hazır ama uygulanmadı: `supabase/migrations/0013_yedek.sql` (her gece `yedek.gunluk`, 90 gün, pg_cron). Supabase MCP onayı Mustafa'ya düşmüyor; SQL Editor'den çalıştırılacak.
 - Dış yedek (haftalık, şifreli, GitHub Actions → `yedek` dalı) Mustafa'nın açık izni gerekiyor ("dış yedeği kur, izin veriyorum"). Supabase Pro (25$/ay) pahalı bulundu.
+- Plan: "Bütün verimi indir" düğmesi (çiftçi defteri, Özet bağlantıları). Tek Excel (tarlalar, masraflar, gelirler, tarla işleri, verim, depo, borçlar, belgeler, fidan) + geri yüklenebilir JSON. Kullanıcı iCloud/bilgisayarda saklar. Ücretsiz, yedeğin en kolay yolu.
+- Plan (uzak): Supabase'ten kendi sunucuya taşıma. Büyük iş, aylık 5-10$; şimdilik değmez.
