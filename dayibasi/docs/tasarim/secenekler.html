@@ -1,0 +1,78 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Görünüm seçenekleri</title>
+<style>
+:root{--g:#2E6A2B;--g2:#1F3D1D;--k:#FDF4E3;--y:#E3A72F}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#ECEFEA;color:#1E2A1E;padding:24px 16px}
+h1{margin:0 0 4px}p.s{margin:0 0 20px;color:#5D6B5C}
+.row{display:flex;gap:28px;flex-wrap:wrap;justify-content:center}
+.opt{display:flex;flex-direction:column;gap:10px;align-items:center}.opt h2{margin:0;font-size:1.1rem}.opt small{color:#5D6B5C;max-width:320px;text-align:center}
+.ph{width:340px;height:700px;border-radius:38px;border:10px solid #111;overflow:hidden;position:relative;background:#fff;display:flex;flex-direction:column}
+.nav{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-around;padding:10px 6px 16px;font-size:11px;font-weight:700}
+.nav span{display:flex;flex-direction:column;align-items:center;gap:3px}.nav i{width:22px;height:22px;border-radius:7px;background:currentColor;opacity:.25;display:block}
+.nav .on i{opacity:1}
+/* A: sade kartlar (Feedlance tarzı) */
+.a{background:#F6F7F2}.a .top{padding:22px 20px 10px}.a .hi{font-size:13px;color:#6E7B6D}.a h3{margin:2px 0 0;font-size:24px}
+.a .wx{margin:12px 20px;border-radius:22px;background:linear-gradient(135deg,#DDEFD6,#F5F0DA);padding:16px;display:flex;justify-content:space-between;align-items:center}
+.a .wx b{font-size:30px}.a .k{margin:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.a .k div{background:#fff;border-radius:18px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}.a .k span{font-size:12px;color:#6E7B6D}.a .k b{display:block;font-size:20px;margin-top:4px}
+.a .acts{margin:14px 20px;display:flex;gap:10px}.a .acts div{flex:1;background:var(--g);color:#fff;border-radius:16px;padding:14px 10px;text-align:center;font-weight:800;font-size:14px}
+.a .acts div:nth-child(2){background:#fff;color:var(--g);border:2px solid #CFE0C9}
+.a .lst{margin:0 20px;background:#fff;border-radius:18px;padding:6px 14px}.a .lst div{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid #EEF1EC;font-size:14px}.a .lst div:first-child{border:0}
+.a .nav{background:#fff;color:var(--g)}
+/* B: koyu üst bant, büyük rakamlar */
+.b{background:#F2F4EF}.b .hd{background:var(--g2);color:#fff;padding:24px 20px 60px;border-radius:0 0 30px 30px}.b .hd small{opacity:.7}.b .hd b{display:block;font-size:34px;margin-top:6px}
+.b .hd .r{display:flex;gap:20px;margin-top:10px;font-size:13px}.b .hd .r b{font-size:16px;margin:0}
+.b .card{margin:-44px 18px 12px;background:#fff;border-radius:20px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;box-shadow:0 6px 18px rgba(0,0,0,.08);text-align:center;font-size:11px;font-weight:700}
+.b .card i{width:44px;height:44px;border-radius:14px;background:#E6F2E3;display:block;margin:0 auto 6px}
+.b .sec{margin:6px 20px;font-weight:800}.b .tl{margin:8px 18px;background:#fff;border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.b .tl em{width:10px;height:42px;border-radius:6px;background:var(--y)}.b .tl div{flex:1;font-size:14px}.b .tl small{display:block;color:#6E7B6D}
+.b .nav{background:#fff;color:var(--g2);border-top:1px solid #E3E8E1}
+/* C: toprak tonları, büyük düğmeler (yaşlı kullanıcı) */
+.c{background:var(--k)}.c .top{padding:22px 20px 6px;display:flex;justify-content:space-between;align-items:center}.c h3{margin:0;font-size:26px}
+.c .big{margin:10px 18px;border-radius:24px;background:#fff;border:3px solid #E9D9B8;padding:18px}.c .big span{font-size:15px;color:#7A6A4B;font-weight:700}.c .big b{display:block;font-size:36px;color:var(--g)}
+.c .tiles{margin:6px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.c .tiles div{background:var(--g);color:#fff;border-radius:22px;padding:22px 14px;font-weight:800;font-size:18px;min-height:92px;display:flex;align-items:flex-end}
+.c .tiles div:nth-child(2){background:#8B5E34}.c .tiles div:nth-child(3){background:var(--y);color:#3B2A0A}.c .tiles div:nth-child(4){background:#fff;color:var(--g);border:3px solid #E9D9B8}
+.c .wx{margin:12px 18px;padding:14px 16px;border-radius:20px;background:#FFF0CC;font-weight:700;color:#6B4A00}
+.c .nav{background:#fff;color:#8B5E34;font-size:13px}
+/* Masaüstü */
+.desk{width:min(1100px,100%);height:560px;border-radius:16px;overflow:hidden;border:1px solid #CDD6CA;display:grid;grid-template-columns:220px 1fr;background:#F4F6F2;margin:30px auto 0}
+.desk aside{background:#fff;border-right:1px solid #E3E8E1;padding:18px 12px;display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px}
+.desk aside b{margin-bottom:14px;font-size:16px}.desk aside span{padding:9px 12px;border-radius:10px;color:#4A5849}.desk aside span.on{background:#E6F2E3;color:var(--g)}
+.desk main{padding:22px 26px;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:min-content;gap:14px}
+.desk .w{background:#fff;border-radius:16px;padding:16px;border:1px solid #E3E8E1}.desk .w span{font-size:12px;color:#6E7B6D}.desk .w b{display:block;font-size:24px;margin-top:4px}
+.desk .wide{grid-column:span 2}.desk table{width:100%;border-collapse:collapse;font-size:13px}.desk td,.desk th{padding:8px 6px;border-top:1px solid #EEF1EC;text-align:left}.desk th{color:#6E7B6D;font-size:12px}
+.bar{height:10px;border-radius:6px;background:#E6F2E3;overflow:hidden}.bar i{display:block;height:100%;background:var(--g)}
+</style></head><body>
+<h1>Çiftçi Defteri · görünüm seçenekleri</h1>
+<p class="s">Aynı Özet ekranı, üç farklı tarzda. Beğendiğinin harfini söyle; bilgisayar görünümü (en altta) seçtiğin renk ve kartlara uyarlanır.</p>
+<div class="row">
+ <div class="opt"><h2>A · Sade kartlar</h2><small>Açık zemin, yumuşak gölgeli beyaz kartlar, yeşil vurgu. Modern ve ferah (Feedlance tarzı).</small>
+  <div class="ph a"><div class="top"><div class="hi">Günaydın Abdullah</div><h3>Aile defteri</h3></div>
+   <div class="wx"><div><small>Kınık · Bugün</small><b>17°</b><small>Yarın don riski −1°</small></div><div style="font-size:40px">⛅</div></div>
+   <div class="k"><div><span>2026 kâr</span><b>443.762 ₺</b></div><div><span>Masraf</span><b>331.070 ₺</b></div></div>
+   <div class="acts"><div>+ Masraf</div><div>+ Tarla işi</div></div>
+   <div class="lst"><div><span>Çayın kenarı · Sulama</span><b>5,5 sa</b></div><div><span>Gelir · Mısır</span><b>251.299 ₺</b></div><div><span>Masraf · Gübre</span><b>50.000 ₺</b></div></div>
+   <div class="nav"><span class="on"><i></i>Özet</span><span><i></i>Tarlalar</span><span><i></i>Masraf</span><span><i></i>Gelir</span><span><i></i>Depo</span></div></div></div>
+ <div class="opt"><h2>B · Koyu üst bant</h2><small>Üstte büyük kâr rakamı, altında simgeli hızlı düğmeler ve zaman çizelgesi. Banka uygulaması gibi.</small>
+  <div class="ph b"><div class="hd"><small>2026 sezonu kâr</small><b>443.762 ₺</b><div class="r"><div><small>Gelir</small><br><b>774.832 ₺</b></div><div><small>Masraf</small><br><b>331.070 ₺</b></div></div></div>
+   <div class="card"><div><i></i>Masraf</div><div><i></i>Tarla işi</div><div><i></i>Gelir</div><div><i></i>Fiş</div></div>
+   <div class="sec">Yaklaşanlar</div>
+   <div class="tl"><em></em><div>Mısıra gübre<small>Yarın · Çayın kenarı</small></div></div>
+   <div class="tl"><em style="background:#2E6A2B"></em><div>Hasat edilebilir<small>12 Kasım · Mehmet Ağa'nın yeri</small></div></div>
+   <div class="tl"><em style="background:#B3261E"></em><div>Kredi taksiti<small>20 Kasım · 15.000 ₺</small></div></div>
+   <div class="nav"><span class="on"><i></i>Özet</span><span><i></i>Tarlalar</span><span><i></i>Masraf</span><span><i></i>Gelir</span><span><i></i>Depo</span></div></div></div>
+ <div class="opt"><h2>C · Toprak tonları, kocaman düğmeler</h2><small>Krem zemin, yeşil-kahve-buğday renkleri, çok büyük yazı ve düğmeler. Babanın kullanması en kolay olanı.</small>
+  <div class="ph c"><div class="top"><h3>Özet</h3><span>☀️ 17°</span></div>
+   <div class="big"><span>Bu sezon kârın</span><b>443.762 ₺</b></div>
+   <div class="tiles"><div>+ Masraf</div><div>+ Tarla işi</div><div>+ Gelir</div><div>Takvim</div></div>
+   <div class="wx">⚠ Yarın don riski (−1°C)</div>
+   <div class="nav"><span class="on"><i></i>Özet</span><span><i></i>Tarlalar</span><span><i></i>Masraf</span><span><i></i>Gelir</span><span><i></i>Depo</span></div></div></div>
+</div>
+<div class="desk"><aside><b>🌾 Çiftçi Defteri</b><span class="on">Özet</span><span>Tarlalar</span><span>Masraf</span><span>Gelir</span><span>Depo</span><span>Takvim</span><span>Sezon raporu</span><span>Kayıtlar</span></aside>
+ <main><div class="w"><span>2026 kâr</span><b>443.762 ₺</b></div><div class="w"><span>Gelir</span><b>774.832 ₺</b></div><div class="w"><span>Masraf</span><b>331.070 ₺</b></div>
+  <div class="w wide"><b style="font-size:16px;margin:0 0 8px">Tarla tarla</b><table><tr><th>Tarla</th><th>Dönüm</th><th>Gelir</th><th>Masraf</th><th>Kâr</th></tr><tr><td>Mehmet Ağa'nın yeri</td><td>25</td><td>523.533 ₺</td><td>223.696 ₺</td><td><b style="font-size:13px;display:inline">299.837 ₺</b></td></tr><tr><td>Çayın kenarı</td><td>12</td><td>251.299 ₺</td><td>107.374 ₺</td><td><b style="font-size:13px;display:inline">143.925 ₺</b></td></tr></table></div>
+  <div class="w"><b style="font-size:16px;margin:0 0 10px">Hava · Kınık</b><span>Bugün 17° ⛅ · Yarın −1° don</span></div>
+  <div class="w wide"><b style="font-size:16px;margin:0 0 10px">Masraf türleri</b><div style="display:grid;gap:8px;font-size:13px"><div>Gübre 105.000 ₺<div class="bar"><i style="width:100%"></i></div></div><div>Tohum 90.000 ₺<div class="bar"><i style="width:86%"></i></div></div><div>Sulama / elektrik 71.070 ₺<div class="bar"><i style="width:68%"></i></div></div></div></div>
+  <div class="w"><b style="font-size:16px;margin:0 0 10px">Yaklaşanlar</b><span>Yarın: Mısıra gübre<br>12 Kas: hasat edilebilir<br>20 Kas: kredi taksiti</span></div>
+ </main></div>
+</body></html>
