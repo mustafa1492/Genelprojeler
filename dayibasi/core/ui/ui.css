@@ -226,10 +226,12 @@ button.ui-card { display: block; }
 .ui-stepper output small { font-size: 0.75rem; color: var(--sessiz2); font-weight: 700; }
 .ui-code { font-size: 2rem; letter-spacing: 0.15em; font-variant-numeric: tabular-nums; }
 .ui-links { display: grid; gap: 10px; }
-.ui-links a { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 16px; background: var(--kart); border: 1px solid var(--cizgi2);
+.ui-links a, .ui-links > button { font: inherit; text-align: left; cursor: pointer; width: 100%;
+}
+.ui-links a, .ui-links > button { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 16px; background: var(--kart); border: 1px solid var(--cizgi2);
   box-shadow: var(--golge); color: var(--yazi); text-decoration: none; }
-.ui-links a b { font-size: 1.05rem; }
-.ui-links a span { font-size: 0.85rem; color: var(--sessiz2); font-weight: 600; }
+.ui-links a b, .ui-links > button b { font-size: 1.05rem; }
+.ui-links a span, .ui-links > button span { font-size: 0.85rem; color: var(--sessiz2); font-weight: 600; }
 a.ui-warn { color: inherit; }
 
 /* --- Düğmeler: dolgun, basınca içe göçer (yalnız transform: hızlı) --- */
@@ -311,3 +313,18 @@ html, body { overflow-x: clip; }
 .ui-quickadd > button { flex-shrink: 0; }
 html.klavye .ui-nav, html.klavye .ui-sticky-bottom { display: none; }
 html.klavye .tab-shell { padding-bottom: 24px; }
+/* Takvim (çiftçi defteri) */
+.takvim-bas { display: flex; align-items: center; justify-content: space-between; }
+.takvim-bas b { font-size: 1.1rem; text-transform: capitalize; }
+.takvim-bas button { width: 56px; height: 48px; border-radius: 14px; border: 1px solid var(--cizgi2); background: var(--kart); font: inherit; font-size: 1.5rem; font-weight: 800; cursor: pointer; color: var(--yazi); }
+.takvim { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.takvim .gun-ad { text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--sessiz2); }
+.takvim .gun { aspect-ratio: 1 / 1.05; min-width: 0; border: 1px solid var(--cizgi2); border-radius: 10px; background: var(--kart); font: inherit; color: var(--yazi);
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 0 6px; cursor: pointer; }
+.takvim .gun span { font-weight: 700; font-size: 0.95rem; }
+.takvim .gun i { display: flex; gap: 2px; min-height: 7px; }
+.takvim .gun em, .takvim-renk em { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
+.takvim .gun.bugun { border: 2px solid var(--yesil, #2E6A2B); }
+.takvim .gun.secili { background: var(--yesil, #2E6A2B); color: #fff; }
+.takvim-renk { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 0.8rem; color: var(--sessiz2); font-weight: 600; }
+.takvim-renk span { display: inline-flex; align-items: center; gap: 4px; }

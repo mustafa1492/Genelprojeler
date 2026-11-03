@@ -7,7 +7,8 @@ import { SyncBar } from "@/core/offline/SyncBar";
 import { supabase } from "@/core/supabase/client";
 import { ErrorText, MainButton, TextField } from "@/core/ui";
 
-export type Business = { id: string; name: string; settings?: Record<string, unknown> };
+/** role: üyenin bu defterdeki rolü ("sahip" | "calisan"). Çalışan para ekranlarını görmez. */
+export type Business = { id: string; name: string; settings?: Record<string, unknown>; role?: string };
 const BusinessCtx = createContext<Business | null>(null);
 const SetBusinessCtx = createContext<(b: Business) => void>(() => {});
 /** İşletme ayarı değişince ekranı güncellemek için. */
@@ -60,15 +61,15 @@ function Gate({ product, texts, children, path, otherHomes = {} }: { product: st
     if (cached) setBiz(cached); // internetsiz açılışta da işletme bilinsin
     supabase()
       .from("memberships")
-      .select("business_id, businesses(id, name, product, settings)")
+      .select("business_id, role, businesses(id, name, product, settings)")
       .then(({ data, error }) => {
         if (error) { if (!cached) setBiz(undefined); return; } // internet yok: önbellekle devam
-        const rows = (data ?? []).map((m) => m.businesses as unknown as Business & { product: string }).filter(Boolean);
+        const rows = (data ?? []).filter((m) => m.businesses).map((m) => ({ ...(m.businesses as unknown as Business & { product: string }), role: (m as { role?: string }).role }));
         const row = rows.find((b) => b.product === product);
         // Başka ürünün hesabı: o ürünün sayfasına gönder (ör. çiftçi defteri → /ciftci)
         const other = !row && rows.find((b) => otherHomes[b.product]);
         if (other) { router.replace(otherHomes[other.product]); return; }
-        const b = row ? { id: row.id, name: row.name, settings: row.settings ?? {} } : null;
+        const b = row ? { id: row.id, name: row.name, settings: row.settings ?? {}, role: row.role } : null;
         try { localStorage.setItem(cacheKey, JSON.stringify(b)); } catch { /* yok */ }
         setBiz(b);
       });

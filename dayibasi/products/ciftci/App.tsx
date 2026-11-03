@@ -18,6 +18,7 @@ import Rapor from "./screens/Rapor";
 import Listeler from "./lists";
 import Vadeler from "./screens/Vadeler";
 import Kayitlar from "./screens/Kayitlar";
+import Takvim from "./screens/Takvim";
 import { SeasonProvider } from "./sezon";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
@@ -35,6 +36,7 @@ const TABS: ShellTab[] = [
   { id: "listeler", label: "Listeler", path: `${BASE}/listeler`, inNav: false, render: () => <Listeler /> },
   { id: "rapor", label: "Sezon raporu", path: `${BASE}/rapor`, inNav: false, render: () => <Rapor /> },
   { id: "kayitlar", label: "Kayıtlar", path: `${BASE}/kayitlar`, inNav: false, render: () => <Kayitlar /> },
+  { id: "takvim", label: "Takvim", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
 ];
 

@@ -16,6 +16,7 @@ import { supabase } from "@/core/supabase/client";
 import { PickWithAdd } from "@/core/settings/lists";
 import { BackButton, BottomNav, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField, type NavItem } from "@/core/ui";
 
+const SPLIT = "__bol__";   // masraf formunda "Tarlalara böl" seçimi
 const dayText = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
 
 /** Ürün farkları: türler, "çiftçiye yansıt" hedefleri, tarla seçimi, özet kartı, menü. */
@@ -109,6 +110,23 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
           const before = { ...ed };
           await updateExpense(ed.id, input);
           setDone({ message: `Değiştirdim: ${input.category} ${formatTL(input.amount)}.`, undo: () => updateExpense(ed.id, before) });
+        } else if (input.place_id === SPLIT) {
+          // Tarlalara dönüme göre böl (dönüm yazılmamışsa eşit)
+          const ps = places.filter((p) => Number(p.custom?.donum) > 0).length ? places.filter((p) => Number(p.custom?.donum) > 0) : places;
+          const w = ps.map((p) => Number(p.custom?.donum) || 1), W = w.reduce((a, b) => a + b, 0);
+          let left = input.amount;
+          const made: Expense[] = [];
+          for (let k = 0; k < ps.length; k++) {
+            const part = k === ps.length - 1 ? Math.round(left * 100) / 100 : Math.round((input.amount * w[k]) / W * 100) / 100;
+            left -= part;
+            const placeIs = ps[k].custom?.is;
+            made.push(await addExpense(biz.id, { ...input, amount: part, place_id: ps[k].id,
+              note: [input.note, `${formatTL(input.amount)} tarlalara bölündü`].filter(Boolean).join(" · "),
+              ...(placeIs && input.data && !input.data.branch ? { data: { ...input.data, branch: placeIs } } : {}) }));
+          }
+          setDone({ message: `Kaydettim: ${input.category} ${formatTL(input.amount)}, ${made.map((e) => `${places.find((p) => p.id === e.place_id)?.name} ${formatTL(e.amount)}`).join(", ")}.`,
+            undo: async () => { for (const e of made) await deleteExpense(e.id); } });
+          setMonth(input.occurred_on.slice(0, 7));
         } else {
           const e = await addExpense(biz.id, input);
           let undoStock: (() => Promise<void>) | null = null, stockMsg = "";
@@ -396,7 +414,13 @@ function MasrafForm({ categories = [], branches = [], onAddBranch, cat, edit, la
           <div className="ui-chips wrap">
             <Chip selected={!placeId} onClick={() => pickPlace(null)}>Genel</Chip>
             {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => pickPlace(p.id)}>{p.name}</Chip>)}
+            {!edit && places.length > 1 && <Chip selected={placeId === SPLIT} onClick={() => setPlaceId(SPLIT)}>Tarlalara böl</Chip>}
           </div>
+          {placeId === SPLIT && (() => {
+            const ps = places.filter((p) => Number(p.custom?.donum) > 0).length ? places.filter((p) => Number(p.custom?.donum) > 0) : places;
+            const w = ps.map((p) => Number(p.custom?.donum) || 1), W = w.reduce((a, b) => a + b, 0), a = num(amount) || 0;
+            return <span className="ui-note" style={{ margin: 0 }}>{ps.some((p) => Number(p.custom?.donum) > 0) ? "Dönüme göre" : "Eşit"} bölünür: {ps.map((p, k) => `${p.name} ${a ? formatTL(Math.round((a * w[k]) / W)) : `%${Math.round((w[k] / W) * 100)}`}`).join(" · ")}</span>;
+          })()}
         </div>
       )}
       {(branches.length > 1 || onAddBranch) && (onAddBranch

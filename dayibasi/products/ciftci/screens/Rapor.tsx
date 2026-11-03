@@ -21,7 +21,7 @@ const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString
 export default function Rapor() {
   const biz = useBusiness();
   const go = useGo();
-  const { selected: S } = useSeason();
+  const { selected: S, seasons } = useSeason();
   const [exp, setExp] = useState<Expense[]>([]);
   const [ev, setEv] = useState<EventRow[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
@@ -56,6 +56,17 @@ export default function Rapor() {
     const b = breakEven(m, V.filter((e) => e.place_id === id));
     return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
   }).filter((x) => x.m || x.g || x.v);
+  // Geçen sezon: başlangıcı bundan önce olan en yakın sezon; yoksa aynı tarihlerin bir yıl öncesi
+  const yr = (d: string, k: number) => `${Number(d.slice(0, 4)) + k}${d.slice(4)}`;
+  const P = seasons.filter((x) => x.start < S.start).sort((a, b) => b.start.localeCompare(a.start))[0] ?? { id: "_", name: "Geçen yıl", start: yr(S.start, -1), end: yr(S.end, -1) };
+  const EP = exp.filter((e) => inSeason(e.occurred_on, P)), GP = ev.filter((e) => e.kind === GELIR && inSeason(e.occurred_on, P));
+  const masrafP = EP.reduce((t, e) => t + e.amount, 0), gelirP = GP.reduce((t, e) => t + Number(e.quantity ?? 0), 0);
+  const VP = ev.filter((e) => e.kind === VERIM && String(e.data.year) === P.name);
+  const crops = [...new Set([...V, ...VP].map((e) => `${String(e.data.crop || "")}|${String(e.data.unit)}`))];
+  const vSum = (L: EventRow[], c: string) => L.filter((e) => `${String(e.data.crop || "")}|${String(e.data.unit)}` === c).reduce((t, e) => t + Number(e.quantity), 0);
+  const hasPrev = masrafP > 0 || gelirP > 0 || VP.length > 0;
+  const pct = (a: number, b: number) => (b ? `${a >= b ? "▲" : "▼"} %${Math.abs(Math.round(((a - b) / b) * 100))}` : "");
+  const cmpRows: [string, number, number, boolean][] = [["Gelir", gelir, gelirP, true], ["Masraf", masraf, masrafP, false], ["Kâr / zarar", gelir - masraf, gelirP - masrafP, true]];
   const isler = useCList("isler");
   const multi = isler.length > 1;
   const bOf = (e: { data?: Record<string, unknown> | null; place_id: string | null }) => { const b = branchOf(e, places); return b && isler.includes(b) ? b : "Genel"; };
@@ -72,6 +83,7 @@ export default function Rapor() {
       ["Kalem", "Tutar (TL)"], ["Gelir", gelir], ["Masraf", masraf], ["Kâr / zarar", gelir - masraf], ["Alınacak (vadeli satış)", alinacak], [],
       ["Masraf türü", "Toplam (TL)"], ...cats.map((x) => [x.c, x.t]), ["Toplam masraf", masraf], [],
       ["Ay", "Masraf (TL)"], ...months.map((x) => [monthName(x.m), x.t]),
+      ...(hasPrev ? [[], ["Geçen sezonla", S.name, P.name], ...cmpRows.map(([k, a, b]) => [k, a, b]), ...crops.map((c) => { const [crop, unit] = c.split("|"); return [`Verim ${crop} (${unit})`, vSum(V, c), vSum(VP, c)]; })] : []),
       ...(multi ? [[], ["İş", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)"], ...branches.map((x) => [x.b === "Genel" ? "Genel (ortak)" : x.b, x.m, x.g, x.b === "Genel" ? "" : x.kar])] : []),
     ] },
     { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dönüm", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dönüm başı masraf (TL)", "Verim", "Başabaş fiyatı"],
@@ -111,6 +123,21 @@ export default function Rapor() {
         <div className={gelir - masraf >= 0 ? "pos" : "neg"}><span>Kâr / zarar</span><b>{formatTL(gelir - masraf)}</b></div>
       </div>
       {(alinacak > 0 || borc > 0 || alacak > 0) && <p className="ui-note">Alınacak (bu sezonun satışları): {formatTL(alinacak)} · Bugün toplam borç: {formatTL(borc)} · alacak: {formatTL(alacak)}</p>}
+
+      {hasPrev && (
+        <>
+          <h2 className="ui-section">Geçen sezonla ({P.name})</h2>
+          <div className="rapor-table">
+            <table>
+              <thead><tr><th></th><th>{S.name}</th><th>{P.name}</th><th>Fark</th></tr></thead>
+              <tbody>
+                {cmpRows.map(([k, a, b]) => <tr key={k}><td>{k}</td><td>{formatTL(a)}</td><td>{formatTL(b)}</td><td>{pct(a, b)}</td></tr>)}
+                {crops.map((c) => { const [crop, unit] = c.split("|"); const a = vSum(V, c), b = vSum(VP, c); return <tr key={c}><td>Verim {crop}</td><td>{a.toLocaleString("tr-TR")} {unit}</td><td>{b.toLocaleString("tr-TR")} {unit}</td><td>{pct(a, b)}</td></tr>; })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {multi && (
         <>

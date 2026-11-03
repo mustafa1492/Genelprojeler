@@ -16,8 +16,10 @@ import { supabase } from "@/core/supabase/client";
 import { TabLink, useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
-import { dayText, dayYear, GELIR, harvestFrom, incomeOpen, ISLEM, todayStr } from "../kayit";
+import { addDays, dayText, dayYear, GELIR, harvestFrom, HATIRLAT, incomeOpen, ISLEM, todayStr } from "../kayit";
+import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
+import { exportAll } from "../disaAktar";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
 export default function Ana() {
@@ -33,7 +35,7 @@ export default function Ana() {
   const go = useGo();
   const load = useCallback(() => {
     listExpenses(biz.id).then(setExp).catch(() => {});
-    Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM)]).then(([a, b]) => setEv([...a, ...b])).catch(() => {});
+    Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM), listEvents(biz.id, HATIRLAT)]).then(([a, b, c]) => setEv([...a, ...b, ...c])).catch(() => {});
     listDues(biz.id).then(setDues).catch(() => {});
     listDocs(biz.id).then(setDocs).catch(() => {});
     listItems(biz.id).then(setItems).catch(() => {});
@@ -45,6 +47,7 @@ export default function Ana() {
   const today = todayStr();
   const [showAlerts, setShowAlerts] = useState(false);
   const [outMsg, setOutMsg] = useState("");
+  const [exporting, setExporting] = useState(false);
   const signOut = async () => {
     if (status().pending > 0) {
       await flush();
@@ -68,6 +71,7 @@ export default function Ana() {
   ].filter((x) => (Date.parse(x.due) - Date.parse(today)) / 86400000 <= config.remindDays.dues).sort((a, b) => a.due.localeCompare(b.due));
   const docSoon = docs.filter((d) => { const n = daysLeft(d.expires_on); return n !== null && n <= config.remindDays.documents; });
   const empty = items.filter(isLow);
+  const remind = ev.filter((e) => e.kind === HATIRLAT && !e.data.done && e.occurred_on <= addDays(today, 3)).sort((a, b) => a.occurred_on.localeCompare(b.occurred_on));
   const recent = [...exp.map((e) => ({ at: e.created_at ?? e.occurred_on, t: `Masraf · ${e.category} ${formatTL(e.amount)}`, by: e.created_by, open: () => go("masraf", { duzenle: e.id }) })),
     ...ev.map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by,
       open: () => (e.kind === GELIR ? go("gelir", { duzenle: e.id }) : go("tarlalar", { islem: e.id })) }))]
@@ -95,15 +99,21 @@ export default function Ana() {
       </div>
 
       {(() => {
-        const n = lastWait.length + dueSoon.length + docSoon.length + (empty.length ? 1 : 0);
+        const n = remind.length + lastWait.length + dueSoon.length + docSoon.length + (empty.length ? 1 : 0);
         if (!n) return null;
-        const red = dueSoon.some((d) => d.due < today) || docSoon.some((d) => (daysLeft(d.expires_on) ?? 0) < 0);
+        const red = remind.some((e) => e.occurred_on < today) || dueSoon.some((d) => d.due < today) || docSoon.some((d) => (daysLeft(d.expires_on) ?? 0) < 0);
         return (
           <div className={`ui-alerts${red ? " gecti" : ""}`}>
             <button type="button" aria-expanded={showAlerts} onClick={() => setShowAlerts(!showAlerts)}>
               <span>Uyarılar ({n})</span><span>{showAlerts ? "Kapat ▲" : "Gör ▼"}</span>
             </button>
             {showAlerts && <div className="list">
+              {remind.map((e) => (
+                <div key={e.id} className={`ui-warn ${e.occurred_on < today ? "gecti" : "yakin"}`}><div className="ui-warn-row" style={{ alignItems: "center" }}>
+                  <span style={{ flex: 1 }}><b>{String(e.data.title)}</b> · {e.occurred_on === today ? "bugün" : dayText(e.occurred_on)}{e.occurred_on < today ? " (geçti)" : ""}{e.place_id ? ` · ${place(e.place_id)}` : ""}</span>
+                  <button type="button" className="ui-chip" onClick={async () => { await updateEvent(e.id, { data: { ...e.data, done: true } }); load(); }}>Yapıldı</button>
+                </div></div>
+              ))}
       {lastWait.map(({ e, h }) => (
                 <div key={e.id} className="ui-warn yakin"><div className="ui-warn-row"><span><b>{place(e.place_id)}</b>: hasat en erken {dayYear(h)} ({String(e.data.product ?? "ilaç")}).</span></div></div>
               ))}
@@ -128,8 +138,16 @@ export default function Ana() {
         <TabLink to="rapor"><b>Sezon raporu</b><span>Gelir, masraf, tarla tarla kâr</span></TabLink>
         <TabLink to="vadeler"><b>Borç ve vadeler</b><span>Borç {formatTL(borc)} · Alacak {formatTL(alacak)}</span></TabLink>
         <TabLink to="belgeler"><b>Belgeler</b><span>{docs.length ? `${docs.length} belge` : "ÇKS, sigorta, kira…"}</span></TabLink>
+        <TabLink to="takvim"><b>Takvim ve hatırlatmalar</b><span>Tarla işleri, hasat, vadeler; hatırlatma kur</span></TabLink>
         <TabLink to="kayitlar"><b>Kayıtlar</b><span>Bütün masraf, gelir, tarla işleri: ara, düzelt, sil</span></TabLink>
         <TabLink to="listeler"><b>Listeleri düzenle</b><span>Masraf türleri, tarla işleri, birimler… ekle / kaldır</span></TabLink>
+        <button type="button" disabled={exporting} onClick={async () => {
+          if (!navigator.onLine) { setOutMsg("İndirmek için internet lazım."); return; }
+          setExporting(true); setOutMsg("");
+          try { await exportAll(biz); setOutMsg("İndirildi: Excel (okumak için) ve .json (yedek). İkisini de iCloud'a ya da bilgisayara kaydet."); }
+          catch { setOutMsg("İndiremedim, tekrar dene."); }
+          setExporting(false);
+        }}><b>{exporting ? "Hazırlanıyor…" : "Bütün verimi indir"}</b><span>Yedek: bütün kayıtlar Excel ve yedek dosyası olarak</span></button>
         <TabLink to="aile"><b>Aile ve ortak defter</b><span>Kim girdi, davet</span></TabLink>
       </div>
 
