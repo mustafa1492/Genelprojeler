@@ -20,6 +20,7 @@ import { addDays, dayText, dayYear, GELIR, harvestFrom, HATIRLAT, incomeOpen, IS
 import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
 import { exportAll } from "../disaAktar";
+import { Weather } from "../hava";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
 export default function Ana() {
@@ -48,6 +49,15 @@ export default function Ana() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [outMsg, setOutMsg] = useState("");
   const [exporting, setExporting] = useState(false);
+  // Kim ne girdi: son "Gördüm"den beri başkalarının girdiği kayıtlar
+  const [me, setMe] = useState<string | null>(null);
+  const [seenAt, setSeenAt] = useState<string>("");
+  useEffect(() => {
+    supabase().auth.getSession().then(({ data }) => {
+      const id = data.session?.user.id ?? null; setMe(id);
+      try { setSeenAt(localStorage.getItem(`ko:gordu:${biz.id}:${id}`) ?? new Date(Date.now() - 3 * 86400000).toISOString()); } catch { /* yok */ }
+    });
+  }, [biz.id]);
   const signOut = async () => {
     if (status().pending > 0) {
       await flush();
@@ -77,6 +87,10 @@ export default function Ana() {
       open: () => (e.kind === GELIR ? go("gelir", { duzenle: e.id }) : go("tarlalar", { islem: e.id })) }))]
     .sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
 
+  const fresh = me && seenAt ? [...exp.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: "masraf" })), ...ev.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: e.kind === GELIR ? "gelir" : e.kind === HATIRLAT ? "hatırlatma" : "tarla işi" }))]
+    .filter((x) => x.by && x.by !== me && x.at > seenAt) : [];
+  const freshBy = Object.entries(fresh.reduce<Record<string, Record<string, number>>>((m, x) => { const n = nameOf(x.by); (m[n] ??= {})[x.k] = (m[n][x.k] ?? 0) + 1; return m; }, {}));
+
   return (
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={biz.name} title="Özet" right={<HistoryLink />} />
@@ -91,6 +105,22 @@ export default function Ana() {
         </div>
       </div>
 
+      {(() => {
+        // Hava: konumu girilmiş tarlalar (aynı yer bir kez)
+        const seen = new Set<string>();
+        const spots = places.filter((p) => p.custom?.lat).filter((p) => { const k = `${Number(p.custom.lat).toFixed(1)},${Number(p.custom.lon).toFixed(1)}`; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 2);
+        return spots.map((p) => <Weather key={p.id} lat={Number(p.custom.lat)} lon={Number(p.custom.lon)} title={p.custom.koy?.split(",")[0] || p.name} />);
+      })()}
+      {freshBy.length > 0 && (
+        <div className="ui-card ui-stack" style={{ gap: 6 }}>
+          <b>Yeni kayıtlar</b>
+          {freshBy.map(([who, ks]) => <span key={who}><b>{who}</b>: {Object.entries(ks).map(([k, n]) => `${n} ${k}`).join(", ")}</span>)}
+          <div style={{ display: "flex", gap: 8 }}>
+            <button type="button" className="ui-chip" onClick={() => go("kayitlar")}>Kayıtlarda gör</button>
+            <button type="button" className="ui-chip" onClick={() => { const t = new Date().toISOString(); setSeenAt(t); try { localStorage.setItem(`ko:gordu:${biz.id}:${me}`, t); } catch { /* yok */ } }}>Gördüm</button>
+          </div>
+        </div>
+      )}
       <div className="ui-tiles">
         <TabLink to="masraf" params={{ yeni: 1 }}><b>+ Masraf</b><small>gübre, mazot, ilaç…</small></TabLink>
         <TabLink to="tarlalar"><b>+ Tarla işi</b><small>ilaçlama, sulama…</small></TabLink>

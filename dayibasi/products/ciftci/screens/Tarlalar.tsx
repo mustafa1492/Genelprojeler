@@ -6,7 +6,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
 import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@/core/events/api";
-import { listExpenses, type Expense } from "@/core/expenses/api";
+import { addExpense, deleteExpense, listExpenses, type Expense } from "@/core/expenses/api";
+import { useRole } from "../rol";
+import { searchPlace, Weather, type Spot } from "../hava";
 import { listItems, updateItem, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
@@ -30,6 +32,7 @@ export default function Tarlalar() {
   const [items, setItems] = useState<Item[]>([]);
   const [lots, setLots] = useState<Lot[]>([]);
   const fidan = hasFidan(biz);
+  const { money } = useRole();
   const [view, setView] = useState<View>({ v: "list" });
   const [done, setDone] = useState<Done>(null);
   const { selected: S, seasons } = useSeason();
@@ -91,7 +94,7 @@ export default function Tarlalar() {
     const p = find(view.id);
     if (p) return <IslemForm place={p} items={items} history={events.filter((e) => e.kind === ISLEM)} initialType={view.type} edit={view.edit} onCancel={() => setView({ v: "tarla", id: p.id })}
       onDelete={view.edit ? async () => { const e = view.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setView({ v: "tarla", id: p.id }); load(); } : undefined}
-      onSave={async (type, day, data, use) => {
+      onSave={async (type, day, data, use, fee) => {
         if (view.edit) {
           const old = view.edit;
           const keep = Object.fromEntries(Object.entries(old.data).filter(([k]) => ["item_id", "used", "unit"].includes(k)));
@@ -106,8 +109,9 @@ export default function Tarlalar() {
           await updateItem(it.id, { quantity: it.quantity - use.amount });
           undoStock = () => updateItem(it.id, { quantity: it.quantity });
         }
-        setDone({ message: `Kaydettim: ${p.name}, ${type}${data.product ? ` (${data.product})` : ""}.${use ? ` Depodan ${use.amount} ${items.find((i) => i.id === use.id)?.unit} düştüm.` : ""}`,
-          undo: async () => { await deleteEvent(ev.id); if (undoStock) await undoStock(); } });
+        const fx = fee ? await addExpense(biz.id, { occurred_on: day, category: "Sulama / elektrik", amount: fee, note: `Su ücreti${data.hours ? ` (${String(data.hours)} saat)` : ""}`, on_credit: false, vendor: null, paid_amount: 0, charge_to: null, place_id: p.id, photo_path: null, ...(p.custom?.is ? { data: { branch: p.custom.is } } : {}) }) : null;
+        setDone({ message: `Kaydettim: ${p.name}, ${type}${data.product ? ` (${data.product})` : ""}${data.hours ? `, ${String(data.hours)} saat` : ""}${data.kwh ? `, ${String(data.kwh)} kWh` : ""}.${use ? ` Depodan ${use.amount} ${items.find((i) => i.id === use.id)?.unit} düştüm.` : ""}${fx ? ` Masraflara ${formatTL(fee!)} su ücreti eklendi.` : ""}`,
+          undo: async () => { await deleteEvent(ev.id); if (undoStock) await undoStock(); if (fx) await deleteExpense(fx.id); } });
         setView({ v: "tarla", id: p.id }); load();
       }} />;
   }
@@ -162,12 +166,19 @@ export default function Tarlalar() {
               {f.S.map((x) => <div key={x.lot.id} className="ui-moneyrow"><b>{String(x.lot.data.batch_name ?? x.lot.name)}<small>{x.lot.planted_on ? dayYear(x.lot.planted_on) : ""} · fidan başı {formatTL(Math.round(x.perPlant * 100) / 100)}</small></b><strong>{x.alive.toLocaleString("tr-TR")}</strong></div>)}
               <button type="button" className="ui-link" onClick={() => go("fidan")}>Fidan sekmesinde aç ›</button>
             </div>); })()}
+          {p.custom?.lat && <Weather lat={Number(p.custom.lat)} lon={Number(p.custom.lon)} title={p.custom.koy?.split(",")[0] || p.name} />}
+          {(() => {
+            const su = ops.filter((e) => e.data.type === "Sulama" && inSeason(e.occurred_on, S));
+            if (!su.length) return null;
+            const h = su.reduce((t, e) => t + Number(e.data.hours ?? 0), 0), k = su.reduce((t, e) => t + Number(e.data.kwh ?? 0), 0), f = su.reduce((t, e) => t + Number(e.data.water_fee ?? 0), 0);
+            return <Card><InfoRows rows={[["Sulama (bu sezon)", `${su.length} kez`], ...(h ? [["Toplam süre", `${h.toLocaleString("tr-TR")} saat`] as [string, string]] : []), ...(k ? [["Elektrik", `${k.toLocaleString("tr-TR")} kWh`] as [string, string]] : []), ...(f && money ? [["Su ücreti", formatTL(f)] as [string, string]] : []), ["Son sulama", `${dayYear(su[0].occurred_on)}${su[0].data.method ? ` · ${String(su[0].data.method)}` : ""}`]]} /></Card>;
+          })()}
           <h2 className="ui-section">Tarla günlüğü</h2>
           {ops.length === 0 && <div className="ui-empty">Henüz işlem yok.</div>}
           {ops.map((e) => (
             <div key={e.id} className="ui-moneyrow" role="button" style={{ cursor: "pointer" }} onClick={() => { setDone(null); setView({ v: "islem", id: p.id, type: String(e.data.type), edit: e }); }}>
               <b style={{ minWidth: 0 }}>{String(e.data.type)}{e.data.product ? ` · ${String(e.data.product)}` : ""}
-                <small>{[dayYear(e.occurred_on), e.data.dose ? `doz ${String(e.data.dose)}` : "", harvestFrom(e) ? `hasat ≥ ${dayText(harvestFrom(e)!)}` : "", e.data.note ? String(e.data.note) : "", nameOf(e.created_by)].filter(Boolean).join(" · ")}</small></b>
+                <small>{[dayYear(e.occurred_on), e.data.method ? String(e.data.method) : "", e.data.hours ? `${String(e.data.hours)} saat` : "", e.data.kwh ? `${String(e.data.kwh)} kWh` : "", e.data.dose ? `doz ${String(e.data.dose)}` : "", harvestFrom(e) ? `hasat ≥ ${dayText(harvestFrom(e)!)}` : "", e.data.note ? String(e.data.note) : "", nameOf(e.created_by)].filter(Boolean).join(" · ")}</small></b>
               <button type="button" className="ui-link inline" style={{ color: "var(--tehlike)" }} onClick={async (x) => {
                 x.stopPropagation(); await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); load();
               }}>Sil</button>
@@ -224,6 +235,10 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
   const [note, setNote] = useState(edit?.custom?.not ?? "");
   const isler = useCList("isler");
   const [is, setIs] = useState(edit?.custom?.is ?? "");
+  const [koy, setKoy] = useState(edit?.custom?.koy ?? "");
+  const [spot, setSpot] = useState<Spot | null>(edit?.custom?.lat ? { name: edit.custom.koy ?? "", lat: Number(edit.custom.lat), lon: Number(edit.custom.lon), area: "" } : null);
+  const [found, setFound] = useState<Spot[] | null>(null);
+  const [geoErr, setGeoErr] = useState("");
   return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
@@ -241,19 +256,36 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
           <span className="ui-note" style={{ margin: 0 }}>Bu tarlanın masrafları o işe sayılır.</span>
         </div>
       )}
+      <div className="ui-stack" style={{ gap: 8 }}>
+        <div className="ui-quickadd">
+          <TextField id="t_koy" label="Köy / ilçe (hava durumu için, isteğe bağlı)" placeholder="Örnek: Yeniköy, Bergama" maxLength={60} value={koy}
+            onChange={(e) => { setKoy(e.target.value); setSpot(null); setFound(null); }} />
+          <button type="button" disabled={koy.trim().length < 2} onClick={async () => {
+            setGeoErr(""); setFound(null);
+            try { const r = await searchPlace(koy.split(",")[0]); setFound(r); if (!r.length) setGeoErr("Bulamadım. Sadece köyün ya da ilçenin adını yaz."); }
+            catch { setGeoErr("Arayamadım, internet lazım."); }
+          }}>Bul</button>
+        </div>
+        {spot && <span className="ui-note" style={{ margin: 0 }}>✓ Hava durumu bu yere göre: <b>{spot.name}{spot.area ? `, ${spot.area}` : ""}</b></span>}
+        {found && found.length > 0 && !spot && (
+          <div className="ui-chips wrap">{found.map((f, i) => <Chip key={i} onClick={() => { setSpot(f); setKoy(`${f.name}${f.area ? `, ${f.area}` : ""}`); setFound(null); }}>{f.name}{f.area ? ` (${f.area})` : ""}</Chip>)}</div>
+        )}
+        {geoErr && <span className="ui-note" style={{ margin: 0 }}>{geoErr}</span>}
+      </div>
       <TextField id="t_not" label="Not (isteğe bağlı)" placeholder="Örnek: Ada 105 parsel 3" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
       <MainButton disabled={!name.trim()} onClick={() => onSave(name.trim(), {
-        ...(edit?.custom ?? {}), donum: donum ? String(num(donum)) : "", urun: urun.trim(), not: note.trim(), is })}>Kaydet</MainButton>
+        ...(edit?.custom ?? {}), donum: donum ? String(num(donum)) : "", urun: urun.trim(), not: note.trim(), is, koy: koy.trim(), lat: spot ? String(spot.lat) : "", lon: spot ? String(spot.lon) : "" })}>Kaydet</MainButton>
     </main>
   );
 }
 
 function IslemForm({ place, items, history, initialType, edit, onSave, onCancel, onDelete }: {
   place: Place; items: Item[]; history: EventRow[]; initialType?: string; edit?: EventRow; onCancel: () => void; onDelete?: () => Promise<void>;
-  onSave: (type: string, day: string, data: Record<string, unknown>, use: { id: string; amount: number } | null) => Promise<void>;
+  onSave: (type: string, day: string, data: Record<string, unknown>, use: { id: string; amount: number } | null, fee?: number) => Promise<void>;
 }) {
   const operations = useCList("operations");
   const go = useGo();
+  const { money } = useRole();
   const [type, setType] = useState<string | null>(initialType ?? null);
   const ed = edit?.data ?? {};
   const [day, setDay] = useState(edit?.occurred_on ?? todayStr());
@@ -263,6 +295,19 @@ function IslemForm({ place, items, history, initialType, edit, onSave, onCancel,
   const [wait, setWait] = useState(ed.wait_days ? String(ed.wait_days) : "");
   const [used, setUsed] = useState("");
   const [note, setNote] = useState(String(ed.note ?? ""));
+  // Sulama
+  const isSu = type === "Sulama";
+  const [method, setMethod] = useState(String(ed.method ?? ""));
+  const [tStart, setTStart] = useState(String(ed.t_start ?? ""));
+  const [tEnd, setTEnd] = useState(String(ed.t_end ?? ""));
+  const [hours, setHours] = useState(ed.hours ? String(ed.hours) : "");
+  const [m1, setM1] = useState(ed.meter_start != null ? String(ed.meter_start) : "");
+  const [m2, setM2] = useState(ed.meter_end != null ? String(ed.meter_end) : "");
+  const lastSu = history.filter((e) => e.data.type === "Sulama" && e.place_id === place.id).sort((a, b) => b.occurred_on.localeCompare(a.occurred_on))[0];
+  const [waterFee, setWaterFee] = useState(ed.water_fee ? String(ed.water_fee) : "");
+  const [feeToExpense, setFeeToExpense] = useState(!edit);
+  const calcHours = (() => { if (!tStart || !tEnd) return 0; const [a1, a2] = tStart.split(":").map(Number), [b1, b2] = tEnd.split(":").map(Number); let d = b1 * 60 + b2 - (a1 * 60 + a2); if (d < 0) d += 24 * 60; return Math.round((d / 60) * 10) / 10; })();
+  const kwh = m1 && m2 && num(m2) >= num(m1) ? Math.round((num(m2) - num(m1)) * 10) / 10 : 0;
   const [error, setError] = useState("");
   const needsProduct = type === "İlaçlama" || type === "Gübreleme";
   const stock = items.filter((i) => (type === "İlaçlama" ? i.category === "İlaç" : type === "Gübreleme" ? i.category === "Gübre" : false));
@@ -333,17 +378,50 @@ function IslemForm({ place, items, history, initialType, edit, onSave, onCancel,
           )}
         </>
       )}
+      {isSu && (
+        <>
+          <div className="ui-stack" style={{ gap: 8 }}>
+            <span className="ui-label">Nasıl sulandı?</span>
+            <div className="ui-chips wrap">{["Damla", "Salma", "Yağmurlama", "Diğer"].map((x) => <Chip key={x} selected={method === x} onClick={() => setMethod(method === x ? "" : x)}>{x}</Chip>)}</div>
+          </div>
+          <div className="ui-quickadd">
+            <TextField id="su_bas" label="Başladı (saat)" type="time" value={tStart} onChange={(e) => setTStart(e.target.value)} />
+            <TextField id="su_bit" label="Bitti (saat)" type="time" value={tEnd} onChange={(e) => setTEnd(e.target.value)} />
+          </div>
+          {calcHours > 0 ? <span className="ui-note" style={{ margin: 0 }}>Süre: <b>{calcHours.toLocaleString("tr-TR")} saat</b></span>
+            : <TextField id="su_saat" label="Ya da kaç saat sürdü?" inputMode="decimal" placeholder="Örnek: 6" maxLength={5} value={hours} onChange={(e) => setHours(e.target.value)} />}
+          <div className="ui-quickadd">
+            <TextField id="su_s1" label="Sayaç başta (isteğe bağlı)" inputMode="decimal" placeholder={lastSu?.data.meter_end != null ? `Son: ${String(lastSu.data.meter_end)}` : "Örnek: 12450"} maxLength={10} value={m1} onChange={(e) => setM1(e.target.value)} />
+            <TextField id="su_s2" label="Sayaç sonda" inputMode="decimal" maxLength={10} value={m2} onChange={(e) => setM2(e.target.value)} />
+          </div>
+          {!m1 && lastSu?.data.meter_end != null && <Chip onClick={() => setM1(String(lastSu.data.meter_end))}>Geçen seferki son değer: {String(lastSu.data.meter_end)}</Chip>}
+          {kwh > 0 && <span className="ui-note" style={{ margin: 0 }}>Harcanan elektrik: <b>{kwh.toLocaleString("tr-TR")} kWh</b></span>}
+          {money && (
+            <>
+              <TextField id="su_ucret" label="Su ücreti ödendiyse (TL, kooperatif / DSİ)" inputMode="decimal" placeholder="Örnek: 600" maxLength={10} value={waterFee} onChange={(e) => setWaterFee(e.target.value)} />
+              {!edit && num(waterFee) > 0 && <label className="ui-check"><input type="checkbox" checked={feeToExpense} onChange={(e) => setFeeToExpense(e.target.checked)} /> Masraflara da ekle (Sulama / elektrik)</label>}
+            </>
+          )}
+        </>
+      )}
       <TextField id="i_not" label="Not (isteğe bağlı)" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
       <div className="ui-sticky-bottom">
         <MainButton onClick={async () => {
           const u = used ? num(used) : 0;
           if (used && !(u > 0)) { setError("Kullanılan miktarı doğru yaz."); return; }
+          if (isSu && m1 && m2 && num(m2) < num(m1)) { setError("Sayacın son değeri baştakinden küçük olamaz."); return; }
           await onSave(type, day, {
             ...(product.trim() ? { product: product.trim() } : {}), ...(dose.trim() ? { dose: dose.trim() } : {}),
             ...(wait ? { wait_days: Number(wait) } : {}), ...(note.trim() ? { note: note.trim() } : {}),
             ...(item && u ? { item_id: item.id, used: u, unit: item.unit } : {}),
-          }, item && u ? { id: item.id, amount: u } : null);
+            ...(isSu ? {
+              ...(method ? { method } : {}), ...(tStart ? { t_start: tStart } : {}), ...(tEnd ? { t_end: tEnd } : {}),
+              ...((calcHours || num(hours)) > 0 ? { hours: calcHours || num(hours) } : {}),
+              ...(m1 ? { meter_start: num(m1) } : {}), ...(m2 ? { meter_end: num(m2) } : {}), ...(kwh ? { kwh } : {}),
+              ...(num(waterFee) > 0 ? { water_fee: num(waterFee) } : {}),
+            } : {}),
+          }, item && u ? { id: item.id, amount: u } : null, isSu && !edit && feeToExpense && num(waterFee) > 0 ? num(waterFee) : 0);
         }}>Kaydet</MainButton>
       </div>
       {onDelete && <button type="button" className="ui-link" style={{ color: "var(--tehlike)" }} onClick={onDelete}>Bu işlemi sil</button>}
