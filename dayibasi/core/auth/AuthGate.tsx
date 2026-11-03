@@ -116,9 +116,12 @@ function Login({ appName }: { appName: string }) {
       else { setInfo("E-postana şifre yenileme bağlantısı gönderdim. Ona dokun, yeni şifreni yaz."); setMode("giris"); }
       return;
     }
+    // Yanıt gelmezse (telefonda takılma) sayfayı yenile: oturum kaydedildiyse içeri girer.
+    const stuck = setTimeout(() => location.reload(), 15000);
     const { data, error } = mode === "giris"
       ? await sb.signInWithPassword({ email: toEmail(email), password })
       : await sb.signUp({ email: toEmail(email), password });
+    clearTimeout(stuck);
     setBusy(false);
     if (error) {
       const c = error.code ?? "";
