@@ -103,3 +103,8 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - [x] Fiş kutusu: fotoğraf yükle → sahip Masraf'ta "Aç" ile masrafa çevirir. Yapay zeka okuma **sonra** (Claude API anahtarı gerekecek, Mustafa "şimdilik yapay zekasız" dedi).
 - [ ] Devlet destekleri bölümü: araştırma `docs/fikirler/09-devlet-destekleri.md`, Mustafa'nın cevabı bekleniyor.
 - [ ] Telefona bildirim (push) ile hatırlatma: sonra (sunucu zamanlayıcı gerekir).
+
+## Tapudan tarla getirme (Mustafa, 4 Kasım 2026: listeye eklendi, sonra yapılacak)
+- Tarla eklerken "Tapudan getir": il / ilçe / mahalle seç, ada + parsel yaz → TKGM parsel servisi (cbsapi.tkgm.gov.tr/megsiswebapi.v3, tarayıcıdan çağrılabiliyor, CORS açık) alan (m² → dönüm), nitelik, mevki, koordinat getirir; hava durumu konumu otomatik.
+- Mevcut tarlalara ada/parsel girip güncelleme; istenirse parsel sınırı küçük haritada.
+- Not: resmi açık servis değil, değişebilir; sadece kullanıcı tıklayınca sorgu. Hisseli tarlada alan parselin tamamı.
