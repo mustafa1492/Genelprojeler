@@ -16,7 +16,7 @@ import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { listExpenses, type Expense } from "@/core/expenses/api";
 import { listLots, type Lot } from "@/core/lots/api";
-import { FIDAN_SATIS, hasFidan, lotStats, marginOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
+import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, marginOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -29,6 +29,7 @@ export default function Gelir() {
   const [exps, setExps] = useState<Expense[]>([]);
   const [yields, setYields] = useState<EventRow[]>([]);
   const [counts, setCounts] = useState<EventRow[]>([]);
+  const [moves, setMoves] = useState<EventRow[]>([]);
   const fidan = hasFidan(biz);
   const [form, setForm] = useState<{ type?: string; edit?: EventRow; prefill?: Record<string, string | number | boolean> } | null>(null);
   const [done, setDone] = useState<Done>(null);
@@ -40,7 +41,7 @@ export default function Gelir() {
     if (fidan) listLots(biz.id).then(setLots).catch(() => {});
     listExpenses(biz.id).then(setExps).catch(() => {});
     listEvents(biz.id, VERIM).then(setYields).catch(() => {});
-    if (fidan) listEvents(biz.id, SAYIM).then(setCounts).catch(() => {});
+    if (fidan) Promise.all([listEvents(biz.id, SAYIM), listEvents(biz.id, AKTARIM)]).then(([a, b]) => { setCounts(a); setMoves(b); }).catch(() => {});
   }, [biz.id, fidan]);
   useEffect(load, [load]);
   useOnActivate(load);
@@ -54,7 +55,7 @@ export default function Gelir() {
   };
   const lotInfo = (id: string | null) => {
     const l = lots.find((x) => x.id === id); if (!l) return null;
-    const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps);
+    const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps, moves);
     return { alive: st.alive, perPlant: st.perPlant, suggested: suggestedPrice(st.perPlant, marginOf(biz)) };
   };
   if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prefill={form.prefill} onCancel={() => setForm(null)}

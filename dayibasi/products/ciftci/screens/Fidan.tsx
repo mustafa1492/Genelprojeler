@@ -13,13 +13,13 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { ageText, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
+import { AKTARIM, ageText, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
 import { addDays, dayText, dayYear, GELIR, ISLEM, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -39,7 +39,7 @@ export default function Fidan() {
 
   const load = useCallback(() => {
     listLots(biz.id).then(setLots).catch(() => setLots([]));
-    Promise.all([listEvents(biz.id, SAYIM), listEvents(biz.id, SIPARIS), listEvents(biz.id, FOTO), listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM)])
+    Promise.all([listEvents(biz.id, AKTARIM), listEvents(biz.id, SAYIM), listEvents(biz.id, SIPARIS), listEvents(biz.id, FOTO), listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM)])
       .then((r) => setEv(r.flat())).catch(() => {});
     listExpenses(biz.id).then(setExp).catch(() => {});
     listPlaces(biz.id).then(setPlaces).catch(() => {});
@@ -51,7 +51,11 @@ export default function Fidan() {
   const counts = ev.filter((e) => e.kind === SAYIM);
   const sales = ev.filter((e) => e.kind === GELIR && e.data.type === FIDAN_SATIS);
   const orders = ev.filter((e) => e.kind === SIPARIS);
-  const stats = (l: Lot) => lotStats(l, all, counts, sales, exp);
+  const moves = ev.filter((e) => e.kind === AKTARIM);
+  const stats = (l: Lot) => lotStats(l, all, counts, sales, exp, moves);
+  const [group, setGroupState] = useState<"dikim" | "tarla">("dikim");
+  const [showAlerts, setShowAlerts] = useState(false);
+  const batchOf = (l: Lot) => String(l.data.batch ?? l.id);
   const place = (id: string | null) => places.find((p) => p.id === id)?.name ?? "";
   const find = (id: string) => all.find((l) => l.id === id);
   const back = () => { setDone(null); setView({ v: "list" }); };
@@ -82,6 +86,39 @@ export default function Fidan() {
     if (error) throw error;
     setBiz({ ...biz, settings }); setDone({ message: "Boy sınıfları kaydedildi." }); setView({ v: "list" });
   }} />;
+
+  if (view.v === "dikim") return <DikimForm places={places} onCancel={back} onSave={async (v, parts) => {
+    const batch = crypto.randomUUID(), total = parts.reduce((t, x) => t + x.qty, 0);
+    const created: Lot[] = [];
+    for (const x of parts) {
+      const k = total ? x.qty / total : 0;
+      const name = parts.length > 1 ? `${v.name} · ${places.find((p) => p.id === x.place)?.name ?? "Yer yok"}` : v.name;
+      created.push(await addLot(biz.id, { name, place_id: x.place, planted_on: v.planted, initial_count: x.qty, source: v.source || null, note: v.note || null,
+        data: { batch, batch_name: v.name, initial_cost: Math.round(v.cost * k * 100) / 100, prior_cost: Math.round(v.prior * k * 100) / 100 } }));
+    }
+    setDone({ message: `Dikim eklendi: ${v.name}, ${fmt(total)} fidan${parts.length > 1 ? `, ${parts.length} tarlaya` : ""}.`, undo: async () => { for (const l of created) await deleteLot(l.id); } });
+    setView({ v: "list" }); load();
+  }} />;
+
+  if (view.v === "tasi") {
+    const from = find(view.id);
+    if (from) { const st = stats(from); return <TasiForm lot={from} st={st} lots={all.filter((l) => l.status === "aktif" && l.id !== from.id)} places={places} sizes={sizes} onCancel={() => setView({ v: "lot", id: from.id })}
+      onSave={async (qty, size, target, newPlace) => {
+        let to = target;
+        let createdLot: Lot | null = null;
+        if (!to) {
+          const pn = newPlace === "saksi" ? "Saksı" : places.find((p) => p.id === newPlace)?.name ?? "Yeni yer";
+          createdLot = await addLot(biz.id, { name: `${String(from.data.batch_name ?? from.name)} · ${pn}`, place_id: newPlace === "saksi" ? null : newPlace, planted_on: from.planted_on,
+            initial_count: 0, source: from.source, note: null, data: { batch: batchOf(from), batch_name: from.data.batch_name ?? from.name, ...(newPlace === "saksi" ? { potted: true } : {}) } });
+          to = createdLot.id;
+        }
+        const cost = Math.round(qty * st.perPlant * 100) / 100;
+        const e = await addEvent(biz.id, { kind: AKTARIM, occurred_on: todayStr(), place_id: from.place_id, person_id: null, quantity: qty, data: { from: from.id, to, qty, cost, ...(size ? { size } : {}) } });
+        setDone({ message: `Taşındı: ${fmt(qty)} fidan → ${find(to)?.name ?? createdLot?.name}. Maliyeti (${formatTL(cost)}) yanında gitti.`,
+          undo: async () => { await deleteEvent(e.id); if (createdLot) await deleteLot(createdLot.id); } });
+        setView({ v: "lot", id: from.id }); load();
+      }} />; }
+  }
 
   if (view.v === "sevk") {
     const o = view.order; const l = find(String(o.data.lot_id ?? ""));
@@ -176,9 +213,8 @@ export default function Fidan() {
         <BackButton onClick={back} label="Fidan" />
         <PageHeader sub={[place(lotV.place_id), lotV.planted_on ? `dikim ${dayYear(lotV.planted_on)}` : "", ageText(st.ageMonths), lotV.status === "bitti" ? "bitti" : ""].filter(Boolean).join(" · ")} title={lotV.name} />
         {doneCard}
-        {dueOf(lotV).filter((d) => d.next <= addDays(todayStr(), 3)).map((d) => (
-          <div key={d.type} className={`ui-warn ${d.late ? "gecti" : "yakin"}`}><div className="ui-warn-row"><span>{d.type}: {d.late ? "zamanı geldi" : "yaklaşıyor"} ({d.next.slice(0, 4) === todayStr().slice(0, 4) ? dayText(d.next) : dayYear(d.next)})</span></div></div>
-        ))}
+        <Alerts open={showAlerts} setOpen={setShowAlerts} items={dueOf(lotV).filter((d) => d.next <= addDays(todayStr(), 3)).map((d) => ({
+          key: d.type, red: d.late, text: <>{d.type}: {d.late ? "zamanı geldi" : "yaklaşıyor"} ({d.next.slice(0, 4) === todayStr().slice(0, 4) ? dayText(d.next) : dayYear(d.next)})</> }))} />
         <div className="ui-total">
           <span>Canlı fidan</span><b>{fmt(st.alive)} adet</b>
           <div className="ui-total-row">
@@ -188,10 +224,14 @@ export default function Fidan() {
         </div>
         <Card><InfoRows rows={[
           ["Dikilen", `${fmt(lotV.initial_count)} adet${lotV.source ? ` · ${lotV.source}` : ""}`],
+          ...(st.movedIn || st.movedOut ? [["Taşınan", `gelen ${fmt(st.movedIn)} · giden ${fmt(st.movedOut)}`] as [string, string]] : []),
           ["Satılan", `${fmt(st.sold)} adet · ${formatTL(st.income)}`],
           ["Fire (ölen / kayıp)", `${fmt(st.dead)} adet · %${st.firePct.toFixed(1)}`],
           ["Son sayım", st.counted ? dayYear(st.counted) : "Sayım yok (dikilen adet esas)"],
-          ["Maliyet dökümü", `partiye ${formatTL(Math.round(st.costDirect))}${st.costShare ? ` + parselden pay ${formatTL(Math.round(st.costShare))}` : ""}`],
+          ["Partiye özel", formatTL(Math.round(st.costDirect))],
+          ["Tarla masrafından payı", formatTL(Math.round(st.costShare))],
+          ["Genel masraftan payı", formatTL(Math.round(st.costGeneral))],
+          ...(st.costMoved ? [["Taşımayla gelen / giden maliyet", formatTL(Math.round(st.costMoved))] as [string, string]] : []),
           ["Kâr / zarar (şimdiye kadar)", formatTL(Math.round(st.income - st.cost))],
           ["Önerilen satış fiyatı", suggestedPrice(st.perPlant, margin) ? `${formatTL(suggestedPrice(st.perPlant, margin)!)} / adet (maliyet + %${margin})` : "Kâr oranı girilmedi"],
         ]} /></Card>
@@ -233,6 +273,7 @@ export default function Fidan() {
           <button type="button" onClick={() => go("gelir", { yeni: 1, parti: lotV.id })}><b>+ Satış</b><small>adet × boy × fiyat</small></button>
           <button type="button" onClick={() => { setDone(null); setView({ v: "foto", id: lotV.id }); }}><b>+ Fotoğraf</b><small>gelişim günlüğü</small></button>
           <button type="button" onClick={() => { setDone(null); setView({ v: "hatirlat", id: lotV.id }); }}><b>Hatırlatıcılar</b><small>her kaç günde bir</small></button>
+          <button type="button" onClick={() => { setDone(null); setView({ v: "tasi", id: lotV.id }); }}><b>Taşı / saksıya al</b><small>başka tarlaya, saksıya</small></button>
         </div>
 
         <h2 className="ui-section">Sayımlar</h2>
@@ -302,15 +343,12 @@ export default function Fidan() {
         </div>
       </div>
       <div className="ui-seg">
-        <button type="button" onClick={() => { setDone(null); setView({ v: "lotForm" }); }}>+ Parti ekle</button>
+        <button type="button" onClick={() => { setDone(null); setView({ v: "dikim" }); }}>+ Yeni dikim</button>
         <button type="button" onClick={() => { setDone(null); setView({ v: "siparis" }); }}>+ Sipariş</button>
       </div>
 
-      {dues.map((d) => (
-        <button key={d.lot.id + d.type} type="button" className={`ui-warn ${d.late ? "gecti" : "yakin"}`} style={{ textAlign: "left", font: "inherit" }} onClick={() => setView({ v: "lot", id: d.lot.id })}>
-          <div className="ui-warn-row"><span><b>{d.lot.name}</b>: {d.type} {d.late ? "zamanı geldi" : `· ${dayText(d.next)}`}</span></div>
-        </button>
-      ))}
+      <Alerts open={showAlerts} setOpen={setShowAlerts} items={dues.map((d) => ({ key: d.lot.id + d.type, red: d.late, onClick: () => setView({ v: "lot", id: d.lot.id }),
+        text: <><b>{d.lot.name}</b>: {d.type} {d.late ? "zamanı geldi" : `· ${dayText(d.next)}`}</> }))} />
 
       {Object.keys(ready).length > 0 && (
         <div className="ui-card ui-stack" style={{ gap: 6 }}>
@@ -345,14 +383,45 @@ export default function Fidan() {
         </>
       )}
 
-      <h2 className="ui-section">Partiler</h2>
-      {lots && all.length === 0 && <div className="ui-empty">Henüz parti yok. Önceki yıllarda diktiklerini de dikim tarihiyle ekleyebilirsin.</div>}
-      {all.map((l) => { const s = stats(l); return (
-        <button key={l.id} type="button" className="ui-card ui-stack" style={{ gap: 6, opacity: l.status === "bitti" ? 0.6 : 1 }} onClick={() => { setDone(null); setView({ v: "lot", id: l.id }); }}>
-          <span style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><b style={{ fontSize: "1.1rem" }}>{l.name}</b>
-            {l.status === "bitti" ? <StatusPill status="bekliyor">Bitti</StatusPill> : <span className="ui-amount">{fmt(s.alive)} adet</span>}</span>
-          <span className="ui-note" style={{ margin: 0 }}>{[place(l.place_id), l.planted_on ? dayYear(l.planted_on) : "", ageText(s.ageMonths), `fire %${s.firePct.toFixed(1)}`, s.alive ? `fidan başı ${formatTL(Math.round(s.perPlant * 100) / 100)}` : "", suggestedPrice(s.perPlant, margin) ? `öneri ${formatTL(suggestedPrice(s.perPlant, margin)!)}` : ""].filter(Boolean).join(" · ")}</span>
-        </button>); })}
+      <div className="ui-tabs" role="tablist" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        <button type="button" role="tab" aria-selected={group === "dikim"} onClick={() => setGroupState("dikim")}>Dikime göre</button>
+        <button type="button" role="tab" aria-selected={group === "tarla"} onClick={() => setGroupState("tarla")}>Tarlaya göre</button>
+      </div>
+      {lots && all.length === 0 && <div className="ui-empty">Henüz dikim yok. “+ Yeni dikim” ile ekle; geçmiş yıllarda diktiklerini de tarihiyle ekleyebilirsin.</div>}
+      {(() => {
+        const lotRow = (l: Lot, sub?: string) => { const st = stats(l); return (
+          <button key={l.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer", opacity: l.status === "bitti" ? 0.55 : 1 }} onClick={() => { setDone(null); setView({ v: "lot", id: l.id }); }}>
+            <b style={{ minWidth: 0 }}>{sub ?? l.name}<small>{[ageText(st.ageMonths), `fire %${st.firePct.toFixed(1)}`, st.alive ? `fidan başı ${formatTL(Math.round(st.perPlant * 100) / 100)}` : "", l.status === "bitti" ? "bitti" : ""].filter(Boolean).join(" · ")}</small></b>
+            <strong>{fmt(st.alive)}</strong>
+          </button>); };
+        const groupCard = (key: string, title: string, sub: string, ls: Lot[], rowLabel: (l: Lot) => string) => {
+          const S = ls.filter((l) => l.status === "aktif").map(stats);
+          const alive = S.reduce((t, x) => t + x.alive, 0), cost = S.reduce((t, x) => t + x.cost, 0), inc = ls.map(stats).reduce((t, x) => t + x.income, 0);
+          return (
+            <div key={key} className="ui-card ui-stack" style={{ gap: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><b style={{ fontSize: "1.1rem" }}>{title}</b><span className="ui-amount">{fmt(alive)} fidan</span></div>
+              <span className="ui-note" style={{ margin: 0 }}>{[sub, `maliyet ${formatTL(Math.round(cost))}`, alive ? `fidan başı ${formatTL(Math.round((cost / alive) * 100) / 100)}` : "", inc ? `satış ${formatTL(inc)}` : ""].filter(Boolean).join(" · ")}</span>
+              {ls.map((l) => lotRow(l, rowLabel(l)))}
+            </div>
+          );
+        };
+        if (group === "tarla") {
+          const keys = [...new Set(all.map((l) => l.place_id ?? (l.data.potted ? "saksi" : "yok")))];
+          return keys.map((k) => {
+            const ls = all.filter((l) => (l.place_id ?? (l.data.potted ? "saksi" : "yok")) === k);
+            const pl = places.find((p) => p.id === k);
+            return groupCard(k, pl?.name ?? (k === "saksi" ? "Saksıda" : "Tarlası seçilmemiş"), pl?.custom?.donum ? `${pl.custom.donum} dönüm` : "", ls,
+              (l) => `${String(l.data.batch_name ?? l.name)}${l.planted_on ? ` (${l.planted_on.slice(0, 4)})` : ""}`);
+          });
+        }
+        const batches = [...new Set(all.map(batchOf))];
+        return batches.map((b) => {
+          const ls = all.filter((l) => batchOf(l) === b);
+          const f = ls[0];
+          return groupCard(b, String(f.data.batch_name ?? f.name), [f.planted_on ? dayYear(f.planted_on) : "", f.source, `${fmt(ls.reduce((t, l) => t + l.initial_count, 0))} dikildi`].filter(Boolean).join(" · "), ls,
+            (l) => (l.place_id ? place(l.place_id) : l.data.potted ? "Saksıda" : "Tarlası yok"));
+        });
+      })()}
       {all.length > 0 && <MainButton secondary onClick={excel}>Excel’e indir (partiler, boy stoku, siparişler)</MainButton>}
       <button type="button" className="ui-link" onClick={() => setView({ v: "kar" })}>{margin ? `Kâr oranı: %${margin} · değiştir` : "Satış fiyatı önerisi için kâr oranı gir"}</button>
       <button type="button" className="ui-link" onClick={() => setView({ v: "boylar" })}>Boy sınıflarını düzenle ({sizes.join(", ")})</button>
@@ -565,6 +634,99 @@ function KarOrani({ value, onSave, onCancel }: { value: number | null; onCancel:
       <TextField id="kar" label="Kâr oranı (%)" inputMode="numeric" maxLength={4} placeholder="Örnek: 40" value={v} onChange={(e) => setV(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={async () => { try { await onSave(Number(v) || 0); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+    </main>
+  );
+}
+
+/** Uyarılar tek kartta (aç / kapa). */
+function Alerts({ items, open, setOpen }: { items: { key: string; red: boolean; text: React.ReactNode; onClick?: () => void }[]; open: boolean; setOpen: (v: boolean) => void }) {
+  if (!items.length) return null;
+  const red = items.some((i) => i.red);
+  return (
+    <div className={`ui-alerts${red ? " gecti" : ""}`}>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}><span>Uyarılar ({items.length})</span><span>{open ? "Kapat ▲" : "Gör ▼"}</span></button>
+      {open && <div className="list">{items.map((i) => (
+        <button key={i.key} type="button" className={`ui-warn ${i.red ? "gecti" : "yakin"}`} style={{ textAlign: "left", font: "inherit", cursor: i.onClick ? "pointer" : "default" }} onClick={i.onClick}>
+          <div className="ui-warn-row"><span>{i.text}</span></div>
+        </button>))}</div>}
+    </div>
+  );
+}
+
+/** Yeni dikim: bir kerede dikilen fidan, istenirse birden çok tarlaya dağıtılır (her tarla ayrı parti olur). */
+function DikimForm({ places, onSave, onCancel }: { places: Place[]; onCancel: () => void;
+  onSave: (v: { name: string; planted: string | null; source: string; cost: number; prior: number; note: string }, parts: { place: string | null; qty: number }[]) => Promise<void> }) {
+  const sources = useCList("sources");
+  const [name, setName] = useState("");
+  const [planted, setPlanted] = useState("");
+  const [source, setSource] = useState("");
+  const [cost, setCost] = useState("");
+  const [prior, setPrior] = useState("");
+  const [note, setNote] = useState("");
+  const [qty, setQty] = useState<Record<string, string>>({});
+  const [error, setError] = useState("");
+  const keys = places.length ? places.map((p) => p.id) : ["yok"];
+  const total = keys.reduce((t, k) => t + (Number(qty[k]) || 0), 0);
+  return (
+    <main className="ui-stack" style={{ paddingBottom: 120 }}>
+      <BackButton onClick={onCancel} label="Vazgeç" />
+      <PageHeader sub="Fidan" title="Yeni dikim" />
+      <TextField id="dk_ad" label="Dikimin adı" placeholder="Örnek: 2025 yaz dikimi" maxLength={50} value={name} onChange={(e) => setName(e.target.value)} />
+      <TextField id="dk_tarih" label="Dikim tarihi (geçmiş tarih olabilir)" type="date" max={todayStr()} value={planted} onChange={(e) => setPlanted(e.target.value)} />
+      <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Kaynak</span>
+        <div className="ui-chips wrap">{sources.map((x) => <Chip key={x} selected={source === x} onClick={() => setSource(source === x ? "" : x)}>{x}</Chip>)}</div></div>
+      <div className="ui-card ui-stack" style={{ gap: 8 }}>
+        <b>Hangi tarlaya kaç fidan dikildi?</b>
+        {places.length === 0 && <span className="ui-note" style={{ margin: 0 }}>Henüz tarla yok; tarlaları Tarlalar sekmesinden ekleyebilirsin. Şimdilik toplamı yaz.</span>}
+        {keys.map((k) => <TextField key={k} id={`dk_${k}`} label={places.find((p) => p.id === k)?.name ?? "Toplam adet"} inputMode="numeric" maxLength={9}
+          value={qty[k] ?? ""} onChange={(e) => setQty({ ...qty, [k]: e.target.value.replace(/\D/g, "") })} />)}
+        {total > 0 && <span>Toplam: <b>{fmt(total)}</b> fidan</span>}
+      </div>
+      <TextField id="dk_alis" label="Fidan / çelik alış maliyeti, toplam TL (isteğe bağlı)" inputMode="decimal" maxLength={12} value={cost} onChange={(e) => setCost(e.target.value)} />
+      <TextField id="dk_onceki" label="Uygulamadan önce bu dikime yapılan masraf, toplam TL (isteğe bağlı)" inputMode="decimal" maxLength={12} value={prior} onChange={(e) => setPrior(e.target.value)} />
+      <p className="ui-note">Maliyetler tarlalara dikilen adede göre bölünür. Her tarla ayrı parti olarak takip edilir; “Dikime göre” görünümünde birlikte görünür.</p>
+      <TextField id="dk_not" label="Not (isteğe bağlı)" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
+      {error && <ErrorText>{error}</ErrorText>}
+      <div className="ui-sticky-bottom"><MainButton onClick={async () => {
+        if (!name.trim()) { setError("Dikimin adını yaz."); return; }
+        if (!(total > 0)) { setError("Kaç fidan dikildiğini yaz."); return; }
+        await onSave({ name: name.trim(), planted: planted || null, source, cost: cost ? num(cost) : 0, prior: prior ? num(prior) : 0, note: note.trim() },
+          keys.filter((k) => Number(qty[k]) > 0).map((k) => ({ place: k === "yok" ? null : k, qty: Number(qty[k]) })));
+      }}>Kaydet</MainButton></div>
+    </main>
+  );
+}
+
+/** Taşı / saksıya al: fidanlar maliyetleriyle (fidan başı maliyet × adet) yeni yere geçer. */
+function TasiForm({ lot, st, lots, places, sizes, onSave, onCancel }: { lot: Lot; st: LotStats; lots: Lot[]; places: Place[]; sizes: string[]; onCancel: () => void;
+  onSave: (qty: number, size: string | null, target: string | null, newPlace: string | null) => Promise<void> }) {
+  const [qty, setQty] = useState("");
+  const [size, setSize] = useState<string | null>(null);
+  const [target, setTarget] = useState<string | null>(null);
+  const [newPlace, setNewPlace] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const n = Number(qty);
+  return (
+    <main className="ui-stack" style={{ paddingBottom: 120 }}>
+      <BackButton onClick={onCancel} label="Vazgeç" />
+      <PageHeader sub={`${lot.name} · ${fmt(st.alive)} canlı`} title="Taşı / saksıya al" />
+      <TextField id="ts_adet" label="Kaç fidan?" inputMode="numeric" maxLength={9} value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.5rem", fontWeight: 800 }} />
+      {sizes.length > 0 && <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Boy (isteğe bağlı)</span>
+        <div className="ui-chips wrap">{sizes.map((x) => <Chip key={x} selected={size === x} onClick={() => setSize(size === x ? null : x)}>{x}</Chip>)}</div></div>}
+      <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Nereye?</span>
+        <div className="ui-chips wrap">
+          <Chip selected={newPlace === "saksi" && !target} onClick={() => { setTarget(null); setNewPlace("saksi"); }}>Saksıya</Chip>
+          {places.filter((p) => p.id !== lot.place_id).map((p) => <Chip key={p.id} selected={newPlace === p.id && !target} onClick={() => { setTarget(null); setNewPlace(p.id); }}>{p.name} (yeni parti)</Chip>)}
+          {lots.map((l) => <Chip key={l.id} selected={target === l.id} onClick={() => { setTarget(l.id); setNewPlace(null); }}>{l.name}</Chip>)}
+        </div></div>
+      {n > 0 && st.alive > 0 && <div className="ui-done"><p>Taşınan maliyet: <b>{formatTL(Math.round(n * st.perPlant * 100) / 100)}</b> ({formatTL(Math.round(st.perPlant * 100) / 100)} × {fmt(n)})</p></div>}
+      {error && <ErrorText>{error}</ErrorText>}
+      <div className="ui-sticky-bottom"><MainButton onClick={async () => {
+        if (!(n > 0)) { setError("Kaç fidan taşındığını yaz."); return; }
+        if (n > st.alive) { setError(`Partide ${fmt(st.alive)} canlı fidan var.`); return; }
+        if (!target && !newPlace) { setError("Nereye taşındığını seç."); return; }
+        await onSave(n, size, target, newPlace);
+      }}>Kaydet</MainButton></div>
     </main>
   );
 }

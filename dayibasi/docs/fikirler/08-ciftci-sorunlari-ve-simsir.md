@@ -58,6 +58,13 @@ Fidan önerileri 2 (büyüme: sayımdan sayıma boy dağılımı), 5 (fire sebeb
 Düzenleme modu: `core/settings/lists.tsx` (settings.lists[key] = {added, hidden}); çiftçide Özet → "Listeleri düzenle" + masraf/işlem seçiminde "düzenle".
 Hesap: hüseyinköprü (→ huseyinkopru@kullanici…; kullanıcı adındaki Türkçe harf düz harfe çevrilir), defter "Köprü fidancılık", fidan modülü açık.
 
+## Çok tarlalı fidan (3 Kasım 2026, Mustafa kararları)
+- Dikim (batch) birden çok tarlaya dağıtılır → her tarla ayrı parti (`data.batch`, `data.batch_name`); alış ve önceki masraf adede göre bölünür.
+- Fidan ekranı: "Dikime göre" / "Tarlaya göre"; Tarlalar sekmesinde tarla başı fidan sayısı ve fidan başı maliyet.
+- Maliyet: partiye özel + tarla masrafı (tarladaki aktif partilerin CANLI fidanına göre) + GENEL masraf (tarlası/partisi olmayan; bütün aktif partilerin canlı fidanına göre) + taşıma.
+- Taşı / saksıya al: `events.kind = 'aktarim'` {from, to, qty, cost}; maliyet = adet × o anki fidan başı maliyet.
+- Fidan uyarıları tek kartta (aç/kapa).
+
 ## C. Çıktılar
 - Var: güzel Excel (renkli başlık, TL biçimi, toplamlar, sabit başlık), PDF sezon raporu (yazdır → PDF).
 - Ek seçenekler: WhatsApp özet mesajı; muhasebeci için tek dosya (yıl sonu); grafikli PDF kapak sayfası; banka/kredi için çok sezonlu özet.

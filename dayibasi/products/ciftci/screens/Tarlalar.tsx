@@ -1,5 +1,7 @@
 "use client";
 import { useCList } from "../lists";
+import { listLots, type Lot } from "@/core/lots/api";
+import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, SAYIM } from "../fidan";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -26,6 +28,8 @@ export default function Tarlalar() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [items, setItems] = useState<Item[]>([]);
+  const [lots, setLots] = useState<Lot[]>([]);
+  const fidan = hasFidan(biz);
   const [view, setView] = useState<View>({ v: "list" });
   const [done, setDone] = useState<Done>(null);
   const { selected: S, seasons } = useSeason();
@@ -34,7 +38,11 @@ export default function Tarlalar() {
 
   const load = useCallback(() => {
     Promise.all([listPlaces(biz.id), listEvents(biz.id, ISLEM), listEvents(biz.id, VERIM), listEvents(biz.id, GELIR), listExpenses(biz.id), listItems(biz.id)])
-      .then(([p, a, b, c, x, i]) => { setPlaces(p.sort((m, n) => m.name.localeCompare(n.name, "tr"))); setEvents([...a, ...b, ...c]); setExpenses(x); setItems(i); });
+      .then(([p, a, b, c, x, i]) => { setPlaces(p.sort((m, n) => m.name.localeCompare(n.name, "tr"))); setEvents((ev) => [...a, ...b, ...c, ...ev.filter((e) => e.kind === SAYIM || e.kind === AKTARIM)]); setExpenses(x); setItems(i); });
+    if (fidan) {
+      listLots(biz.id).then(setLots).catch(() => {});
+      Promise.all([listEvents(biz.id, SAYIM), listEvents(biz.id, AKTARIM)]).then(([s1, s2]) => setEvents((ev) => [...ev.filter((e) => e.kind !== SAYIM && e.kind !== AKTARIM), ...s1, ...s2])).catch(() => {});
+    }
   }, [biz.id]);
   useEffect(load, [load]);
   useOnActivate(load);
@@ -42,6 +50,15 @@ export default function Tarlalar() {
   useEffect(() => { if (tp.p.tarla) setView({ v: "tarla", id: String(tp.p.tarla) }); }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
+  // Fidan modülü: tarladaki aktif partilerin canlı fidan sayısı ve maliyeti
+  const fidanOf = (pid: string) => {
+    if (!fidan) return null;
+    const counts = events.filter((e) => e.kind === SAYIM), sales = events.filter((e) => e.kind === GELIR && e.data.type === FIDAN_SATIS), moves = events.filter((e) => e.kind === AKTARIM);
+    const S = lots.filter((l) => l.place_id === pid && l.status === "aktif").map((l) => lotStats(l, lots, counts, sales, expenses, moves));
+    if (!S.length) return null;
+    const alive = S.reduce((t, x) => t + x.alive, 0), cost = S.reduce((t, x) => t + x.cost, 0);
+    return { S, alive, cost, per: alive ? cost / alive : 0 };
+  };
   const statsOf = (p: Place, ss: Season) => {
     const m = expenses.filter((e) => e.place_id === p.id && inSeason(e.occurred_on, ss)).reduce((t, e) => t + e.amount, 0);
     const g = events.filter((e) => e.kind === GELIR && e.place_id === p.id && inSeason(e.occurred_on, ss)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
@@ -126,6 +143,13 @@ export default function Tarlalar() {
             <TabLink to="masraf" params={{ yeni: 1, tarla: p.id }}><b>+ Masraf</b><small>bu tarla için</small></TabLink>
           </div>
 
+          {(() => { const f = fidanOf(p.id); if (!f) return null; return (
+            <div className="ui-card ui-stack" style={{ gap: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><b>Bu tarladaki fidanlar</b><span className="ui-amount">{f.alive.toLocaleString("tr-TR")}</span></div>
+              <span className="ui-note" style={{ margin: 0 }}>Toplam maliyet {formatTL(Math.round(f.cost))} · fidan başı {formatTL(Math.round(f.per * 100) / 100)}</span>
+              {f.S.map((x) => <div key={x.lot.id} className="ui-moneyrow"><b>{String(x.lot.data.batch_name ?? x.lot.name)}<small>{x.lot.planted_on ? dayYear(x.lot.planted_on) : ""} · fidan başı {formatTL(Math.round(x.perPlant * 100) / 100)}</small></b><strong>{x.alive.toLocaleString("tr-TR")}</strong></div>)}
+              <button type="button" className="ui-link" onClick={() => go("fidan")}>Fidan sekmesinde aç ›</button>
+            </div>); })()}
           <h2 className="ui-section">Tarla günlüğü</h2>
           {ops.length === 0 && <div className="ui-empty">Henüz işlem yok.</div>}
           {ops.map((e) => (
@@ -172,6 +196,7 @@ export default function Tarlalar() {
               {[p.custom?.urun, st.donum ? `${st.donum} dönüm` : "", `masraf ${formatTL(st.m)}`, `gelir ${formatTL(st.g)}`].filter(Boolean).join(" · ")}
             </span>
             {last && <span className="ui-note" style={{ margin: 0 }}>Son iş: {String(last.data.type)} · {dayText(last.occurred_on)}</span>}
+            {(() => { const f = fidanOf(p.id); return f ? <span style={{ fontWeight: 800, color: "var(--ana-yazi)" }}>{f.alive.toLocaleString("tr-TR")} fidan · fidan başı {formatTL(Math.round(f.per * 100) / 100)}</span> : null; })()}
           </button>
         );
       })}

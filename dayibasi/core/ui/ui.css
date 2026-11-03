@@ -300,3 +300,4 @@ body.gizli .ui-moneyrow strong, body.gizli .ui-links span { filter: blur(9px); u
 .ui-alerts .list { display: flex; flex-direction: column; gap: 8px; padding: 0 12px 12px; }
 .ui-alerts.gecti { border-color: var(--tehlike-cizgi); background: var(--tehlike-acik); color: var(--tehlike-yazi); }
 body.gizli .ui-money { filter: blur(7px); user-select: none; }
+button.ui-card.ui-stack { display: flex; flex-direction: column; text-align: left; }
