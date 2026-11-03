@@ -2,6 +2,8 @@
 
 Yeni oturumda önce bunu oku. Yapılan işi `- [x]` yap, `docs/urun.md`'ye de işle.
 
+> **3 Kasım 2026: Mustafa dayıbaşı işine ara verdi.** Odak çiftçi defteri. Aşağıdaki dayıbaşı maddeleri o geri dönene kadar bekler.
+
 ## 1 Kasım 2026 (not alındı, henüz yapılmadı)
 
 - [x] **Ekibim'i ayır** (2 Kasım 2026: Bütün ekip + sınırsız liste, liste içinde yoklama, “Geliyor musun?” sor: listeden/çoklu liste/kişi seç + sadece cevap vermeyenler; Bugün'de liste düğmeleri. Tablo: `lists`, migration 0006)
