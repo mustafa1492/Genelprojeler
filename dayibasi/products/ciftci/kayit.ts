@@ -28,3 +28,12 @@ export function breakEven(cost: number, yields: EventRow[]): { perUnit: number; 
   if (yields.every((e) => String(e.data.unit) === u)) { const q = yields.reduce((t, e) => t + Number(e.quantity), 0); return q > 0 ? { perUnit: cost / q, unit: u, qty: q } : null; }
   return null;
 }
+
+/** Kaydın hangi işe ait olduğu: kendi seçimi > tarlanın işi > fidan bağlantısı > genel (null). */
+export function branchOf(e: { data?: Record<string, unknown> | null; place_id: string | null }, places: { id: string; custom: Record<string, string> }[]): string | null {
+  const b = e.data?.branch as string | undefined;
+  if (b) return b;
+  if (e.data?.lot_id || e.data?.type === "Fidan satışı") return "Fidan";
+  const p = places.find((x) => x.id === e.place_id);
+  return p?.custom?.is || null;
+}

@@ -10,7 +10,8 @@ import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { BackButton, MainButton } from "@/core/ui";
-import { breakEven, dayYear, GELIR, incomeOpen, ISLEM, VERIM } from "../kayit";
+import { useCList } from "../lists";
+import { branchOf, breakEven, dayYear, GELIR, incomeOpen, ISLEM, VERIM } from "../kayit";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 
 const tr = (d: string) => `${d.slice(8)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
@@ -55,6 +56,14 @@ export default function Rapor() {
     const b = breakEven(m, V.filter((e) => e.place_id === id));
     return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
   }).filter((x) => x.m || x.g || x.v);
+  const isler = useCList("isler");
+  const multi = isler.length > 1;
+  const bOf = (e: { data?: Record<string, unknown> | null; place_id: string | null }) => { const b = branchOf(e, places); return b && isler.includes(b) ? b : "Genel"; };
+  const branches = multi ? [...isler, "Genel"].map((b) => {
+    const m = E.filter((e) => bOf(e) === b).reduce((t, e) => t + e.amount, 0);
+    const g = G.filter((e) => bOf(e) === b).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
+    return { b, m, g, kar: g - m };
+  }).filter((x) => x.m || x.g) : [];
   const borc = dues.filter((d) => d.direction === "borc").reduce((t, d) => t + remaining(d), 0) + exp.reduce((t, e) => t + owed(e), 0);
   const alacak = dues.filter((d) => d.direction === "alacak").reduce((t, d) => t + remaining(d), 0) + ev.filter((e) => e.kind === GELIR).reduce((t, e) => t + incomeOpen(e), 0);
 
@@ -63,11 +72,14 @@ export default function Rapor() {
       ["Kalem", "Tutar (TL)"], ["Gelir", gelir], ["Masraf", masraf], ["Kâr / zarar", gelir - masraf], ["Alınacak (vadeli satış)", alinacak], [],
       ["Masraf türü", "Toplam (TL)"], ...cats.map((x) => [x.c, x.t]), ["Toplam masraf", masraf], [],
       ["Ay", "Masraf (TL)"], ...months.map((x) => [monthName(x.m), x.t]),
+      ...(multi ? [[], ["İş", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)"], ...branches.map((x) => [x.b === "Genel" ? "Genel (ortak)" : x.b, x.m, x.g, x.b === "Genel" ? "" : x.kar])] : []),
     ] },
     { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dönüm", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dönüm başı masraf (TL)", "Verim", "Başabaş fiyatı"],
       ...fields.map((f) => [f.name, f.d || "", f.m, f.g, f.kar, f.d ? Math.round(f.m / f.d) : "", f.v, f.be])] },
-    { name: "Masraflar", title: `Masraflar · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not", "Veresiye (kime)"],
-      ...E.map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? "", e.on_credit ? e.vendor ?? "" : ""]), ["Toplam", "", "", masraf]] },
+    { name: "Masraflar", title: `Masraflar · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not", "Veresiye (kime)", ...(multi ? ["İş"] : [])],
+      ...E.map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? "", e.on_credit ? e.vendor ?? "" : "", ...(multi ? [bOf(e)] : [])]), ["Toplam", "", "", masraf]] },
+    ...(multi ? isler.concat("Genel").filter((b) => E.some((e) => bOf(e) === b)).map((b) => ({ name: `${b} masrafı`.slice(0, 31), title: `${b === "Genel" ? "Genel (ortak)" : b} masrafları · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not"],
+      ...E.filter((e) => bOf(e) === b).map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? ""]), ["Toplam", "", "", E.filter((e) => bOf(e) === b).reduce((t, e) => t + e.amount, 0)]] })) : []),
     { name: "Gelir", title: `Gelir · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Ürün", "Miktar", "Birim", "Toplam (TL)", "Alıcı", "Alınacak (TL)"],
       ...G.map((e) => [tr(e.occurred_on), String(e.data.type), pName(e.place_id), String(e.data.crop ?? ""), Number(e.data.qty ?? 0) || "", String(e.data.unit ?? ""), Number(e.quantity), String(e.data.buyer ?? ""), incomeOpen(e)]),
       ["Toplam", "", "", "", "", "", gelir, "", alinacak]] },
@@ -99,6 +111,19 @@ export default function Rapor() {
         <div className={gelir - masraf >= 0 ? "pos" : "neg"}><span>Kâr / zarar</span><b>{formatTL(gelir - masraf)}</b></div>
       </div>
       {(alinacak > 0 || borc > 0 || alacak > 0) && <p className="ui-note">Alınacak (bu sezonun satışları): {formatTL(alinacak)} · Bugün toplam borç: {formatTL(borc)} · alacak: {formatTL(alacak)}</p>}
+
+      {multi && (
+        <>
+          <h2 className="ui-section">İş iş</h2>
+          <div className="rapor-table">
+            <table>
+              <thead><tr><th>İş</th><th>Masraf</th><th>Gelir</th><th>Kâr</th></tr></thead>
+              <tbody>{branches.map((x) => <tr key={x.b}><td>{x.b === "Genel" ? "Genel (ortak)" : x.b}</td><td>{formatTL(x.m)}</td><td>{formatTL(x.g)}</td><td className={x.kar < 0 && x.b !== "Genel" ? "neg" : ""}>{x.b === "Genel" ? "—" : formatTL(x.kar)}</td></tr>)}</tbody>
+            </table>
+          </div>
+          <p className="ui-note">Genel (ortak): hiçbir işe ayrılmamış masraflar. Fidan maliyetine sadece “Fidan” seçilen masraflar girer.</p>
+        </>
+      )}
 
       <h2 className="ui-section">Masraf türleri</h2>
       <div className="ui-card ui-stack" style={{ gap: 8 }}>
@@ -132,9 +157,9 @@ export default function Rapor() {
       <h2 className="ui-section">Masraflar</h2>
       <div className="rapor-table">
         <table>
-          <thead><tr><th>Tarih</th><th>Tür</th><th>Tarla</th><th>Not</th><th>Tutar</th></tr></thead>
-          <tbody>{E.map((e) => <tr key={e.id}><td>{tr(e.occurred_on)}</td><td>{e.category}</td><td>{pName(e.place_id)}</td><td>{e.note ?? ""}</td><td>{formatTL(e.amount)}</td></tr>)}</tbody>
-          <tfoot><tr><td colSpan={4}>Toplam</td><td>{formatTL(masraf)}</td></tr></tfoot>
+          <thead><tr><th>Tarih</th><th>Tür</th><th>Tarla</th>{multi && <th>İş</th>}<th>Not</th><th>Tutar</th></tr></thead>
+          <tbody>{E.map((e) => <tr key={e.id}><td>{tr(e.occurred_on)}</td><td>{e.category}</td><td>{pName(e.place_id)}</td>{multi && <td>{bOf(e)}</td>}<td>{e.note ?? ""}</td><td>{formatTL(e.amount)}</td></tr>)}</tbody>
+          <tfoot><tr><td colSpan={multi ? 5 : 4}>Toplam</td><td>{formatTL(masraf)}</td></tr></tfoot>
         </table>
       </div>
 

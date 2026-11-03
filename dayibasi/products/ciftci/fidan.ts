@@ -43,10 +43,11 @@ export function aliveOf(lot: Lot, counts: EventRow[], sales: EventRow[], moves: 
  * Parti durumu ve maliyeti (Mustafa, 3 Kasım 2026):
  *  maliyet = alış + uygulama öncesi masraf + partiye özel masraf
  *          + tarla masrafı payı (tarladaki aktif partilerin CANLI fidan sayısına göre)
- *          + genel masraf payı (tarlası/partisi olmayan masraf; bütün aktif partilerin canlı fidan sayısına göre)
+ *          + genel masraf payı (tarlası/partisi olmayan "Fidan" masrafı; bütün aktif partilerin canlı fidan sayısına göre;
+ *            tek iş varken iş seçilmemiş genel masraf da sayılır)
  *          + taşımayla gelen maliyet − taşımayla giden maliyet
  */
-export function lotStats(lot: Lot, lots: Lot[], counts: EventRow[], sales: EventRow[], expenses: Expense[], moves: EventRow[] = []): LotStats {
+export function lotStats(lot: Lot, lots: Lot[], counts: EventRow[], sales: EventRow[], expenses: Expense[], moves: EventRow[] = [], multiBranch = false): LotStats {
   const a = aliveOf(lot, counts, sales, moves);
   const active = lots.filter((l) => l.status === "aktif");
   const aliveMap = new Map(active.map((l) => [l.id, l.id === lot.id ? a.alive : aliveOf(l, counts, sales, moves).alive]));
@@ -63,7 +64,8 @@ export function lotStats(lot: Lot, lots: Lot[], counts: EventRow[], sales: Event
   }
   let general = 0;
   if (myW > 0) {
-    const genExp = expenses.filter((e) => !e.place_id && !e.data?.lot_id && !e.charge_to).reduce((t, e) => t + e.amount, 0);
+    // Birden çok iş varsa (ör. fidan + buğday) yalnız "Fidan" seçilen genel masraf fidana dağıtılır; iş seçilmemiş genel masraf ayrı kalır.
+    const genExp = expenses.filter((e) => !e.place_id && !e.data?.lot_id && !e.charge_to && (multiBranch ? e.data?.branch === "Fidan" : !e.data?.branch || e.data.branch === "Fidan")).reduce((t, e) => t + e.amount, 0);
     const tot = active.reduce((t, l) => t + w(l), 0);
     general = tot ? genExp * (myW / tot) : 0;
   }

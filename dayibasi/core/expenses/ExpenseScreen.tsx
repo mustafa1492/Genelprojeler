@@ -38,6 +38,8 @@ export type ExpenseScreenProps = {
   stock?: { categoryOf: (expenseCategory: string) => string | null; units: readonly string[] };
   /** Verilirse türler hazır (düzenlenmiş) liste olarak gelir ve "Türleri düzenle" bağlantısı çıkar. */
   onEditCategories?: () => void;
+  /** Birden çok iş varsa (ör. Fidan, Buğday): "Hangi iş için?" seçimi, data.branch'e yazılır. Tarlanın işi (custom.is) önceden seçilir. */
+  branches?: readonly string[];
 };
 type StockAdd = { itemId: string | null; name: string; qty: number; unit: string; category: string };
 
@@ -46,7 +48,7 @@ type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
 
-export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories }: ExpenseScreenProps) {
+export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places = [], summary, summaryRows, navItems, current, headerRight, memberName, period, periodPicker, periodSummary, link, stock, onEditCategories, branches = [] }: ExpenseScreenProps) {
   const biz = useBusiness();
   const setBiz = useSetBusiness();
   const [items, setItems] = useState<Expense[] | null>(null);
@@ -96,7 +98,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink}
+    return <MasrafForm cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} link={link} presetLink={presetLink} branches={branches}
       stockCategory={stock && !ed ? stock.categoryOf(view.cat) : null} stockUnits={stock?.units ?? []} stockItems={stockItems}
       onCancel={() => setView({ v: "list" })}
       onSave={async (input, add) => {
@@ -271,7 +273,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
             <button key={e.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }}
               onClick={() => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}>
               <b style={{ minWidth: 0 }}>{e.category}{e.photo_path ? " · fişli" : ""}
-                <small>{[placeName(e.place_id), e.note, memberName ? memberName((e as Expense & { created_by?: string }).created_by) : "", e.on_credit ? `Veresiye: ${e.vendor}${owed(e) ? "" : " (ödendi)"}` : "", e.charge_to ? `Yansıtıldı: ${farmerName(e.charge_to)}` : ""].filter(Boolean).join(" · ") || "Düzenlemek için dokun"}</small></b>
+                <small>{[placeName(e.place_id), (e.data?.branch as string) || "", e.note, memberName ? memberName((e as Expense & { created_by?: string }).created_by) : "", e.on_credit ? `Veresiye: ${e.vendor}${owed(e) ? "" : " (ödendi)"}` : "", e.charge_to ? `Yansıtıldı: ${farmerName(e.charge_to)}` : ""].filter(Boolean).join(" · ") || "Düzenlemek için dokun"}</small></b>
               <strong>{formatTL(e.amount)}</strong>
             </button>
           ))}
@@ -315,10 +317,10 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }:
   );
 }
 
-function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
+function MasrafForm({ branches = [], cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
   stockCategory?: string | null; stockUnits?: readonly string[]; stockItems?: Item[];
   cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
-  link?: ExpenseScreenProps["link"]; presetLink?: string | null;
+  link?: ExpenseScreenProps["link"]; presetLink?: string | null; branches?: readonly string[];
   onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data"> & { data?: Record<string, unknown> }, stockAdd?: StockAdd | null) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
 }) {
@@ -330,6 +332,9 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPla
   const [vendor, setVendor] = useState(edit?.vendor ?? "");
   const [chargeTo, setChargeTo] = useState<string | null>(edit?.charge_to ?? null);
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? presetPlace ?? null);
+  const placeIs = (id: string | null) => places.find((p) => p.id === id)?.custom?.is || null;
+  const [branch, setBranch] = useState<string | null>((edit?.data?.branch as string) ?? placeIs(edit?.place_id ?? presetPlace ?? null));
+  const pickPlace = (id: string | null) => { setPlaceId(id); const b = placeIs(id); if (b) setBranch(b); };
   const [toStock, setToStock] = useState(false);
   const [stItem, setStItem] = useState<string | null>(null);
   const [stName, setStName] = useState("");
@@ -353,7 +358,7 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPla
       await onSave({
         occurred_on: day, category: cat, amount: n, note: note.trim() || null, on_credit: credit, vendor: credit ? vendor.trim() : null,
         paid_amount: edit?.paid_amount ?? 0, charge_to: chargeTo, place_id: placeId, photo_path: photo,
-        ...(link ? { data: { ...(edit?.data ?? {}), [link.key]: linkId } } : {}),
+        ...(link || branches.length > 1 ? { data: { ...(edit?.data ?? {}), ...(link ? { [link.key]: linkId } : {}), ...(branches.length > 1 ? { branch } : {}) } } : {}),
       }, toStock && stockCategory ? { itemId: stItem, name: stName.trim() || cat, qty: num(stQty) || 0, unit: stUnit, category: stockCategory } : null);
     } catch { setError("Kaydedemedim, tekrar dene."); setBusy(false); }
   };
@@ -377,8 +382,17 @@ function MasrafForm({ cat, edit, lastAmount, vendors, farmers, places, presetPla
         <div className="ui-stack" style={{ gap: 8 }}>
           <span className="ui-label">Hangi tarla?</span>
           <div className="ui-chips wrap">
-            <Chip selected={!placeId} onClick={() => setPlaceId(null)}>Genel</Chip>
-            {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => setPlaceId(p.id)}>{p.name}</Chip>)}
+            <Chip selected={!placeId} onClick={() => pickPlace(null)}>Genel</Chip>
+            {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => pickPlace(p.id)}>{p.name}</Chip>)}
+          </div>
+        </div>
+      )}
+      {branches.length > 1 && (
+        <div className="ui-stack" style={{ gap: 8 }}>
+          <span className="ui-label">Hangi iş için?</span>
+          <div className="ui-chips wrap">
+            <Chip selected={!branch} onClick={() => setBranch(null)}>Genel (hepsi)</Chip>
+            {branches.map((b) => <Chip key={b} selected={branch === b} onClick={() => setBranch(b)}>{b}</Chip>)}
           </div>
         </div>
       )}

@@ -32,10 +32,11 @@ export default function Masraf() {
   const { selected: S } = useSeason();
   const cats = useCList("expense");
   const invUnits = useCList("inv_units");
+  const isler = useCList("isler");
   const go = useGo();
   const gelirS = income.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
-    <ExpenseScreen categories={cats} onEditCategories={() => go("listeler", { liste: "expense" })} places={places} headerRight={<HistoryLink />} memberName={nameOf}
+    <ExpenseScreen categories={cats} onEditCategories={() => go("listeler", { liste: "expense" })} places={places} branches={isler} headerRight={<HistoryLink />} memberName={nameOf}
       link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
       stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: invUnits }}
       period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}

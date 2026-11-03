@@ -20,13 +20,18 @@ export const LISTS = {
   documents: { title: "Belge önerileri", defaults: config.documents },
   bakim: { title: "Fidan bakım türleri", defaults: ["Budama", "Güve kontrolü", "İlaçlama", "Gübreleme", "Sulama", "Yaprak hastalığı kontrolü", "Diğer"], fidan: true },
   sources: { title: "Fidan kaynakları", defaults: ["Çelik", "Fide", "Tohum", "Hazır fidan"], fidan: true },
+  isler: { title: "İşler (fidan, buğday…)", defaults: [] as string[] },
   fire: { title: "Fire (kayıp) sebepleri", defaults: ["Kuraklık", "Güve", "Kök çürüklüğü", "Don", "Hastalık", "Bilinmiyor"], fidan: true },
 } as const;
 export type ListKey = keyof typeof LISTS;
 
 /** Etkin liste (hazırlar − kaldırılanlar + eklenenler). Masraf türlerinde eski "expense_categories" de dahil. */
+/** İşler listesi: fidan modülü açıksa "Fidan" hazır gelir. */
+const defaultsOf = (key: ListKey, fidan: boolean): readonly string[] => (key === "isler" ? (fidan ? ["Fidan"] : []) : LISTS[key].defaults);
+
 export function useCList(key: ListKey) {
   const biz = useBusiness();
+  if (key === "isler") return resolveList(biz, key, defaultsOf(key, hasFidan(biz)));
   const legacy = key === "expense" && Array.isArray(biz.settings?.expense_categories) ? (biz.settings!.expense_categories as string[]) : [];
   return resolveList(biz, key, LISTS[key].defaults, legacy);
 }
@@ -35,7 +40,7 @@ export function useCList(key: ListKey) {
 export function EditListScreen({ k, onDone }: { k: ListKey; onDone: () => void }) {
   const biz = useBusiness();
   const legacy = k === "expense" && Array.isArray(biz.settings?.expense_categories) ? (biz.settings!.expense_categories as string[]) : [];
-  return <ListEditor title={LISTS[k].title} listKey={k} defaults={LISTS[k].defaults} legacyAdded={legacy} legacyKey={k === "expense" ? "expense_categories" : undefined} onDone={onDone} />;
+  return <ListEditor title={LISTS[k].title} listKey={k} defaults={defaultsOf(k, hasFidan(biz))} legacyAdded={legacy} legacyKey={k === "expense" ? "expense_categories" : undefined} onDone={onDone} />;
 }
 
 /** Bütün listeler tek yerde. */
@@ -54,7 +59,7 @@ export default function Listeler() {
       <PageHeader sub="Kullanmadığını kaldır, ihtiyacın olanı ekle" title="Listeleri düzenle" />
       <div className="ui-links">
         {keys.map((x) => {
-          const n = resolveList(biz, x, LISTS[x].defaults).length;
+          const n = resolveList(biz, x, defaultsOf(x, hasFidan(biz))).length;
           return <a key={x} href="#" onClick={(e) => { e.preventDefault(); setK(x); }}><b>{LISTS[x].title}</b><span>{n} seçenek</span></a>;
         })}
       </div>

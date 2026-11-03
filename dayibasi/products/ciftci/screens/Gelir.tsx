@@ -53,9 +53,10 @@ export default function Gelir() {
     const cost = exps.filter((e) => e.place_id === placeId && inSeason(e.occurred_on, S)).reduce((t, e) => t + e.amount, 0);
     return breakEven(cost, yields.filter((e) => e.place_id === placeId && String(e.data.year) === S.name));
   };
+  const multi = useCList("isler").length > 1;
   const lotInfo = (id: string | null) => {
     const l = lots.find((x) => x.id === id); if (!l) return null;
-    const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps, moves);
+    const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps, moves, multi);
     return { alive: st.alive, perPlant: st.perPlant, suggested: suggestedPrice(st.perPlant, marginOf(biz)) };
   };
   if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prefill={form.prefill} onCancel={() => setForm(null)}
@@ -118,7 +119,10 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
 }) {
   const incomeKinds = useCList("income");
   const units = useCList("units");
+  const isler = useCList("isler");
   const d = edit?.data ?? {};
+  const placeIs = (id: string | null) => places.find((p) => p.id === id)?.custom?.is || null;
+  const [branch, setBranch] = useState<string | null>((d.branch as string) ?? placeIs(edit?.place_id ?? null));
   const [type, setType] = useState<string | null>((d.type as string) ?? t0 ?? null);
   const [day, setDay] = useState(edit?.occurred_on ?? todayStr());
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? null);
@@ -155,6 +159,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
     if (pay === "kismen" && !(rec > 0 && rec < tot)) { setError("Alınan tutarı yaz (toplamdan az)."); return; }
     await onSave({ occurred_on: day, place_id: placeId, quantity: tot, data: {
       type, ...(crop.trim() ? { crop: crop.trim() } : {}), ...(isSale && num(qty) > 0 ? { qty: num(qty), unit: isPlant ? "adet" : unit, ...(num(price) > 0 ? { price: num(price) } : {}) } : {}),
+      ...(isler.length > 1 ? { branch: isPlant ? "Fidan" : branch } : {}),
       ...(isPlant ? { lot_id: lotId, ...(size ? { size } : {}) } : {}),
       ...(buyer.trim() ? { buyer: buyer.trim() } : {}), received: rec, ...(pay !== "hepsi" && due ? { due_on: due } : {}),
     } });
@@ -170,7 +175,16 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
           <span className="ui-label">Hangi tarla? (isteğe bağlı)</span>
           <div className="ui-chips wrap">
             <Chip selected={!placeId} onClick={() => setPlaceId(null)}>Genel</Chip>
-            {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => { setPlaceId(p.id); if (!crop && p.custom?.urun) setCrop(p.custom.urun); }}>{p.name}</Chip>)}
+            {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => { setPlaceId(p.id); if (p.custom?.is) setBranch(p.custom.is); if (!crop && p.custom?.urun) setCrop(p.custom.urun); }}>{p.name}</Chip>)}
+          </div>
+        </div>
+      )}
+      {isler.length > 1 && !isPlant && (
+        <div className="ui-stack" style={{ gap: 8 }}>
+          <span className="ui-label">Hangi işin geliri?</span>
+          <div className="ui-chips wrap">
+            <Chip selected={!branch} onClick={() => setBranch(null)}>Genel</Chip>
+            {isler.map((b) => <Chip key={b} selected={branch === b} onClick={() => setBranch(b)}>{b}</Chip>)}
           </div>
         </div>
       )}

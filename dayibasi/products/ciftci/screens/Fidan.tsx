@@ -52,7 +52,8 @@ export default function Fidan() {
   const sales = ev.filter((e) => e.kind === GELIR && e.data.type === FIDAN_SATIS);
   const orders = ev.filter((e) => e.kind === SIPARIS);
   const moves = ev.filter((e) => e.kind === AKTARIM);
-  const stats = (l: Lot) => lotStats(l, all, counts, sales, exp, moves);
+  const multi = useCList("isler").length > 1;
+  const stats = (l: Lot) => lotStats(l, all, counts, sales, exp, moves, multi);
   const [group, setGroupState] = useState<"dikim" | "tarla">("dikim");
   const [showAlerts, setShowAlerts] = useState(false);
   const batchOf = (l: Lot) => String(l.data.batch ?? l.id);

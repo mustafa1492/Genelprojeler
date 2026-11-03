@@ -51,10 +51,11 @@ export default function Tarlalar() {
 
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
   // Fidan modülü: tarladaki aktif partilerin canlı fidan sayısı ve maliyeti
+  const multi = useCList("isler").length > 1;
   const fidanOf = (pid: string) => {
     if (!fidan) return null;
     const counts = events.filter((e) => e.kind === SAYIM), sales = events.filter((e) => e.kind === GELIR && e.data.type === FIDAN_SATIS), moves = events.filter((e) => e.kind === AKTARIM);
-    const S = lots.filter((l) => l.place_id === pid && l.status === "aktif").map((l) => lotStats(l, lots, counts, sales, expenses, moves));
+    const S = lots.filter((l) => l.place_id === pid && l.status === "aktif").map((l) => lotStats(l, lots, counts, sales, expenses, moves, multi));
     if (!S.length) return null;
     const alive = S.reduce((t, x) => t + x.alive, 0), cost = S.reduce((t, x) => t + x.cost, 0);
     return { S, alive, cost, per: alive ? cost / alive : 0 };
@@ -210,6 +211,8 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
   const [donum, setDonum] = useState(edit?.custom?.donum ?? "");
   const [urun, setUrun] = useState(edit?.custom?.urun ?? "");
   const [note, setNote] = useState(edit?.custom?.not ?? "");
+  const isler = useCList("isler");
+  const [is, setIs] = useState(edit?.custom?.is ?? "");
   return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
@@ -217,9 +220,19 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
       <TextField id="t_ad" label="Tarlanın adı" placeholder="Örnek: Kınık yolu, Dere kenarı" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
       <TextField id="t_donum" label="Kaç dönüm? (isteğe bağlı)" inputMode="decimal" placeholder="Örnek: 12" maxLength={8} value={donum} onChange={(e) => setDonum(e.target.value)} />
       <TextField id="t_urun" label="Ürün (isteğe bağlı)" placeholder="Örnek: Zeytin, Pamuk, Domates" maxLength={40} value={urun} onChange={(e) => setUrun(e.target.value)} />
+      {isler.length > 1 && (
+        <div className="ui-stack" style={{ gap: 8 }}>
+          <span className="ui-label">Bu tarlada hangi iş?</span>
+          <div className="ui-chips wrap">
+            <Chip selected={!is} onClick={() => setIs("")}>Belli değil</Chip>
+            {isler.map((b) => <Chip key={b} selected={is === b} onClick={() => setIs(b)}>{b}</Chip>)}
+          </div>
+          <span className="ui-note" style={{ margin: 0 }}>Bu tarlanın masrafları o işe sayılır.</span>
+        </div>
+      )}
       <TextField id="t_not" label="Not (isteğe bağlı)" placeholder="Örnek: Ada 105 parsel 3" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
       <MainButton disabled={!name.trim()} onClick={() => onSave(name.trim(), {
-        ...(edit?.custom ?? {}), donum: donum ? String(num(donum)) : "", urun: urun.trim(), not: note.trim() })}>Kaydet</MainButton>
+        ...(edit?.custom ?? {}), donum: donum ? String(num(donum)) : "", urun: urun.trim(), not: note.trim(), is })}>Kaydet</MainButton>
     </main>
   );
 }
