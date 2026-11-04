@@ -171,7 +171,7 @@ export default function Hayvanlar({ species }: { species: Sp }) {
       {all.length > 6 && <TextField id="h_ara" label="Küpe no ya da ad ile ara" value={q} onChange={(e) => setQ(e.target.value)} />}
       {shown.map((a) => { const d = st(a); return (
         <Card key={a.id} onClick={() => go({ v: "kart", id: a.id })}>
-          <span style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><b>{animalLabel(a)}</b><span>{a.sex === "erkek" ? KINDS[a.kind].male : KINDS[a.kind].label}</span></span>
+          <span style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><b>{animalLabel(a)}</b><span>{a.born_on && a.born_on > addDays(today, -365) ? KINDS[a.kind].young.replace(/^./, (c) => c.toLocaleUpperCase("tr")) : a.sex === "erkek" ? KINDS[a.kind].male : KINDS[a.kind].label}</span></span>
           {(d.line || d.milkUntil) && <span className="ui-note" style={{ margin: 0 }}>{[d.line, d.milkUntil ? "ilaçlı: süt tanka katılmaz" : ""].filter(Boolean).join(" · ")}</span>}
         </Card>
       ); })}
