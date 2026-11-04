@@ -8,7 +8,7 @@ import { downloadBook, xDate } from "@/core/export/xlsx";
 import { fmtFx, useRates } from "@/core/fx";
 import { fxFor, gelirSheet, masrafSheet, ozetSheet } from "../excel";
 import { listItems, type Item } from "@/core/inventory/api";
-import { formatTL } from "@/core/ledger/api";
+import { formatTL, formatTLRaw } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { BackButton, MainButton } from "@/core/ui";
@@ -57,7 +57,7 @@ export default function Rapor() {
     const p = places.find((x) => x.id === id); const d = Number(p?.custom?.donum) || 0;
     const v = V.filter((e) => e.place_id === id).map((e) => `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}`).join(", ");
     const b = breakEven(m, V.filter((e) => e.place_id === id));
-    return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
+    return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "", beRaw: b ? `${formatTLRaw(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
   }).filter((x) => x.m || x.g || x.v);
   // Geçen sezon: başlangıcı bundan önce olan en yakın sezon; yoksa aynı tarihlerin bir yıl öncesi
   const yr = (d: string, k: number) => `${Number(d.slice(0, 4)) + k}${d.slice(4)}`;
@@ -103,7 +103,7 @@ export default function Rapor() {
       oz,
       { name: "Tarla tarla", title: `Tarla tarla · ${S.name}`, info: ["Kâr ve dekar başı masraf formüldür."],
         cols: [{ h: "Tarla", t: "text", w: 20 }, { h: "Dekar", t: "num", sum: true }, { h: "Gelir (TL)", t: "tl" }, { h: "Masraf (TL)", t: "tl" }, { h: "Kâr (TL)", t: "tl" }, { h: "Dekar başı masraf (TL)", t: "tl", sum: false }, { h: "Verim", t: "text", w: 20 }, { h: "Başabaş fiyatı", t: "text", w: 16 }],
-        rows: fields.map((f) => [f.name, f.d || null, f.g, f.m, { f: "={C:Gelir (TL)}{r}-{C:Masraf (TL)}{r}", v: f.kar }, { f: "=IF(N({C:Dekar}{r})>0,{C:Masraf (TL)}{r}/{C:Dekar}{r},\"\")", v: f.d ? f.m / f.d : "" }, f.v, f.be]) },
+        rows: fields.map((f) => [f.name, f.d || null, f.g, f.m, { f: "={C:Gelir (TL)}{r}-{C:Masraf (TL)}{r}", v: f.kar }, { f: "=IF(N({C:Dekar}{r})>0,{C:Masraf (TL)}{r}/{C:Dekar}{r},\"\")", v: f.d ? f.m / f.d : "" }, f.v, f.beRaw]) },
       M, GS,
       { name: "Tarla işleri", title: `Tarla günlüğü · ${S.name}`, totals: false,
         cols: [{ h: "Tarih", t: "date" }, { h: "Tarla", t: "text" }, { h: "İşlem", t: "text" }, { h: "Ürün / ilaç", t: "text" }, { h: "Doz", t: "text" }, { h: "Bekleme (gün)", t: "num", sum: false }, { h: "Not", t: "text", w: 30 }],

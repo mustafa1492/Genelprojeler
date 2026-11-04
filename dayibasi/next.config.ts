@@ -9,7 +9,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${sb}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${sb} ${sb.replace("https://", "wss://")} https://api.open-meteo.com https://geocoding-api.open-meteo.com`,
+  `connect-src 'self' ${sb} ${sb.replace("https://", "wss://")} https://api.open-meteo.com https://geocoding-api.open-meteo.com https://cbsapi.tkgm.gov.tr`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

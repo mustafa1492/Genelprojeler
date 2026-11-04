@@ -76,7 +76,7 @@ export default function Ayarlar() {
       <div className="mn-grp"><span>Görünüm</span>
         <div className="mn-liste">
           {row("duzenle", "Ekranımı düzenle", "Özet kartları, alt çubuk, kâr dönemi, hazır görünümler")}
-          <label><div>Tutarları gizle<small>Telefonu birine gösterirken rakamlar bulanık olur</small></div><input type="checkbox" checked={privacy.on} onChange={privacy.toggle} /></label>
+          <label><div>Tutarları gizle<small>Telefonu birine gösterirken para yazan her yer *** olur</small></div><input type="checkbox" checked={privacy.on} onChange={privacy.toggle} /></label>
           <div className="mn-doviz"><div>Döviz karşılığı<small>{kurBugun ? `Bugün 1 $ = ${kurBugun.usd.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL · 1 € = ${kurBugun.eur.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL (TCMB)` : "Tutarların yanında, kaydın günündeki kurla"}</small></div>
             <div className="mn-seg" role="group" aria-label="Döviz karşılığı" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
               {([["kapali", "Kapalı"], ["usd", "Dolar"], ["eur", "Euro"]] as const).map(([k, l]) => <button key={k} type="button" aria-pressed={doviz === k} onClick={() => setDoviz(k)}>{l}</button>)}

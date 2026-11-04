@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { usePrefs } from "@/core/prefs";
+import { MASK, moneyHidden } from "@/core/ui/privacy";
 
 /**
  * Döviz karşılığı: kaydın kendi tarihindeki TCMB döviz satış kuruyla.
@@ -62,7 +63,7 @@ export function useRates(dates: string[]) {
 }
 
 export const SYM: Record<Exclude<Doviz, "kapali">, string> = { usd: "$", eur: "€" };
-export const fmtFx = (v: number | null, d: Doviz) => (v == null || d === "kapali" ? "" : `≈ ${Math.round(v).toLocaleString("tr-TR")} ${SYM[d]}`);
+export const fmtFx = (v: number | null, d: Doviz) => (v == null || d === "kapali" ? "" : `≈ ${moneyHidden() ? MASK : Math.round(v).toLocaleString("tr-TR")} ${SYM[d]}`);
 
 /** Küçük gri satır: "≈ 1.234 $". Kur yoksa hiçbir şey göstermez. */
 export function FxNote({ tl, date, className }: { tl: number; date: string; className?: string }) {

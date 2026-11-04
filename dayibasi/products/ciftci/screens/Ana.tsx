@@ -146,7 +146,7 @@ export default function Ana() {
     kar: can("rapor") ? (
       <div className="ozet-kar">
         <div>
-          <span className="bas">{kTitle}<button type="button" onClick={nextPeriod} aria-label="Dönemi değiştir">{PERIODS.find((p) => p.id === g.period)!.label} ▾</button></span>
+          <span className="bas">{kTitle}<span className="bas-sag"><button type="button" onClick={nextPeriod} aria-label="Dönemi değiştir">{PERIODS.find((p) => p.id === g.period)!.label} ▾</button><PrivacyButton compact className="kar-goz" /></span></span>
           <span className="tutar ui-money">{formatTL(kar)}</span>
           {kFx != null && <span className="ozet-kar-fx ui-money">{fmtFx(kFx, doviz)}</span>}
           {kPrev !== null && kPrev !== 0 && <small className={kar < kPrev ? "kotu" : ""}>{kar >= kPrev ? "▲" : "▼"} %{Math.abs(Math.round(((kar - kPrev) / Math.abs(kPrev)) * 100))} {kPrevLabel}</small>}
@@ -210,7 +210,7 @@ export default function Ana() {
   return (
     <main className="ui-has-nav ui-stack ozet-izgara" onClick={(e) => { if (sel && !(e.target as HTMLElement).closest(".ozet-blok.secili")) setSel(null); }}>
       <div className="ozet-selam">{selam}{myName ? `, ${myName}` : ""}</div>
-      <PageHeader title={biz.name} right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}>{can("rapor") && <span className="ozet-gizle"><PrivacyButton /></span>}<HistoryLink /></span>} />
+      <PageHeader title={biz.name} right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}>{can("rapor") && !g.cards.includes("kar") && <span className="ozet-gizle"><PrivacyButton /></span>}<HistoryLink /></span>} />
       {can("rapor") && g.period === "sezon" && g.cards.includes("kar") && <SeasonPicker onManage={() => go("sezonlar")} />}
       {shown.map((id) => {
         const i = g.cards.indexOf(id);

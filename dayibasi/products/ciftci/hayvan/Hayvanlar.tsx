@@ -1,4 +1,5 @@
 "use client";
+import { MASK, moneyHidden } from "@/core/ui/privacy";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness, useSetBusiness } from "@/core/auth/AuthGate";
 import { addEvent, deleteEvent } from "@/core/events/api";
@@ -18,7 +19,7 @@ import {
 type Sp = "kucukbas" | "buyukbas";
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "barinak" } | { v: "sureler" } | { v: "form"; edit?: Animal } | { v: "kart"; id: string } | { v: "olay"; id: string; type?: EvType };
-const tl = (n: number) => `${Math.round(n).toLocaleString("tr-TR")} TL`;
+const tl = (n: number) => (moneyHidden() ? `${MASK} TL` : `${Math.round(n).toLocaleString("tr-TR")} TL`);
 const low = (s: string) => s.toLocaleLowerCase("tr");
 
 /** Büyükbaş / küçükbaş: küpe numaralı hayvan kartları, olaylar, yaklaşan işler, ilaç arınma uyarısı. Ahır/ağıl ve toplu sürü kaydı ortak Barinak ekranında. */
