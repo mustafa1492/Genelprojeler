@@ -1,5 +1,7 @@
 # Hayvancılık oturumu
 
+**Not:** Kanatlı (kümes) ayrı oturumda: `kanatli.md`. Ortak iskelet (barınak, modül anahtarı, olay/hatırlatma) bu oturumda.
+
 **Kapsam:** yeni modül, `products/ciftci/hayvan/` altında (fidan gibi panelden açılıp kapanan modül: settings.modules "hayvan"). Ortak masraf/gelir/depo/takvim/yetki kullanılır, yeniden yazılmaz.
 
 ## Kaynaklar
