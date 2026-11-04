@@ -21,6 +21,6 @@ Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, k
 | core.md | giriş, yetkiler, ortak ekranlar, internetsiz kayıt, tasarım, panel, veritabanı, yayın |
 | ciftci.md | tarla, masraf, gelir, rapor, takvim |
 | fidan.md | fidancılık modülü |
-| hayvancilik.md | büyükbaş, küçükbaş, süt, kümes |
+| hayvancilik.md | büyükbaş, küçükbaş, süt (kümes ayrı modül olacak) |
 | tanitim.md | tanıtım sitesi, paketler/fiyat metinleri, pazarlama, mağaza |
 | dayibasi.md | dayıbaşı ürünü (ara verildi) |
