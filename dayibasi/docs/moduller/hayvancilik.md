@@ -21,5 +21,8 @@
 - Mandıra süt parası hesabı, çobana ödeme şekli, ortaklı sürü.
 - Deneyecek gerçek bir hayvancı.
 
+## Kanatlıdan not (4 Kasım 2026)
+- Kanatlı iskeleti beklemeden başladı: modül anahtarı "kanatli", kümes/sürü `lots` tablosunda `data.kanatli` ile. Ortak barınak gelince birleştirilecek (bkz. `kanatli.md` Yapı).
+
 ## Nerede kaldık
 - Başlanmadı (plan: Aralık).

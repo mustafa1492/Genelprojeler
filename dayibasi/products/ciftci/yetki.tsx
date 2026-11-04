@@ -7,6 +7,7 @@ export const SCREENS: { key: string; label: string; hint: string }[] = [
   { key: "masraf", label: "Masraflar", hint: "masraf tutarları, veresiye" },
   { key: "gelir", label: "Gelirler", hint: "satışlar, alacaklar" },
   { key: "fidan", label: "Fidan", hint: "partiler, sayım, sipariş, maliyet" },
+  { key: "kumes", label: "Kümes", hint: "kümes, sürü, günlük ölü ve yem" },
   { key: "depo", label: "Depo", hint: "gübre, ilaç, tohum stoku" },
   { key: "takvim", label: "Takvim ve hatırlatmalar", hint: "" },
   { key: "rapor", label: "Sezon raporu ve kâr", hint: "kâr / zarar, PDF, Excel" },

@@ -18,7 +18,7 @@ import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { listExpenses, type Expense } from "@/core/expenses/api";
 import { listLots, type Lot } from "@/core/lots/api";
-import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, marginOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
+import { AKTARIM, FIDAN_SATIS, hasFidan, isFidanLot, lotStats, marginOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -40,7 +40,7 @@ export default function Gelir() {
   const load = useCallback(() => {
     listEvents(biz.id, GELIR).then((r) => setRows(r.slice().reverse())).catch(() => setRows([]));
     listPlaces(biz.id).then(setPlaces).catch(() => {});
-    if (fidan) listLots(biz.id).then(setLots).catch(() => {});
+    if (fidan) listLots(biz.id).then((r) => setLots(r.filter(isFidanLot))).catch(() => {});
     listExpenses(biz.id).then(setExps).catch(() => {});
     listEvents(biz.id, VERIM).then(setYields).catch(() => {});
     if (fidan) Promise.all([listEvents(biz.id, SAYIM), listEvents(biz.id, AKTARIM)]).then(([a, b]) => { setCounts(a); setMoves(b); }).catch(() => {});

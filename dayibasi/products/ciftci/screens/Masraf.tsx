@@ -14,7 +14,7 @@ import { HistoryLink } from "../nav";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { listLots, type Lot } from "@/core/lots/api";
-import { hasFidan } from "../fidan";
+import { hasFidan, isFidanLot } from "../fidan";
 import { closeInbox, InboxCard } from "./Fis";
 
 /** Çiftçi masrafı: tarla seçimi, ayın geliriyle kâr, kim girdi. */
@@ -27,7 +27,7 @@ export default function Masraf() {
   const load = () => {
     listPlaces(biz.id).then(setPlaces).catch(() => {});
     listEvents(biz.id, GELIR).then(setIncome).catch(() => {});
-    if (hasFidan(biz)) listLots(biz.id).then(setLots).catch(() => {});
+    if (hasFidan(biz)) listLots(biz.id).then((r) => setLots(r.filter(isFidanLot))).catch(() => {});
   };
   useEffect(load, [biz.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useOnActivate(load);

@@ -1,7 +1,7 @@
 "use client";
 import { useCList } from "../lists";
 import { listLots, type Lot } from "@/core/lots/api";
-import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, SAYIM } from "../fidan";
+import { AKTARIM, FIDAN_SATIS, hasFidan, isFidanLot, lotStats, SAYIM } from "../fidan";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -43,7 +43,7 @@ export default function Tarlalar() {
     Promise.all([listPlaces(biz.id), listEvents(biz.id, ISLEM), listEvents(biz.id, VERIM), listEvents(biz.id, GELIR), listExpenses(biz.id), listItems(biz.id)])
       .then(([p, a, b, c, x, i]) => { setPlaces(p.sort((m, n) => m.name.localeCompare(n.name, "tr"))); setEvents((ev) => [...a, ...b, ...c, ...ev.filter((e) => e.kind === SAYIM || e.kind === AKTARIM)]); setExpenses(x); setItems(i); });
     if (fidan) {
-      listLots(biz.id).then(setLots).catch(() => {});
+      listLots(biz.id).then((r) => setLots(r.filter(isFidanLot))).catch(() => {});
       Promise.all([listEvents(biz.id, SAYIM), listEvents(biz.id, AKTARIM)]).then(([s1, s2]) => setEvents((ev) => [...ev.filter((e) => e.kind !== SAYIM && e.kind !== AKTARIM), ...s1, ...s2])).catch(() => {});
     }
   }, [biz.id]);
