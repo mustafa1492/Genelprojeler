@@ -132,3 +132,4 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Tanıtım sitesi tasarımı: Mustafa'nın attığı sitelerden (Dribbble/Contra örnekleri) bakılacak.
 - Claude: bir işi başka bağlayıcı/skill ile daha iyi yapabileceğini düşünürse önce Mustafa'ya sorar.
 - İleride "agent paketi" hazırlanacak (Claude yönetir/kontrol eder): öneri listesi aşağıda, onay bekliyor.
+- Agent paketi önerisi: test, güvenlik, araştırma, tasarım, içerik, veri, pazarlama (Canva görsel/video, Gmail taslak, Drive içerik takvimi; hiçbir şey Mustafa onayı olmadan yayınlanmaz). Nisan sonrası.
