@@ -9,12 +9,13 @@ import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
-import { dayYear, GELIR, harvestFrom, HATIRLAT, ISLEM, todayStr, VERIM } from "../kayit";
+import { dayYear, GELIR, harvestFrom, HATIRLAT, ISLEM, MAKINE, todayStr, VERIM } from "../kayit";
+import { bakimDurumu } from "./Makineler";
 import { useRole } from "../rol";
 
-type Mark = { day: string; kind: "is" | "hasat" | "satis" | "verim" | "vade" | "belge" | "hatir"; text: string; place?: string | null; ev?: EventRow };
-const COLOR: Record<Mark["kind"], string> = { is: "var(--yesil, #2E6A2B)", hasat: "#C98A00", satis: "#1F7A8C", verim: "#7A5C1F", vade: "#B3261E", belge: "#6B4FA0", hatir: "#E07A00" };
-const LABEL: Record<Mark["kind"], string> = { is: "Tarla işi", hasat: "Hasat olur", satis: "Satış", verim: "Verim", vade: "Vade", belge: "Belge bitişi", hatir: "Hatırlatma" };
+type Mark = { day: string; kind: "is" | "hasat" | "satis" | "verim" | "vade" | "belge" | "hatir" | "makine"; text: string; place?: string | null; ev?: EventRow };
+const COLOR: Record<Mark["kind"], string> = { is: "var(--yesil, #2E6A2B)", hasat: "#C98A00", satis: "#1F7A8C", verim: "#7A5C1F", vade: "#B3261E", belge: "#6B4FA0", hatir: "#E07A00", makine: "#5B6770" };
+const LABEL: Record<Mark["kind"], string> = { is: "Tarla işi", hasat: "Hasat olur", satis: "Satış", verim: "Verim", vade: "Vade", belge: "Belge bitişi", hatir: "Hatırlatma", makine: "Makine bakımı" };
 const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 const ym = (d: string) => d.slice(0, 7);
 const addMonth = (m: string, k: number) => { const d = new Date(m + "-15T12:00:00Z"); d.setUTCMonth(d.getUTCMonth() + k); return d.toISOString().slice(0, 7); };
@@ -36,7 +37,7 @@ export default function Takvim() {
   const [form, setForm] = useState<{ edit?: EventRow } | null>(null);
   const [done, setDone] = useState<{ message: string; undo?: () => Promise<unknown> } | null>(null);
   const load = useCallback(() => {
-    Promise.all([listEvents(biz.id, ISLEM), listEvents(biz.id, VERIM), listEvents(biz.id, HATIRLAT), money ? listEvents(biz.id, GELIR) : Promise.resolve([] as EventRow[])])
+    Promise.all([listEvents(biz.id, ISLEM), listEvents(biz.id, VERIM), listEvents(biz.id, HATIRLAT), listEvents(biz.id, MAKINE), money ? listEvents(biz.id, GELIR) : Promise.resolve([] as EventRow[])])
       .then((r) => setEv(r.flat())).catch(() => {});
     listPlaces(biz.id).then(setPlaces).catch(() => {});
     if (vade) listDues(biz.id).then(setDues).catch(() => {});
@@ -63,6 +64,8 @@ export default function Takvim() {
     ...ev.filter((e) => e.kind === VERIM).map((e): Mark => ({ day: e.occurred_on, kind: "verim", text: `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)} ${String(e.data.crop ?? "")}`, place: e.place_id, ev: e })),
     ...ev.filter((e) => e.kind === HATIRLAT).map((e): Mark => ({ day: e.occurred_on, kind: "hatir", text: `${e.data.done ? "✓ " : ""}${String(e.data.title)}`, place: e.place_id, ev: e })),
     ...dues.filter((d) => d.due_on && remaining(d) > 0).map((d): Mark => ({ day: d.due_on!, kind: "vade", text: `${d.direction === "borc" ? "Ödenecek" : "Alınacak"}: ${d.party}` })),
+    ...bakimDurumu(ev).filter((b) => b.nextOn).map((b): Mark => ({ day: b.nextOn!, kind: "makine", text: `${b.makine} bakımı` })),
+    ...ev.filter((e) => e.kind === MAKINE).map((e): Mark => ({ day: e.occurred_on, kind: "makine", text: `${String(e.data.makine)}: ${String(e.data.is)} yapıldı` })),
     ...docs.filter((d) => d.expires_on).map((d): Mark => ({ day: d.expires_on!, kind: "belge", text: `${d.title} bitiyor` })),
   ].filter((m) => !place || m.place === place);
 

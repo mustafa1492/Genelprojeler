@@ -104,10 +104,15 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - [ ] Devlet destekleri bölümü: araştırma `docs/fikirler/09-devlet-destekleri.md`, Mustafa'nın cevabı bekleniyor.
 - [ ] Telefona bildirim (push) ile hatırlatma: sonra (sunucu zamanlayıcı gerekir).
 
-## Tapudan tarla getirme (Mustafa, 4 Kasım 2026: listeye eklendi, sonra yapılacak)
+## Tapudan tarla getirme (4 Kasım 2026: YAPILDI, modul/ciftci dalı, PR #1 — "Parsel sorgula (isteğe bağlı)", dönüm yerine dekar)
 - Tarla eklerken "Tapudan getir": il / ilçe / mahalle seç, ada + parsel yaz → TKGM parsel servisi (cbsapi.tkgm.gov.tr/megsiswebapi.v3, tarayıcıdan çağrılabiliyor, CORS açık) alan (m² → dönüm), nitelik, mevki, koordinat getirir; hava durumu konumu otomatik.
 - Mevcut tarlalara ada/parsel girip güncelleme; istenirse parsel sınırı küçük haritada.
 - Not: resmi açık servis değil, değişebilir; sadece kullanıcı tıklayınca sorgu. Hisseli tarlada alan parselin tamamı.
+
+## Kâr analizi (Mustafa, 4 Kasım 2026: isteklere yazıldı, şimdilik yapılmayacak)
+- Dekar başı ve ürün (kg) başı kâr; raporda dekar başı masraf ve başabaş zaten var.
+- Girdi fiyat geçmişi: aynı girdinin (gübre, ilaç, mazot) yıllara göre birim fiyatı.
+- Münavebe görünümü: hangi yıl hangi tarlaya ne ekildi (tarla × yıl tablosu).
 
 ## Hayvancılık bölümü (Mustafa, 4 Kasım 2026: not alındı, henüz başlanmayacak)
 - Tek "Hayvancılık" bölümü: kanatlı (sürü olarak), küçükbaş ve büyükbaş (küpe numarasıyla tek tek). Barınak listesi (kümes, ağıl, ahır); masraf, gelir, depo, takvim, çalışan modu ortak.

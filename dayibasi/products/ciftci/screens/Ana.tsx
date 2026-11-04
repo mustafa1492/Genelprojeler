@@ -15,7 +15,8 @@ import { supabase } from "@/core/supabase/client";
 import { TabLink, useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
-import { addDays, dayText, dayYear, GELIR, harvestFrom, HATIRLAT, incomeOpen, ISLEM, todayStr } from "../kayit";
+import { addDays, dayText, dayYear, GELIR, harvestFrom, HATIRLAT, incomeOpen, ISLEM, MAKINE, todayStr } from "../kayit";
+import { bakimDurumu } from "./Makineler";
 import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
 import { Weather } from "../hava";
@@ -39,7 +40,7 @@ export default function Ana() {
   const can = (s: string, w = 1) => !off.includes(s) && (w === 2 ? writes(s) : sees(s));
   const load = useCallback(() => {
     listExpenses(biz.id).then(setExp).catch(() => {});
-    Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM), listEvents(biz.id, HATIRLAT)]).then(([a, b, c]) => setEv([...a, ...b, ...c])).catch(() => {});
+    Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM), listEvents(biz.id, HATIRLAT), listEvents(biz.id, MAKINE)]).then(([a, b, c, d]) => setEv([...a, ...b, ...c, ...d])).catch(() => {});
     listDues(biz.id).then(setDues).catch(() => {});
     listDocs(biz.id).then(setDocs).catch(() => {});
     listItems(biz.id).then(setItems).catch(() => {});
@@ -76,7 +77,7 @@ export default function Ana() {
   const empty = items.filter(isLow);
   const remind = ev.filter((e) => e.kind === HATIRLAT && !e.data.done && e.occurred_on <= addDays(today, 3)).sort((a, b) => a.occurred_on.localeCompare(b.occurred_on));
   const recent = [...exp.map((e) => ({ at: e.created_at ?? e.occurred_on, t: `Masraf · ${e.category} ${formatTL(e.amount)}`, by: e.created_by, open: () => go("masraf", { duzenle: e.id }) })),
-    ...ev.map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by,
+    ...ev.filter((e) => e.kind !== MAKINE).map((e) => ({ at: e.created_at ?? e.occurred_on, t: e.kind === GELIR ? `Gelir · ${String(e.data.type)} ${formatTL(Number(e.quantity))}` : `${place(e.place_id)} · ${String(e.data.type)}`, by: e.created_by,
       open: () => (e.kind === GELIR ? go("gelir", { duzenle: e.id }) : go("tarlalar", { islem: e.id })) }))]
     .filter((r) => (!r.t.startsWith("Masraf ·") || sees("masraf")) && (!r.t.startsWith("Gelir ·") || sees("gelir"))).sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
 
@@ -95,9 +96,11 @@ export default function Ana() {
     ...lastWait.map(({ e, h }): Up => ({ key: "h" + e.id, day: h!, icon: "🌾", tone: "", title: "Hasat edilebilir", sub: `${when(h!)} · ${place(e.place_id)} (${String(e.data.product ?? "ilaç")} beklemesi)` })),
     ...dueSoon.map((d, i): Up => ({ key: "d" + i, day: d.due, icon: d.dir === "borc" ? "💳" : "💰", tone: d.due < today ? "kirmizi" : d.dir === "borc" ? "kirmizi" : "", title: `${d.dir === "borc" ? "Ödenecek" : "Alınacak"}: ${d.who}`, sub: when(d.due), right: <b className="ui-money">{formatTL(d.left)}</b>, go: () => go("vadeler") })),
     ...docSoon.map((d): Up => ({ key: "b" + d.id, day: d.expires_on!, icon: "📄", tone: (daysLeft(d.expires_on) ?? 0) < 0 ? "kirmizi" : "mavi", title: `${d.title} bitiyor`, sub: when(d.expires_on!), go: () => go("belgeler") })),
+    ...bakimDurumu(ev).filter((b) => b.nextOn && b.nextOn <= addDays(today, config.remindDays.makine)).map((b): Up => ({ key: "m" + b.makine, day: b.nextOn!, icon: "🚜", tone: b.nextOn! < today ? "kirmizi" : "ilac",
+      title: `${b.makine} bakımı`, sub: when(b.nextOn!), go: () => go("makineler", { makine: b.makine }) })),
     ...(empty.length ? [{ key: "depo", day: "9999", icon: "📦", tone: "ilac", title: "Depoda az kalan", sub: empty.map((i) => `${i.name} (${i.quantity.toLocaleString("tr-TR")} ${i.unit})`).join(", "), go: () => go("depo") } as Up] : []),
   ].sort((a, b) => a.day.localeCompare(b.day));
-  const fresh = me && seenAt ? [...exp.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: "masraf" })), ...ev.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: e.kind === GELIR ? "gelir" : e.kind === HATIRLAT ? "hatırlatma" : "tarla işi" }))]
+  const fresh = me && seenAt ? [...exp.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: "masraf" })), ...ev.map((e) => ({ by: e.created_by, at: e.created_at ?? "", k: e.kind === GELIR ? "gelir" : e.kind === HATIRLAT ? "hatırlatma" : e.kind === MAKINE ? "makine bakımı" : "tarla işi" }))]
     .filter((x) => x.by && x.by !== me && x.at > seenAt) : [];
   const freshBy = Object.entries(fresh.reduce<Record<string, Record<string, number>>>((m, x) => { const n = nameOf(x.by); (m[n] ??= {})[x.k] = (m[n][x.k] ?? 0) + 1; return m; }, {}));
 

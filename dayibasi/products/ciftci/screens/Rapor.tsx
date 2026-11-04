@@ -86,7 +86,7 @@ export default function Rapor() {
       ...(hasPrev ? [[], ["Geçen sezonla", S.name, P.name], ...cmpRows.map(([k, a, b]) => [k, a, b]), ...crops.map((c) => { const [crop, unit] = c.split("|"); return [`Verim ${crop} (${unit})`, vSum(V, c), vSum(VP, c)]; })] : []),
       ...(multi ? [[], ["İş", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)"], ...branches.map((x) => [x.b === "Genel" ? "Genel (ortak)" : x.b, x.m, x.g, x.b === "Genel" ? "" : x.kar])] : []),
     ] },
-    { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dönüm", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dönüm başı masraf (TL)", "Verim", "Başabaş fiyatı"],
+    { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dekar", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dekar başı masraf (TL)", "Verim", "Başabaş fiyatı"],
       ...fields.map((f) => [f.name, f.d || "", f.m, f.g, f.kar, f.d ? Math.round(f.m / f.d) : "", f.v, f.be])] },
     { name: "Masraflar", title: `Masraflar · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not", "Veresiye (kime)", ...(multi ? ["İş"] : [])],
       ...E.map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? "", e.on_credit ? e.vendor ?? "" : "", ...(multi ? [bOf(e)] : [])]), ["Toplam", "", "", masraf]] },
@@ -168,7 +168,7 @@ export default function Rapor() {
       <h2 className="ui-section">Tarla tarla</h2>
       <div className="rapor-table">
         <table>
-          <thead><tr><th>Tarla</th><th>Masraf</th><th>Gelir</th><th>Kâr</th><th>Dönüm başı</th><th>Verim</th><th>Başabaş</th></tr></thead>
+          <thead><tr><th>Tarla</th><th>Masraf</th><th>Gelir</th><th>Kâr</th><th>Dekar başı</th><th>Verim</th><th>Başabaş</th></tr></thead>
           <tbody>{fields.map((f) => <tr key={f.name}><td>{f.name}</td><td>{formatTL(f.m)}</td><td>{formatTL(f.g)}</td><td className={f.kar < 0 ? "neg" : ""}>{formatTL(f.kar)}</td><td>{f.d ? formatTL(Math.round(f.m / f.d)) : "—"}</td><td>{f.v || "—"}</td><td>{f.be || "—"}</td></tr>)}</tbody>
         </table>
       </div>
