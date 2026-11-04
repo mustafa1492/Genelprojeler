@@ -24,9 +24,10 @@
 - Küpe kartı ve üreme döngüsü: hayvancılık oturumu, ayrı tablo, `herds`/`barns`'a bağlanır.
 
 ## Nerede kaldık
-- v1 yazıldı ve genel iskelete taşındı (dal `modul/kanatli`): kümesler listesi (bugün girildi/girilmedi), kümes kartı, sürü aç/kapat, Bugünün kaydı (ölü, ayıklanan, yem çuvalı sayacı, çuval kg bir kez, dün seçimi, tartım + not "daha fazla"da), sürü kartı (kalan, kayıp %, yem kg, son tartım, tahmini canlı kg, tahmini YDO, gün ve tartım listesi). Tip denetimi temiz; tarayıcıda denenmedi.
+- v1 yazıldı ve genel iskelete taşındı (dal `modul/kanatli`): kümesler listesi (bugün girildi/girilmedi), kümes kartı, sürü aç/kapat, Bugünün kaydı (ölü, ayıklanan, yem çuvalı sayacı, çuval kg bir kez, dün seçimi, tartım + not "daha fazla"da), sürü kartı (kalan, kayıp %, yem kg, son tartım, tahmini canlı kg, tahmini YDO, gün ve tartım listesi). Sürü formunda "uygulamadan önce verilen yem / ölen" (ortadan başlayan için); girişten beri yem eksikse YDO gösterilmez.
+- Ekran denemesi yapıldı (4 Kasım 2026, sahte sunucu, derlenmiş sürüm): kümes ekle → sürü aç → bugünün kaydı (çuval kg sorusu, tartım) → aynı günü düzelt → geri al → YDO → sürü kapat; hepsi geçti, konsol hatası yok.
 
 ## Sıradaki
-- Ekran denemesi (sahte sunucu) ve Core'a birleştirme isteği.
+- Core'a birleştirme isteği (gelistirme dalı, Mustafa "yükle" deyince canlı).
 - v2: dönem kapanışı + firma karnesiyle karşılaştırma; masraf/gelirde sürü seçimi (`data.lot_id`); yem stoğu Depo'dan.
 - Sonra: aşı/ilaç + bekleme süresi, boş bekleme sayacı, biyogüvenlik defteri.

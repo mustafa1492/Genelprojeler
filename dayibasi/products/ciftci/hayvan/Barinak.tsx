@@ -112,10 +112,11 @@ export default function Barinak({ species }: { species: Species }) {
             ["Yem", `${fmt(st.feedBags)} çuval · ${fmt(st.feedKg)} kg`],
             ["Son tartım", st.lastWeigh ? `${fmt(st.lastWeigh.avg_weight_g!)} gram · ${dayText(st.lastWeigh.day)}` : "Tartım yok"],
             ["Tahmini canlı ağırlık", st.liveKg != null ? `${fmt(st.liveKg)} kg` : "—"],
-            ["Yemden yararlanma (tahmini)", st.fcr != null ? `${dec(st.fcr)} kg yem / 1 kg et` : "—"],
+            ["Yemden yararlanma (tahmini)", st.fcr != null ? `${dec(st.fcr)} kg yem / 1 kg et` : st.liveKg != null && !st.feedComplete ? "Girişten beri yem kaydı eksik" : "—"],
             ...(h.data.firma ? [["Firma", `${String(h.data.firma)}${h.data.sozlesme_no ? ` · sözleşme ${String(h.data.sozlesme_no)}` : ""}`] as [string, string]] : []),
             ...(h.source ? [["Nereden geldi", h.source] as [string, string]] : []),
           ]} /></div>
+          {st.liveKg != null && !st.feedComplete && <p className="ui-note">Uygulamaya sürünün ortasında başladıysan, önceki günlerin yemini "Sürü bilgilerini düzenle"den toplam olarak yaz; oran o zaman hesaplanır.</p>}
           {st.fcr != null && <p className="ui-note">Yemden yararlanma: verilen bütün yem ÷ (kalan hayvan × son tartım). Tartım sıklaştıkça doğrulaşır.</p>}
 
           <h2 className="ui-section">Günler</h2>
@@ -220,6 +221,8 @@ function HerdForm({ tur, edit, barnName, onSave, onCancel, onDelete }: {
   const [firma, setFirma] = useState(String(edit?.data.firma ?? ""));
   const [soz, setSoz] = useState(String(edit?.data.sozlesme_no ?? ""));
   const [gram, setGram] = useState(edit?.data.giris_g ? String(edit.data.giris_g) : "");
+  const [pFeed, setPFeed] = useState(edit?.data.prior_feed_kg ? String(edit.data.prior_feed_kg) : "");
+  const [pDead, setPDead] = useState(edit?.data.prior_dead ? String(edit.data.prior_dead) : "");
   const [note, setNote] = useState(edit?.note ?? "");
   const [error, setError] = useState("");
   return (
@@ -234,6 +237,9 @@ function HerdForm({ tur, edit, barnName, onSave, onCancel, onDelete }: {
       </>}
       <TextField id="h_kaynak" label={tur.species === "kanatli" ? "Civciv nereden geldi? Kuluçkahane (isteğe bağlı)" : "Nereden alındı? (isteğe bağlı)"} maxLength={60} value={source} onChange={(e) => setSource(e.target.value)} />
       <TextField id="h_gram" label="Giriş ağırlığı, ortalama gram (isteğe bağlı)" inputMode="numeric" maxLength={7} value={gram} onChange={(e) => setGram(e.target.value.replace(/\D/g, ""))} />
+      <TextField id="h_pyem" label="Uygulamadan önce verilen yem, toplam kg (isteğe bağlı)" inputMode="decimal" maxLength={9} value={pFeed} onChange={(e) => setPFeed(e.target.value)} />
+      <TextField id="h_pol" label="Uygulamadan önce ölen + ayıklanan (isteğe bağlı)" inputMode="numeric" maxLength={7} value={pDead} onChange={(e) => setPDead(e.target.value.replace(/\D/g, ""))} />
+      <p className="ui-note">Sürünün ortasında başladıysan önceki günleri tek tek girmek yerine burada toplam yaz; kalan hayvan ve yem hesabına eklenir.</p>
       <TextField id="h_not" label="Not (isteğe bağlı)" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
       {onDelete && <MainButton className="tehlike" onClick={onDelete}>Sürüyü ve günlük kayıtlarını sil</MainButton>}
@@ -242,7 +248,7 @@ function HerdForm({ tur, edit, barnName, onSave, onCancel, onDelete }: {
         if (!day) { setError("Giriş gününü seç."); return; }
         if (!(n > 0)) { setError(`Kaç ${tur.animal} girdiğini yaz.`); return; }
         await onSave({ name: edit?.name ?? `${barnName} · ${dayYear(day)}`, started_on: day, initial_count: n, source: source.trim() || null, note: note.trim() || null,
-          data: { ...(tur.contract ? { firma: firma.trim(), sozlesme_no: soz.trim() } : {}), giris_g: gram ? Number(gram) : null } });
+          data: { ...(tur.contract ? { firma: firma.trim(), sozlesme_no: soz.trim() } : {}), giris_g: gram ? Number(gram) : null, prior_feed_kg: pFeed ? num(pFeed) : 0, prior_dead: pDead ? Number(pDead) : 0 } });
       }}>{edit ? "Kaydet" : "Sürüyü aç"}</MainButton></div>
     </main>
   );
