@@ -304,7 +304,7 @@ function TapuBolum({ onFound }: { onFound: (p: Parsel) => void }) {
     setMsg(""); try { set(await f()); } catch { setMsg("Tapuya ulaşamadım, internet lazım. Bilgileri elle de yazabilirsin."); }
   };
   useEffect(() => { if (acik && !iller.length) yukle(ilListe, setIller); }, [acik]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!acik) return <button type="button" className="ui-link" onClick={() => setAcik(true)}>📄 Tapudan getir (ada / parsel ile)</button>;
+  if (!acik) return <button type="button" className="ui-link" onClick={() => setAcik(true)}>📄 Tapudan getir (isteğe bağlı)</button>;
   const sec = (id: string, label: string, list: Yer[], value: number, on: (v: number) => void) => (
     <label className="ui-stack" style={{ gap: 4 }}>
       <span className="ui-label">{label}</span>
