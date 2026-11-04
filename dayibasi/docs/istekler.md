@@ -108,3 +108,12 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Tarla eklerken "Tapudan getir": il / ilçe / mahalle seç, ada + parsel yaz → TKGM parsel servisi (cbsapi.tkgm.gov.tr/megsiswebapi.v3, tarayıcıdan çağrılabiliyor, CORS açık) alan (m² → dönüm), nitelik, mevki, koordinat getirir; hava durumu konumu otomatik.
 - Mevcut tarlalara ada/parsel girip güncelleme; istenirse parsel sınırı küçük haritada.
 - Not: resmi açık servis değil, değişebilir; sadece kullanıcı tıklayınca sorgu. Hisseli tarlada alan parselin tamamı.
+
+## Hayvancılık bölümü (Mustafa, 4 Kasım 2026: not alındı, henüz başlanmayacak)
+- Tek "Hayvancılık" bölümü: kanatlı (sürü olarak), küçükbaş ve büyükbaş (küpe numarasıyla tek tek). Barınak listesi (kümes, ağıl, ahır); masraf, gelir, depo, takvim, çalışan modu ortak.
+- Kanatlı: günlük ölüm/yem/yumurta, dönem kâr, yumurta ve gübre satışı, köy tavuğu sade modu, kuluçka, sözleşmeli yetiştirici karşılaştırması (rapor: docs/arastirma/reports/Kanatlı çiftlik modülü.md).
+- Küçükbaş: hayvan kartı, koç katımı/kuzulama, kırkım, süt, otlatma/çoban, aşı şablonu, satış (kurban, kasap).
+- Büyükbaş: hayvan kartı, kızgınlık/tohumlama/gebelik/tahmini doğum, kuruya ayırma, süt defteri (mandıra, süt parası), besi tartımı, sağlık ve süt/et arınma uyarısı, buzağı, rasyon maliyeti.
+- Devlet: TÜRKVET bildirim hatırlatmaları (doğrudan bağlantı yok), destek takibi (tutar sabit yazılmaz), veteriner belgeleri.
+- Tarla bağı: yem bitkisi hasadı depoya yem, gübre tarlaya; hayvan ve tarla gerçek maliyeti.
+- Önerilen sıra: ortak iskelet + küçükbaş/büyükbaş kartı → süt defteri → kümes → yem bağlantısı ve hayvan başı kâr. Eşik ve takvimler Mustafa/veterinerden alınacak, uydurulmaz.
