@@ -19,7 +19,7 @@ import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -71,6 +71,50 @@ export default function Fidan() {
       return { lot: l, type, next, late: next <= todayStr() };
     });
   };
+
+  // Boy stoku: aktif partilerin son sayımı (satılan / taşınan düşülmüş) ve bekleyen siparişler
+  const stock = () => {
+    const S = all.filter((l) => l.status === "aktif").map(stats);
+    const ready: Record<string, number> = {}, byLot: Record<string, { lot: Lot; n: number }[]> = {};
+    for (const s of S) for (const [k, v] of Object.entries(s.bySize)) { ready[k] = (ready[k] ?? 0) + v; if (v > 0) (byLot[k] ??= []).push({ lot: s.lot, n: v }); }
+    const reserved: Record<string, number> = {};
+    for (const o of orders.filter((o) => o.data.status === "bekliyor")) { const k = String(o.data.size ?? ""); if (k) reserved[k] = (reserved[k] ?? 0) + Number(o.data.qty ?? 0); }
+    const unsized = S.filter((s) => s.alive > 0 && !Object.keys(s.bySize).length);
+    return { S, ready, reserved, byLot, unsized };
+  };
+
+  if (view.v === "stok") {
+    const { ready, reserved, byLot, unsized } = stock();
+    const keys = [...sizes.filter((k) => ready[k] != null || reserved[k]), ...Object.keys(ready).filter((k) => !sizes.includes(k))];
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={back} label="Fidan" />
+        <PageHeader sub="Son sayımlardan; satılan ve taşınan düşüldü" title="Stok" />
+        {keys.length === 0 && <div className="ui-empty">Boy boy sayım yok. Partiye “+ Sayım” girip boyları yazınca burada görünür.</div>}
+        {keys.map((k) => {
+          const have = ready[k] ?? 0, res = reserved[k] ?? 0, free = have - res;
+          return (
+            <div key={k} className="ui-card ui-stack" style={{ gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><b style={{ fontSize: "1.1rem" }}>{k}</b><span className="ui-amount">{fmt(Math.max(0, free))} satılabilir</span></div>
+              <span className="ui-note" style={{ margin: 0 }}>elde {fmt(have)} · siparişte {fmt(res)}{free < 0 ? ` · ${fmt(-free)} adet eksik` : ""}</span>
+              {(byLot[k] ?? []).map(({ lot, n }) => (
+                <button key={lot.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "lot", id: lot.id })}>
+                  <b>{lot.name}<small>{place(lot.place_id) || (lot.data.potted ? "Saksıda" : "")}</small></b><strong>{fmt(n)}</strong></button>))}
+            </div>
+          );
+        })}
+        {unsized.length > 0 && (
+          <div className="ui-card ui-stack" style={{ gap: 6 }}>
+            <b>Boyu sayılmamış</b>
+            <span className="ui-note" style={{ margin: 0 }}>Bu partilerde boy boy sayım yok; toplam adet gösteriliyor.</span>
+            {unsized.map((s) => (
+              <button key={s.lot.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "lot", id: s.lot.id })}>
+                <b>{s.lot.name}</b><strong>{fmt(s.alive)}</strong></button>))}
+          </div>
+        )}
+      </main>
+    );
+  }
 
   // --- Formlar
   if (view.v === "lotForm") return <LotForm edit={view.edit} places={places} onCancel={() => setView(view.edit ? { v: "lot", id: view.edit.id } : { v: "list" })}
@@ -309,13 +353,9 @@ export default function Fidan() {
 
   // --- Liste
   const active = all.filter((l) => l.status === "aktif");
-  const S = active.map(stats);
+  const { S, ready, reserved } = stock();
   const totAlive = S.reduce((t, s) => t + s.alive, 0);
   const totCost = S.reduce((t, s) => t + s.cost, 0);
-  const ready: Record<string, number> = {};
-  for (const s of S) for (const [k, v] of Object.entries(s.bySize)) ready[k] = (ready[k] ?? 0) + v;
-  const reserved: Record<string, number> = {};
-  for (const o of orders.filter((o) => o.data.status === "bekliyor")) { const k = String(o.data.size ?? ""); if (k) reserved[k] = (reserved[k] ?? 0) + Number(o.data.qty ?? 0); }
   const dues = active.flatMap(dueOf).filter((d) => d.next <= addDays(todayStr(), 7)).sort((a, b) => a.next.localeCompare(b.next));
   const openOrders = orders.filter((o) => o.data.status === "bekliyor").sort((a, b) => String(a.data.due_on ?? "9").localeCompare(String(b.data.due_on ?? "9")));
 
@@ -355,6 +395,7 @@ export default function Fidan() {
         <div className="ui-card ui-stack" style={{ gap: 6 }}>
           <b>Satışa hazır (boylara göre)</b>
           <div className="ui-rows">{sizes.filter((k) => ready[k] != null).map((k) => <div key={k}><span>{k}</span><span>{fmt(ready[k])} adet{reserved[k] ? ` · ${fmt(reserved[k])} siparişte` : ""}</span></div>)}</div>
+          <button type="button" className="ui-link" onClick={() => { setDone(null); setView({ v: "stok" }); }}>Stoku ayrıntılı gör ›</button>
         </div>
       )}
 

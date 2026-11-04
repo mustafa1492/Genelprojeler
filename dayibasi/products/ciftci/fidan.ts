@@ -87,3 +87,9 @@ export const ageText = (m: number | null) => (m == null ? "" : m < 12 ? `${m} ay
 /** Kâr oranı (%): kullanıcı belirler (settings.fidan_margin); yoksa öneri gösterilmez. */
 export const marginOf = (b: Business) => (Number(b.settings?.fidan_margin) > 0 ? Number(b.settings!.fidan_margin) : null);
 export const suggestedPrice = (perPlant: number, margin: number | null) => (margin && perPlant > 0 ? Math.ceil(perPlant * (1 + margin / 100) * 100) / 100 : null);
+
+/** Satış fiyat listesi (boy → TL/adet), settings.fidan_prices. Boy başına tek fiyat (Mustafa, 4 Kasım 2026: şimdilik sadece şimşir). */
+export const pricesOf = (b: Business) => ((b.settings?.fidan_prices ?? {}) as Record<string, number>);
+
+/** Müşteri adını eşleştirmek için: büyük/küçük harf ve fazla boşluk farkı yok sayılır. */
+export const custKey = (s: unknown) => String(s ?? "").trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR");
