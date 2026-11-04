@@ -40,7 +40,7 @@ export const status = () => { load(); return { pending: outbox.length, failed: f
 export const clearFailed = () => { failed = []; save(); };
 
 /** Satır anahtarı: çoğu tabloda id, yoklamada kişi + tarih. */
-export const keyOf = (table: string, r: Row) => (table === "rsvps" ? `${r.person_id}|${r.for_date}` : String(r.id));
+export const keyOf = (table: string, r: Row) => (table === "rsvps" ? `${r.person_id}|${r.for_date}` : table === "user_prefs" ? `${r.user_id}|${r.business_id}` : String(r.id));
 const matchFromKey = (table: string, key: string) => {
   if (table === "rsvps") { const [person_id, for_date] = key.split("|"); return { person_id, for_date }; }
   return { id: key };

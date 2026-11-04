@@ -24,6 +24,11 @@ import Kayitlar from "./screens/Kayitlar";
 import Takvim from "./screens/Takvim";
 import Fis from "./screens/Fis";
 import { SeasonProvider } from "./sezon";
+import { PrefsProvider } from "@/core/prefs";
+import Ayarlar from "./screens/Ayarlar";
+import Duzenle from "./screens/Duzenle";
+import Menu from "./Menu";
+import { NAV_CHOICES, useGorunum } from "./gorunum";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
 const TABS: ShellTab[] = [
@@ -44,20 +49,34 @@ const TABS: ShellTab[] = [
   { id: "fis", label: "Fiş yükle", group: "Para", emoji: "📷", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
   { id: "takvim", label: "Takvim", group: "Genel", emoji: "📅", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
+  { id: "ayarlar", label: "Ayarlar", group: "Diğer", emoji: "⚙️", path: `${BASE}/ayarlar`, inNav: false, render: () => <Ayarlar /> },
+  { id: "duzenle", label: "Ekranımı düzenle", path: `${BASE}/duzenle`, inNav: false, render: () => null },
 ];
 
 /** Çiftçi defteri: tek sayfalık sekmeli uygulama (sekmeler kaldığı yerde kalır). */
 export default function CiftciApp({ initial }: { initial: string }) {
   const biz = useBusiness();
+  return <PrefsProvider businessId={biz.id}><Inner initial={initial} /></PrefsProvider>;
+}
+
+function Inner({ initial }: { initial: string }) {
+  const biz = useBusiness();
+  const { g } = useGorunum();
   // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
   const { lvl } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
   const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "hayvan", depo: "depo", tarlalar: "tarlalar", takvim: "takvim", rapor: "rapor",
     vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
-  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
+  const base = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
     .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t));
+  // Kişiye özel: alt çubuk (4 yer) ve Menü; "Ekranımı düzenle" seçilebilir sekmeleri bilir.
+  const choices = NAV_CHOICES.map((id) => base.find((t) => t.id === id)).filter((t): t is ShellTab => !!t).map((t) => ({ id: t.id, label: t.label }));
+  let navIds = g.nav.filter((id) => choices.some((c) => c.id === id));
+  if (!navIds.length) navIds = ["ozet"];
+  const tabs = base.map((t) => (t.id === "duzenle" ? { ...t, render: () => <Duzenle choices={choices} /> } : t));
+  const menuTabs = tabs.map((t) => ({ id: t.id, label: t.label, emoji: t.emoji }));
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
   if (!tabs.some((t) => t.id === start)) start = "ozet";
-  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span></>} /></SeasonProvider>;
+  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span></>} /></SeasonProvider>;
 }
