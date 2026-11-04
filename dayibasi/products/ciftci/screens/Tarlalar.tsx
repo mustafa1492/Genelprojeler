@@ -304,7 +304,7 @@ function TapuBolum({ onFound }: { onFound: (p: Parsel) => void }) {
     setMsg(""); try { set(await f()); } catch { setMsg("Tapuya ulaşamadım, internet lazım. Bilgileri elle de yazabilirsin."); }
   };
   useEffect(() => { if (acik && !iller.length) yukle(ilListe, setIller); }, [acik]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!acik) return <button type="button" className="ui-link" onClick={() => setAcik(true)}>📄 Tapudan getir (isteğe bağlı)</button>;
+  if (!acik) return <button type="button" className="ui-link" onClick={() => setAcik(true)}>📄 Parsel sorgula (isteğe bağlı)</button>;
   const sec = (id: string, label: string, list: Yer[], value: number, on: (v: number) => void) => (
     <label className="ui-stack" style={{ gap: 4 }}>
       <span className="ui-label">{label}</span>
@@ -317,7 +317,7 @@ function TapuBolum({ onFound }: { onFound: (p: Parsel) => void }) {
   return (
     <Card>
       <div className="ui-stack" style={{ gap: 10 }}>
-        <span className="ui-label">Tapudan getir</span>
+        <span className="ui-label">Parsel sorgula</span>
         {sec("tp_il", "İl", iller, il, (v) => { setIl(v); setIlce(0); setMah(0); setIlceler([]); setMahalleler([]); if (v) yukle(() => ilceListe(v), setIlceler); })}
         {sec("tp_ilce", "İlçe", ilceler, ilce, (v) => { setIlce(v); setMah(0); setMahalleler([]); if (v) yukle(() => mahalleListe(v), setMahalleler); })}
         {sec("tp_mah", "Mahalle / köy", mahalleler, mah, setMah)}
