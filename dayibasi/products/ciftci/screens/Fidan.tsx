@@ -13,13 +13,13 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { AKTARIM, ageText, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
-import { addDays, dayText, dayYear, GELIR, ISLEM, num, todayStr } from "../kayit";
+import { AKTARIM, ageText, custKey, FIDAN_SATIS, FOTO, lotStats, marginOf, pricesOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
+import { addDays, dayText, dayYear, GELIR, incomeOpen, ISLEM, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" } | { v: "musteriler" } | { v: "musteri"; key: string } | { v: "fiyat" } | { v: "odeme"; key: string };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -71,6 +71,137 @@ export default function Fidan() {
       return { lot: l, type, next, late: next <= todayStr() };
     });
   };
+
+  // Boy stoku: aktif partilerin son sayımı (satılan / taşınan düşülmüş) ve bekleyen siparişler
+  const stock = () => {
+    const S = all.filter((l) => l.status === "aktif").map(stats);
+    const ready: Record<string, number> = {}, byLot: Record<string, { lot: Lot; n: number }[]> = {};
+    for (const s of S) for (const [k, v] of Object.entries(s.bySize)) { ready[k] = (ready[k] ?? 0) + v; if (v > 0) (byLot[k] ??= []).push({ lot: s.lot, n: v }); }
+    const reserved: Record<string, number> = {};
+    for (const o of orders.filter((o) => o.data.status === "bekliyor")) { const k = String(o.data.size ?? ""); if (k) reserved[k] = (reserved[k] ?? 0) + Number(o.data.qty ?? 0); }
+    const unsized = S.filter((s) => s.alive > 0 && !Object.keys(s.bySize).length);
+    return { S, ready, reserved, byLot, unsized };
+  };
+
+  if (view.v === "stok") {
+    const { ready, reserved, byLot, unsized } = stock();
+    const keys = [...sizes.filter((k) => ready[k] != null || reserved[k]), ...Object.keys(ready).filter((k) => !sizes.includes(k))];
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={back} label="Fidan" />
+        <PageHeader sub="Son sayımlardan; satılan ve taşınan düşüldü" title="Stok" />
+        {keys.length === 0 && <div className="ui-empty">Boy boy sayım yok. Partiye “+ Sayım” girip boyları yazınca burada görünür.</div>}
+        {keys.map((k) => {
+          const have = ready[k] ?? 0, res = reserved[k] ?? 0, free = have - res;
+          return (
+            <div key={k} className="ui-card ui-stack" style={{ gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><b style={{ fontSize: "1.1rem" }}>{k}</b><span className="ui-amount">{fmt(Math.max(0, free))} satılabilir</span></div>
+              <span className="ui-note" style={{ margin: 0 }}>elde {fmt(have)} · siparişte {fmt(res)}{free < 0 ? ` · ${fmt(-free)} adet eksik` : ""}</span>
+              {(byLot[k] ?? []).map(({ lot, n }) => (
+                <button key={lot.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "lot", id: lot.id })}>
+                  <b>{lot.name}<small>{place(lot.place_id) || (lot.data.potted ? "Saksıda" : "")}</small></b><strong>{fmt(n)}</strong></button>))}
+            </div>
+          );
+        })}
+        {unsized.length > 0 && (
+          <div className="ui-card ui-stack" style={{ gap: 6 }}>
+            <b>Boyu sayılmamış</b>
+            <span className="ui-note" style={{ margin: 0 }}>Bu partilerde boy boy sayım yok; toplam adet gösteriliyor.</span>
+            {unsized.map((s) => (
+              <button key={s.lot.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "lot", id: s.lot.id })}>
+                <b>{s.lot.name}</b><strong>{fmt(s.alive)}</strong></button>))}
+          </div>
+        )}
+      </main>
+    );
+  }
+
+  // Müşteriler: fidan satışlarındaki alıcı + siparişlerdeki müşteri (ad eşleşmesi, büyük/küçük harf farkı yok)
+  const customers = () => {
+    const m = new Map<string, { key: string; name: string; sales: EventRow[]; orders: EventRow[]; total: number; open: number; qty: number; last: string }>();
+    const get = (raw: unknown, day: string) => {
+      const key = custKey(raw); if (!key) return null;
+      let c = m.get(key); if (!c) { c = { key, name: String(raw).trim().replace(/\s+/g, " "), sales: [], orders: [], total: 0, open: 0, qty: 0, last: "" }; m.set(key, c); }
+      if (day > c.last) c.last = day; return c;
+    };
+    for (const e of sales) { const c = get(e.data.buyer, e.occurred_on); if (!c) continue; c.sales.push(e); c.total += Number(e.quantity ?? 0); c.open += incomeOpen(e); c.qty += Number(e.data.qty ?? 0); }
+    for (const o of orders.filter((o) => o.data.status === "bekliyor")) get(o.data.customer, o.occurred_on)?.orders.push(o);
+    return [...m.values()].sort((a, b) => b.open - a.open || b.last.localeCompare(a.last));
+  };
+
+  if (view.v === "musteriler") {
+    const cs = customers(), debt = cs.reduce((t, c) => t + c.open, 0);
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={back} label="Fidan" />
+        <PageHeader sub={`${cs.length} müşteri`} title="Müşteriler" />
+        <div className="ui-total"><span>Toplam alacak</span><b>{formatTL(debt)}</b></div>
+        {cs.length === 0 && <div className="ui-empty">Henüz müşteri yok. Satışta “Kime sattın?” ya da siparişte müşteri adı yazınca burada çıkar.</div>}
+        {cs.map((c) => (
+          <button key={c.key} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "musteri", key: c.key })}>
+            <b>{c.name}<small>{[c.qty ? `${fmt(c.qty)} fidan aldı` : "", c.total ? formatTL(c.total) : "", c.orders.length ? `${c.orders.length} bekleyen sipariş` : "", c.last ? dayYear(c.last) : ""].filter(Boolean).join(" · ")}</small></b>
+            <strong>{c.open ? `${formatTL(c.open)} borç` : "borcu yok"}</strong>
+          </button>))}
+      </main>
+    );
+  }
+
+  if (view.v === "odeme") {
+    const c = customers().find((x) => x.key === view.key);
+    if (c) return <OdemeForm name={c.name} open={c.open} onCancel={() => setView({ v: "musteri", key: c.key })} onSave={async (amt) => {
+      // Ödeme en eski satıştan başlayarak düşer (Mustafa, 4 Kasım 2026).
+      const due = c.sales.filter((e) => incomeOpen(e) > 0).sort((a, b) => (a.occurred_on + (a.created_at ?? "")).localeCompare(b.occurred_on + (b.created_at ?? "")));
+      const before: EventRow[] = []; let left = amt;
+      for (const e of due) {
+        if (left <= 0) break;
+        const take = Math.min(left, incomeOpen(e)); left = Math.round((left - take) * 100) / 100;
+        before.push(e); await updateEvent(e.id, { data: { ...e.data, received: Math.round((Number(e.data.received ?? 0) + take) * 100) / 100 } });
+      }
+      setDone({ message: `Tahsil ettim: ${c.name}, ${formatTL(amt)}. Kalan borç ${formatTL(Math.max(0, Math.round((c.open - amt) * 100) / 100))}.`,
+        undo: async () => { for (const e of before) await updateEvent(e.id, { data: e.data }); } });
+      setView({ v: "musteri", key: c.key }); load();
+    }} />;
+  }
+
+  if (view.v === "musteri") {
+    const c = customers().find((x) => x.key === view.key);
+    if (!c) return <main className="ui-stack"><BackButton onClick={() => setView({ v: "musteriler" })} label="Müşteriler" /><div className="ui-empty">Bu müşteri bulunamadı.</div></main>;
+    const ss = c.sales.slice().sort((a, b) => b.occurred_on.localeCompare(a.occurred_on));
+    const msg = [`Merhaba ${c.name},`, `${biz.name} fidan hesabınız:`,
+      ...ss.filter((e) => incomeOpen(e) > 0).map((e) => `${dayYear(e.occurred_on)}: ${fmt(Number(e.data.qty ?? 0))} adet${e.data.size ? ` ${String(e.data.size)}` : ""}, ${formatTL(Number(e.quantity))}, kalan ${formatTL(incomeOpen(e))}`),
+      `Toplam kalan: ${formatTL(c.open)}`].join("\n");
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={() => setView({ v: "musteriler" })} label="Müşteriler" />
+        <PageHeader sub={`${fmt(c.qty)} fidan · ${formatTL(c.total)}`} title={c.name} />
+        {doneCard}
+        <div className="ui-total"><span>Kalan borç</span><b>{formatTL(c.open)}</b></div>
+        {c.open > 0 && <MainButton onClick={() => { setDone(null); setView({ v: "odeme", key: c.key }); }}>Ödeme al</MainButton>}
+        {c.open > 0 && <MainButton secondary onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank")}>Hesabı WhatsApp’tan gönder</MainButton>}
+        {c.orders.length > 0 && <><h2 className="ui-section">Bekleyen siparişler</h2>
+          {c.orders.map((o) => <button key={o.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "siparis", edit: o })}>
+            <b>{fmt(Number(o.data.qty))} adet{o.data.size ? ` · ${String(o.data.size)}` : ""}<small>{[o.data.due_on ? `teslim ${dayText(String(o.data.due_on))}` : "", o.data.deposit ? `kapora ${formatTL(Number(o.data.deposit))}` : ""].filter(Boolean).join(" · ")}</small></b>
+            <strong>{o.data.price ? formatTL(Number(o.data.qty) * Number(o.data.price)) : ""}</strong></button>)}</>}
+        <h2 className="ui-section">Satışlar</h2>
+        {ss.length === 0 ? <div className="ui-empty">Henüz satış yok.</div> : ss.map((e) => (
+          <div key={e.id} className="ui-moneyrow"><b>{fmt(Number(e.data.qty ?? 0))} adet{e.data.size ? ` · ${String(e.data.size)}` : ""}<small>{[dayYear(e.occurred_on), find(String(e.data.lot_id ?? ""))?.name, incomeOpen(e) ? `kalan ${formatTL(incomeOpen(e))}${e.data.due_on ? ` (${dayText(String(e.data.due_on))})` : ""}` : "ödendi"].filter(Boolean).join(" · ")}</small></b>
+            <strong>{formatTL(Number(e.quantity))}</strong></div>))}
+      </main>
+    );
+  }
+
+  if (view.v === "fiyat") {
+    const { S, ready, reserved } = stock();
+    const alive = S.reduce((t, x) => t + x.alive, 0), cost = S.reduce((t, x) => t + x.cost, 0);
+    return <FiyatListesi sizes={sizes} prices={pricesOf(biz)} suggested={suggestedPrice(alive ? cost / alive : 0, margin)} bizName={biz.name}
+      free={Object.fromEntries(sizes.map((k) => [k, Math.max(0, (ready[k] ?? 0) - (reserved[k] ?? 0))]))} hasStock={Object.keys(ready).length > 0} onCancel={back}
+      onSave={async (fidan_prices) => {
+        const settings = { ...biz.settings, fidan_prices };
+        const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
+        if (error) throw error;
+        setBiz({ ...biz, settings });
+      }} />;
+  }
 
   // --- Formlar
   if (view.v === "lotForm") return <LotForm edit={view.edit} places={places} onCancel={() => setView(view.edit ? { v: "lot", id: view.edit.id } : { v: "list" })}
@@ -309,13 +440,9 @@ export default function Fidan() {
 
   // --- Liste
   const active = all.filter((l) => l.status === "aktif");
-  const S = active.map(stats);
+  const { S, ready, reserved } = stock();
   const totAlive = S.reduce((t, s) => t + s.alive, 0);
   const totCost = S.reduce((t, s) => t + s.cost, 0);
-  const ready: Record<string, number> = {};
-  for (const s of S) for (const [k, v] of Object.entries(s.bySize)) ready[k] = (ready[k] ?? 0) + v;
-  const reserved: Record<string, number> = {};
-  for (const o of orders.filter((o) => o.data.status === "bekliyor")) { const k = String(o.data.size ?? ""); if (k) reserved[k] = (reserved[k] ?? 0) + Number(o.data.qty ?? 0); }
   const dues = active.flatMap(dueOf).filter((d) => d.next <= addDays(todayStr(), 7)).sort((a, b) => a.next.localeCompare(b.next));
   const openOrders = orders.filter((o) => o.data.status === "bekliyor").sort((a, b) => String(a.data.due_on ?? "9").localeCompare(String(b.data.due_on ?? "9")));
 
@@ -347,6 +474,11 @@ export default function Fidan() {
         <button type="button" onClick={() => { setDone(null); setView({ v: "dikim" }); }}>+ Yeni dikim</button>
         <button type="button" onClick={() => { setDone(null); setView({ v: "siparis" }); }}>+ Sipariş</button>
       </div>
+      <div className="ui-seg">
+        <button type="button" onClick={() => { setDone(null); setView({ v: "stok" }); }}>Stok</button>
+        <button type="button" onClick={() => { setDone(null); setView({ v: "musteriler" }); }}>Müşteriler</button>
+        <button type="button" onClick={() => { setDone(null); setView({ v: "fiyat" }); }}>Fiyat listesi</button>
+      </div>
 
       <Alerts open={showAlerts} setOpen={setShowAlerts} items={dues.map((d) => ({ key: d.lot.id + d.type, red: d.late, onClick: () => setView({ v: "lot", id: d.lot.id }),
         text: <><b>{d.lot.name}</b>: {d.type} {d.late ? "zamanı geldi" : `· ${dayText(d.next)}`}</> }))} />
@@ -355,6 +487,7 @@ export default function Fidan() {
         <div className="ui-card ui-stack" style={{ gap: 6 }}>
           <b>Satışa hazır (boylara göre)</b>
           <div className="ui-rows">{sizes.filter((k) => ready[k] != null).map((k) => <div key={k}><span>{k}</span><span>{fmt(ready[k])} adet{reserved[k] ? ` · ${fmt(reserved[k])} siparişte` : ""}</span></div>)}</div>
+          <button type="button" className="ui-link" onClick={() => { setDone(null); setView({ v: "stok" }); }}>Stoku ayrıntılı gör ›</button>
         </div>
       )}
 
@@ -635,6 +768,64 @@ function KarOrani({ value, onSave, onCancel }: { value: number | null; onCancel:
       <TextField id="kar" label="Kâr oranı (%)" inputMode="numeric" maxLength={4} placeholder="Örnek: 40" value={v} onChange={(e) => setV(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={async () => { try { await onSave(Number(v) || 0); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+    </main>
+  );
+}
+
+/** Müşteriden ödeme: tutar en eski borçlu satıştan başlayarak düşer. */
+function OdemeForm({ name, open, onSave, onCancel }: { name: string; open: number; onCancel: () => void; onSave: (amt: number) => Promise<void> }) {
+  const [v, setV] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <main className="ui-stack">
+      <BackButton onClick={onCancel} label="Vazgeç" />
+      <PageHeader sub={`Borcu ${formatTL(open)}`} title={`Ödeme al: ${name}`} />
+      <TextField id="odeme" label="Alınan para (TL)" inputMode="decimal" maxLength={12} value={v} onChange={(e) => setV(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
+      <button type="button" className="ui-link" onClick={() => setV(String(open))}>Borcun hepsi: {formatTL(open)}</button>
+      <p className="ui-note">Para en eski satıştan başlayarak düşülür.</p>
+      {error && <ErrorText>{error}</ErrorText>}
+      <MainButton disabled={busy} onClick={async () => {
+        const n = Math.round(num(v) * 100) / 100;
+        if (!(n > 0)) { setError("Alınan parayı yaz."); return; }
+        if (n > open + 0.001) { setError(`Borcu ${formatTL(open)}, fazlası yazılamaz.`); return; }
+        setBusy(true); try { await onSave(n); } catch { setError("Kaydedemedim."); setBusy(false); }
+      }}>Tamam</MainButton>
+    </main>
+  );
+}
+
+/** Boy başına satış fiyatı + WhatsApp'ta paylaşma. */
+function FiyatListesi({ sizes, prices, suggested, free, hasStock, bizName, onSave, onCancel }: {
+  sizes: string[]; prices: Record<string, number>; suggested: number | null; free: Record<string, number>; hasStock: boolean; bizName: string;
+  onCancel: () => void; onSave: (p: Record<string, number>) => Promise<void>;
+}) {
+  const [v, setV] = useState<Record<string, string>>(Object.fromEntries(sizes.map((k) => [k, prices[k] ? String(prices[k]) : ""])));
+  const [withStock, setWithStock] = useState(hasStock);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const list = () => Object.fromEntries(sizes.filter((k) => num(v[k] ?? "") > 0).map((k) => [k, num(v[k])]));
+  const text = () => {
+    const p = list();
+    return [`${bizName} · Şimşir fidanı fiyat listesi`, `Tarih: ${dayYear(todayStr())}`, "",
+      ...sizes.filter((k) => p[k] && (!withStock || free[k] > 0)).map((k) => `${k}: ${formatTL(p[k])} / adet${withStock ? ` (${fmt(free[k])} adet var)` : ""}`)].join("\n");
+  };
+  return (
+    <main className="ui-stack" style={{ paddingBottom: 120 }}>
+      <BackButton onClick={onCancel} label="Fidan" />
+      <PageHeader sub="Boy başına adet fiyatı" title="Fiyat listesi" />
+      {suggested && <p className="ui-note">Önerilen: {formatTL(suggested)} / adet (ortalama maliyet + kâr oranı). Boş bıraktığın boy listede çıkmaz.</p>}
+      {sizes.map((k) => <TextField key={k} id={`fy_${k}`} label={`${k} (TL / adet)${hasStock ? ` · ${fmt(free[k] ?? 0)} adet var` : ""}`} inputMode="decimal" maxLength={10}
+        placeholder={suggested ? String(suggested) : ""} value={v[k] ?? ""} onChange={(e) => { setSaved(false); setV({ ...v, [k]: e.target.value }); }} />)}
+      {hasStock && <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Paylaşırken stok adedi yazılsın mı?</span>
+        <div className="ui-chips"><Chip selected={withStock} onClick={() => setWithStock(true)}>Evet (stoğu olmayan boy çıkmaz)</Chip><Chip selected={!withStock} onClick={() => setWithStock(false)}>Hayır</Chip></div></div>}
+      {error && <ErrorText>{error}</ErrorText>}
+      {saved && <DoneCard message="Fiyat listesi kaydedildi." />}
+      <MainButton secondary onClick={async () => { setError(""); try { await onSave(list()); setSaved(true); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+      <div className="ui-sticky-bottom"><MainButton onClick={() => {
+        if (!Object.keys(list()).length) { setError("En az bir boya fiyat yaz."); return; }
+        window.open(`https://wa.me/?text=${encodeURIComponent(text())}`, "_blank");
+      }}>WhatsApp’ta paylaş</MainButton></div>
     </main>
   );
 }
