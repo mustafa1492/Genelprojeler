@@ -150,7 +150,7 @@ export default function Barinak({ species }: { species: Species }) {
     <main className="ui-stack">
       <PageHeader sub={`${list.length} ${low(tur.barn)}`} title={tur.barns} right={<HistoryLink />} />
       {doneCard}
-      {barns && list.length === 0 && <p className="ui-note">Önce {low(tur.barn)} ekle. Sonra her dönem için bir sürü açıp her gün ölü ve yemi girersin.</p>}
+      {barns && list.length === 0 && <p className="ui-note">{species === "kanatli" ? `Önce ${low(tur.barn)} ekle. Sonra her dönem için bir sürü açıp her gün ölü ve yemi girersin.` : `${tur.barns} ekle; hayvanları eklerken nerede durduğunu seçersin. İstersen toplu sürü açıp günlük ölü ve yemi de girebilirsin.`}</p>}
       {list.map((b) => {
         const h = openOf(b);
         const st = h ? herdStats(h, days) : null;

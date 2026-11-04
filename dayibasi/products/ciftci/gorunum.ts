@@ -20,7 +20,7 @@ export const PERIODS = [
 export type Period = (typeof PERIODS)[number]["id"];
 
 /** Alt çubuğa konabilecek sekmeler (Menü hep sağda, sabit). */
-export const NAV_CHOICES = ["ozet", "tarlalar", "masraf", "gelir", "depo", "fidan", "kumes", "takvim", "rapor", "vadeler", "kayitlar"];
+export const NAV_CHOICES = ["ozet", "tarlalar", "masraf", "gelir", "depo", "fidan", "kumes", "buyukbas", "kucukbas", "takvim", "rapor", "vadeler", "kayitlar"];
 export const NAV_SLOTS = 4;
 
 export type Gorunum = { cards: CardId[]; period: Period; nav: string[] };
