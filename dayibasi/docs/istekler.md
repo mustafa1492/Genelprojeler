@@ -129,3 +129,6 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Paketler: basit / orta / tam gibi; ücret pakete göre. (Paket içerikleri sonra konuşulacak.)
 - Destek: uygulama içinde kısa videolar; iş büyürse Mustafa ilgilenir, daha büyürse ekip.
 - Dayıbaşı ve diğer modüller: ayrıca hak harcanmayacak; başka bir iş yaparken az ek eforla oraya da uygulanabiliyorsa yapılır (Claude bunu fırsat görünce söyler).
+- Tanıtım sitesi tasarımı: Mustafa'nın attığı sitelerden (Dribbble/Contra örnekleri) bakılacak.
+- Claude: bir işi başka bağlayıcı/skill ile daha iyi yapabileceğini düşünürse önce Mustafa'ya sorar.
+- İleride "agent paketi" hazırlanacak (Claude yönetir/kontrol eder): öneri listesi aşağıda, onay bekliyor.
