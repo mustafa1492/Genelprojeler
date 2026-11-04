@@ -30,7 +30,7 @@ import { PrefsProvider } from "@/core/prefs";
 import Ayarlar from "./screens/Ayarlar";
 import Duzenle from "./screens/Duzenle";
 import Menu from "./Menu";
-import { NAV_CHOICES, useGorunum } from "./gorunum";
+import { NAV_CHOICES, NAV_SLOTS, useGorunum } from "./gorunum";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
 const TABS: ShellTab[] = [
@@ -77,7 +77,8 @@ function Inner({ initial }: { initial: string }) {
   // Kişiye özel: alt çubuk (4 yer) ve Menü; "Ekranımı düzenle" seçilebilir sekmeleri bilir.
   const choices = NAV_CHOICES.map((id) => base.find((t) => t.id === id)).filter((t): t is ShellTab => !!t).map((t) => ({ id: t.id, label: t.label }));
   let navIds = g.nav.filter((id) => choices.some((c) => c.id === id));
-  if (!navIds.length) navIds = ["ozet"];
+  // Yetki ya da modül yüzünden boşalan yerleri görebildiği sekmelerle doldur (çalışan: Özet, Tarlalar, Depo, Takvim…)
+  for (const c of choices) { if (navIds.length >= NAV_SLOTS) break; if (!navIds.includes(c.id)) navIds.push(c.id); }
   const tabs = base.map((t) => (t.id === "duzenle" ? { ...t, render: () => <Duzenle choices={choices} /> } : t));
   const menuTabs = tabs.map((t) => ({ id: t.id, label: t.label, emoji: t.emoji }));
   let start = initial, params: Record<string, string | number> | undefined;

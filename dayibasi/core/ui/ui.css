@@ -529,3 +529,11 @@ html.buyuk-yazi { font-size: 118%; }
   .ozet-izgara > .ozet-blok:has(.ozet-kar), .ozet-izgara > .ozet-blok:has(.ozet-hizli) { grid-column: 1 / -1; }
 }
 @media (min-width: 900px) { .ozet-ipucu { display: none; } }
+/* Dar ekran / büyük yazı: başlık ve sağdaki düğmeler sığmazsa alta geçsin; tutarlar üst üste binmesin */
+.ui-header { flex-wrap: wrap; }
+.ui-header > div { min-width: 0; flex: 1 1 160px; }
+.ui-header h1 { overflow-wrap: anywhere; }
+.ozet-kar .tutar { font-size: clamp(1.5rem, 8vw, 2rem); overflow-wrap: anywhere; }
+.ozet-kar .alt { grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); }
+.ozet-kar .alt span, .ozet-kar .alt b { min-width: 0; overflow-wrap: anywhere; }
+.liste-ic div { overflow-wrap: anywhere; }
