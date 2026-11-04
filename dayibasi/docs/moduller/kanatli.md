@@ -18,7 +18,7 @@
 - Deneyecek kümesçi şimdilik yok.
 
 ## Yapı: hayvan ortak iskeleti (Mustafa, 4 Kasım 2026: genel kurulsun, hayvancılık da kullanacak)
-- Göç `supabase/migrations/0018_hayvan.sql` (**uygulanmadı, Mustafa onayı bekliyor**): `barns` (barınak), `herds` (sürü/dönem), `herd_days` (günlük kayıt: ölü, ayıklanan, yem çuvalı + çuval kg, tartım, not; sürü başına günde bir). Hepsinde `species` = kanatli | kucukbas | buyukbas. Yetki ekranı `hayvan` (hazır çalışan rolü: yazar). Geri alma, yedek, yönetim paneli listelerine eklendi.
+- Göç `supabase/migrations/0018_hayvan.sql` (**uygulandı 4 Kasım 2026**, yedek bölümü hariç: canlıda 0013/`yedek.al` yok): `barns` (barınak), `herds` (sürü/dönem), `herd_days` (günlük kayıt: ölü, ayıklanan, yem çuvalı + çuval kg, tartım, not; sürü başına günde bir). Hepsinde `species` = kanatli | kucukbas | buyukbas. Yetki ekranı `hayvan` (hazır çalışan rolü: yazar). Geri alma, yedek, yönetim paneli listelerine eklendi.
 - Kod: `products/ciftci/hayvan/` → `api.ts` (internetsiz okuma/yazma), `hayvan.ts` (tür adları, modül anahtarları, hesaplar), `Barinak.tsx` (genel ekran: türü parametre alır). Kanatlı: `hayvan/kanatli/Kumes.tsx` = `<Barinak species="kanatli" />`; kümese özel ekler burada büyür.
 - Modül anahtarları tür başına: "kanatli" (panelde var), "kucukbas", "buyukbas" (sekmeleri hayvancılık oturumu ekler).
 - Küpe kartı ve üreme döngüsü: hayvancılık oturumu, ayrı tablo, `herds`/`barns`'a bağlanır.
@@ -27,6 +27,6 @@
 - v1 yazıldı ve genel iskelete taşındı (dal `modul/kanatli`): kümesler listesi (bugün girildi/girilmedi), kümes kartı, sürü aç/kapat, Bugünün kaydı (ölü, ayıklanan, yem çuvalı sayacı, çuval kg bir kez, dün seçimi, tartım + not "daha fazla"da), sürü kartı (kalan, kayıp %, yem kg, son tartım, tahmini canlı kg, tahmini YDO, gün ve tartım listesi). Tip denetimi temiz; tarayıcıda denenmedi.
 
 ## Sıradaki
-- 0018 göçünü uygulamak (Mustafa onayı), sonra ekran denemesi ve Core'a birleştirme isteği.
+- Ekran denemesi (sahte sunucu) ve Core'a birleştirme isteği.
 - v2: dönem kapanışı + firma karnesiyle karşılaştırma; masraf/gelirde sürü seçimi (`data.lot_id`); yem stoğu Depo'dan.
 - Sonra: aşı/ilaç + bekleme süresi, boş bekleme sayacı, biyogüvenlik defteri.

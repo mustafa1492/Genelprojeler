@@ -1,6 +1,7 @@
 -- Hayvan ortak iskeleti (Mustafa, 4 Kasım 2026): barınak → sürü → günlük kayıt; tür alanıyla (kanatlı / küçükbaş / büyükbaş).
 -- Kanatlı (kümes) oturumu kurdu; küpe kartı ve üreme döngüsü hayvancılık oturumunda eklenecek (ayrı tablo, herds'e bağlanır).
 -- Yetki: tek ekran izni 'hayvan'. Yalnız yeni tablo/işlev: geriye uyumlu.
+-- UYGULANDI 4 Kasım 2026 (yedek bölümü HARİÇ: canlıda 0013/yedek.al yok; 0013 uygulanınca alttaki bölüm de çalıştırılmalı).
 
 create table barns (                                   -- barınak: kümes, ağıl, ahır
   id          uuid primary key default gen_random_uuid(),
@@ -73,6 +74,9 @@ do $$ begin
     '''lots'')', '''lots'',''barns'',''herds'',''herd_days'')');
 end $$;
 
+-- Giriş yapmamış kişi yazamasın / tabloyu boşaltamasın (diğer tablolarla aynı)
+revoke insert, update, delete, truncate on barns, herds, herd_days from anon;
+
 -- Yönetim paneli beyaz listesi
 create or replace function admin_table_ok(t text) returns boolean language sql immutable as $$
   select t = any (array['businesses','places','expenses','events','dues','inventory_items','documents','lots','people','ledger_entries','lists','receipt_inbox','invites','activity_log','message_templates','barns','herds','herd_days']);
@@ -95,7 +99,7 @@ create or replace function my_perms(bid uuid) returns jsonb language sql stable 
   select jsonb_object_agg(s, perm_level(bid, s)) from unnest(array['tarlalar','masraf','gelir','fidan','hayvan','depo','takvim','rapor','vadeler','belgeler','kayitlar','fis','gecmis','ayarlar','uyeler']) s;
 $$;
 
--- Günlük yedeğe ekle
+-- Günlük yedeğe ekle — UYGULANMADI: 0013_yedek canlıda yok. 0013 uygulanınca bunu da çalıştır.
 create or replace function yedek.al() returns int language plpgsql security definer set search_path = public as $$
 declare n int := 0; b record;
 begin
