@@ -4,6 +4,7 @@ import type { EventRow } from "@/core/events/api";
 export const ISLEM = "islem";   // tarla günlüğü: data {type, product?, dose?, wait_days?, item_id?, used?, unit?}
 export const VERIM = "verim";   // quantity = miktar; data {year, crop, unit}
 export const HATIRLAT = "hatirlat"; // hatırlatma: occurred_on = gün; data {title, done?}
+export const MAKINE = "makine"; // makine bakımı: occurred_on = gün, quantity = motor saati; data {makine, is, not?, next_on?, next_hours?, expense_id?}
 export const GELIR = "gelir";   // quantity = toplam TL; data {type, crop?, qty?, unit?, price?, buyer?, received (TL), due_on?}
 
 export const year = (d: string) => d.slice(0, 4);

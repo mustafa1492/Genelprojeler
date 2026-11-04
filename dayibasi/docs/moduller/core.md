@@ -20,9 +20,11 @@
 - (yok)
 
 ## Nerede kaldık
-- Fikir dönemi; Mustafa "ikinci emre kadar uygulamaya bir şey getirme" dedi.
-- Bu oturum ayrıca Mustafa'nın **genel planlarını konuşma** yeri.
-- Paket sistemi **ertelendi**: modüller oturduktan sonra yapılacak. Hazır plan: settings.paket (basit/orta/tam, sadece yönetici değiştirir, keep_modules gibi tetikleyici) + paket tanımları (öneri: app_config) + panelde paket seçimi + görünen ekran = paket izinleri − hidden_screens. O zaman sorulacak: paket içerikleri, mevcut defterler hangi pakete (öneri: Tam), tanımların yeri.
+- 4 Kasım: **Telefon arayüzü yenilendi** (gelistirme, canlıda DEĞİL): alt çubuk 4 yer + Menü (alttan açılan, gruplu), Ayarlar ekranı (aile, listeler, sezonlar, tutarları gizle, büyük yazı, verimi indir, panel, çıkış), Ekranımı düzenle (hazır görünümler: Tarlacı/Kümesçi/Sadece para/En sade; kâr dönemi sezon/ay/yıl/30 gün; özet kartları aç-kapa + ↑↓; alt çubuk seçimi). Özette uzun basma: gizle/yukarı/aşağı. Sürükleme yok (Mustafa: kastırır). Kişiye özel: `user_prefs` tablosu (0020, canlı veritabanına UYGULANDI), `core/prefs.tsx`, `products/ciftci/gorunum.ts`. Bilgisayarda özet iki sütun.
+- Aynı gün birleştirildi: modul/kanatli, ciftci (makineler, tapudan tarla), fidan (stok, müşteri, fiyat listesi), hayvancilik (küpe kartı, 0019 canlıda), tanitim (not). Menü'ye büyükbaş/küçükbaş/makineler eklendi.
+- Deneme (sahte sunucu, telefon 390 px + bilgisayar): özet, dönem değiştirme, Menü, Ayarlar, büyük yazı, hazır görünüm, sıralama, alt çubuk seçimi, uzun basma, yeniden açınca ayarın kalması ve 18 modül ekranı geçti; konsol hatası yok. Eksik adresler eklendi: /ciftci/takvim, /kayitlar, /fis.
+- Paket sistemi ertelendi (modüller oturunca). Hazır plan: settings.paket + app_config tanımları + panelde seçim; hazır görünümler pakete bağlanabilir.
 
 ## Sıradaki
-- Mustafa'nın genel planlarını dinlemek; kod işi yok.
+- Mustafa "yükle" derse main'e gönder. Gerçek telefonda bir bakılmalı (özellikle uzun basma ve Menü).
+- İsteğe bağlı: Menü'de borç/vade uyarı etiketi, bilgisayar özetini daha doldurmak.

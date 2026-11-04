@@ -302,6 +302,8 @@ function Ayarlar({ biz, reload }: { biz: Biz; reload: () => void }) {
             <h2>Modüller</h2>
             <label className="pn-check"><input type="checkbox" checked={mods.includes("fidan")} onChange={(e) => persist({ ...st, modules: e.target.checked ? [...mods, "fidan"] : mods.filter((m) => m !== "fidan") })} /> Fidan (şimşir) modülü</label>
             <label className="pn-check"><input type="checkbox" checked={mods.includes("kanatli")} onChange={(e) => persist({ ...st, modules: e.target.checked ? [...mods, "kanatli"] : mods.filter((m) => m !== "kanatli") })} /> Kümes (kanatlı) modülü</label>
+            <label className="pn-check"><input type="checkbox" checked={mods.includes("buyukbas")} onChange={(e) => persist({ ...st, modules: e.target.checked ? [...mods, "buyukbas"] : mods.filter((m) => m !== "buyukbas") })} /> Büyükbaş modülü</label>
+            <label className="pn-check"><input type="checkbox" checked={mods.includes("kucukbas")} onChange={(e) => persist({ ...st, modules: e.target.checked ? [...mods, "kucukbas"] : mods.filter((m) => m !== "kucukbas") })} /> Küçükbaş modülü</label>
           </div>
           <div className="pn-card pn-stack">
             <h2>Bu defterde açık bölümler</h2>

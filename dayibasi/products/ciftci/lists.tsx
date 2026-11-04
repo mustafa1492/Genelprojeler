@@ -21,6 +21,8 @@ export const LISTS = {
   documents: { title: "Belge önerileri", defaults: config.documents },
   bakim: { title: "Fidan bakım türleri", defaults: ["Budama", "Güve kontrolü", "İlaçlama", "Gübreleme", "Sulama", "Yaprak hastalığı kontrolü", "Diğer"], fidan: true },
   sources: { title: "Fidan kaynakları", defaults: ["Çelik", "Fide", "Tohum", "Hazır fidan"], fidan: true },
+  makineler: { title: "Makineler (traktör, pulluk…)", defaults: [] as string[] },
+  makine_isleri: { title: "Makine bakım işleri", defaults: ["Yağ değişimi", "Yağ filtresi", "Hava filtresi", "Mazot filtresi", "Gres yağlama", "Lastik", "Tamir", "Diğer"] },
   isler: { title: "İşler (fidan, buğday…)", defaults: [] as string[] },
   fire: { title: "Fire (kayıp) sebepleri", defaults: ["Kuraklık", "Güve", "Kök çürüklüğü", "Don", "Hastalık", "Bilinmiyor"], fidan: true },
 } as const;

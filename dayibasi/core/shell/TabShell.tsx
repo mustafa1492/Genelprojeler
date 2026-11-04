@@ -14,7 +14,12 @@ type Ctx = { active: string; go: (id: string, params?: Params) => void; params: 
 const ShellCtx = createContext<Ctx>({ active: "", go: () => {}, params: () => ({ p: {}, n: 0 }) });
 const TabIdCtx = createContext<string>("");
 
-export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellTab[]; initial: string; initialParams?: Params; brand?: React.ReactNode }) {
+/**
+ * navIds: telefonda alt çubukta görünecek sekmeler (sırayla); yoksa inNav olanlar.
+ * menu: verilirse alt çubuğun sağında "Menü" tuşu çıkar, alttan açılan bir sayfa gösterir.
+ */
+export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: { tabs: ShellTab[]; initial: string; initialParams?: Params; brand?: React.ReactNode; navIds?: string[]; menu?: (close: () => void) => React.ReactNode }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState(initial);
   const [visited, setVisited] = useState<string[]>([initial]);
   const [resets, setResets] = useState<Record<string, number>>({});
@@ -24,6 +29,7 @@ export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellT
   const go = useCallback((id: string, p?: Params) => {
     const t = tabs.find((x) => x.id === id);
     if (!t) return;
+    setMenuOpen(false);
     scrolls.current[active] = window.scrollY;
     if (p) setParams((s) => ({ ...s, [id]: { p, n: (s[id]?.n ?? 0) + 1 } }));
     setVisited((v) => (v.includes(id) ? v : [...v, id]));
@@ -51,8 +57,14 @@ export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellT
   }, [tabs]);
 
   const ctx: Ctx = { active, go, params: (id) => params[id] ?? { p: {}, n: 0 } };
-  const navTabs = tabs.filter((t) => t.inNav);
-  const navActive = tabs.find((t) => t.id === active)?.inNav ? active : "";
+  const navTabs = navIds ? navIds.map((id) => tabs.find((t) => t.id === id)).filter((t): t is ShellTab => !!t) : tabs.filter((t) => t.inNav);
+  const navActive = navTabs.some((t) => t.id === active) ? active : "";
+  useEffect(() => {
+    if (!menuOpen) return;
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [menuOpen]);
 
   return (
     <ShellCtx.Provider value={ctx}>
@@ -71,6 +83,12 @@ export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellT
             {t.icon}<span>{t.label}</span>
           </a>
         ))}
+        {menu && (
+          <button type="button" className="m ui-nav-menu" aria-expanded={menuOpen} aria-current={!navActive && !menuOpen ? "page" : undefined} onClick={() => setMenuOpen((o) => !o)}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5" /><rect x="14" y="4" width="6" height="6" rx="1.5" /><rect x="4" y="14" width="6" height="6" rx="1.5" /><rect x="14" y="14" width="6" height="6" rx="1.5" /></svg>
+            <span>Menü</span>
+          </button>
+        )}
         {/* Bilgisayar: gruplu yan menü (telefonda gizli) */}
         <div className="ui-nav-desk">
           {brand && <div className="ui-nav-brand">{brand}</div>}
@@ -87,6 +105,14 @@ export function TabShell({ tabs, initial, initialParams, brand }: { tabs: ShellT
           ))}
         </div>
       </nav>
+      {menu && menuOpen && (
+        <div className="ui-sheet-bg" onClick={() => setMenuOpen(false)}>
+          <div className="ui-sheet" role="dialog" aria-modal="true" aria-label="Menü" onClick={(e) => e.stopPropagation()}>
+            <div className="ui-sheet-bas"><b>Menü</b><button type="button" aria-label="Kapat" onClick={() => setMenuOpen(false)}>✕</button></div>
+            {menu(() => setMenuOpen(false))}
+          </div>
+        </div>
+      )}
     </ShellCtx.Provider>
   );
 }

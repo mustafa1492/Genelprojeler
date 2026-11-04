@@ -18,7 +18,7 @@ import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { listExpenses, type Expense } from "@/core/expenses/api";
 import { listLots, type Lot } from "@/core/lots/api";
-import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, marginOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
+import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, marginOf, pricesOf, SAYIM, sizesOf, suggestedPrice } from "../fidan";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 
@@ -61,7 +61,7 @@ export default function Gelir() {
     const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps, moves, multi);
     return { alive: st.alive, perPlant: st.perPlant, suggested: suggestedPrice(st.perPlant, marginOf(biz)) };
   };
-  if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prefill={form.prefill} onCancel={() => setForm(null)}
+  if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prices={fidan ? pricesOf(biz) : {}} prefill={form.prefill} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)} ${formatTL(Number(e.quantity))}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
       if (form.edit) {
@@ -124,10 +124,10 @@ export default function Gelir() {
 }
 
 type GelirValues = { occurred_on: string; place_id: string | null; quantity: number; data: Record<string, unknown> };
-function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [], prefill = {}, onSave, onCancel, onDelete }: {
+function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [], prices = {}, prefill = {}, onSave, onCancel, onDelete }: {
   beOf?: (placeId: string | null) => { perUnit: number; unit: string } | null;
   lotInfo?: (id: string | null) => { alive: number; perPlant: number; suggested: number | null } | null;
-  places: Place[]; type?: string; edit?: EventRow; lots?: Lot[]; sizes?: string[]; prefill?: Record<string, string | number | boolean>; onSave: (v: GelirValues) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
+  places: Place[]; type?: string; edit?: EventRow; lots?: Lot[]; sizes?: string[]; prices?: Record<string, number>; prefill?: Record<string, string | number | boolean>; onSave: (v: GelirValues) => Promise<void>; onCancel: () => void; onDelete?: () => Promise<void>;
 }) {
   const incomeKinds = useCList("income");
   const units = useCList("units");
@@ -144,7 +144,14 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
   const [size, setSize] = useState<string | null>((d.size as string) ?? (prefill.boy ? String(prefill.boy) : null));
   const [qty, setQty] = useState(d.qty ? String(d.qty) : prefill.adet ? String(prefill.adet) : "");
   const [unit, setUnit] = useState(String(d.unit ?? "kg"));
-  const [price, setPrice] = useState(d.price ? String(d.price) : prefill.fiyat ? String(prefill.fiyat) : "");
+  const [price, setPrice] = useState(d.price ? String(d.price) : prefill.fiyat ? String(prefill.fiyat) : !edit && prefill.boy && prices[String(prefill.boy)] ? String(prices[String(prefill.boy)]) : "");
+  // Fiyat listesinden gelen fiyat: boy değişince güncellenir; kullanıcı elle yazınca bir daha dokunulmaz.
+  const [autoPrice, setAutoPrice] = useState(!d.price && !prefill.fiyat && !edit && !!prefill.boy && !!prices[String(prefill.boy)]);
+  const pickSize = (x: string | null) => {
+    setSize(x);
+    if ((autoPrice || !price) && x && prices[x]) { setPrice(String(prices[x])); setAutoPrice(true); }
+    else if (autoPrice && (!x || !prices[x])) { setPrice(""); setAutoPrice(false); }
+  };
   const [total, setTotal] = useState(edit ? String(edit.quantity) : "");
   const [buyer, setBuyer] = useState(String(d.buyer ?? prefill.alici ?? ""));
   const [pay, setPay] = useState<"hepsi" | "kismen" | "vadeli">(edit ? (incomeOpen(edit) === 0 ? "hepsi" : Number(d.received ?? 0) > 0 ? "kismen" : "vadeli") : prefill.alinan ? "kismen" : "hepsi");
@@ -198,7 +205,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
           <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Hangi parti?</span>
             <div className="ui-chips wrap">{lots.map((l) => <Chip key={l.id} selected={lotId === l.id} onClick={() => { setLotId(l.id); if (l.place_id) setPlaceId(l.place_id); }}>{l.name}</Chip>)}</div></div>
           {sizes.length > 0 && <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Boy</span>
-            <div className="ui-chips wrap">{sizes.map((x) => <Chip key={x} selected={size === x} onClick={() => setSize(size === x ? null : x)}>{x}</Chip>)}</div></div>}
+            <div className="ui-chips wrap">{sizes.map((x) => <Chip key={x} selected={size === x} onClick={() => pickSize(size === x ? null : x)}>{x}</Chip>)}</div></div>}
           {(() => { const li = lotInfo?.(lotId); if (!li) return null; return (
             <div className="ui-card ui-stack" style={{ gap: 2 }}>
               <span>Partide <b>{li.alive.toLocaleString("tr-TR")}</b> canlı fidan · fidan başı maliyet <b>{formatTL(Math.round(li.perPlant * 100) / 100)}</b></span>
@@ -207,7 +214,8 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
             </div>); })()}
           <div className="ui-quickadd">
             <TextField id="g_adet" label="Kaç adet?" inputMode="numeric" maxLength={9} value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} />
-            <TextField id="g_afiyat" label="Adet fiyatı (TL)" inputMode="decimal" maxLength={10} value={price} onChange={(e) => setPrice(e.target.value)} />
+            <TextField id="g_afiyat" label="Adet fiyatı (TL)" inputMode="decimal" maxLength={10} value={price} onChange={(e) => { setPrice(e.target.value); setAutoPrice(false); }} />
+            {autoPrice && <p className="ui-note" style={{ margin: 0 }}>Fiyat listesinden geldi; bu satış için istediğin gibi değiştirebilirsin.</p>}
           </div>
         </>
       )}

@@ -10,7 +10,9 @@ Partiler (dikim, kaynak, pasaport), çok tarlalı dikim (tarlalara dağıtım), 
 
 ## Sıradaki
 - Hüseyin'in kullanımından gelen geri bildirim (henüz yok).
-- Fikirler: fidan stok görünümü (boy boy satılabilir adet), müşteri listesi ve borç, satış fiyat listesi paylaşma (WhatsApp).
+- Hüseyin'e yeni ekranları göstermek (Stok, Müşteriler, Fiyat listesi), geri bildirim almak.
+- Olası: müşteri telefonu (şimdilik WhatsApp kişi seçtiriyor).
+- Tür/çeşit bazlı fiyat (Seçenek C) birden çok tür üretilirse.
 
 ## Nerede kaldık
-- Bekliyor (fikir dönemi).
+- 4 Kasım 2026 (modul/fidan): Stok ekranı (boy boy elde / siparişte / satılabilir, parti dağılımı, boyu sayılmamışlar), Müşteriler (fidan satışı alıcısı + sipariş müşterisi, ad eşleşmesi büyük/küçük harf duyarsız; borç = Gelir'deki kalan), müşteri hesabını WhatsApp'tan gönderme, Fiyat listesi (settings.fidan_prices, boy başına tek fiyat: şimdilik sadece şimşir) + WhatsApp paylaşma (stok adediyle ya da adetsiz). Müşteriden "Ödeme al": tutar en eski borçlu satıştan başlayarak düşer (Mustafa kararı), satışın data.received'ı artar (Vadeler ile aynı yol), borçtan fazlası girilemez, geri alınabilir. Gelir'de fidan satışı: boy seçince fiyat listesinden fiyat dolar (elle yazılınca bir daha değişmez; siparişten gelen fiyat ve düzenlenen satış ezilmez). Tarayıcıda denenmedi; main'e gitmedi.

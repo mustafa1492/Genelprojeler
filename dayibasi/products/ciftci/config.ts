@@ -9,7 +9,7 @@ export const config = {
   inventory: { categories: ["Gübre", "İlaç", "Tohum", "Malzeme", "Diğer"], units: ["kg", "litre", "adet", "çuval", "kutu", "paket"] },
   dueKinds: ["Kredi", "Kooperatif", "Bayi", "Çek", "Senet", "Diğer"],
   documents: ["ÇKS", "TARSİM sigortası", "Kira sözleşmesi", "Traktör muayenesi", "Traktör sigortası", "Destek başvurusu", "Ruhsat"],
-  remindDays: { dues: 15, documents: 30 },
+  remindDays: { dues: 15, documents: 30, makine: 7 },
 } as const;
 
 export const BASE = "/ciftci";
