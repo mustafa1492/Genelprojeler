@@ -10,9 +10,9 @@ Tarlalar (köy/ilçe → hava), tarla günlüğü (ilaçlama bekleme, sulama saa
 
 ## Sıradaki (plan)
 1. ~~Tapudan tarla getirme~~ (yazıldı, servis denendi) (TKGM servisi: `cbsapi.tkgm.gov.tr/megsiswebapi.v3/api` → idariYapi/ilListe, ilceListe/{il}, mahalleListe/{ilçe}, parsel/{mahalle}/{ada}/{parsel}; CORS açık; alan m²→dönüm).
-2. Dönüm/ürün başı kâr, başabaş, girdi fiyat geçmişi, münavebe görünümü.
-3. Devlet destekleri takibi (araştırma: `docs/fikirler/09-devlet-destekleri.md`; tutarlar sabit yazılmaz).
-4. Satışta vergi kesintisi (oran doğrulanmadan yapılmaz).
+2. ~~Kâr analizi~~ → `docs/istekler.md`'ye yazıldı, şimdilik yapılmayacak (Mustafa).
+3. (Bekliyor, yapılmayacak) Devlet destekleri takibi (araştırma: `docs/fikirler/09-devlet-destekleri.md`; tutarlar sabit yazılmaz).
+4. (Bekliyor, yapılmayacak) Satışta vergi kesintisi (oran doğrulanmadan yapılmaz).
 Ayrıntı: `docs/istekler.md`, `docs/arastirma/research_notes/Kanatlı çiftlik modülü/ciftci_defteri_ek_ozellikler.md`.
 
 ## Nerede kaldık
