@@ -108,12 +108,15 @@ export default function Ana() {
   const { g, setG } = useGorunum();
   const [sel, setSel] = useState<CardId | null>(null);
   const press = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const held = useRef(false);
   const hold = (id: CardId) => ({
-    onPointerDown: () => { press.current = setTimeout(() => { setSel(id); try { navigator.vibrate?.(20); } catch { /* yok */ } }, 550); },
+    onPointerDown: () => { held.current = false; press.current = setTimeout(() => { held.current = true; setSel(id); try { navigator.vibrate?.(20); } catch { /* yok */ } }, 550); },
     onPointerUp: () => { if (press.current) clearTimeout(press.current); },
     onPointerLeave: () => { if (press.current) clearTimeout(press.current); },
     onPointerCancel: () => { if (press.current) clearTimeout(press.current); },
     onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); setSel(id); },
+    // Uzun basıştan sonra parmak kalkınca gelen tıklama düğmeyi çalıştırmasın
+    onClickCapture: (e: React.MouseEvent) => { if (held.current) { held.current = false; if (!(e.target as HTMLElement).closest(".ozet-blok-arac")) { e.preventDefault(); e.stopPropagation(); } } },
   });
   const moveCard = (id: CardId, d: -1 | 1) => { const a = g.cards.slice(); const i = a.indexOf(id), j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; setG({ cards: a }); };
 
