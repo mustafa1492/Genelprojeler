@@ -31,5 +31,12 @@
 - Tablolar `barns`, `herds`, `herd_days` (göç 0018, `species` alanıyla), yetki ekranı `hayvan`, kod `products/ciftci/hayvan/` (api.ts, hayvan.ts, Barinak.tsx). Ayrıntı: `kanatli.md` "Yapı".
 - Küçükbaş/büyükbaş için: `TURLER` içindeki adları kontrol et, App.tsx'e `<Barinak species="kucukbas" />` sekmesi ve panele modül kutusu ekle. Küpe kartı ve üreme döngüsü bu oturumda, ayrı tablo olarak.
 
-## Nerede kaldık
-- Kod başlanmadı. Soru listesi hazır, cevaplar bekleniyor.
+## Nerede kaldık (4 Kasım 2026)
+- Yapıldı (`modul/hayvancilik`, gelistirme'ye birleştirilmedi): göç `0019_hayvan_kart.sql` (animals, animal_events) CANLIYA UYGULANDI. Kod: `hayvan/kart.ts` (hesaplar, varsayılan süreler), `hayvan/Hayvanlar.tsx` (liste, "Bu hafta", kart, olay, doğumda yavru kaydı, satışta gelire yazma, ilaç arınma uyarısı, Süreler ekranı → settings.hayvan_sureler). Sekmeler Büyükbaş/Küçükbaş (modül anahtarı buyukbas/kucukbas, panel + /yonetim'de kutu). Ahır/ağıl ve toplu sürü: ortak Barinak ekranı.
+- Ekran denemesi yapılmadı (Mustafa'ya sorulacak).
+- Varsayılan süreler veteriner onayı bekliyor (`hayvancilik-sorular.md`).
+- 0013 yedek uygulanınca yedek.al()'a animals, animal_events eklenmeli.
+
+## Sıradaki
+- Veteriner/hayvancı cevaplarıyla süreleri düzelt; aşı takvimi önerisi.
+- Süt defteri (mandıra cevapları gelince), çoban hesabı, verimsiz hayvan listesi.

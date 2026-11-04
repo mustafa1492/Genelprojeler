@@ -5,6 +5,7 @@ import { hasFidan } from "./fidan";
 import { useRole } from "./rol";
 import Fidan from "./screens/Fidan";
 import Kumes from "./hayvan/kanatli/Kumes";
+import Hayvanlar from "./hayvan/Hayvanlar";
 import { hasTur } from "./hayvan/hayvan";
 import { BASE } from "./config";
 import { navItems } from "./nav";
@@ -33,6 +34,8 @@ const TABS: ShellTab[] = [
   { id: "gelir", label: "Gelir", group: "Para", emoji: "💰", path: `${BASE}/gelir`, inNav: true, icon: icon(`${BASE}/gelir`), render: () => <Gelir /> },
   { id: "fidan", label: "Fidan", group: "Tarla", emoji: "🌱", path: `${BASE}/fidan`, inNav: true, icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6" /><path d="M12 15v6M8 21h8" /><path d="M9 8c1 1 2 1 3 0s2-1 3 0" /></svg>, render: () => <Fidan /> },
   { id: "kumes", label: "Kümes", group: "Hayvan", emoji: "🐔", path: `${BASE}/kumes`, inNav: true, icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7" /><path d="M5 10v10h14V10" /><path d="M10 20v-5h4v5" /></svg>, render: () => <Kumes /> },
+  { id: "buyukbas", label: "Büyükbaş", group: "Hayvan", emoji: "🐄", path: `${BASE}/buyukbas`, inNav: true, icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8c0-2 1-3 3-3h10c2 0 3 1 3 3v3c0 4-3 8-8 8s-8-4-8-8z" /><path d="M9 12h.01M15 12h.01M10 16h4" /></svg>, render: () => <Hayvanlar species="buyukbas" /> },
+  { id: "kucukbas", label: "Küçükbaş", group: "Hayvan", emoji: "🐑", path: `${BASE}/kucukbas`, inNav: true, icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8c0-2 1-3 3-3h10c2 0 3 1 3 3v3c0 4-3 8-8 8s-8-4-8-8z" /><path d="M9 12h.01M15 12h.01M10 16h4" /></svg>, render: () => <Hayvanlar species="kucukbas" /> },
   { id: "depo", label: "Depo", group: "Tarla", emoji: "📦", path: `${BASE}/depo`, inNav: true, icon: icon(`${BASE}/depo`), render: () => <Depo /> },
   { id: "vadeler", label: "Borç ve vadeler", group: "Para", emoji: "💳", path: `${BASE}/vadeler`, inNav: false, render: () => <Vadeler /> },
   { id: "belgeler", label: "Belgeler", group: "Diğer", emoji: "📄", path: `${BASE}/belgeler`, inNav: false, render: () => <Belgeler /> },
@@ -52,9 +55,9 @@ export default function CiftciApp({ initial }: { initial: string }) {
   // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
   const { lvl } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
-  const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "hayvan", depo: "depo", tarlalar: "tarlalar", takvim: "takvim", rapor: "rapor",
+  const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "hayvan", buyukbas: "hayvan", kucukbas: "hayvan", depo: "depo", tarlalar: "tarlalar", takvim: "takvim", rapor: "rapor",
     vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
-  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
+  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && (t.id !== "buyukbas" || hasTur(biz, "buyukbas")) && (t.id !== "kucukbas" || hasTur(biz, "kucukbas")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
     .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t));
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
