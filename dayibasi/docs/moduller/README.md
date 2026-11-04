@@ -1,6 +1,6 @@
 # Modül oturumları (her oturum önce bunu, sonra kendi dosyasını okur)
 
-Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, klasör `dayibasi/`). Canlı: https://genelprojeler.vercel.app, panel: /panel. Ayrıntılı kurallar: `dayibasi/CLAUDE.md`, istekler: `docs/istekler.md`, plan: `docs/plan/is-plani-ve-maliyet.md`.
+Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, klasör `dayibasi/`). Canlı: https://genelprojeler.vercel.app, panel: /panel. Ayrıntılı kurallar: `dayibasi/CLAUDE.md`, istekler ve kararlar: `docs/istekler.md`, maliyet + uzun vadeli plan: `docs/plan/is-plani-ve-maliyet.md` (en alttaki "Güncelleme" bölümü geçerli), araştırmalar: `docs/arastirma/reports/`, tasarım: `docs/tasarim/`.
 
 ## Ortak kurallar (Mustafa)
 - Cevaplar kısa ve Türkçe. Kural/para/süre uydurma: sor. Gerçek veriyi silmeden/değiştirmeden önce sor.
