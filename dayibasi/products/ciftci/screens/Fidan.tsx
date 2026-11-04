@@ -13,13 +13,13 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { AKTARIM, ageText, custKey, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
+import { AKTARIM, ageText, custKey, FIDAN_SATIS, FOTO, lotStats, marginOf, pricesOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
 import { addDays, dayText, dayYear, GELIR, incomeOpen, ISLEM, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" } | { v: "musteriler" } | { v: "musteri"; key: string };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" } | { v: "musteriler" } | { v: "musteri"; key: string } | { v: "fiyat" };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -170,6 +170,19 @@ export default function Fidan() {
             <strong>{formatTL(Number(e.quantity))}</strong></div>))}
       </main>
     );
+  }
+
+  if (view.v === "fiyat") {
+    const { S, ready, reserved } = stock();
+    const alive = S.reduce((t, x) => t + x.alive, 0), cost = S.reduce((t, x) => t + x.cost, 0);
+    return <FiyatListesi sizes={sizes} prices={pricesOf(biz)} suggested={suggestedPrice(alive ? cost / alive : 0, margin)} bizName={biz.name}
+      free={Object.fromEntries(sizes.map((k) => [k, Math.max(0, (ready[k] ?? 0) - (reserved[k] ?? 0))]))} hasStock={Object.keys(ready).length > 0} onCancel={back}
+      onSave={async (fidan_prices) => {
+        const settings = { ...biz.settings, fidan_prices };
+        const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
+        if (error) throw error;
+        setBiz({ ...biz, settings });
+      }} />;
   }
 
   // --- Formlar
@@ -446,6 +459,7 @@ export default function Fidan() {
       <div className="ui-seg">
         <button type="button" onClick={() => { setDone(null); setView({ v: "stok" }); }}>Stok</button>
         <button type="button" onClick={() => { setDone(null); setView({ v: "musteriler" }); }}>Müşteriler</button>
+        <button type="button" onClick={() => { setDone(null); setView({ v: "fiyat" }); }}>Fiyat listesi</button>
       </div>
 
       <Alerts open={showAlerts} setOpen={setShowAlerts} items={dues.map((d) => ({ key: d.lot.id + d.type, red: d.late, onClick: () => setView({ v: "lot", id: d.lot.id }),
@@ -736,6 +750,41 @@ function KarOrani({ value, onSave, onCancel }: { value: number | null; onCancel:
       <TextField id="kar" label="Kâr oranı (%)" inputMode="numeric" maxLength={4} placeholder="Örnek: 40" value={v} onChange={(e) => setV(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={async () => { try { await onSave(Number(v) || 0); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+    </main>
+  );
+}
+
+/** Boy başına satış fiyatı + WhatsApp'ta paylaşma. */
+function FiyatListesi({ sizes, prices, suggested, free, hasStock, bizName, onSave, onCancel }: {
+  sizes: string[]; prices: Record<string, number>; suggested: number | null; free: Record<string, number>; hasStock: boolean; bizName: string;
+  onCancel: () => void; onSave: (p: Record<string, number>) => Promise<void>;
+}) {
+  const [v, setV] = useState<Record<string, string>>(Object.fromEntries(sizes.map((k) => [k, prices[k] ? String(prices[k]) : ""])));
+  const [withStock, setWithStock] = useState(hasStock);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const list = () => Object.fromEntries(sizes.filter((k) => num(v[k] ?? "") > 0).map((k) => [k, num(v[k])]));
+  const text = () => {
+    const p = list();
+    return [`${bizName} · Şimşir fidanı fiyat listesi`, `Tarih: ${dayYear(todayStr())}`, "",
+      ...sizes.filter((k) => p[k] && (!withStock || free[k] > 0)).map((k) => `${k}: ${formatTL(p[k])} / adet${withStock ? ` (${fmt(free[k])} adet var)` : ""}`)].join("\n");
+  };
+  return (
+    <main className="ui-stack" style={{ paddingBottom: 120 }}>
+      <BackButton onClick={onCancel} label="Fidan" />
+      <PageHeader sub="Boy başına adet fiyatı" title="Fiyat listesi" />
+      {suggested && <p className="ui-note">Önerilen: {formatTL(suggested)} / adet (ortalama maliyet + kâr oranı). Boş bıraktığın boy listede çıkmaz.</p>}
+      {sizes.map((k) => <TextField key={k} id={`fy_${k}`} label={`${k} (TL / adet)${hasStock ? ` · ${fmt(free[k] ?? 0)} adet var` : ""}`} inputMode="decimal" maxLength={10}
+        placeholder={suggested ? String(suggested) : ""} value={v[k] ?? ""} onChange={(e) => { setSaved(false); setV({ ...v, [k]: e.target.value }); }} />)}
+      {hasStock && <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Paylaşırken stok adedi yazılsın mı?</span>
+        <div className="ui-chips"><Chip selected={withStock} onClick={() => setWithStock(true)}>Evet (stoğu olmayan boy çıkmaz)</Chip><Chip selected={!withStock} onClick={() => setWithStock(false)}>Hayır</Chip></div></div>}
+      {error && <ErrorText>{error}</ErrorText>}
+      {saved && <DoneCard message="Fiyat listesi kaydedildi." />}
+      <MainButton secondary onClick={async () => { setError(""); try { await onSave(list()); setSaved(true); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+      <div className="ui-sticky-bottom"><MainButton onClick={() => {
+        if (!Object.keys(list()).length) { setError("En az bir boya fiyat yaz."); return; }
+        window.open(`https://wa.me/?text=${encodeURIComponent(text())}`, "_blank");
+      }}>WhatsApp’ta paylaş</MainButton></div>
     </main>
   );
 }
