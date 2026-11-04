@@ -294,14 +294,11 @@ a.ui-warn { color: inherit; }
 /* Gizli mod: tutarlar bulanık */
 .ui-privacy { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 10px;
   border-radius: 12px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.12); color: #fff; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-body.gizli .ui-total b, body.gizli .ui-total strong, body.gizli .ui-amount, body.gizli .ui-split b, body.gizli .rapor-kpi b,
-body.gizli .ui-moneyrow strong, body.gizli .ui-links span { filter: blur(9px); user-select: none; }
 /* Uyarılar kartı */
 .ui-alerts { border: 2px solid var(--uyari-cizgi); background: var(--uyari-acik); color: var(--uyari-yazi); border-radius: 18px; padding: 0; overflow: hidden; }
 .ui-alerts > button { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; font-weight: 800; }
 .ui-alerts .list { display: flex; flex-direction: column; gap: 8px; padding: 0 12px 12px; }
 .ui-alerts.gecti { border-color: var(--tehlike-cizgi); background: var(--tehlike-acik); color: var(--tehlike-yazi); }
-body.gizli .ui-money { filter: blur(7px); user-select: none; }
 button.ui-card.ui-stack { display: flex; flex-direction: column; text-align: left; }
 .ui-rows > .ui-row-btn { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border: 0; border-top: 1px solid var(--cizgi2); background: none; font: inherit; font-size: 0.944rem; color: inherit; text-align: left; cursor: pointer; width: 100%; }
 .ui-rows > .ui-row-btn:first-child { border-top: 0; padding-top: 0; }
@@ -442,7 +439,6 @@ body { background-image: none; background-color: var(--zemin); }
   .tab-shell main > .ui-main-btn:not(.ikincil) { max-width: 300px; min-height: 52px; align-self: flex-start; font-size: 1rem; }
 }
 .ozet-gizle .ui-privacy { position: static; background: #fff; color: var(--ana); box-shadow: var(--golge); border: 0; }
-body.gizli .ozet-k2 b, body.gizli .masa .num { filter: blur(8px); user-select: none; }
 @media (min-width: 900px) {
   .ui-nav-desk a { flex-direction: row; justify-content: flex-start; align-items: center; min-height: 0; text-align: left; }
   .ui-nav-desk a span { font-size: 0.93rem; }
@@ -506,7 +502,6 @@ body.gizli .ozet-k2 b, body.gizli .masa .num { filter: blur(8px); user-select: n
 .ozet-kar .alt { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-top: 1px solid var(--koyu-cizgi); padding-top: 12px; }
 .ozet-kar .alt span { display: flex; flex-direction: column; gap: 2px; font-size: 0.78rem; color: var(--koyu-yazi2); font-weight: 600; }
 .ozet-kar .alt b { font-size: 1.02rem; color: #fff; }
-body.gizli .ozet-kar .tutar, body.gizli .ozet-kar .alt b { filter: blur(9px); user-select: none; }
 .ozet-hizli { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .ozet-hizli a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 80px; border-radius: 16px; background: #fff; box-shadow: var(--golge);
   color: var(--ana-yazi); font-weight: 800; font-size: 0.85rem; text-decoration: none; }
@@ -537,3 +532,18 @@ html.buyuk-yazi { font-size: 118%; }
 .ozet-kar .alt { grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); }
 .ozet-kar .alt span, .ozet-kar .alt b { min-width: 0; overflow-wrap: anywhere; }
 .liste-ic div { overflow-wrap: anywhere; }
+
+/* Döviz karşılığı (kaydın günündeki kurla) */
+.ui-fx { display: block; font-size: 0.78rem; font-weight: 600; color: var(--sessiz2); white-space: nowrap; }
+.ui-total .ui-fx { color: var(--koyu-yazi2); font-size: 0.85rem; }
+.ui-moneyrow strong .ui-fx { text-align: right; }
+.ozet-kar-fx { font-size: 0.95rem; font-weight: 700; color: var(--koyu-yazi2); }
+.rapor-kpi .ui-fx, .ui-total .ui-fx { font-size: 0.8rem; white-space: normal; overflow-wrap: anywhere; }
+.mn-doviz { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--cizgi2); }
+.mn-doviz > div:first-child { display: flex; flex-direction: column; font-weight: 700; }
+
+/* Kâr kartında dönem ve göz tuşu */
+.ozet-kar .bas-sag { display: flex; gap: 6px; align-items: center; }
+.ozet-kar .kar-goz { all: unset; cursor: pointer; width: 40px; height: 40px; border-radius: 999px; background: var(--koyu-cizgi); color: #fff; display: grid; place-items: center; }
+.ozet-kar .kar-goz[aria-pressed="true"] { background: #fff; color: var(--koyu); }
+.ozet-kar .kar-goz:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }

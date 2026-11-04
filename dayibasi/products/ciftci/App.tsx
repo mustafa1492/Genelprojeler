@@ -27,6 +27,7 @@ import Makineler from "./screens/Makineler";
 import Fis from "./screens/Fis";
 import { SeasonProvider } from "./sezon";
 import { PrefsProvider } from "@/core/prefs";
+import { usePrivacy } from "@/core/ui/privacy";
 import Ayarlar from "./screens/Ayarlar";
 import Duzenle from "./screens/Duzenle";
 import Menu from "./Menu";
@@ -67,6 +68,7 @@ export default function CiftciApp({ initial }: { initial: string }) {
 function Inner({ initial }: { initial: string }) {
   const biz = useBusiness();
   const { g } = useGorunum();
+  usePrivacy();   // "Tutarları gizle" değişince her ekran yeniden çizilir (*** TL)
   // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
   const { lvl } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];

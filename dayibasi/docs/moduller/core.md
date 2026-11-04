@@ -25,6 +25,13 @@
 - Deneme (sahte sunucu, telefon 390 px + bilgisayar): özet, dönem değiştirme, Menü, Ayarlar, büyük yazı, hazır görünüm, sıralama, alt çubuk seçimi, uzun basma, yeniden açınca ayarın kalması ve 18 modül ekranı geçti; konsol hatası yok. Eksik adresler eklendi: /ciftci/takvim, /kayitlar, /fis.
 - Paket sistemi ertelendi (modüller oturunca). Hazır plan: settings.paket + app_config tanımları + panelde seçim; hazır görünümler pakete bağlanabilir.
 
+- 4 Kasım (2): **Döviz karşılığı + yeni Excel** (gelistirme, canlıda DEĞİL). Kur: TCMB döviz satış, kaydın kendi günü (hafta sonu/tatil → önceki iş günü), `/api/kur` (sunucu, önbellekli) + `core/fx.tsx` (telefonda saklar, toplu ister). Ayarlar → Döviz karşılığı: Kapalı / Dolar (varsayılan) / Euro + bugünkü kur. Görünür: masraf/gelir satırları ve toplamları, kâr kartı, sezon raporu. Excel: `core/export/xlsx.ts` `downloadBook` (gerçek Excel tabloları, tarih gerçek tarih, Toplam satırı süzmeye göre, dolar = TL/kur formül), `core/expenses/excel.ts`, `products/ciftci/excel.ts` (Özet: gelir/masraf/kâr TL+$, ay ay SUMIFS, türe ve tarlaya göre). Bütün verimi indir'e makineler, barınak, sürü, günlük kayıt, hayvanlar, hayvan olayları eklendi. LibreOffice'te yeniden hesaplatılıp karşılaştırıldı: formül hatası yok, sonuçlar aynı. Depo ve Fidan ekranlarının kendi Excel'i eski biçimde (dövizsiz) kaldı.
+
+- 4 Kasım (3): Tutarları gizle artık bulanık değil "*** TL" (formatTL ve döviz karşılığı bayrağa bakar, kök usePrivacy ile yeniden çizer; Excel ham sayı kullanır). Göz tuşu kâr kartının sağ üstünde (kâr kartı gizliyse başlıkta). Parsel sorgu düzeltmesi: CSP tkgm adresini engelliyordu (il listesi gelmiyor, "Seç" kilitli) → connect-src'ye cbsapi.tkgm.gov.tr eklendi. Bu ortamdan tarayıcıyla TKGM 403 verdi (ortam kısıtı olabilir); canlıda telefonda denenmeli.
+
 ## Sıradaki
-- Mustafa "yükle" derse main'e gönder. Gerçek telefonda bir bakılmalı (özellikle uzun basma ve Menü).
-- İsteğe bağlı: Menü'de borç/vade uyarı etiketi, bilgisayar özetini daha doldurmak.
+- **Önüne sunulacak fikir: İlaçlama saati** (hava durumuna göre saat saat uygun/değil) → `docs/fikirler/ilaclama-saati.md` (kural tablosu, yerleşim, diğer modüllere bağlama, açık sorular). Kodlanmadı; eşikler onaylanmadan yazılmayacak.
+- **NOT (Mustafa): Giriş ekranı düzenlenecek** — ne istendiği konuşulacak (görünüm, metinler, kullanıcı adı/şifre akışı?).
+- **CANLIDA** (4 Kasım, main d820174). Mustafa: bir süre yeni özellik yok, sadece hata avı. Elle test listesi: `docs/test-plani.md` (A–J). Mustafa'nın bildirdiği hatalar numarasıyla gelecek; düzelt, otomatik testi tekrar çalıştır, sonra yayınla.
+- Otomatik deneme betiği oturum geçici klasöründeydi (kalıcı değil); gerekirse yeniden yazılır: sahte Supabase (Playwright route), girişte /auth/v1/token sahte cevap, 9 yapılandırma × 22 ekran.
+- Açık küçük not: user_prefs için anon yetkisi kaldırılmadı (RLS zaten engelliyor); istenirse SQL Editor'den `revoke all on user_prefs from anon;`.

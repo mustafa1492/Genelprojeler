@@ -9,6 +9,7 @@ import { MainButton, PageHeader } from "@/core/ui";
 import { usePrivacy } from "@/core/ui/privacy";
 import { exportAll } from "../disaAktar";
 import { useGorunum } from "../gorunum";
+import { getRates, useDoviz, type Kur } from "@/core/fx";
 import { useRole } from "../rol";
 
 /** Ayarlar: kişi, defter ayarları, görünüm, veri, çıkış. */
@@ -21,6 +22,9 @@ export default function Ayarlar() {
   const can = (s: string, w = 1) => !off.includes(s) && (w === 2 ? writes(s) : sees(s));
   const privacy = usePrivacy();
   const { large, setLarge } = useGorunum();
+  const { doviz, setDoviz } = useDoviz();
+  const [kurBugun, setKurBugun] = useState<Kur | null>(null);
+  useEffect(() => { const t = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Istanbul" }); getRates([t]).then((r) => setKurBugun(r[t])).catch(() => {}); }, []);
   const [me, setMe] = useState<string | null>(null);
   const [isAdm, setIsAdm] = useState(false);
   const [msg, setMsg] = useState("");
@@ -42,7 +46,7 @@ export default function Ayarlar() {
   const download = async () => {
     if (!navigator.onLine) { setMsg("İndirmek için internet lazım."); return; }
     setExporting(true); setMsg("");
-    try { await exportAll(biz); setMsg("İndirildi: Excel (okumak için) ve .json (yedek). İkisini de iCloud'a ya da bilgisayara kaydet."); }
+    try { await exportAll(biz, { eur: doviz === "eur" }); setMsg("İndirildi: Excel (okumak için) ve .json (yedek). İkisini de iCloud'a ya da bilgisayara kaydet."); }
     catch { setMsg("İndiremedim, tekrar dene."); }
     setExporting(false);
   };
@@ -72,14 +76,19 @@ export default function Ayarlar() {
       <div className="mn-grp"><span>Görünüm</span>
         <div className="mn-liste">
           {row("duzenle", "Ekranımı düzenle", "Özet kartları, alt çubuk, kâr dönemi, hazır görünümler")}
-          <label><div>Tutarları gizle<small>Telefonu birine gösterirken rakamlar bulanık olur</small></div><input type="checkbox" checked={privacy.on} onChange={privacy.toggle} /></label>
+          <label><div>Tutarları gizle<small>Telefonu birine gösterirken para yazan her yer *** olur</small></div><input type="checkbox" checked={privacy.on} onChange={privacy.toggle} /></label>
+          <div className="mn-doviz"><div>Döviz karşılığı<small>{kurBugun ? `Bugün 1 $ = ${kurBugun.usd.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL · 1 € = ${kurBugun.eur.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL (TCMB)` : "Tutarların yanında, kaydın günündeki kurla"}</small></div>
+            <div className="mn-seg" role="group" aria-label="Döviz karşılığı" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+              {([["kapali", "Kapalı"], ["usd", "Dolar"], ["eur", "Euro"]] as const).map(([k, l]) => <button key={k} type="button" aria-pressed={doviz === k} onClick={() => setDoviz(k)}>{l}</button>)}
+            </div>
+          </div>
           <label><div>Büyük yazı<small>Bütün ekranlarda yazılar büyür</small></div><input type="checkbox" checked={large} onChange={(e) => setLarge(e.target.checked)} /></label>
         </div>
       </div>
 
       <div className="mn-grp"><span>Veri</span>
         <div className="mn-liste">
-          {can("rapor") && <button type="button" disabled={exporting} onClick={download}><div>{exporting ? "Hazırlanıyor…" : "Bütün verimi indir"}<small>Excel ve yedek dosyası</small></div><i aria-hidden="true">›</i></button>}
+          {can("rapor") && <button type="button" disabled={exporting} onClick={download}><div>{exporting ? "Hazırlanıyor…" : "Bütün verimi indir"}<small>Excel (özet, ay ay, dolar karşılığı) ve yedek dosyası</small></div><i aria-hidden="true">›</i></button>}
           {row("gecmis", "Geçmiş", "Kim ne zaman ne değiştirdi")}
           {isAdm && <a href="/panel"><div>Yönetim paneli<small>Bütün hesaplar ve defterler (bilgisayardan)</small></div><i aria-hidden="true">›</i></a>}
         </div>

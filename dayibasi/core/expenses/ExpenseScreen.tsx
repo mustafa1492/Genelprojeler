@@ -1,13 +1,15 @@
 "use client";
 // Ortak masraf ekranı (dayıbaşı + çiftçi defteri). Ürün farkları prop olarak gelir.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { useBusiness, useSetBusiness } from "@/core/auth/AuthGate";
 import { todayIstanbul } from "@/core/events/api";
 import {
   addExpense, deleteExpense, listExpenses, owed, payVendor, receiptUrl, restoreExpense, updateExpense, uploadReceipt, type Expense,
 } from "@/core/expenses/api";
-import { downloadXlsx } from "@/core/export/xlsx";
+import { downloadBook } from "@/core/export/xlsx";
+import { fmtFx, getRates, useRates } from "@/core/fx";
+import { masrafOzet, masrafSheet } from "./excel";
 import { formatTL } from "@/core/ledger/api";
 import type { Person } from "@/core/people/api";
 import type { Place } from "@/core/places/api";
@@ -34,7 +36,7 @@ export type ExpenseScreenProps = {
   /** Sezon görünümü (çiftçi): seçili dönem + seçici + özet kartı. Verilirse "Ay ay / Sezon" düğmeleri çıkar. */
   period?: { name: string; start: string; end: string };
   periodPicker?: React.ReactNode;
-  periodSummary?: (total: number) => React.ReactNode;
+  periodSummary?: (total: number, fx?: string) => React.ReactNode;   // fx: döviz karşılığı yazısı ("≈ 1.234 $") ya da boş
   /** Ek bağlantı (ör. fidan partisi): seçilen id data[key]'e yazılır. */
   link?: { label: string; key: string; options: { id: string; name: string }[]; param: string };
   /** Masrafla birlikte depoya ekleme: masraf türü → depo türü (yoksa null). */
@@ -86,6 +88,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   const custom = (Array.isArray(biz.settings?.expense_categories) ? biz.settings!.expense_categories : []) as string[];
   const categories = onEditCategories ? [...baseCats] : [...baseCats.filter((c) => c !== "Diğer"), ...custom.filter((c) => !baseCats.includes(c)), "Diğer"];
   const all = items ?? [];
+  const { doviz, conv } = useRates(useMemo(() => all.map((e) => e.occurred_on), [all]));   // döviz karşılığı (kaydın günündeki kur)
   const lastOf = (cat: string) => all.find((e) => e.category === cat)?.amount;
   const vendors = [...new Set(all.map((e) => e.vendor).filter(Boolean) as string[])];
   const farmerName = (id: string | null) => farmers.find((f) => f.id === id)?.full_name ?? "";
@@ -221,21 +224,16 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   const perMonth = [...new Set(mine.map((e) => e.occurred_on.slice(0, 7)))].sort().map((m) => ({ m, t: mine.filter((e) => e.occurred_on.startsWith(m)).reduce((s, e) => s + e.amount, 0) }));
   const maxM = Math.max(1, ...perMonth.map((x) => x.t));
 
-  const excel = () => downloadXlsx(`masraflar-${bySeason ? period!.name.replace(/\s+/g, "-") : month}`, [
-    { name: "Masraflar", title: `${biz.name} · Masraflar · ${label}`, rows: [
-      ["Tarih", "Tür", "Tutar (TL)", ...(places.length ? ["Tarla"] : []), "Not", "Veresiye (kime)", "Kalan borç (TL)", ...(farmers.length ? ["Çiftçiye yansıtıldı"] : []), "Fiş", ...(memberName ? ["Giren"] : [])],
-      ...inMonth.slice().sort((a, b) => a.occurred_on.localeCompare(b.occurred_on)).map((e) => [
-        `${e.occurred_on.slice(8)}.${e.occurred_on.slice(5, 7)}.${e.occurred_on.slice(0, 4)}`, e.category, e.amount, ...(places.length ? [placeName(e.place_id)] : []), e.note ?? "",
-        e.on_credit ? e.vendor ?? "" : "", e.on_credit ? owed(e) : "", ...(farmers.length ? [farmerName(e.charge_to)] : []), e.photo_path ? "var" : "",
-        ...(memberName ? [memberName((e as Expense & { created_by?: string }).created_by)] : [])]),
-    ] },
-    { name: "Özet", title: `${biz.name} · Masraf özeti · ${label}`, rows: [
-      [label, ""], [],
-      ["Tür", "Toplam (TL)"], ...byCat.map((x) => [x.c, x.t]), ["Toplam masraf", total], [],
-      ...(bySeason ? [["Ay", "Toplam (TL)"], ...perMonth.map((x) => [monthName(x.m), x.t]), []] : summaryRows ? summaryRows(month, total) : []),
-      ...(charged ? [["Çiftçiye yansıtılan", charged]] : []), ["Veresiye borcun (bugün)", totalOwed],
-    ] },
-  ]);
+  const totalFx = inMonth.filter((e) => !e.charge_to).reduce((t, e) => { const v = conv(e.amount, e.occurred_on); return v == null || t == null ? null : t + v; }, 0 as number | null);
+  const excel = async () => {
+    const fx = doviz === "kapali" || !navigator.onLine ? null : { rates: await getRates(inMonth.map((e) => e.occurred_on)), eur: doviz === "eur" };
+    const M = masrafSheet(inMonth, places.map((p) => ({ id: p.id, name: p.name })), fx, { title: `${biz.name} · Masraflar · ${label}`,
+      who: memberName ? (id) => memberName(id) : undefined, extra: farmers.length ? [{ h: "Çiftçiye yansıtıldı", get: (e) => farmerName(e.charge_to) }] : [] });
+    await downloadBook(`masraflar-${bySeason ? period!.name.replace(/\s+/g, "-") : month}`, [
+      masrafOzet(M, mine, fx, `${biz.name} · Masraf özeti`, label, [...(charged ? [["Çiftçiye yansıtılan (toplama girmez)", charged] as [string, number]] : []), ...(!bySeason && summaryRows ? summaryRows(month, total).filter((r) => r.length === 2 && typeof r[1] === "number").map((r) => [String(r[0]), Number(r[1])] as [string, number]) : []), ["Veresiye borcun (bugün)", totalOwed]]),
+      M,
+    ]);
+  };
 
   return (
     <main className="ui-has-nav ui-stack">
@@ -258,8 +256,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
       )}
 
       {bySeason
-        ? (periodSummary ? periodSummary(total) : <div className="ui-total"><span>{label} masraf</span><b>{formatTL(total)}</b></div>)
-        : summary ? summary(month, total) : <div className="ui-total"><span>Bu ay masraf</span><b>{formatTL(total)}</b></div>}
+        ? (periodSummary ? periodSummary(total, totalFx != null && total > 0 ? fmtFx(totalFx, doviz) : "") : <div className="ui-total"><span>{label} masraf</span><b>{formatTL(total)}</b>{totalFx != null && doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(totalFx, doviz)}</small>}</div>)
+        : summary ? summary(month, total) : <div className="ui-total"><span>Bu ay masraf</span><b>{formatTL(total)}</b>{totalFx != null && doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(totalFx, doviz)}</small>}</div>}
       {bySeason && perMonth.length > 0 && (
         <div className="ui-card ui-stack" style={{ gap: 10 }}>
           <b>Ay ay</b>
@@ -301,7 +299,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
           { label: "Not", cell: (e) => [e.note, (e.data?.branch as string) || ""].filter(Boolean).join(" · ") },
           { label: "Durum", cell: (e) => e.on_credit ? (owed(e) ? <Tag tone="kirmizi">Veresiye: {e.vendor}</Tag> : <Tag tone="yesil">Ödendi</Tag>) : e.charge_to ? <Tag tone="gri">Yansıtıldı</Tag> : <Tag tone="yesil">{e.photo_path ? "Ödendi · fişli" : "Ödendi"}</Tag> },
           ...(memberName ? [{ label: "Giren", cell: (e: Expense) => memberName((e as Expense & { created_by?: string }).created_by) }] : []),
-          { label: "Tutar", num: true, cell: (e) => <b>{formatTL(e.amount)}</b> },
+          { label: "Tutar", num: true, cell: (e) => <><b>{formatTL(e.amount)}</b>{doviz !== "kapali" && <small className="ui-fx ui-money" style={{ display: "block" }}>{fmtFx(conv(e.amount, e.occurred_on), doviz)}</small>}</> },
         ]} />
       {days.map((d) => (
         <section key={d} className="ui-stack only-mobile" style={{ gap: 8 }}>
@@ -311,7 +309,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
               onClick={() => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}>
               <b style={{ minWidth: 0 }}>{e.category}{e.photo_path ? " · fişli" : ""}
                 <small>{[placeName(e.place_id), (e.data?.branch as string) || "", e.note, memberName ? memberName((e as Expense & { created_by?: string }).created_by) : "", e.on_credit ? `Veresiye: ${e.vendor}${owed(e) ? "" : " (ödendi)"}` : "", e.charge_to ? `Yansıtıldı: ${farmerName(e.charge_to)}` : ""].filter(Boolean).join(" · ") || "Düzenlemek için dokun"}</small></b>
-              <strong>{formatTL(e.amount)}</strong>
+              <strong>{formatTL(e.amount)}{doviz !== "kapali" && <small className="ui-fx">{fmtFx(conv(e.amount, e.occurred_on), doviz)}</small>}</strong>
             </button>
           ))}
         </section>

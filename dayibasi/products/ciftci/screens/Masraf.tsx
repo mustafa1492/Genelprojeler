@@ -44,9 +44,9 @@ export default function Masraf() {
       link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
       stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: invUnits }}
       period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}
-      periodSummary={(total) => (
+      periodSummary={(total, fx) => (
         <div className="ui-total">
-          <span>{S.name} sezonu masraf</span><b>{formatTL(total)}</b>
+          <span>{S.name} sezonu masraf</span><b>{formatTL(total)}</b>{fx && <small className="ui-fx ui-money">{fx}</small>}
           <div className="ui-total-row">
             <div><span>Sezon geliri</span><strong>{formatTL(gelirS)}</strong></div>
             <div><span>Kâr / zarar</span><strong>{formatTL(gelirS - total)}</strong></div>

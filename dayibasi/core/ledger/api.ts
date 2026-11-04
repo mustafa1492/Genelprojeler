@@ -1,3 +1,4 @@
+import { MASK, moneyHidden } from "@/core/ui/privacy";
 import { mutate, query } from "@/core/offline/store";
 import { supabase } from "@/core/supabase/client";
 
@@ -34,4 +35,6 @@ export async function deleteEntry(id: string) {
   await mutate({ kind: "delete", table: "ledger_entries", key: id });
 }
 
-export const formatTL = (n: number) => `${n.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} TL`;
+/** Ekranda para: "Tutarları gizle" açıksa "*** TL". Dosyaya yazarken formatTLRaw kullan. */
+export const formatTL = (n: number) => (moneyHidden() ? `${MASK} TL` : formatTLRaw(n));
+export const formatTLRaw = (n: number) => `${n.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} TL`;

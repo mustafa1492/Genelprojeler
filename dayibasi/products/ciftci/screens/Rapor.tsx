@@ -1,12 +1,14 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { listDues, remaining, type Due } from "@/core/dues/api";
 import { listEvents, type EventRow } from "@/core/events/api";
 import { listExpenses, owed, type Expense } from "@/core/expenses/api";
-import { downloadXlsx } from "@/core/export/xlsx";
+import { downloadBook, xDate } from "@/core/export/xlsx";
+import { fmtFx, useRates } from "@/core/fx";
+import { fxFor, gelirSheet, masrafSheet, ozetSheet } from "../excel";
 import { listItems, type Item } from "@/core/inventory/api";
-import { formatTL } from "@/core/ledger/api";
+import { formatTL, formatTLRaw } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { BackButton, MainButton } from "@/core/ui";
@@ -36,6 +38,7 @@ export default function Rapor() {
   }, [biz.id]);
   useEffect(load, [load]);
   useOnActivate(load);
+  const { doviz, conv } = useRates(useMemo(() => [...exp.map((e) => e.occurred_on), ...ev.filter((e) => e.kind === GELIR).map((e) => e.occurred_on)], [exp, ev]));
 
   const E = exp.filter((e) => inSeason(e.occurred_on, S)).sort((a, b) => a.occurred_on.localeCompare(b.occurred_on));
   const G = ev.filter((e) => e.kind === GELIR && inSeason(e.occurred_on, S)).sort((a, b) => a.occurred_on.localeCompare(b.occurred_on));
@@ -54,7 +57,7 @@ export default function Rapor() {
     const p = places.find((x) => x.id === id); const d = Number(p?.custom?.donum) || 0;
     const v = V.filter((e) => e.place_id === id).map((e) => `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}`).join(", ");
     const b = breakEven(m, V.filter((e) => e.place_id === id));
-    return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
+    return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "", beRaw: b ? `${formatTLRaw(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
   }).filter((x) => x.m || x.g || x.v);
   // Geçen sezon: başlangıcı bundan önce olan en yakın sezon; yoksa aynı tarihlerin bir yıl öncesi
   const yr = (d: string, k: number) => `${Number(d.slice(0, 4)) + k}${d.slice(4)}`;
@@ -78,27 +81,38 @@ export default function Rapor() {
   const borc = dues.filter((d) => d.direction === "borc").reduce((t, d) => t + remaining(d), 0) + exp.reduce((t, e) => t + owed(e), 0);
   const alacak = dues.filter((d) => d.direction === "alacak").reduce((t, d) => t + remaining(d), 0) + ev.filter((e) => e.kind === GELIR).reduce((t, e) => t + incomeOpen(e), 0);
 
-  const excel = () => downloadXlsx(`${biz.name}-${S.name}-sezon-raporu`.replace(/\s+/g, "-"), [
-    { name: "Özet", title: `${biz.name} · ${S.name} sezonu (${tr(S.start)} – ${tr(S.end)})`, rows: [
-      ["Kalem", "Tutar (TL)"], ["Gelir", gelir], ["Masraf", masraf], ["Kâr / zarar", gelir - masraf], ["Alınacak (vadeli satış)", alinacak], [],
-      ["Masraf türü", "Toplam (TL)"], ...cats.map((x) => [x.c, x.t]), ["Toplam masraf", masraf], [],
-      ["Ay", "Masraf (TL)"], ...months.map((x) => [monthName(x.m), x.t]),
-      ...(hasPrev ? [[], ["Geçen sezonla", S.name, P.name], ...cmpRows.map(([k, a, b]) => [k, a, b]), ...crops.map((c) => { const [crop, unit] = c.split("|"); return [`Verim ${crop} (${unit})`, vSum(V, c), vSum(VP, c)]; })] : []),
-      ...(multi ? [[], ["İş", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)"], ...branches.map((x) => [x.b === "Genel" ? "Genel (ortak)" : x.b, x.m, x.g, x.b === "Genel" ? "" : x.kar])] : []),
-    ] },
-    { name: "Tarlalar", title: `Tarla tarla · ${S.name}`, rows: [["Tarla", "Dekar", "Masraf (TL)", "Gelir (TL)", "Kâr (TL)", "Dekar başı masraf (TL)", "Verim", "Başabaş fiyatı"],
-      ...fields.map((f) => [f.name, f.d || "", f.m, f.g, f.kar, f.d ? Math.round(f.m / f.d) : "", f.v, f.be])] },
-    { name: "Masraflar", title: `Masraflar · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not", "Veresiye (kime)", ...(multi ? ["İş"] : [])],
-      ...E.map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? "", e.on_credit ? e.vendor ?? "" : "", ...(multi ? [bOf(e)] : [])]), ["Toplam", "", "", masraf]] },
-    ...(multi ? isler.concat("Genel").filter((b) => E.some((e) => bOf(e) === b)).map((b) => ({ name: `${b} masrafı`.slice(0, 31), title: `${b === "Genel" ? "Genel (ortak)" : b} masrafları · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not"],
-      ...E.filter((e) => bOf(e) === b).map((e) => [tr(e.occurred_on), e.category, pName(e.place_id), e.amount, e.note ?? ""]), ["Toplam", "", "", E.filter((e) => bOf(e) === b).reduce((t, e) => t + e.amount, 0)]] })) : []),
-    { name: "Gelir", title: `Gelir · ${S.name}`, rows: [["Tarih", "Tür", "Tarla", "Ürün", "Miktar", "Birim", "Toplam (TL)", "Alıcı", "Alınacak (TL)"],
-      ...G.map((e) => [tr(e.occurred_on), String(e.data.type), pName(e.place_id), String(e.data.crop ?? ""), Number(e.data.qty ?? 0) || "", String(e.data.unit ?? ""), Number(e.quantity), String(e.data.buyer ?? ""), incomeOpen(e)]),
-      ["Toplam", "", "", "", "", "", gelir, "", alinacak]] },
-    { name: "Tarla işleri", title: `Tarla günlüğü · ${S.name}`, rows: [["Tarih", "Tarla", "İşlem", "Ürün / ilaç", "Doz", "Bekleme (gün)", "Not"],
-      ...OPS.map((e) => [tr(e.occurred_on), pName(e.place_id), String(e.data.type), String(e.data.product ?? ""), String(e.data.dose ?? ""), Number(e.data.wait_days ?? 0) || "", String(e.data.note ?? "")])] },
-    { name: "Depo", title: `Depo · ${new Date().toLocaleDateString("tr-TR")}`, rows: [["Malzeme", "Tür", "Miktar", "Birim"], ...items.map((i) => [i.name, i.category, i.quantity, i.unit])] },
-  ]);
+  const fxSum = (L: { amt: number; d: string }[]) => (doviz === "kapali" ? null : L.reduce<number | null>((t, x) => { const v = conv(x.amt, x.d); return t == null || v == null ? null : t + v; }, 0));
+  const fxM = fxSum(E.map((e) => ({ amt: e.amount, d: e.occurred_on }))), fxG = fxSum(G.map((e) => ({ amt: Number(e.quantity ?? 0), d: e.occurred_on })));
+  const excel = async () => {
+    const PL = places.map((p) => ({ id: p.id, name: p.name }));
+    const fx = doviz === "kapali" || !navigator.onLine ? null : await fxFor([...E.map((e) => e.occurred_on), ...G.map((e) => e.occurred_on)], doviz === "eur");
+    const M = masrafSheet(E, PL, fx, { title: `Masraflar · ${S.name}`, ...(multi ? { extra: [{ h: "İş", get: (e: Expense) => bOf(e) }] } : {}) });
+    const GS = gelirSheet(G, PL, fx, { title: `Gelirler · ${S.name}` });
+    const oz = ozetSheet({ title: `${biz.name} · ${S.name} sezonu`, sub: `${tr(S.start)} – ${tr(S.end)} · Hazırlandı: ${tr(new Date().toISOString().slice(0, 10))}`, M, G: GS, exp: E, gel: G, fx, places: PL, borc, alacak: alinacak });
+    // Geçen sezonla ve iş iş: özetin altına
+    if (hasPrev) {
+      oz.rows.push({ cells: [] }, { cells: [`Geçen sezonla (${P.name})`], style: "section" }, { cells: ["", S.name, P.name, "Fark"], style: "head" });
+      for (const [k, a, b] of cmpRows) { const r = oz.rows.length + 1; oz.rows.push({ cells: [k, a, b, { f: `=IF(C${r}<>0,(B${r}-C${r})/ABS(C${r}),"")`, v: b ? (a - b) / Math.abs(b) : "" }], fmt: [undefined, "tl", "tl", "pct"] }); }
+      for (const c of crops) { const [crop, unit] = c.split("|"); const r = oz.rows.length + 1; const a = vSum(V, c), b = vSum(VP, c); oz.rows.push({ cells: [`Verim ${crop} (${unit})`, a, b, { f: `=IF(C${r}<>0,(B${r}-C${r})/ABS(C${r}),"")`, v: b ? (a - b) / b : "" }], fmt: [undefined, "num", "num", "pct"] }); }
+    }
+    if (multi) {
+      oz.rows.push({ cells: [] }, { cells: ["İş iş"], style: "section" }, { cells: ["İş", "Gelir (TL)", "Masraf (TL)", "Kâr (TL)"], style: "head" });
+      for (const x of branches) { const r = oz.rows.length + 1; oz.rows.push({ cells: [x.b === "Genel" ? "Genel (ortak)" : x.b, x.g, x.m, x.b === "Genel" ? "" : { f: `=B${r}-C${r}`, v: x.kar }], fmt: [undefined, "tl", "tl", "tl"] }); }
+    }
+    await downloadBook(`${biz.name}-${S.name}-sezon-raporu`.replace(/\s+/g, "-"), [
+      oz,
+      { name: "Tarla tarla", title: `Tarla tarla · ${S.name}`, info: ["Kâr ve dekar başı masraf formüldür."],
+        cols: [{ h: "Tarla", t: "text", w: 20 }, { h: "Dekar", t: "num", sum: true }, { h: "Gelir (TL)", t: "tl" }, { h: "Masraf (TL)", t: "tl" }, { h: "Kâr (TL)", t: "tl" }, { h: "Dekar başı masraf (TL)", t: "tl", sum: false }, { h: "Verim", t: "text", w: 20 }, { h: "Başabaş fiyatı", t: "text", w: 16 }],
+        rows: fields.map((f) => [f.name, f.d || null, f.g, f.m, { f: "={C:Gelir (TL)}{r}-{C:Masraf (TL)}{r}", v: f.kar }, { f: "=IF(N({C:Dekar}{r})>0,{C:Masraf (TL)}{r}/{C:Dekar}{r},\"\")", v: f.d ? f.m / f.d : "" }, f.v, f.beRaw]) },
+      M, GS,
+      { name: "Tarla işleri", title: `Tarla günlüğü · ${S.name}`, totals: false,
+        cols: [{ h: "Tarih", t: "date" }, { h: "Tarla", t: "text" }, { h: "İşlem", t: "text" }, { h: "Ürün / ilaç", t: "text" }, { h: "Doz", t: "text" }, { h: "Bekleme (gün)", t: "num", sum: false }, { h: "Not", t: "text", w: 30 }],
+        rows: OPS.map((e) => [xDate(e.occurred_on), pName(e.place_id), String(e.data.type), String(e.data.product ?? ""), String(e.data.dose ?? ""), Number(e.data.wait_days ?? 0) || null, String(e.data.note ?? "")]) },
+      { name: "Depo", title: `Depo · ${new Date().toLocaleDateString("tr-TR")}`, totals: false,
+        cols: [{ h: "Malzeme", t: "text", w: 22 }, { h: "Tür", t: "text" }, { h: "Miktar", t: "num", sum: false }, { h: "Birim", t: "text" }],
+        rows: items.map((i) => [i.name, i.category, i.quantity, i.unit]) },
+    ], { title: `${biz.name} ${S.name} sezon raporu` });
+  };
 
   return (
     <main className="ui-stack rapor">
@@ -118,9 +132,9 @@ export default function Rapor() {
       </header>
 
       <div className="rapor-kpi">
-        <div><span>Gelir</span><b>{formatTL(gelir)}</b></div>
-        <div><span>Masraf</span><b>{formatTL(masraf)}</b></div>
-        <div className={gelir - masraf >= 0 ? "pos" : "neg"}><span>Kâr / zarar</span><b>{formatTL(gelir - masraf)}</b></div>
+        <div><span>Gelir</span><b>{formatTL(gelir)}</b>{fxG != null && <small className="ui-fx">{fmtFx(fxG, doviz)}</small>}</div>
+        <div><span>Masraf</span><b>{formatTL(masraf)}</b>{fxM != null && <small className="ui-fx">{fmtFx(fxM, doviz)}</small>}</div>
+        <div className={gelir - masraf >= 0 ? "pos" : "neg"}><span>Kâr / zarar</span><b>{formatTL(gelir - masraf)}</b>{fxG != null && fxM != null && <small className="ui-fx">{fmtFx(fxG - fxM, doviz)} (her kayıt kendi günündeki kurla)</small>}</div>
       </div>
       {(alinacak > 0 || borc > 0 || alacak > 0) && <p className="ui-note">Alınacak (bu sezonun satışları): {formatTL(alinacak)} · Bugün toplam borç: {formatTL(borc)} · alacak: {formatTL(alacak)}</p>}
 
