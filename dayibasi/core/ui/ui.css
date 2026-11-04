@@ -413,7 +413,7 @@ body { background-image: none; background-color: var(--zemin); }
   .only-mobile { display: none !important; }
   /* Yan menü: koyu yeşil, gruplu */
   .ui-nav { top: 0; bottom: 0; right: auto; width: 240px; display: block; padding: 18px 12px; background: #16301A; border: 0; overflow-y: auto; }
-  .ui-nav a.m { display: none; }
+  .ui-nav a.m, .ui-nav button.ui-nav-menu { display: none; }
   .ui-nav-desk { display: flex; flex-direction: column; gap: 2px; }
   .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; color: #fff; }
   .ui-nav-brand img { border-radius: 10px; background: #FDF4E3; }
@@ -521,10 +521,11 @@ body.gizli .ozet-kar .tutar, body.gizli .ozet-kar .alt b { filter: blur(9px); us
 /* --- Büyük yazı (Ayarlar) --- */
 html.buyuk-yazi { font-size: 118%; }
 @supports (font: -apple-system-body) { html.buyuk-yazi { font-size: 118%; } }
-@media (min-width: 900px) { .ui-sheet-bg { display: none; } }
+@media (min-width: 900px) { .ui-sheet-bg, .ui-nav button.ui-nav-menu { display: none; } }
 /* Bilgisayar: özet iki sütun, kâr kartı ve hızlı düğmeler tam genişlik */
 @media (min-width: 900px) {
   .ozet-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; }
   .ozet-izgara > .ozet-selam, .ozet-izgara > .ui-header, .ozet-izgara > .ozet-ipucu, .ozet-izgara > .ui-empty, .ozet-izgara > :not(.ozet-blok) { grid-column: 1 / -1; }
   .ozet-izgara > .ozet-blok:has(.ozet-kar), .ozet-izgara > .ozet-blok:has(.ozet-hizli) { grid-column: 1 / -1; }
 }
+@media (min-width: 900px) { .ozet-ipucu { display: none; } }
