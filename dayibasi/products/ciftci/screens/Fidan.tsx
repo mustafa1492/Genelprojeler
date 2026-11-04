@@ -19,7 +19,7 @@ import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" } | { v: "musteriler" } | { v: "musteri"; key: string } | { v: "fiyat" };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" } | { v: "musteriler" } | { v: "musteri"; key: string } | { v: "fiyat" } | { v: "odeme"; key: string };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -146,6 +146,23 @@ export default function Fidan() {
     );
   }
 
+  if (view.v === "odeme") {
+    const c = customers().find((x) => x.key === view.key);
+    if (c) return <OdemeForm name={c.name} open={c.open} onCancel={() => setView({ v: "musteri", key: c.key })} onSave={async (amt) => {
+      // Ödeme en eski satıştan başlayarak düşer (Mustafa, 4 Kasım 2026).
+      const due = c.sales.filter((e) => incomeOpen(e) > 0).sort((a, b) => (a.occurred_on + (a.created_at ?? "")).localeCompare(b.occurred_on + (b.created_at ?? "")));
+      const before: EventRow[] = []; let left = amt;
+      for (const e of due) {
+        if (left <= 0) break;
+        const take = Math.min(left, incomeOpen(e)); left = Math.round((left - take) * 100) / 100;
+        before.push(e); await updateEvent(e.id, { data: { ...e.data, received: Math.round((Number(e.data.received ?? 0) + take) * 100) / 100 } });
+      }
+      setDone({ message: `Tahsil ettim: ${c.name}, ${formatTL(amt)}. Kalan borç ${formatTL(Math.max(0, Math.round((c.open - amt) * 100) / 100))}.`,
+        undo: async () => { for (const e of before) await updateEvent(e.id, { data: e.data }); } });
+      setView({ v: "musteri", key: c.key }); load();
+    }} />;
+  }
+
   if (view.v === "musteri") {
     const c = customers().find((x) => x.key === view.key);
     if (!c) return <main className="ui-stack"><BackButton onClick={() => setView({ v: "musteriler" })} label="Müşteriler" /><div className="ui-empty">Bu müşteri bulunamadı.</div></main>;
@@ -157,9 +174,10 @@ export default function Fidan() {
       <main className="ui-stack">
         <BackButton onClick={() => setView({ v: "musteriler" })} label="Müşteriler" />
         <PageHeader sub={`${fmt(c.qty)} fidan · ${formatTL(c.total)}`} title={c.name} />
+        {doneCard}
         <div className="ui-total"><span>Kalan borç</span><b>{formatTL(c.open)}</b></div>
-        {c.open > 0 && <MainButton onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank")}>Hesabı WhatsApp’tan gönder</MainButton>}
-        <p className="ui-note">Ödeme alınca Gelir’de o satışı açıp “alınan” tutarı değiştir; borç buradan düşer.</p>
+        {c.open > 0 && <MainButton onClick={() => { setDone(null); setView({ v: "odeme", key: c.key }); }}>Ödeme al</MainButton>}
+        {c.open > 0 && <MainButton secondary onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank")}>Hesabı WhatsApp’tan gönder</MainButton>}
         {c.orders.length > 0 && <><h2 className="ui-section">Bekleyen siparişler</h2>
           {c.orders.map((o) => <button key={o.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "siparis", edit: o })}>
             <b>{fmt(Number(o.data.qty))} adet{o.data.size ? ` · ${String(o.data.size)}` : ""}<small>{[o.data.due_on ? `teslim ${dayText(String(o.data.due_on))}` : "", o.data.deposit ? `kapora ${formatTL(Number(o.data.deposit))}` : ""].filter(Boolean).join(" · ")}</small></b>
@@ -750,6 +768,29 @@ function KarOrani({ value, onSave, onCancel }: { value: number | null; onCancel:
       <TextField id="kar" label="Kâr oranı (%)" inputMode="numeric" maxLength={4} placeholder="Örnek: 40" value={v} onChange={(e) => setV(e.target.value.replace(/\D/g, ""))} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       {error && <ErrorText>{error}</ErrorText>}
       <MainButton onClick={async () => { try { await onSave(Number(v) || 0); } catch { setError("Kaydedemedim, internet lazım."); } }}>Kaydet</MainButton>
+    </main>
+  );
+}
+
+/** Müşteriden ödeme: tutar en eski borçlu satıştan başlayarak düşer. */
+function OdemeForm({ name, open, onSave, onCancel }: { name: string; open: number; onCancel: () => void; onSave: (amt: number) => Promise<void> }) {
+  const [v, setV] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <main className="ui-stack">
+      <BackButton onClick={onCancel} label="Vazgeç" />
+      <PageHeader sub={`Borcu ${formatTL(open)}`} title={`Ödeme al: ${name}`} />
+      <TextField id="odeme" label="Alınan para (TL)" inputMode="decimal" maxLength={12} value={v} onChange={(e) => setV(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
+      <button type="button" className="ui-link" onClick={() => setV(String(open))}>Borcun hepsi: {formatTL(open)}</button>
+      <p className="ui-note">Para en eski satıştan başlayarak düşülür.</p>
+      {error && <ErrorText>{error}</ErrorText>}
+      <MainButton disabled={busy} onClick={async () => {
+        const n = Math.round(num(v) * 100) / 100;
+        if (!(n > 0)) { setError("Alınan parayı yaz."); return; }
+        if (n > open + 0.001) { setError(`Borcu ${formatTL(open)}, fazlası yazılamaz.`); return; }
+        setBusy(true); try { await onSave(n); } catch { setError("Kaydedemedim."); setBusy(false); }
+      }}>Tamam</MainButton>
     </main>
   );
 }
