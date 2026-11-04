@@ -15,7 +15,8 @@
 - Android (TWA) paketi.
 - Taslakta tablonun sağında ayrıntı paneli vardı, yapılmadı (isteğe bağlı).
 
-## Bekleyen istekler (diğer oturumlardan)
+## Bekleyen istekler
+- (Kanatlı, 4 Kasım 2026) Canlıda 0013_yedek uygulanmamış (`yedek.al` yok, gece yedeği çalışmıyor). Uygulanınca 0018_hayvan.sql sonundaki yedek bölümü de çalıştırılmalı (barns/herds/herd_days yedeğe girsin). (diğer oturumlardan)
 - (yok)
 
 ## Nerede kaldık

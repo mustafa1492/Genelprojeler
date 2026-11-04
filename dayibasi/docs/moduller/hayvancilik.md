@@ -21,5 +21,9 @@
 - Mandıra süt parası hesabı, çobana ödeme şekli, ortaklı sürü.
 - Deneyecek gerçek bir hayvancı.
 
+## Ortak iskelet hazır (kanatlı oturumu kurdu, 4 Kasım 2026)
+- Tablolar `barns`, `herds`, `herd_days` (göç 0018, `species` alanıyla), yetki ekranı `hayvan`, kod `products/ciftci/hayvan/` (api.ts, hayvan.ts, Barinak.tsx). Ayrıntı: `kanatli.md` "Yapı".
+- Küçükbaş/büyükbaş için: `TURLER` içindeki adları kontrol et, App.tsx'e `<Barinak species="kucukbas" />` sekmesi ve panele modül kutusu ekle. Küpe kartı ve üreme döngüsü bu oturumda, ayrı tablo olarak.
+
 ## Nerede kaldık
 - Başlanmadı (plan: Aralık).
