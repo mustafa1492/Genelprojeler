@@ -26,5 +26,6 @@
 - Paket sistemi ertelendi (modüller oturunca). Hazır plan: settings.paket + app_config tanımları + panelde seçim; hazır görünümler pakete bağlanabilir.
 
 ## Sıradaki
-- Mustafa "yükle" derse main'e gönder. Gerçek telefonda bir bakılmalı (özellikle uzun basma ve Menü).
-- İsteğe bağlı: Menü'de borç/vade uyarı etiketi, bilgisayar özetini daha doldurmak.
+- **CANLIDA** (4 Kasım, main d820174). Mustafa: bir süre yeni özellik yok, sadece hata avı. Elle test listesi: `docs/test-plani.md` (A–J). Mustafa'nın bildirdiği hatalar numarasıyla gelecek; düzelt, otomatik testi tekrar çalıştır, sonra yayınla.
+- Otomatik deneme betiği oturum geçici klasöründeydi (kalıcı değil); gerekirse yeniden yazılır: sahte Supabase (Playwright route), girişte /auth/v1/token sahte cevap, 9 yapılandırma × 22 ekran.
+- Açık küçük not: user_prefs için anon yetkisi kaldırılmadı (RLS zaten engelliyor); istenirse SQL Editor'den `revoke all on user_prefs from anon;`.
