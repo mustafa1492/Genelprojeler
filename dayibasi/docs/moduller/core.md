@@ -20,3 +20,7 @@
 
 ## Nerede kaldık
 - Fikir dönemi; Mustafa "ikinci emre kadar uygulamaya bir şey getirme" dedi.
+- 4 Kasım: Paket sistemi seçildi, plan sunuldu (kod yazılmadı). Plan: settings.paket (basit/orta/tam, sadece yönetici değiştirir, keep_modules gibi tetikleyici) + paket tanımları (öneri: app_config, panelden düzenlenir) + panelde paket seçimi/sütunu + uygulamada görünen ekran = paketin izinleri − hidden_screens.
+
+## Sıradaki
+- Mustafa'dan cevap bekleniyor: 1) her pakette hangi ekran/modüller açık, 2) mevcut defterler hangi pakete (öneri: Tam), 3) tanımlar app_config'te mi sabit dosyada mı. Cevap + onay gelince `gelistirme` dalında kodla; canlıya sadece "yükle" deyince.
