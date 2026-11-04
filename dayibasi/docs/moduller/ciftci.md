@@ -16,4 +16,5 @@ Tarlalar (köy/ilçe → hava), tarla günlüğü (ilaçlama bekleme, sulama saa
 Ayrıntı: `docs/istekler.md`, `docs/arastirma/research_notes/Kanatlı çiftlik modülü/ciftci_defteri_ek_ozellikler.md`.
 
 ## Nerede kaldık
-- Bekliyor (fikir dönemi).
+- 2026-11-04: `modul/ciftci` dalı `gelistirme`'den açıldı. Sıradaki 1 (tapudan tarla) seçildi, plan hazır, kod yazılmadı, Mustafa'nın onayı bekleniyor.
+- Plan: yeni `products/ciftci/tapu.ts` (il/ilçe/mahalle listesi + parsel sorgusu). Tarla formuna (`Tarlalar.tsx`) "Tapudan getir" bölümü eklenecek: dönüm = m² ÷ 1000, köy ve konum (hava için) dolacak, il/ilçe/mahalle/ada/parsel `custom`'a yazılacak, ad boşsa "Mahalle ada/parsel" önerilecek. Bulunamazsa uyarı çıkacak, elle giriş devam edecek. Veritabanı ve `core/` değişmeyecek. Tapu servisi testi Mustafa'ya sorulacak.
