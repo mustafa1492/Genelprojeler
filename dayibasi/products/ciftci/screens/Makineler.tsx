@@ -57,7 +57,7 @@ export default function Makineler() {
   const names = [...new Set([...makineler, ...durum.map((d) => d.makine)])];
   const nextText = (d?: Bakim) => [
     d?.nextOn ? `${dayYear(d.nextOn)}${d.nextOn < todayStr() ? " (geçti)" : ""}` : "",
-    d?.nextHours ? `${d.nextHours.toLocaleString("tr-TR")} saatte${d.left !== null ? (d.left <= 0 ? " (saati geldi)" : ` (${d.left.toLocaleString("tr-TR")} saat kaldı)`) : ""}` : "",
+    d?.nextHours ? `tavsiye ${d.nextHours.toLocaleString("tr-TR")} saatte${d.left !== null && d.left > 0 ? ` (${d.left.toLocaleString("tr-TR")} saat var)` : ""}` : "",
   ].filter(Boolean).join(" · ");
 
   if (form) return <BakimForm makine={form.makine} edit={form.edit} money={money} lastHours={durumOf(form.makine)?.lastHours ?? null}
@@ -179,7 +179,7 @@ function BakimForm({ makine, edit, money, lastHours, expense, onSave, onCancel, 
       <TextField id="mk_not" label="Not (isteğe bağlı)" placeholder="Örnek: 15W40, 12 litre" maxLength={200} value={not} onChange={(e) => setNot(e.target.value)} />
       <span className="ui-label">Sonraki bakım (isteğe bağlı)</span>
       <TextField id="mk_sonraki_gun" label="Tarih" type="date" value={nextOn} onChange={(e) => setNextOn(e.target.value)} />
-      <TextField id="mk_sonraki_saat" label="ya da motor saati" inputMode="decimal" placeholder="Örnek: 1500" maxLength={8} value={nextHours} onChange={(e) => setNextHours(e.target.value)} />
+      <TextField id="mk_sonraki_saat" label="ya da tavsiye edilen motor saati (kılavuzdan)" inputMode="decimal" placeholder="Örnek: 1500" maxLength={8} value={nextHours} onChange={(e) => setNextHours(e.target.value)} />
       {bad && <span className="ui-note" style={{ margin: 0 }}>Sayıları kontrol et.</span>}
       <MainButton disabled={!is || !day || bad || busy} onClick={async () => {
         setBusy(true);
