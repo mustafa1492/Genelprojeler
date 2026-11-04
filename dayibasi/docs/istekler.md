@@ -108,3 +108,28 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Tarla eklerken "Tapudan getir": il / ilçe / mahalle seç, ada + parsel yaz → TKGM parsel servisi (cbsapi.tkgm.gov.tr/megsiswebapi.v3, tarayıcıdan çağrılabiliyor, CORS açık) alan (m² → dönüm), nitelik, mevki, koordinat getirir; hava durumu konumu otomatik.
 - Mevcut tarlalara ada/parsel girip güncelleme; istenirse parsel sınırı küçük haritada.
 - Not: resmi açık servis değil, değişebilir; sadece kullanıcı tıklayınca sorgu. Hisseli tarlada alan parselin tamamı.
+
+## Hayvancılık bölümü (Mustafa, 4 Kasım 2026: not alındı, henüz başlanmayacak)
+- Tek "Hayvancılık" bölümü: kanatlı (sürü olarak), küçükbaş ve büyükbaş (küpe numarasıyla tek tek). Barınak listesi (kümes, ağıl, ahır); masraf, gelir, depo, takvim, çalışan modu ortak.
+- Kanatlı: günlük ölüm/yem/yumurta, dönem kâr, yumurta ve gübre satışı, köy tavuğu sade modu, kuluçka, sözleşmeli yetiştirici karşılaştırması (rapor: docs/arastirma/reports/Kanatlı çiftlik modülü.md).
+- Küçükbaş: hayvan kartı, koç katımı/kuzulama, kırkım, süt, otlatma/çoban, aşı şablonu, satış (kurban, kasap).
+- Büyükbaş: hayvan kartı, kızgınlık/tohumlama/gebelik/tahmini doğum, kuruya ayırma, süt defteri (mandıra, süt parası), besi tartımı, sağlık ve süt/et arınma uyarısı, buzağı, rasyon maliyeti.
+- Devlet: TÜRKVET bildirim hatırlatmaları (doğrudan bağlantı yok), destek takibi (tutar sabit yazılmaz), veteriner belgeleri.
+- Tarla bağı: yem bitkisi hasadı depoya yem, gübre tarlaya; hayvan ve tarla gerçek maliyeti.
+- Önerilen sıra: ortak iskelet + küçükbaş/büyükbaş kartı → süt defteri → kümes → yem bağlantısı ve hayvan başı kâr. Eşik ve takvimler Mustafa/veterinerden alınacak, uydurulmaz.
+- Araştırma raporu: docs/arastirma/reports/Hayvancılık modülü ihtiyaçları.md (4 Kasım 2026). Fark yaratacaklar: ilaç arınma etiketi ("sütü tanka katılmaz, şu tarihe kadar satılmaz"), mandıra kontrolü (litre, yağ/protein, kesinti, yem borcu), çobanla ortak defter (çalışan modu). Sıra: hayvan kartı + olay kaydı + hatırlatma + arınma → süt defteri, satış bağlantısı → besi, yem stoğu, çoban hesabı, verimsiz hayvan → sesli kayıt, küpe okuma.
+- Mustafa'ya sorulacak: ilk sürüm inek mi koyun-keçi mi; mandıralar süt parasını nasıl hesaplıyor; çobana ödeme şekli; ortaklı sürü yaygın mı; varsayılan süreler (gebelik, kuruya, aşı yaşı) onayı. Mevzuat/destek araştırması yarım kaldı (TÜRKVET bildirim süreleri, 2026 destekleri).
+
+## Nisan öncesi (gerçek kullanıma açmadan) — hatırlatılacak
+- Yedek (gece yedeği + dış kopya), deneme hesaplarını silme, şifre sıfırlama e-postası (SMTP), KVKK metni, Supabase uyku çözümü (ping görevi ya da Pro), kısa güvenlik kontrolü, yayından önce test (Mustafa'ya sorulacak).
+- Mağaza: önce Android (Google Play, bir kerelik ~25$, TWA/PWABuilder ile paket; yeni kişisel hesapta 12 kişi × 14 gün kapalı test gerekir; kimlik + gizlilik politikası). iPhone (yıllık ~99$, Mac/bulut derleme, ret riski) sonra.
+
+## Mustafa kararları (4 Kasım 2026)
+- Tanıtım (pazarlama) web sitesi kurulacak: özellikleri anlatan sayfa. Alan adı ertelendi.
+- Paketler: basit / orta / tam gibi; ücret pakete göre. (Paket içerikleri sonra konuşulacak.)
+- Destek: uygulama içinde kısa videolar; iş büyürse Mustafa ilgilenir, daha büyürse ekip.
+- Dayıbaşı ve diğer modüller: ayrıca hak harcanmayacak; başka bir iş yaparken az ek eforla oraya da uygulanabiliyorsa yapılır (Claude bunu fırsat görünce söyler).
+- Tanıtım sitesi tasarımı: Mustafa'nın attığı sitelerden (Dribbble/Contra örnekleri) bakılacak.
+- Claude: bir işi başka bağlayıcı/skill ile daha iyi yapabileceğini düşünürse önce Mustafa'ya sorar.
+- İleride "agent paketi" hazırlanacak (Claude yönetir/kontrol eder): öneri listesi aşağıda, onay bekliyor.
+- Agent paketi önerisi: test, güvenlik, araştırma, tasarım, içerik, veri, pazarlama (Canva görsel/video, Gmail taslak, Drive içerik takvimi; hiçbir şey Mustafa onayı olmadan yayınlanmaz). Nisan sonrası.
