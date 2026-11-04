@@ -119,3 +119,7 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 - Önerilen sıra: ortak iskelet + küçükbaş/büyükbaş kartı → süt defteri → kümes → yem bağlantısı ve hayvan başı kâr. Eşik ve takvimler Mustafa/veterinerden alınacak, uydurulmaz.
 - Araştırma raporu: docs/arastirma/reports/Hayvancılık modülü ihtiyaçları.md (4 Kasım 2026). Fark yaratacaklar: ilaç arınma etiketi ("sütü tanka katılmaz, şu tarihe kadar satılmaz"), mandıra kontrolü (litre, yağ/protein, kesinti, yem borcu), çobanla ortak defter (çalışan modu). Sıra: hayvan kartı + olay kaydı + hatırlatma + arınma → süt defteri, satış bağlantısı → besi, yem stoğu, çoban hesabı, verimsiz hayvan → sesli kayıt, küpe okuma.
 - Mustafa'ya sorulacak: ilk sürüm inek mi koyun-keçi mi; mandıralar süt parasını nasıl hesaplıyor; çobana ödeme şekli; ortaklı sürü yaygın mı; varsayılan süreler (gebelik, kuruya, aşı yaşı) onayı. Mevzuat/destek araştırması yarım kaldı (TÜRKVET bildirim süreleri, 2026 destekleri).
+
+## Nisan öncesi (gerçek kullanıma açmadan) — hatırlatılacak
+- Yedek (gece yedeği + dış kopya), deneme hesaplarını silme, şifre sıfırlama e-postası (SMTP), KVKK metni, Supabase uyku çözümü (ping görevi ya da Pro), kısa güvenlik kontrolü, yayından önce test (Mustafa'ya sorulacak).
+- Mağaza: önce Android (Google Play, bir kerelik ~25$, TWA/PWABuilder ile paket; yeni kişisel hesapta 12 kişi × 14 gün kapalı test gerekir; kimlik + gizlilik politikası). iPhone (yıllık ~99$, Mac/bulut derleme, ret riski) sonra.
