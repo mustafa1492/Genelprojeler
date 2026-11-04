@@ -252,6 +252,7 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
   return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
+      {!tapu && edit?.custom?.ada && <span className="ui-note" style={{ margin: 0 }}>Kayıtlı: {[edit.custom.mahalle, edit.custom.ilce].filter(Boolean).join(", ")} · Ada {edit.custom.ada} / Parsel {edit.custom.parsel}</span>}
       <TapuBolum onFound={tapuGeldi} />
       <PageHeader sub="Tarla" title={edit ? "Tarlayı düzenle" : "Yeni tarla"} />
       <TextField id="t_ad" label="Tarlanın adı" placeholder="Örnek: Kınık yolu, Dere kenarı" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />

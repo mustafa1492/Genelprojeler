@@ -16,6 +16,8 @@ Tarlalar (köy/ilçe → hava), tarla günlüğü (ilaçlama bekleme, sulama saa
 Ayrıntı: `docs/istekler.md`, `docs/arastirma/research_notes/Kanatlı çiftlik modülü/ciftci_defteri_ek_ozellikler.md`.
 
 ## Nerede kaldık
+- 2026-11-04: **Makine bakımı** yazıldı (`screens/Makineler.tsx`, sekme `makineler`, yetki = tarlalar). Makineler ve bakım işleri düzenlenebilir listede (`makineler`, `makine_isleri`). Kayıt: `events.kind = 'makine'`, quantity = motor saati, data {makine, is, not, next_on, next_hours, expense_id}. Tutar girilirse "Traktör / makine" masrafı (data.makine). Özet "Yaklaşanlar": sonraki tarih 7 gün kala (`config.remindDays.makine`, Mustafa'ya sorulmadı, değiştirilebilir) ya da motor saati geldiğinde. Takvimde görünür. Muayene/sigorta → Belgeler bağlantısı. Ekrandan denenmedi.
+- Tarla düzenlerken kayıtlı Ada/Parsel görünüyor.
 - 2026-11-04: Tapudan tarla yazıldı (`products/ciftci/tapu.ts` + Tarla formunda "Parsel sorgula"): il/ilçe/mahalle seç, ada/parsel yaz → dekar (m² ÷ 1000), köy + konum (hava), ad önerisi; `custom`'a il/ilce/mahalle/ada/parsel/tapu_m2/nitelik yazılır. Tarla sayfasında "Ada / Parsel" görünür.
 - Ekranlarda "dönüm" yerine "dekar" yazıyor (veri anahtarı `donum` aynı). Core'da `ExpenseScreen.tsx`'te tek yazı değişti ("Dekara göre").
 - TKGM servisi denendi (2026-11-04): il/ilçe/mahalle listeleri, parsel (alan "9.766,00" biçiminde, koordinat [boylam, enlem]), olmayan parsel 404 — kod bunlarla uyumlu. Önizlemede ekrandan denenmedi.
