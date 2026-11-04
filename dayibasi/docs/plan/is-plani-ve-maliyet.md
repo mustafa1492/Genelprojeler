@@ -151,3 +151,18 @@ Haftaları "hafta başı Pazartesi" diye düşün. Her hafta tek bir ana hedef; 
 - Şirket türü ve ne zaman kurulacağı.
 - Ücretsiz paketin kalıcı olup olmayacağı.
 - Hayvancılık modülünün hangi yılda ele alınacağı.
+
+## 9. Güncelleme (4 Kasım 2026): Nisan'a kadar bütün modüller
+
+Mustafa'nın zaman sorunu yok, tek sınır Claude kullanım hakkı. Bu yüzden plan sıkıştırıldı; modüller ayrı oturumlarda yürür (`docs/moduller/`).
+
+| Ay | İş |
+|---|---|
+| Kasım | Sağlamlaştırma, paketler, basit mod (Core) |
+| Aralık | Hayvancılık ortak iskelet + büyükbaş/küçükbaş ilk sürüm |
+| Ocak | Süt defteri + kümes; tanıtım sitesi |
+| Şubat | Tapudan tarla, kâr hesapları; dayıbaşına az eforla uyan kısımlar |
+| Mart | Yedek, KVKK, Android, toplu test (izinle), düzeltmeler |
+| Nisan | Açılış (12 Nisan civarı) |
+
+Hak tasarrufu: önce karar sonra kod, tek oturum tek iş, ortak iskelet, az ve toplu test, araştırma yok, sınıra takılınca bekle. Güvenlik işleri Nisan öncesine ertelendi. Mustafa "ikinci emir" verene kadar uygulamaya yeni bir şey eklenmiyor (fikir dönemi).

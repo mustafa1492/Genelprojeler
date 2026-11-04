@@ -1,6 +1,8 @@
 # Hayvancılık oturumu
 
-**Kapsam:** büyükbaş + küçükbaş (kümes ayrı modül olacak). Yeni modül, `products/ciftci/hayvan/` altında (fidan gibi panelden açılıp kapanan modül: settings.modules "hayvan"). Ortak masraf/gelir/depo/takvim/yetki kullanılır, yeniden yazılmaz.
+**Not:** Kanatlı (kümes) ayrı oturumda: `kanatli.md`. Ortak iskelet (barınak, modül anahtarı, olay/hatırlatma) bu oturumda.
+
+**Kapsam:** büyükbaş + küçükbaş. Yeni modül, `products/ciftci/hayvan/` altında (fidan gibi panelden açılıp kapanan modül: settings.modules "hayvan"). Ortak masraf/gelir/depo/takvim/yetki kullanılır, yeniden yazılmaz.
 
 ## Kaynaklar
 - Rapor: `docs/arastirma/reports/Hayvancılık modülü ihtiyaçları.md`
@@ -24,6 +26,10 @@
 - Varsayılan süreler (gebelik inek ~280, koyun ~150, kuruya ~60 gün, aşı yaşları) onayı — kullanıcı değiştirebilir olacak.
 - Mandıra süt parası hesabı, çobana ödeme şekli, ortaklı sürü.
 - Deneyecek gerçek bir hayvancı.
+
+## Ortak iskelet hazır (kanatlı oturumu kurdu, 4 Kasım 2026)
+- Tablolar `barns`, `herds`, `herd_days` (göç 0018, `species` alanıyla), yetki ekranı `hayvan`, kod `products/ciftci/hayvan/` (api.ts, hayvan.ts, Barinak.tsx). Ayrıntı: `kanatli.md` "Yapı".
+- Küçükbaş/büyükbaş için: `TURLER` içindeki adları kontrol et, App.tsx'e `<Barinak species="kucukbas" />` sekmesi ve panele modül kutusu ekle. Küpe kartı ve üreme döngüsü bu oturumda, ayrı tablo olarak.
 
 ## Nerede kaldık
 - Kod başlanmadı. Soru listesi hazır, cevaplar bekleniyor.

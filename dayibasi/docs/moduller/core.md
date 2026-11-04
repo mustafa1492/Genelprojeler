@@ -15,8 +15,14 @@
 - Android (TWA) paketi.
 - Taslakta tablonun sağında ayrıntı paneli vardı, yapılmadı (isteğe bağlı).
 
-## Bekleyen istekler (diğer oturumlardan)
+## Bekleyen istekler
+- (Kanatlı, 4 Kasım 2026) Canlıda 0013_yedek uygulanmamış (`yedek.al` yok, gece yedeği çalışmıyor). Uygulanınca 0018_hayvan.sql sonundaki yedek bölümü de çalıştırılmalı (barns/herds/herd_days yedeğe girsin). (diğer oturumlardan)
 - (yok)
 
 ## Nerede kaldık
 - Fikir dönemi; Mustafa "ikinci emre kadar uygulamaya bir şey getirme" dedi.
+- Bu oturum ayrıca Mustafa'nın **genel planlarını konuşma** yeri.
+- Paket sistemi **ertelendi**: modüller oturduktan sonra yapılacak. Hazır plan: settings.paket (basit/orta/tam, sadece yönetici değiştirir, keep_modules gibi tetikleyici) + paket tanımları (öneri: app_config) + panelde paket seçimi + görünen ekran = paket izinleri − hidden_screens. O zaman sorulacak: paket içerikleri, mevcut defterler hangi pakete (öneri: Tam), tanımların yeri.
+
+## Sıradaki
+- Mustafa'nın genel planlarını dinlemek; kod işi yok.

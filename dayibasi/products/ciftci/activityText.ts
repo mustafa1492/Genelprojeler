@@ -25,6 +25,11 @@ export function describe(a: Activity, names: Record<string, string>): string {
       if (d.kind === "gelir") return `Gelir ${verb(a)}: ${s(data.type)} ${formatTL(Number(d.quantity))}`;
       if (d.kind === "verim") return `Verim ${verb(a)}: ${place} ${s(data.year)}, ${Number(d.quantity).toLocaleString("tr-TR")} ${s(data.unit)}`;
       return `${place || "Tarla"}: ${s(data.type)}${data.product ? ` (${s(data.product)})` : ""} ${verb(a)}`;
+    case "barns": return `Barınak ${verb(a)}: ${s(d.name)}`;
+    case "herds":
+      if (a.action === "update" && o.status !== d.status) return `Sürü ${d.status === "kapandi" ? "kapandı" : "yeniden açıldı"}: ${s(d.name)}`;
+      return `Sürü ${verb(a)}: ${s(d.name)} (${Number(d.initial_count).toLocaleString("tr-TR")} hayvan)`;
+    case "herd_days": return `Hayvan günlük kaydı ${verb(a)}: ${Number(d.dead ?? 0)} ölü, ${Number(d.feed_bags ?? 0)} çuval yem`;
     case "places": return `Tarla ${verb(a)}: ${s(d.name)}`;
     case "dues":
       if (a.action === "update" && Number(o.paid_amount) !== Number(d.paid_amount)) return `${d.direction === "borc" ? "Ödeme" : "Tahsilat"}: ${s(d.party)}, ${formatTL(Number(d.paid_amount) - Number(o.paid_amount))}`;

@@ -1,6 +1,6 @@
 # Modül oturumları (her oturum önce bunu, sonra kendi dosyasını okur)
 
-Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, klasör `dayibasi/`). Canlı: https://genelprojeler.vercel.app, panel: /panel. Ayrıntılı kurallar: `dayibasi/CLAUDE.md`, istekler: `docs/istekler.md`, plan: `docs/plan/is-plani-ve-maliyet.md`.
+Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, klasör `dayibasi/`). Canlı: https://genelprojeler.vercel.app, panel: /panel. Ayrıntılı kurallar: `dayibasi/CLAUDE.md`, istekler ve kararlar: `docs/istekler.md`, maliyet + uzun vadeli plan: `docs/plan/is-plani-ve-maliyet.md` (en alttaki "Güncelleme" bölümü geçerli), araştırmalar: `docs/arastirma/reports/`, tasarım: `docs/tasarim/`.
 
 ## Ortak kurallar (Mustafa)
 - Cevaplar kısa ve Türkçe. Kural/para/süre uydurma: sor. Gerçek veriyi silmeden/değiştirmeden önce sor.
@@ -21,6 +21,7 @@ Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, k
 | core.md | giriş, yetkiler, ortak ekranlar, internetsiz kayıt, tasarım, panel, veritabanı, yayın |
 | ciftci.md | tarla, masraf, gelir, rapor, takvim |
 | fidan.md | fidancılık modülü |
-| hayvancilik.md | büyükbaş, küçükbaş, süt (kümes ayrı modül olacak) |
+| hayvancilik.md | büyükbaş, küçükbaş, süt (kümes ayrı: kanatli.md) |
+| kanatli.md | kanatlı (kümes, sürü, yumurta, etlik) |
 | tanitim.md | tanıtım sitesi, paketler/fiyat metinleri, pazarlama, mağaza |
 | dayibasi.md | dayıbaşı ürünü (ara verildi) |
