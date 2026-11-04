@@ -13,13 +13,13 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { AKTARIM, ageText, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
-import { addDays, dayText, dayYear, GELIR, ISLEM, num, todayStr } from "../kayit";
+import { AKTARIM, ageText, custKey, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
+import { addDays, dayText, dayYear, GELIR, incomeOpen, ISLEM, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
 type Done = { message: string; undo?: () => Promise<void> } | null;
 type View = { v: "list" } | { v: "lot"; id: string } | { v: "lotForm"; edit?: Lot } | { v: "sayim"; id: string } | { v: "islem"; id: string }
-  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" };
+  | { v: "siparis"; edit?: EventRow } | { v: "foto"; id: string } | { v: "fotoGor"; url: string; back: string } | { v: "hatirlat"; id: string } | { v: "boylar" } | { v: "kar" } | { v: "sevk"; order: EventRow } | { v: "dikim" } | { v: "tasi"; id: string } | { v: "stok" } | { v: "musteriler" } | { v: "musteri"; key: string };
 const fmt = (n: number) => Math.round(n).toLocaleString("tr-TR");
 
 /** Fidan (şimşir) partileri: sayım, fire, boy, fidan başı maliyet, sipariş, bakım hatırlatıcısı, fotoğraf. */
@@ -112,6 +112,62 @@ export default function Fidan() {
                 <b>{s.lot.name}</b><strong>{fmt(s.alive)}</strong></button>))}
           </div>
         )}
+      </main>
+    );
+  }
+
+  // Müşteriler: fidan satışlarındaki alıcı + siparişlerdeki müşteri (ad eşleşmesi, büyük/küçük harf farkı yok)
+  const customers = () => {
+    const m = new Map<string, { key: string; name: string; sales: EventRow[]; orders: EventRow[]; total: number; open: number; qty: number; last: string }>();
+    const get = (raw: unknown, day: string) => {
+      const key = custKey(raw); if (!key) return null;
+      let c = m.get(key); if (!c) { c = { key, name: String(raw).trim().replace(/\s+/g, " "), sales: [], orders: [], total: 0, open: 0, qty: 0, last: "" }; m.set(key, c); }
+      if (day > c.last) c.last = day; return c;
+    };
+    for (const e of sales) { const c = get(e.data.buyer, e.occurred_on); if (!c) continue; c.sales.push(e); c.total += Number(e.quantity ?? 0); c.open += incomeOpen(e); c.qty += Number(e.data.qty ?? 0); }
+    for (const o of orders.filter((o) => o.data.status === "bekliyor")) get(o.data.customer, o.occurred_on)?.orders.push(o);
+    return [...m.values()].sort((a, b) => b.open - a.open || b.last.localeCompare(a.last));
+  };
+
+  if (view.v === "musteriler") {
+    const cs = customers(), debt = cs.reduce((t, c) => t + c.open, 0);
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={back} label="Fidan" />
+        <PageHeader sub={`${cs.length} müşteri`} title="Müşteriler" />
+        <div className="ui-total"><span>Toplam alacak</span><b>{formatTL(debt)}</b></div>
+        {cs.length === 0 && <div className="ui-empty">Henüz müşteri yok. Satışta “Kime sattın?” ya da siparişte müşteri adı yazınca burada çıkar.</div>}
+        {cs.map((c) => (
+          <button key={c.key} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "musteri", key: c.key })}>
+            <b>{c.name}<small>{[c.qty ? `${fmt(c.qty)} fidan aldı` : "", c.total ? formatTL(c.total) : "", c.orders.length ? `${c.orders.length} bekleyen sipariş` : "", c.last ? dayYear(c.last) : ""].filter(Boolean).join(" · ")}</small></b>
+            <strong>{c.open ? `${formatTL(c.open)} borç` : "borcu yok"}</strong>
+          </button>))}
+      </main>
+    );
+  }
+
+  if (view.v === "musteri") {
+    const c = customers().find((x) => x.key === view.key);
+    if (!c) return <main className="ui-stack"><BackButton onClick={() => setView({ v: "musteriler" })} label="Müşteriler" /><div className="ui-empty">Bu müşteri bulunamadı.</div></main>;
+    const ss = c.sales.slice().sort((a, b) => b.occurred_on.localeCompare(a.occurred_on));
+    const msg = [`Merhaba ${c.name},`, `${biz.name} fidan hesabınız:`,
+      ...ss.filter((e) => incomeOpen(e) > 0).map((e) => `${dayYear(e.occurred_on)}: ${fmt(Number(e.data.qty ?? 0))} adet${e.data.size ? ` ${String(e.data.size)}` : ""}, ${formatTL(Number(e.quantity))}, kalan ${formatTL(incomeOpen(e))}`),
+      `Toplam kalan: ${formatTL(c.open)}`].join("\n");
+    return (
+      <main className="ui-stack">
+        <BackButton onClick={() => setView({ v: "musteriler" })} label="Müşteriler" />
+        <PageHeader sub={`${fmt(c.qty)} fidan · ${formatTL(c.total)}`} title={c.name} />
+        <div className="ui-total"><span>Kalan borç</span><b>{formatTL(c.open)}</b></div>
+        {c.open > 0 && <MainButton onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank")}>Hesabı WhatsApp’tan gönder</MainButton>}
+        <p className="ui-note">Ödeme alınca Gelir’de o satışı açıp “alınan” tutarı değiştir; borç buradan düşer.</p>
+        {c.orders.length > 0 && <><h2 className="ui-section">Bekleyen siparişler</h2>
+          {c.orders.map((o) => <button key={o.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left" }} onClick={() => setView({ v: "siparis", edit: o })}>
+            <b>{fmt(Number(o.data.qty))} adet{o.data.size ? ` · ${String(o.data.size)}` : ""}<small>{[o.data.due_on ? `teslim ${dayText(String(o.data.due_on))}` : "", o.data.deposit ? `kapora ${formatTL(Number(o.data.deposit))}` : ""].filter(Boolean).join(" · ")}</small></b>
+            <strong>{o.data.price ? formatTL(Number(o.data.qty) * Number(o.data.price)) : ""}</strong></button>)}</>}
+        <h2 className="ui-section">Satışlar</h2>
+        {ss.length === 0 ? <div className="ui-empty">Henüz satış yok.</div> : ss.map((e) => (
+          <div key={e.id} className="ui-moneyrow"><b>{fmt(Number(e.data.qty ?? 0))} adet{e.data.size ? ` · ${String(e.data.size)}` : ""}<small>{[dayYear(e.occurred_on), find(String(e.data.lot_id ?? ""))?.name, incomeOpen(e) ? `kalan ${formatTL(incomeOpen(e))}${e.data.due_on ? ` (${dayText(String(e.data.due_on))})` : ""}` : "ödendi"].filter(Boolean).join(" · ")}</small></b>
+            <strong>{formatTL(Number(e.quantity))}</strong></div>))}
       </main>
     );
   }
@@ -386,6 +442,10 @@ export default function Fidan() {
       <div className="ui-seg">
         <button type="button" onClick={() => { setDone(null); setView({ v: "dikim" }); }}>+ Yeni dikim</button>
         <button type="button" onClick={() => { setDone(null); setView({ v: "siparis" }); }}>+ Sipariş</button>
+      </div>
+      <div className="ui-seg">
+        <button type="button" onClick={() => { setDone(null); setView({ v: "stok" }); }}>Stok</button>
+        <button type="button" onClick={() => { setDone(null); setView({ v: "musteriler" }); }}>Müşteriler</button>
       </div>
 
       <Alerts open={showAlerts} setOpen={setShowAlerts} items={dues.map((d) => ({ key: d.lot.id + d.type, red: d.late, onClick: () => setView({ v: "lot", id: d.lot.id }),
