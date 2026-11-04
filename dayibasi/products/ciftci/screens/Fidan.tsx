@@ -13,7 +13,7 @@ import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Card, Chip, DoneCard, ErrorText, InfoRows, MainButton, PageHeader, StatusPill, TextField } from "@/core/ui";
-import { AKTARIM, ageText, FIDAN_SATIS, isFidanLot, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
+import { AKTARIM, ageText, FIDAN_SATIS, FOTO, lotStats, marginOf, SAYIM, SIPARIS, sizesOf, suggestedPrice, type LotStats } from "../fidan";
 import { addDays, dayText, dayYear, GELIR, ISLEM, num, todayStr } from "../kayit";
 import { HistoryLink } from "../nav";
 
@@ -38,7 +38,7 @@ export default function Fidan() {
   const margin = marginOf(biz);
 
   const load = useCallback(() => {
-    listLots(biz.id).then((r) => setLots(r.filter(isFidanLot))).catch(() => setLots([]));
+    listLots(biz.id).then(setLots).catch(() => setLots([]));
     Promise.all([listEvents(biz.id, AKTARIM), listEvents(biz.id, SAYIM), listEvents(biz.id, SIPARIS), listEvents(biz.id, FOTO), listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM)])
       .then((r) => setEv(r.flat())).catch(() => {});
     listExpenses(biz.id).then(setExp).catch(() => {});

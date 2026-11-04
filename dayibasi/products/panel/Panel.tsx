@@ -195,7 +195,7 @@ function Defterler({ bizs, us, reload, open }: { bizs: Biz[]; us: User[]; reload
 const TABS = [
   ["bilgi", "Bilgiler ve üyeler"], ["ayar", "Listeler, sezonlar, modüller"], ["places", "Tarlalar"], ["expenses", "Masraflar"], ["gelir", "Gelirler"],
   ["islem", "Tarla işleri"], ["verim", "Verim"], ["hatirlat", "Hatırlatmalar"], ["inventory_items", "Depo"], ["dues", "Borç / alacak"],
-  ["documents", "Belgeler"], ["lots", "Fidan partileri"], ["receipt_inbox", "Fiş kutusu"], ["events", "Bütün olaylar"], ["people", "Kişiler (dayıbaşı)"], ["ledger_entries", "Cari (dayıbaşı)"],
+  ["documents", "Belgeler"], ["lots", "Fidan partileri"], ["barns", "Barınaklar"], ["herds", "Sürüler"], ["herd_days", "Hayvan günlük kayıt"], ["receipt_inbox", "Fiş kutusu"], ["events", "Bütün olaylar"], ["people", "Kişiler (dayıbaşı)"], ["ledger_entries", "Cari (dayıbaşı)"],
 ] as const;
 
 function Defter({ biz, us, reload, onDeleted }: { biz: Biz; us: User[]; reload: () => void; onDeleted: () => void }) {
@@ -216,7 +216,7 @@ function Defter({ biz, us, reload, onDeleted }: { biz: Biz; us: User[]; reload: 
       {tab === "islem" && <TableEditor key="i" table="events" business={biz.id} lookups={lk} {...ev("islem")} />}
       {tab === "verim" && <TableEditor key="v" table="events" business={biz.id} lookups={lk} {...ev("verim")} />}
       {tab === "hatirlat" && <TableEditor key="h" table="events" business={biz.id} lookups={lk} {...ev("hatirlat")} />}
-      {["places", "expenses", "inventory_items", "dues", "documents", "lots", "receipt_inbox", "events", "people", "ledger_entries"].includes(tab) &&
+      {["places", "expenses", "inventory_items", "dues", "documents", "lots", "barns", "herds", "herd_days", "receipt_inbox", "events", "people", "ledger_entries"].includes(tab) &&
         <TableEditor key={tab} table={tab} business={biz.id} fixed={tab === "places" ? { ...fx, custom: {} } : tab === "documents" ? { ...fx, subject_type: "business" } : fx} lookups={lk} />}
     </div>
   );

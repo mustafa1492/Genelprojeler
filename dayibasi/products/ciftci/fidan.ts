@@ -6,9 +6,6 @@ import type { Lot } from "@/core/lots/api";
 // Fidan (şimşir) modülü — yalnız settings.modules içinde "fidan" olan defterlerde.
 export const hasFidan = (b: Business) => Array.isArray(b.settings?.modules) && (b.settings!.modules as string[]).includes("fidan");
 
-/** Fidan partisi mi (kümes/sürü kayıtları da lots tablosunda: data.kanatli). */
-export const isFidanLot = (l: Lot) => !l.data?.kanatli;
-
 export const SAYIM = "sayim";     // data {lot_id, alive, sizes: {"20-30 cm": n, …}, note}
 export const SIPARIS = "siparis"; // data {customer, lot_id?, size?, qty, price?, due_on?, status: bekliyor|teslim|iptal, note}
 export const FOTO = "foto";       // data {lot_id, path, note}

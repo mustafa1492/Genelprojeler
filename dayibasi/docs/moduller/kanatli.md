@@ -17,15 +17,16 @@
 - Eşikler (aşı, YDO hedefi, ölüm uyarısı, kesim yaşı): şimdilik yok/kullanıcı girer; veterinerle konuşulunca "önerilen" kısmı eklenecek.
 - Deneyecek kümesçi şimdilik yok.
 
-## Yapı (v1)
-- Yeni tablo/göç yok. Kümes ve sürü `lots` tablosunda (`data.kanatli` = "kumes" | "suru"; sürüde `kumes_id, tur, firma, sozlesme_no, giris_g, bag_kg, closed_on`; `planted_on` = giriş günü, `initial_count` = giriş adedi, `source` = kuluçkahane). Fidan ekranları `isFidanLot` ile süzer.
-- Günlük kayıt `events.kind = "kumes_gunluk"` (gün başına sürü başına bir kayıt: dead, culled, bags, bag_kg, note), tartım `"kumes_tartim"` (n, avg_g).
-- Kod: `products/ciftci/hayvan/kanatli/` (kanatli.ts hesaplar, Kumes.tsx ekranlar). Sekme `/ciftci/kumes`, yetki anahtarı "kumes", panel ve /yonetim'de modül kutusu.
+## Yapı: hayvan ortak iskeleti (Mustafa, 4 Kasım 2026: genel kurulsun, hayvancılık da kullanacak)
+- Göç `supabase/migrations/0018_hayvan.sql` (**uygulanmadı, Mustafa onayı bekliyor**): `barns` (barınak), `herds` (sürü/dönem), `herd_days` (günlük kayıt: ölü, ayıklanan, yem çuvalı + çuval kg, tartım, not; sürü başına günde bir). Hepsinde `species` = kanatli | kucukbas | buyukbas. Yetki ekranı `hayvan` (hazır çalışan rolü: yazar). Geri alma, yedek, yönetim paneli listelerine eklendi.
+- Kod: `products/ciftci/hayvan/` → `api.ts` (internetsiz okuma/yazma), `hayvan.ts` (tür adları, modül anahtarları, hesaplar), `Barinak.tsx` (genel ekran: türü parametre alır). Kanatlı: `hayvan/kanatli/Kumes.tsx` = `<Barinak species="kanatli" />`; kümese özel ekler burada büyür.
+- Modül anahtarları tür başına: "kanatli" (panelde var), "kucukbas", "buyukbas" (sekmeleri hayvancılık oturumu ekler).
+- Küpe kartı ve üreme döngüsü: hayvancılık oturumu, ayrı tablo, `herds`/`barns`'a bağlanır.
 
 ## Nerede kaldık
-- v1 yazıldı (dal `modul/kanatli`): kümesler listesi (bugün girildi/girilmedi), kümes kartı, sürü aç/kapat, Bugünün kaydı (ölü, ayıklanan, yem çuvalı sayacı, çuval kg bir kez, dün seçimi, tartım + not "daha fazla"da), sürü kartı (kalan, kayıp %, yem kg, son tartım, tahmini canlı kg, tahmini YDO, gün ve tartım listesi). Tip denetimi temiz; tarayıcıda denenmedi.
+- v1 yazıldı ve genel iskelete taşındı (dal `modul/kanatli`): kümesler listesi (bugün girildi/girilmedi), kümes kartı, sürü aç/kapat, Bugünün kaydı (ölü, ayıklanan, yem çuvalı sayacı, çuval kg bir kez, dün seçimi, tartım + not "daha fazla"da), sürü kartı (kalan, kayıp %, yem kg, son tartım, tahmini canlı kg, tahmini YDO, gün ve tartım listesi). Tip denetimi temiz; tarayıcıda denenmedi.
 
 ## Sıradaki
-- Mustafa onayıyla ekran denemesi (sahte sunucu) ve Core'a birleştirme isteği.
+- 0018 göçünü uygulamak (Mustafa onayı), sonra ekran denemesi ve Core'a birleştirme isteği.
 - v2: dönem kapanışı + firma karnesiyle karşılaştırma; masraf/gelirde sürü seçimi (`data.lot_id`); yem stoğu Depo'dan.
 - Sonra: aşı/ilaç + bekleme süresi, boş bekleme sayacı, biyogüvenlik defteri.

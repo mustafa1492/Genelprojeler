@@ -5,7 +5,7 @@ import { hasFidan } from "./fidan";
 import { useRole } from "./rol";
 import Fidan from "./screens/Fidan";
 import Kumes from "./hayvan/kanatli/Kumes";
-import { hasKanatli } from "./hayvan/kanatli/kanatli";
+import { hasTur } from "./hayvan/hayvan";
 import { BASE } from "./config";
 import { navItems } from "./nav";
 import Aile from "./screens/Aile";
@@ -52,9 +52,9 @@ export default function CiftciApp({ initial }: { initial: string }) {
   // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
   const { lvl } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
-  const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "kumes", depo: "depo", tarlalar: "tarlalar", takvim: "takvim", rapor: "rapor",
+  const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "hayvan", depo: "depo", tarlalar: "tarlalar", takvim: "takvim", rapor: "rapor",
     vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
-  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasKanatli(biz)) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
+  const tabs = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
     .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t));
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
