@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
 import { daysLeft, listDocs, type Doc } from "@/core/documents/api";
@@ -21,6 +21,7 @@ import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
 import { Weather } from "../hava";
 import { useRole } from "../rol";
+import { fmtFx, useRates } from "@/core/fx";
 import { PERIODS, periodRange, useGorunum, type CardId } from "../gorunum";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
@@ -106,6 +107,7 @@ export default function Ana() {
 
   // Kişiye özel görünüm: hangi kartlar, hangi sırayla; kâr kartının dönemi
   const { g, setG } = useGorunum();
+  const { doviz, conv } = useRates(useMemo(() => [...exp.map((e) => e.occurred_on), ...ev.filter((e) => e.kind === GELIR).map((e) => e.occurred_on)], [exp, ev]));
   const [sel, setSel] = useState<CardId | null>(null);
   const press = useRef<ReturnType<typeof setTimeout> | null>(null);
   const held = useRef(false);
@@ -132,6 +134,12 @@ export default function Ana() {
     kTitle = `${r.label} kâr`; kG = c.g; kM = c.m; kPrev = p.g || p.m ? p.g - p.m : null; kPrevLabel = r.prevLabel;
   }
   const kar = kG - kM;
+  // Döviz: her kayıt kendi günündeki kurla; kâr = gelir karşılığı − masraf karşılığı
+  const inK = (d: string) => (g.period === "sezon" ? inSeason(d, S) : (() => { const r = periodRange(g.period, today); return d >= r.from && d <= r.to; })());
+  const fxOf = (L: { a: number; d: string }[]) => (doviz === "kapali" ? null : L.reduce<number | null>((t, x) => { const v = conv(x.a, x.d); return t == null || v == null ? null : t + v; }, 0));
+  const kFxG = fxOf(ev.filter((e) => e.kind === GELIR && inK(e.occurred_on)).map((e) => ({ a: Number(e.quantity ?? 0), d: e.occurred_on })));
+  const kFxM = fxOf(exp.filter((e) => inK(e.occurred_on)).map((e) => ({ a: e.amount, d: e.occurred_on })));
+  const kFx = kFxG != null && kFxM != null && (kG || kM) ? kFxG - kFxM : null;
   const nextPeriod = () => { const i = PERIODS.findIndex((p) => p.id === g.period); setG({ period: PERIODS[(i + 1) % PERIODS.length].id }); };
 
   const blocks: Record<CardId, React.ReactNode> = {
@@ -140,6 +148,7 @@ export default function Ana() {
         <div>
           <span className="bas">{kTitle}<button type="button" onClick={nextPeriod} aria-label="Dönemi değiştir">{PERIODS.find((p) => p.id === g.period)!.label} ▾</button></span>
           <span className="tutar ui-money">{formatTL(kar)}</span>
+          {kFx != null && <span className="ozet-kar-fx ui-money">{fmtFx(kFx, doviz)}</span>}
           {kPrev !== null && kPrev !== 0 && <small className={kar < kPrev ? "kotu" : ""}>{kar >= kPrev ? "▲" : "▼"} %{Math.abs(Math.round(((kar - kPrev) / Math.abs(kPrev)) * 100))} {kPrevLabel}</small>}
         </div>
         <div className="alt">

@@ -2,11 +2,13 @@
 import { useCList } from "../lists";
 import { DeskTable, Tag } from "@/core/ui/DeskTable";
 import { useAddToList, PickWithAdd } from "@/core/settings/lists";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
 import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@/core/events/api";
-import { downloadXlsx } from "@/core/export/xlsx";
+import { downloadBook } from "@/core/export/xlsx";
+import { fmtFx, useRates } from "@/core/fx";
+import { fxFor, gelirSheet } from "../excel";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
@@ -47,6 +49,7 @@ export default function Gelir() {
   }, [biz.id, fidan]);
   useEffect(load, [load]);
   useOnActivate(load);
+  const { doviz, conv } = useRates(useMemo(() => (rows ?? []).map((e) => e.occurred_on), [rows]));   // döviz karşılığı
   const tp = useTabParams();
   useEffect(() => { if (tp.p.duzenle) { const e = (rows ?? []).find((x) => x.id === tp.p.duzenle); if (e) { setDone(null); setForm({ edit: e }); } return; } if (tp.p.yeni) { setDone(null); setForm(tp.p.parti || tp.p.adet ? { type: FIDAN_SATIS, prefill: tp.p } : {}); } }, [tp.n, !!rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -89,7 +92,7 @@ export default function Gelir() {
       <MainButton onClick={() => { setDone(null); setForm({}); }}>+ Gelir ekle</MainButton>
       <SeasonPicker onManage={() => go("sezonlar")} />
       <div className="ui-total">
-        <span>{y} sezonu gelir</span><b>{formatTL(total)}</b>
+        <span>{y} sezonu gelir</span><b>{formatTL(total)}</b>{doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(inY.reduce<number | null>((t, e) => { const v = conv(Number(e.quantity ?? 0), e.occurred_on); return t == null || v == null ? null : t + v; }, 0), doviz)}</small>}
         <div className="ui-total-row">
           <div><span>Alınan</span><strong>{formatTL(total - open)}</strong></div>
           <div><span>Alınacak</span><strong>{formatTL(open)}</strong></div>
@@ -104,21 +107,21 @@ export default function Gelir() {
           { label: "Miktar", cell: (e) => (e.data.qty ? `${Number(e.data.qty).toLocaleString("tr-TR")} ${String(e.data.unit)} × ${formatTL(Number(e.data.price))}` : "") },
           { label: "Alıcı", cell: (e) => String(e.data.buyer ?? "") },
           { label: "Durum", cell: (e) => (incomeOpen(e) ? <Tag tone="sari">Alınacak {formatTL(incomeOpen(e))}</Tag> : <Tag tone="yesil">Alındı</Tag>) },
-          { label: "Tutar", num: true, cell: (e) => <b>{formatTL(Number(e.quantity))}</b> },
+          { label: "Tutar", num: true, cell: (e) => <><b>{formatTL(Number(e.quantity))}</b>{doviz !== "kapali" && <small className="ui-fx ui-money" style={{ display: "block" }}>{fmtFx(conv(Number(e.quantity ?? 0), e.occurred_on), doviz)}</small>}</> },
         ]} />
       {inY.map((e) => (
         <button key={e.id} type="button" className="ui-moneyrow only-mobile" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }} onClick={() => { setDone(null); setForm({ edit: e }); }}>
           <b style={{ minWidth: 0 }}>{String(e.data.type)}{e.data.crop ? ` · ${String(e.data.crop)}` : ""}
             <small>{[dayText(e.occurred_on), placeName(e.place_id), e.data.qty ? `${Number(e.data.qty).toLocaleString("tr-TR")} ${String(e.data.unit)} × ${formatTL(Number(e.data.price))}` : "",
               e.data.buyer ? String(e.data.buyer) : "", incomeOpen(e) ? `alınacak ${formatTL(incomeOpen(e))}${e.data.due_on ? ` (${dayText(String(e.data.due_on))})` : ""}` : "", nameOf(e.created_by)].filter(Boolean).join(" · ")}</small></b>
-          <strong>{formatTL(Number(e.quantity))}</strong>
+          <strong>{formatTL(Number(e.quantity))}{doviz !== "kapali" && <small className="ui-fx">{fmtFx(conv(Number(e.quantity ?? 0), e.occurred_on), doviz)}</small>}</strong>
         </button>
       ))}
-      {inY.length > 0 && <MainButton secondary onClick={() => downloadXlsx(`gelir-${y.replace(/\s+/g, "-")}`, [{ name: "Gelir", title: `${biz.name} · Gelir · ${y} sezonu`, rows: [
-        ["Tarih", "Tür", "Tarla", "Ürün", "Miktar", "Birim", "Fiyat (TL)", "Toplam (TL)", "Alıcı", "Alınan (TL)", "Alınacak (TL)", "Vade", "Giren"],
-        ...inY.slice().reverse().map((e) => [e.occurred_on, String(e.data.type), placeName(e.place_id), String(e.data.crop ?? ""), Number(e.data.qty ?? 0) || "", String(e.data.unit ?? ""),
-          Number(e.data.price ?? 0) || "", Number(e.quantity), String(e.data.buyer ?? ""), Number(e.data.received ?? 0), incomeOpen(e), String(e.data.due_on ?? ""), nameOf(e.created_by)]),
-      ] }])}>Excel’e indir ({y})</MainButton>}
+      {inY.length > 0 && <MainButton secondary onClick={async () => {
+        const fx = doviz === "kapali" || !navigator.onLine ? null : await fxFor(inY.map((e) => e.occurred_on), doviz === "eur");
+        const G = gelirSheet(inY, places.map((p) => ({ id: p.id, name: p.name })), fx, { title: `${biz.name} · Gelir · ${y} sezonu`, who: nameOf });
+        await downloadBook(`gelir-${y.replace(/\s+/g, "-")}`, [G]);
+      }}>Excel’e indir ({y})</MainButton>}
     </main>
   );
 }

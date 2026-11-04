@@ -537,3 +537,13 @@ html.buyuk-yazi { font-size: 118%; }
 .ozet-kar .alt { grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); }
 .ozet-kar .alt span, .ozet-kar .alt b { min-width: 0; overflow-wrap: anywhere; }
 .liste-ic div { overflow-wrap: anywhere; }
+
+/* Döviz karşılığı (kaydın günündeki kurla) */
+.ui-fx { display: block; font-size: 0.78rem; font-weight: 600; color: var(--sessiz2); white-space: nowrap; }
+.ui-total .ui-fx { color: var(--koyu-yazi2); font-size: 0.85rem; }
+.ui-moneyrow strong .ui-fx { text-align: right; }
+.ozet-kar-fx { font-size: 0.95rem; font-weight: 700; color: var(--koyu-yazi2); }
+body.gizli .ui-fx, body.gizli .ozet-kar-fx { filter: blur(7px); user-select: none; }
+.rapor-kpi .ui-fx, .ui-total .ui-fx { font-size: 0.8rem; white-space: normal; overflow-wrap: anywhere; }
+.mn-doviz { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--cizgi2); }
+.mn-doviz > div:first-child { display: flex; flex-direction: column; font-weight: 700; }
