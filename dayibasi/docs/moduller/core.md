@@ -16,6 +16,7 @@
 - Taslakta tablonun sağında ayrıntı paneli vardı, yapılmadı (isteğe bağlı).
 
 ## Bekleyen istekler
+- (Tanıtım, 4 Kasım 2026) Tanıtım sitesindeki "Ücretsiz başla" /ciftci'ye gidiyor ve giriş ekranı açılıyor. AuthGate `?kayit=1` gibi bir adresle doğrudan "Yeni hesap aç" kipinde açılabilirse oraya bağlanacak.
 - (Kanatlı, 4 Kasım 2026) Canlıda 0013_yedek uygulanmamış (`yedek.al` yok, gece yedeği çalışmıyor). Uygulanınca 0018_hayvan.sql sonundaki yedek bölümü de çalıştırılmalı (barns/herds/herd_days yedeğe girsin). (diğer oturumlardan)
 - (yok)
 
