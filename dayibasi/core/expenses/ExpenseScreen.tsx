@@ -115,7 +115,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
           await updateExpense(ed.id, input);
           setDone({ message: `Değiştirdim: ${input.category} ${formatTL(input.amount)}.`, undo: () => updateExpense(ed.id, before) });
         } else if (input.place_id === SPLIT) {
-          // Tarlalara dönüme göre böl (dönüm yazılmamışsa eşit)
+          // Tarlalara dekara göre böl (dekar yazılmamışsa eşit)
           const ps = places.filter((p) => Number(p.custom?.donum) > 0).length ? places.filter((p) => Number(p.custom?.donum) > 0) : places;
           const w = ps.map((p) => Number(p.custom?.donum) || 1), W = w.reduce((a, b) => a + b, 0);
           let left = input.amount;
@@ -435,7 +435,7 @@ function MasrafForm({ presetPhoto, presetNote, categories = [], branches = [], o
           {placeId === SPLIT && (() => {
             const ps = places.filter((p) => Number(p.custom?.donum) > 0).length ? places.filter((p) => Number(p.custom?.donum) > 0) : places;
             const w = ps.map((p) => Number(p.custom?.donum) || 1), W = w.reduce((a, b) => a + b, 0), a = num(amount) || 0;
-            return <span className="ui-note" style={{ margin: 0 }}>{ps.some((p) => Number(p.custom?.donum) > 0) ? "Dönüme göre" : "Eşit"} bölünür: {ps.map((p, k) => `${p.name} ${a ? formatTL(Math.round((a * w[k]) / W)) : `%${Math.round((w[k] / W) * 100)}`}`).join(" · ")}</span>;
+            return <span className="ui-note" style={{ margin: 0 }}>{ps.some((p) => Number(p.custom?.donum) > 0) ? "Dekara göre" : "Eşit"} bölünür: {ps.map((p, k) => `${p.name} ${a ? formatTL(Math.round((a * w[k]) / W)) : `%${Math.round((w[k] / W) * 100)}`}`).join(" · ")}</span>;
           })()}
         </div>
       )}

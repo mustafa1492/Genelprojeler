@@ -9,6 +9,7 @@ import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@
 import { addExpense, deleteExpense, listExpenses, type Expense } from "@/core/expenses/api";
 import { useRole } from "../rol";
 import { searchPlace, Weather, type Spot } from "../hava";
+import { ilceListe, ilListe, mahalleListe, parselBul, type Parsel, type Yer } from "../tapu";
 import { listItems, updateItem, type Item } from "@/core/inventory/api";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
@@ -138,11 +139,11 @@ export default function Tarlalar() {
       return (
         <main className="ui-stack">
           <BackButton onClick={() => { setDone(null); setView({ v: "list" }); }} label="Tarlalar" />
-          <PageHeader sub={[p.custom?.urun, st.donum ? `${st.donum} dönüm` : ""].filter(Boolean).join(" · ") || "Tarla"} title={p.name} />
+          <PageHeader sub={[p.custom?.urun, st.donum ? `${st.donum} dekar` : "", p.custom?.ada ? `Ada ${p.custom.ada} / Parsel ${p.custom.parsel}` : ""].filter(Boolean).join(" · ") || "Tarla"} title={p.name} />
           {doneCard}
           {wait && <div className="ui-warn yakin"><div className="ui-warn-row"><span>Hasat en erken <b>{dayYear(wait.h!)}</b> ({String(wait.e.data.product ?? "ilaç")}, {dayText(wait.e.occurred_on)} ilaçlaması).</span></div></div>}
           {money && <div className="ui-split">
-            <div><span>{y} masraf</span><b>{formatTL(st.m)}</b>{st.donum ? <small>dönüm başı {formatTL(Math.round(st.perDonum))}</small> : <small>&nbsp;</small>}</div>
+            <div><span>{y} masraf</span><b>{formatTL(st.m)}</b>{st.donum ? <small>dekar başı {formatTL(Math.round(st.perDonum))}</small> : <small>&nbsp;</small>}</div>
             <div className="mine"><span>{y} kâr</span><b>{formatTL(st.kar)}</b><small>gelir {formatTL(st.g)}</small></div>
           </div>}
           {!money ? null : be ? (
@@ -190,7 +191,7 @@ export default function Tarlalar() {
           <h2 className="ui-section">Verim</h2>
           {yields.length === 0 && <div className="ui-empty">Henüz verim girilmedi.</div>}
           {yields.length > 0 && <Card><InfoRows rows={yields.map((e) => [`${String(e.data.year)} · ${String(e.data.crop || p.custom?.urun || "")}`,
-            `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}${st.donum ? ` · dönüm başı ${Math.round(Number(e.quantity) / st.donum).toLocaleString("tr-TR")}` : ""}`] as [string, string])} /></Card>}
+            `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}${st.donum ? ` · dekar başı ${Math.round(Number(e.quantity) / st.donum).toLocaleString("tr-TR")}` : ""}`] as [string, string])} /></Card>}
 
           {money && <h2 className="ui-section">{y} sezonu masrafları</h2>}
           {money && (pExp.length === 0 ? <div className="ui-empty">Bu tarlaya bu sezon masraf girilmedi.</div>
@@ -218,7 +219,7 @@ export default function Tarlalar() {
               {money && <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(st.kar)}</span>}
             </span>
             <span className="ui-note" style={{ margin: 0 }}>
-              {[p.custom?.urun, st.donum ? `${st.donum} dönüm` : "", money ? `masraf ${formatTL(st.m)}` : "", money ? `gelir ${formatTL(st.g)}` : ""].filter(Boolean).join(" · ")}
+              {[p.custom?.urun, st.donum ? `${st.donum} dekar` : "", money ? `masraf ${formatTL(st.m)}` : "", money ? `gelir ${formatTL(st.g)}` : ""].filter(Boolean).join(" · ")}
             </span>
             {last && <span className="ui-note" style={{ margin: 0 }}>Son iş: {String(last.data.type)} · {dayText(last.occurred_on)}</span>}
             {(() => { const f = fidanOf(p.id); return f ? <span style={{ fontWeight: 800, color: "var(--ana-yazi)" }}>{f.alive.toLocaleString("tr-TR")} fidan · fidan başı {formatTL(Math.round(f.per * 100) / 100)}</span> : null; })()}
@@ -241,12 +242,20 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
   const [spot, setSpot] = useState<Spot | null>(edit?.custom?.lat ? { name: edit.custom.koy ?? "", lat: Number(edit.custom.lat), lon: Number(edit.custom.lon), area: "" } : null);
   const [found, setFound] = useState<Spot[] | null>(null);
   const [geoErr, setGeoErr] = useState("");
+  const [tapu, setTapu] = useState<Parsel | null>(null);
+  const tapuGeldi = (t: Parsel) => {
+    setTapu(t);
+    setDonum(t.dekar ? String(t.dekar).replace(".", ",") : "");
+    if (!name.trim()) setName(`${t.mahalle} ${t.ada}/${t.parsel}`);
+    if (t.lat) { const k = `${t.mahalle}, ${t.ilce}`; setKoy(k); setSpot({ name: t.mahalle, lat: t.lat, lon: t.lon, area: t.ilce }); setFound(null); }
+  };
   return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
+      <TapuBolum onFound={tapuGeldi} />
       <PageHeader sub="Tarla" title={edit ? "Tarlayı düzenle" : "Yeni tarla"} />
       <TextField id="t_ad" label="Tarlanın adı" placeholder="Örnek: Kınık yolu, Dere kenarı" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
-      <TextField id="t_donum" label="Kaç dönüm? (isteğe bağlı)" inputMode="decimal" placeholder="Örnek: 12" maxLength={8} value={donum} onChange={(e) => setDonum(e.target.value)} />
+      <TextField id="t_donum" label="Kaç dekar? (isteğe bağlı)" inputMode="decimal" placeholder="Örnek: 12" maxLength={8} value={donum} onChange={(e) => setDonum(e.target.value)} />
       <TextField id="t_urun" label="Ürün (isteğe bağlı)" placeholder="Örnek: Zeytin, Pamuk, Domates" maxLength={40} value={urun} onChange={(e) => setUrun(e.target.value)} />
       {isler.length > 1 && (
         <div className="ui-stack" style={{ gap: 8 }}>
@@ -276,8 +285,54 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
       </div>
       <TextField id="t_not" label="Not (isteğe bağlı)" placeholder="Örnek: Ada 105 parsel 3" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
       <MainButton disabled={!name.trim()} onClick={() => onSave(name.trim(), {
-        ...(edit?.custom ?? {}), donum: donum ? String(num(donum)) : "", urun: urun.trim(), not: note.trim(), is, koy: koy.trim(), lat: spot ? String(spot.lat) : "", lon: spot ? String(spot.lon) : "" })}>Kaydet</MainButton>
+        ...(edit?.custom ?? {}), donum: donum ? String(num(donum)) : "", urun: urun.trim(), not: note.trim(), is, koy: koy.trim(), lat: spot ? String(spot.lat) : "", lon: spot ? String(spot.lon) : "",
+        ...(tapu ? { il: tapu.il, ilce: tapu.ilce, mahalle: tapu.mahalle, ada: tapu.ada, parsel: tapu.parsel, tapu_m2: String(tapu.m2), nitelik: tapu.nitelik } : {}) })}>Kaydet</MainButton>
     </main>
+  );
+}
+
+function TapuBolum({ onFound }: { onFound: (p: Parsel) => void }) {
+  const [acik, setAcik] = useState(false);
+  const [iller, setIller] = useState<Yer[]>([]);
+  const [ilceler, setIlceler] = useState<Yer[]>([]);
+  const [mahalleler, setMahalleler] = useState<Yer[]>([]);
+  const [il, setIl] = useState(0); const [ilce, setIlce] = useState(0); const [mah, setMah] = useState(0);
+  const [ada, setAda] = useState(""); const [parsel, setParsel] = useState("");
+  const [msg, setMsg] = useState(""); const [busy, setBusy] = useState(false);
+  const [bulunan, setBulunan] = useState<Parsel | null>(null);
+  const yukle = async (f: () => Promise<Yer[]>, set: (l: Yer[]) => void) => {
+    setMsg(""); try { set(await f()); } catch { setMsg("Tapuya ulaşamadım, internet lazım. Bilgileri elle de yazabilirsin."); }
+  };
+  useEffect(() => { if (acik && !iller.length) yukle(ilListe, setIller); }, [acik]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!acik) return <button type="button" className="ui-link" onClick={() => setAcik(true)}>📄 Tapudan getir (ada / parsel ile)</button>;
+  const sec = (id: string, label: string, list: Yer[], value: number, on: (v: number) => void) => (
+    <label className="ui-stack" style={{ gap: 4 }}>
+      <span className="ui-label">{label}</span>
+      <select id={id} className="ui-select" value={value || ""} disabled={!list.length} onChange={(e) => on(Number(e.target.value))}>
+        <option value="">Seç</option>
+        {list.map((y) => <option key={y.id} value={y.id}>{y.ad}</option>)}
+      </select>
+    </label>
+  );
+  return (
+    <Card>
+      <div className="ui-stack" style={{ gap: 10 }}>
+        <span className="ui-label">Tapudan getir</span>
+        {sec("tp_il", "İl", iller, il, (v) => { setIl(v); setIlce(0); setMah(0); setIlceler([]); setMahalleler([]); if (v) yukle(() => ilceListe(v), setIlceler); })}
+        {sec("tp_ilce", "İlçe", ilceler, ilce, (v) => { setIlce(v); setMah(0); setMahalleler([]); if (v) yukle(() => mahalleListe(v), setMahalleler); })}
+        {sec("tp_mah", "Mahalle / köy", mahalleler, mah, setMah)}
+        <TextField id="tp_ada" label="Ada no" inputMode="numeric" maxLength={8} value={ada} onChange={(e) => setAda(e.target.value)} />
+        <TextField id="tp_parsel" label="Parsel no" inputMode="numeric" maxLength={8} value={parsel} onChange={(e) => setParsel(e.target.value)} />
+        <MainButton disabled={!mah || !ada.trim() || !parsel.trim() || busy} onClick={async () => {
+          setBusy(true); setMsg(""); setBulunan(null);
+          try { const p = await parselBul(mah, ada, parsel); if (!p) setMsg("Bu ada/parseli bulamadım. Numaraları kontrol et."); else { setBulunan(p); onFound(p); } }
+          catch { setMsg("Tapuya ulaşamadım, internet lazım. Bilgileri elle de yazabilirsin."); }
+          finally { setBusy(false); }
+        }}>{busy ? "Arıyorum…" : "Parseli bul"}</MainButton>
+        {bulunan && <span className="ui-note" style={{ margin: 0 }}>✓ {bulunan.mahalle}, {bulunan.ilce} · Ada {bulunan.ada} / Parsel {bulunan.parsel} · {bulunan.m2.toLocaleString("tr-TR")} m² = <b>{bulunan.dekar.toLocaleString("tr-TR")} dekar</b>{bulunan.nitelik ? ` · ${bulunan.nitelik}` : ""}</span>}
+        {msg && <span className="ui-note" style={{ margin: 0 }}>{msg}</span>}
+      </div>
+    </Card>
   );
 }
 

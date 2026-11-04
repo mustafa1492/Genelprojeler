@@ -411,7 +411,7 @@ export default function Fidan() {
           return keys.map((k) => {
             const ls = all.filter((l) => (l.place_id ?? (l.data.potted ? "saksi" : "yok")) === k);
             const pl = places.find((p) => p.id === k);
-            return groupCard(k, pl?.name ?? (k === "saksi" ? "Saksıda" : "Tarlası seçilmemiş"), pl?.custom?.donum ? `${pl.custom.donum} dönüm` : "", ls,
+            return groupCard(k, pl?.name ?? (k === "saksi" ? "Saksıda" : "Tarlası seçilmemiş"), pl?.custom?.donum ? `${pl.custom.donum} dekar` : "", ls,
               (l) => `${String(l.data.batch_name ?? l.name)}${l.planted_on ? ` (${l.planted_on.slice(0, 4)})` : ""}`);
           });
         }

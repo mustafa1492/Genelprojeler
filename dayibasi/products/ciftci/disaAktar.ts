@@ -31,7 +31,7 @@ export async function exportAll(biz: Business) {
   const base = `${biz.name}-tum-veriler-${stamp}`.replace(/\s+/g, "-");
 
   await downloadXlsx(base, [
-    { name: "Tarlalar", title: `${biz.name} · bütün veriler (${tr(stamp)})`, rows: [["Tarla", "Dönüm", "Ürün", "İş", "Köy / ilçe", "Not"],
+    { name: "Tarlalar", title: `${biz.name} · bütün veriler (${tr(stamp)})`, rows: [["Tarla", "Dekar", "Ürün", "İş", "Köy / ilçe", "Not"],
       ...places.map((p) => { const c = (p.custom ?? {}) as Record<string, string>; return [s(p.name), n(c.donum), s(c.urun), s(c.is), s(c.koy), s(c.not)]; })] },
     { name: "Masraflar", rows: [["Tarih", "Tür", "Tarla", "Tutar (TL)", "Not", "Veresiye (kime)", "Ödenen (TL)", "İş"],
       ...expenses.sort((a, b) => s(a.occurred_on).localeCompare(s(b.occurred_on))).map((e) => [tr(s(e.occurred_on)), s(e.category), pName(e.place_id), n(e.amount), s(e.note), e.on_credit ? s(e.vendor) : "", e.on_credit ? n(e.paid_amount) : "", s(d(e).branch)])] },
