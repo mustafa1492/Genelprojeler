@@ -123,3 +123,9 @@ Mustafa bilmiyor; gerçek bir dayıbaşına sorulacak. Cevap gelmeden bu kısım
 ## Nisan öncesi (gerçek kullanıma açmadan) — hatırlatılacak
 - Yedek (gece yedeği + dış kopya), deneme hesaplarını silme, şifre sıfırlama e-postası (SMTP), KVKK metni, Supabase uyku çözümü (ping görevi ya da Pro), kısa güvenlik kontrolü, yayından önce test (Mustafa'ya sorulacak).
 - Mağaza: önce Android (Google Play, bir kerelik ~25$, TWA/PWABuilder ile paket; yeni kişisel hesapta 12 kişi × 14 gün kapalı test gerekir; kimlik + gizlilik politikası). iPhone (yıllık ~99$, Mac/bulut derleme, ret riski) sonra.
+
+## Mustafa kararları (4 Kasım 2026)
+- Tanıtım (pazarlama) web sitesi kurulacak: özellikleri anlatan sayfa. Alan adı ertelendi.
+- Paketler: basit / orta / tam gibi; ücret pakete göre. (Paket içerikleri sonra konuşulacak.)
+- Destek: uygulama içinde kısa videolar; iş büyürse Mustafa ilgilenir, daha büyürse ekip.
+- Dayıbaşı ve diğer modüller: ayrıca hak harcanmayacak; başka bir iş yaparken az ek eforla oraya da uygulanabiliyorsa yapılır (Claude bunu fırsat görünce söyler).
