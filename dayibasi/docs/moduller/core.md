@@ -5,6 +5,7 @@
 ## Durum (4 Kasım 2026)
 - Canlıda: yeni tasarım (telefonda sade kartlar, bilgisayarda koyu yeşil gruplu yan menü + tablolar), yetkiler (memberships.perms: yonetici/aile/calisan/ozel; `perm_level`, `can`, `my_perms`), kısıtlayıcı RLS politikaları (0014–0017), yönetim paneli /panel (admin_* fonksiyonları 0016, edge function `admin-users`), app_config (duyuru, yeni_defter_kapali, liste:<key>), güvenlik başlıkları (CSP; open-meteo izinli), davet koduyla katılma, giriş takılma düzeltmesi (tabLock).
 - Yönetici hesabı: admin@dayibasi.test (şifre Mustafa'da).
+- Deneme hesabı (9 Kasım, SQL): kullanıcı adı `denememcbü` (e-posta denememcbu@kullanici.dayibasi.app), defter "MCBÜ deneme çiftliği", bütün modüller, 2025–2026 rastgele veri (60 masraf, 7 gelir, 4 tarla, kümes 21 gün, 12 hayvan, fidan, depo, belge, borç). Şifre Mustafa'da. Silinecek.
 - Deneme hesabı (5 Kasım, SQL ile açıldı): kullanıcı adı `denemetum`, defter "Deneme çiftliği (tüm modüller)", modüller fidan/kanatlı/büyükbaş/küçükbaş açık, örnek veri var. Şifre depoda YOK (Mustafa'da). Gerçek kullanıma geçmeden silinecek.
 - Supabase ücretsiz plan (7 gün kullanılmazsa uyur, veri silinmez, panelden Restore).
 
