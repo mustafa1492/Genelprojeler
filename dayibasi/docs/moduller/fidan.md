@@ -16,6 +16,7 @@ Mustafa'nın onayladığı işler (10 Kasım 2026), sıra henüz kesin değil:
 4. **Müşteri telefonu ve tekrar satış:** telefon bir kez girilir; hesap / fiyat listesi doğrudan kişiye; geçmiş müşterilere fiyat listesi gönderme.
 5. **Teklif PDF'i (estetik):** sadece fiyat teklifi değil, içinde **tanıtım** da olacak (işletme hakkında yazı, fotoğraflar, iletişim, belki pasaport/sertifika bilgisi). Tanıtım içeriği **uygulamadan düzenlenebilir** olmalı. Tasarımı özenli olmalı (kapak, logo, düzenli tablo).
 6. **Dikim hesaplayıcı (konuşuluyor):** tarla dönümü + kullanılacak alan + sıra arası / sıra üzeri → fidan adedi (yol ve yedek payıyla), sıra uzunluğu, damla boru, işçilik, gübre/torf, maliyet; ters hesap; "bu planla dikim ekle". Birim değerler kullanıcıdan, uydurulmaz.
+- **Hüseyin'e sorulacaklar:** `huseyin-sorular.md` (üretim, dikim ihtiyaç listesi ve birim değerler, büyüme, satış, teklif PDF'i). Hepsi bir seferde sorulacak; dikim hesaplayıcının birim değerleri oradan gelecek.
 - Diğer: Hüseyin'in geri bildirimi; tür/çeşit bazlı fiyat (birden çok tür üretilirse); hızlı (tahmini) sayım, çelikle üretim, parti karşılaştırma raporu (öneri, onaylanmadı).
 
 ## Nerede kaldık
