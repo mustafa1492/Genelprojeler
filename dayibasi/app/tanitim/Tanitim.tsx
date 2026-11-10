@@ -1,4 +1,8 @@
 import "./tanitim.css";
+import { Nunito } from "next/font/google";
+
+// Logo yazısı: yuvarlak, kalın, Türkçe harfleri tam. Derlemede siteye gömülür, dışarıdan yüklenmez.
+const logoFont = Nunito({ subsets: ["latin", "latin-ext"], weight: ["900"], display: "swap" });
 import { NasilKullanilir } from "./NasilKullanilir";
 import { DenemeEkrani, KarHesap, ModulSecici } from "./Etkilesim";
 
@@ -59,7 +63,7 @@ export function TanitimSayfasi() {
     <main className="tn">
       <header className="tn-ust">
         <div className="tn-ic">
-          <a className="tn-logo" href="/"><span className="i" aria-hidden>🌱</span>Çiftçi Defteri</a>
+          <a className="tn-logo" href="/" aria-label="Çiftçi Defteri ana sayfa"><span className="i" aria-hidden><img src="/tanitim/logo-128.png" alt="" width="44" height="44" /></span><span className={"yazi " + logoFont.className}>Çiftçi <b>Defteri</b></span></a>
           <nav aria-label="Bölümler">
             <a href="#moduller">Modüller</a>
             <a href="#dene">Dene</a>

@@ -335,3 +335,11 @@ button.tn-btn:disabled { opacity: .4; cursor: default; }
 .tn-alt::before { content: ""; position: absolute; left: 0; right: 0; top: -43px; height: 44px; background: url(/tanitim/dalga-yesil.svg) center / 100% 100% no-repeat; }
 @media (min-width: 1024px) { .tn-kahraman { padding-bottom: 200px; background-size: 100% 260px, auto, auto; } .tn-kahraman::after { height: 64px; } }
 @media (prefers-reduced-motion: reduce) { .tn-btn, .tn-mk { transition: none; } .tn-mk:hover, .tn-btn:active { transform: none; } }
+
+/* Logo: Mustafa'nın verdiği defter + filiz + tarla simgesi, Nunito yazı */
+.tn-logo { gap: 12px; }
+.tn-logo span.i { width: 54px; height: 54px; border-radius: 16px; background: #fbf7ee; box-shadow: 0 0 0 2px #e9c46a inset; }
+.tn-logo span.i img { display: block; }
+.tn-logo .yazi { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.01em; line-height: 1; color: #fff; }
+.tn-logo .yazi b { font-weight: 900; color: #e9c46a; }
+@media (max-width: 380px) { .tn-logo .yazi { font-size: 1.3rem; } .tn-logo span.i { width: 46px; height: 46px; } .tn-logo span.i img { width: 38px; height: 38px; } }
