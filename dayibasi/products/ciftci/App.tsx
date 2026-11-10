@@ -33,6 +33,7 @@ import Fotograflar from "./screens/Fotograflar";
 import Duzenle from "./screens/Duzenle";
 import Menu from "./Menu";
 import { NAV_CHOICES, NAV_SLOTS, useGorunum } from "./gorunum";
+import { ModulChip, ModulProvider, MODULLER, tabInModul, type Modul } from "./modul";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
 const nv = (d: React.ReactNode) => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>;
@@ -74,10 +75,10 @@ const TABS: ShellTab[] = [
 /** Çiftçi defteri: tek sayfalık sekmeli uygulama (sekmeler kaldığı yerde kalır). */
 export default function CiftciApp({ initial }: { initial: string }) {
   const biz = useBusiness();
-  return <PrefsProvider businessId={biz.id}><Inner initial={initial} /></PrefsProvider>;
+  return <PrefsProvider businessId={biz.id}><ModulProvider biz={biz}>{(m) => <Inner initial={initial} modul={m} />}</ModulProvider></PrefsProvider>;
 }
 
-function Inner({ initial }: { initial: string }) {
+function Inner({ initial, modul }: { initial: string; modul: Modul }) {
   const biz = useBusiness();
   const { g } = useGorunum();
   usePrivacy();   // "Tutarları gizle" değişince her ekran yeniden çizilir (*** TL)
@@ -87,10 +88,13 @@ function Inner({ initial }: { initial: string }) {
   const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "hayvan", buyukbas: "hayvan", kucukbas: "hayvan", depo: "depo", tarlalar: "tarlalar", makineler: "tarlalar", takvim: "takvim", rapor: "rapor",
     vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fotograflar: "masraf", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
   const base = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && (t.id !== "buyukbas" || hasTur(biz, "buyukbas")) && (t.id !== "kucukbas" || hasTur(biz, "kucukbas")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
-    .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t));
+    .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t))
+    .filter((t) => tabInModul(t.id, modul)); // başka bölüme özel sekmeler gizli (tarlalar, depo, makineler… ortak)
   // Kişiye özel: alt çubuk (4 yer) ve Menü; "Ekranımı düzenle" seçilebilir sekmeleri bilir.
   const choices = NAV_CHOICES.map((id) => base.find((t) => t.id === id)).filter((t): t is ShellTab => !!t).map((t) => ({ id: t.id, label: t.short ?? t.label }));
-  let navIds = g.nav.filter((id) => choices.some((c) => c.id === id));
+  // Alt çubuk: bölümün kendi ekranı 2. sırada (Özet'ten sonra), sonra kişinin seçtikleri
+  const own = MODULLER[modul].ana.filter((id) => choices.some((c) => c.id === id));
+  let navIds = [...new Set([...(g.nav[0] === "ozet" ? ["ozet"] : []), ...own, ...g.nav])].filter((id) => choices.some((c) => c.id === id)).slice(0, NAV_SLOTS);
   // Yetki ya da modül yüzünden boşalan yerleri görebildiği sekmelerle doldur (çalışan: Özet, Tarlalar, Depo, Takvim…)
   for (const c of choices) { if (navIds.length >= NAV_SLOTS) break; if (!navIds.includes(c.id)) navIds.push(c.id); }
   const tabs = base.map((t) => (t.id === "duzenle" ? { ...t, render: () => <Duzenle choices={choices} /> } : t));
@@ -98,5 +102,5 @@ function Inner({ initial }: { initial: string }) {
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
   if (!tabs.some((t) => t.id === start)) start = "ozet";
-  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span></>} /></SeasonProvider>;
+  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span><ModulChip /></>} /></SeasonProvider>;
 }

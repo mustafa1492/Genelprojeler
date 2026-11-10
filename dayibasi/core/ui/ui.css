@@ -630,3 +630,11 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .foto-izgara b { font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .foto-izgara small { font-size: 0.78rem; color: var(--sessiz2); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (min-width: 900px) { .foto-izgara { grid-template-columns: repeat(5, minmax(0, 1fr)); } .ui-pick, .ui-liste-sec { max-width: 520px; } }
+
+/* Çiftçi: bölüm (modül) seçimi */
+.modul-sec { padding-top: 24px; }
+.modul-kart { display: flex; align-items: center; gap: 16px; min-height: 120px; padding: 20px; border: 0; border-radius: 18px; color: #fff; text-align: left; font: inherit; cursor: pointer; }
+.modul-kart span { display: flex; flex-direction: column; gap: 4px; }
+.modul-kart b { font-size: 1.55rem; }
+.modul-kart small { font-size: 1rem; opacity: .95; }
+.modul-chip { font: inherit; font-size: 1rem; font-weight: 700; min-height: 44px; padding: 0 14px; border-radius: 22px; border: 2px solid var(--ana); background: var(--ana-acik); color: var(--ana-yazi); cursor: pointer; vertical-align: middle; margin-left: 6px; }

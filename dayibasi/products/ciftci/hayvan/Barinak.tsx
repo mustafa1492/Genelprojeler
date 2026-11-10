@@ -289,15 +289,21 @@ function GunlukForm({ herd, barn, initialDay, days, onSave, onCancel }: {
       </div>
       {ex && <p className="ui-note">Bu günün kaydı var; değiştirip kaydedersen düzeltilir.</p>}
 
-      <span className="ui-label">Ölü</span>
-      <Counter value={dead} onChange={setDead} max={99999} />
-      <span className="ui-label">Ayıklanan</span>
-      <Counter value={culled} onChange={setCulled} max={99999} />
-      <span className="ui-label">Verilen yem</span>
-      <Counter value={bags} onChange={setBags} max={9999} unit=" çuval" />
-      {askKg
-        ? <TextField id="g_kg" label="Bir çuval kaç kilo? (bir kez sorulur)" inputMode="decimal" maxLength={5} value={bagKg} onChange={(e) => setBagKg(e.target.value)} />
-        : <button type="button" className="ui-plain" style={{ textAlign: "left" }} onClick={() => setAskKg(true)}>Çuval {savedKg} kg · değiştir ›</button>}
+      <div className="ui-card ui-stack" style={{ gap: 10 }}>
+        <h2 className="ui-section" style={{ margin: 0 }}>Kayıp</h2>
+        <span className="ui-label">Ölü</span>
+        <Counter value={dead} onChange={setDead} max={99999} />
+        <span className="ui-label">Ayıklanan</span>
+        <Counter value={culled} onChange={setCulled} max={99999} />
+      </div>
+      <div className="ui-card ui-stack" style={{ gap: 10 }}>
+        <h2 className="ui-section" style={{ margin: 0 }}>Yem</h2>
+        <span className="ui-label">Verilen yem</span>
+        <Counter value={bags} onChange={setBags} max={9999} unit=" çuval" />
+        {askKg
+          ? <TextField id="g_kg" label="Bir çuval kaç kilo? (bir kez sorulur)" inputMode="decimal" maxLength={5} value={bagKg} onChange={(e) => setBagKg(e.target.value)} />
+          : <button type="button" className="ui-plain" style={{ textAlign: "left" }} onClick={() => setAskKg(true)}>Çuval {savedKg} kg · değiştir ›</button>}
+      </div>
 
       <button type="button" className="ui-plain" style={{ textAlign: "left" }} onClick={() => setMore(!more)}>{more ? "Daha az ‹" : "Daha fazla: tartım, not ›"}</button>
       {more && <div className="ui-stack">

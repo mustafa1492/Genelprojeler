@@ -17,6 +17,7 @@ import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
 import { addDays, dayText, dayYear, GELIR, harvestFrom, HATIRLAT, incomeOpen, ISLEM, MAKINE, todayStr } from "../kayit";
 import { bakimDurumu } from "./Makineler";
+import { ModulChip } from "../modul";
 import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
 import { Weather } from "../hava";
@@ -224,7 +225,7 @@ export default function Ana() {
 
   return (
     <main className="ui-has-nav ui-stack ozet-izgara" onClick={(e) => { if (sel && !(e.target as HTMLElement).closest(".ozet-blok.secili")) setSel(null); }}>
-      <div className="ozet-selam">{selam}{myName ? `, ${myName}` : ""}</div>
+      <div className="ozet-selam">{selam}{myName ? `, ${myName}` : ""} <ModulChip /></div>
       <PageHeader title={biz.name} right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}>{can("rapor") && !g.cards.includes("kar") && <span className="ozet-gizle"><PrivacyButton /></span>}<HistoryLink /></span>} />
       {can("rapor") && g.period === "sezon" && g.cards.includes("kar") && <SeasonPicker onManage={() => go("sezonlar")} />}
       {shown.map((id) => {
