@@ -79,7 +79,7 @@ export default function Fis() {
         <div className="ui-stack" style={{ gap: 8 }}>
           <span className="ui-label">Hangi tarla için? (isteğe bağlı)</span>
           <div className="ui-chips wrap">
-            <Chip selected={!placeId} onClick={() => setPlaceId(null)}>Genel</Chip>
+            <Chip selected={!placeId} onClick={() => setPlaceId(null)}>İşletme gideri</Chip>
             {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => setPlaceId(p.id)}>{p.name}</Chip>)}
           </div>
         </div>
