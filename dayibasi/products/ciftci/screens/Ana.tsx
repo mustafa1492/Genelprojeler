@@ -22,7 +22,7 @@ import { HistoryLink } from "../nav";
 import { Weather } from "../hava";
 import { useRole } from "../rol";
 import { fmtFx, useRates } from "@/core/fx";
-import { PERIODS, periodRange, useGorunum, type CardId } from "../gorunum";
+import { PERIODS, periodRange, QUICK, QUICK_DEFAULT, useGorunum, type CardId } from "../gorunum";
 
 /** Özet: yılın kârı, hızlı ekle, uyarılar (hasat bekleme, vadeler, belgeler, biten stok), bağlantılar. */
 export default function Ana() {
@@ -140,14 +140,18 @@ export default function Ana() {
   const kFxG = fxOf(ev.filter((e) => e.kind === GELIR && inK(e.occurred_on)).map((e) => ({ a: Number(e.quantity ?? 0), d: e.occurred_on })));
   const kFxM = fxOf(exp.filter((e) => inK(e.occurred_on)).map((e) => ({ a: e.amount, d: e.occurred_on })));
   const kFx = kFxG != null && kFxM != null && (kG || kM) ? kFxG - kFxM : null;
-  const nextPeriod = () => { const i = PERIODS.findIndex((p) => p.id === g.period); setG({ period: PERIODS[(i + 1) % PERIODS.length].id }); };
+  const [karAcik, setKarAcik] = useState(false);
+  const topMasraf = Object.entries(exp.filter((e) => inK(e.occurred_on)).reduce<Record<string, number>>((m, e) => { m[e.category] = (m[e.category] ?? 0) + e.amount; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const topGelir = Object.entries(ev.filter((e) => e.kind === GELIR && inK(e.occurred_on)).reduce<Record<string, number>>((m, e) => { const k = String(e.data.crop || e.data.type || "Gelir"); m[k] = (m[k] ?? 0) + Number(e.quantity ?? 0); return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const mods = (Array.isArray(biz.settings?.modules) ? biz.settings!.modules : []) as string[];
+  const quickShown = (g.quick ?? QUICK_DEFAULT).map((id) => QUICK.find((q) => q.id === id)).filter((q): q is (typeof QUICK)[number] => !!q && (!q.modul || mods.includes(q.modul)) && can(q.perm[0], q.perm[1]));
 
   const blocks: Record<CardId, React.ReactNode> = {
     kar: can("rapor") ? (
       <div className="ozet-kar">
         <div>
-          <span className="bas">{kTitle}<span className="bas-sag"><button type="button" onClick={nextPeriod} aria-label="Dönemi değiştir">{PERIODS.find((p) => p.id === g.period)!.label} ▾</button><PrivacyButton compact className="kar-goz" /></span></span>
-          <span className="tutar ui-money">{formatTL(kar)}</span>
+          <span className="bas">{kTitle}<span className="bas-sag"><button type="button" onClick={() => setKarAcik(!karAcik)} aria-expanded={karAcik} aria-label="Dönemi seç ve ayrıntıyı göster">{PERIODS.find((p) => p.id === g.period)!.label} {karAcik ? "▴" : "▾"}</button><PrivacyButton compact className="kar-goz" /></span></span>
+          <button type="button" className="tutar ui-money kar-ac" onClick={() => setKarAcik(!karAcik)} aria-expanded={karAcik} aria-label={`${kTitle}: ${formatTL(kar)}. Ayrıntı için dokun`}>{formatTL(kar)}</button>
           {kFx != null && <span className="ozet-kar-fx ui-money">{fmtFx(kFx, doviz)}</span>}
           {kPrev !== null && kPrev !== 0 && <small className={kar < kPrev ? "kotu" : ""}>{kar >= kPrev ? "▲" : "▼"} %{Math.abs(Math.round(((kar - kPrev) / Math.abs(kPrev)) * 100))} {kPrevLabel}</small>}
         </div>
@@ -156,16 +160,27 @@ export default function Ana() {
           <span>Masraf<b className="ui-money">{formatTL(kM)}</b></span>
           <span>{alacak >= borc ? "Alacak" : "Borç"}<b className="ui-money">{formatTL(alacak >= borc ? alacak : borc)}</b></span>
         </div>
+        {karAcik && (
+          <div className="kar-ayrinti">
+            <div className="kar-donem" role="group" aria-label="Hangi dönem?">
+              {PERIODS.map((p) => <button key={p.id} type="button" aria-pressed={g.period === p.id} onClick={() => setG({ period: p.id })}>{p.label}</button>)}
+            </div>
+            {topMasraf.length > 0 && <div className="kar-liste"><b>En çok masraf</b>{topMasraf.map(([k, v]) => <span key={k}>{k}<em className="ui-money">{formatTL(v)}</em></span>)}</div>}
+            {topGelir.length > 0 && <div className="kar-liste"><b>Gelir nereden</b>{topGelir.map(([k, v]) => <span key={k}>{k}<em className="ui-money">{formatTL(v)}</em></span>)}</div>}
+            {topMasraf.length === 0 && topGelir.length === 0 && <span className="kar-bos">Bu dönemde kayıt yok.</span>}
+            <div className="kar-baglanti">
+              <button type="button" onClick={() => go("rapor")}>Sezon raporu ›</button>
+              {can("kayitlar") && <button type="button" onClick={() => go("kayitlar")}>Bütün kayıtlar ›</button>}
+            </div>
+          </div>
+        )}
       </div>
     ) : null,
-    hizli: (
+    hizli: quickShown.length ? (
       <div className="ozet-hizli">
-        {can("masraf", 2) && <TabLink to="masraf" params={{ yeni: 1 }}><em aria-hidden="true">🧾</em>+ Masraf</TabLink>}
-        {can("gelir", 2) && <TabLink to="gelir" params={{ yeni: 1 }}><em aria-hidden="true">💰</em>+ Gelir</TabLink>}
-        {can("tarlalar", 2) && <TabLink to="tarlalar"><em aria-hidden="true">🌾</em>Tarla işi</TabLink>}
-        {can("fis", 2) && <TabLink to="fis"><em aria-hidden="true">📷</em>Fiş</TabLink>}
+        {quickShown.map((q) => <TabLink key={q.id} to={q.to} params={q.params}><em aria-hidden="true">{q.emoji}</em>{q.label}</TabLink>)}
       </div>
-    ),
+    ) : null,
     yeni: freshBy.length > 0 ? (
       <div className="ui-card ui-stack" style={{ gap: 6 }}>
         <b>Yeni kayıtlar</b>

@@ -1,6 +1,6 @@
 "use client";
 import { useCList } from "../lists";
-import { useGo, useOnActivate } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
@@ -19,6 +19,7 @@ type Row = { key: string; dir: "borc" | "alacak"; party: string; kind: string; l
 export default function Vadeler() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { nameOf } = useMembers(biz.id);
   const [dues, setDues] = useState<Due[]>([]);
   const [income, setIncome] = useState<EventRow[]>([]);
@@ -82,7 +83,7 @@ export default function Vadeler() {
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Kredi, kooperatif, bayi, tüccar, çek" title="Borç ve vadeler" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <div className="ui-split">

@@ -10,7 +10,7 @@ import { fxFor, gelirSheet, masrafSheet, ozetSheet } from "../excel";
 import { listItems, type Item } from "@/core/inventory/api";
 import { formatTL, formatTLRaw } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { useGo, useOnActivate } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { BackButton, MainButton } from "@/core/ui";
 import { useCList } from "../lists";
 import { branchOf, breakEven, dayYear, GELIR, incomeOpen, ISLEM, VERIM } from "../kayit";
@@ -23,6 +23,7 @@ const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString
 export default function Rapor() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { selected: S, seasons } = useSeason();
   const [exp, setExp] = useState<Expense[]>([]);
   const [ev, setEv] = useState<EventRow[]>([]);
@@ -50,7 +51,7 @@ export default function Rapor() {
   const cats = [...new Set(E.map((e) => e.category))].map((c) => ({ c, t: E.filter((e) => e.category === c).reduce((s, e) => s + e.amount, 0) })).sort((a, b) => b.t - a.t);
   const months = [...new Set(E.map((e) => e.occurred_on.slice(0, 7)))].sort().map((m) => ({ m, t: E.filter((e) => e.occurred_on.startsWith(m)).reduce((s, e) => s + e.amount, 0) }));
   const maxC = Math.max(1, ...cats.map((x) => x.t)), maxM = Math.max(1, ...months.map((x) => x.t));
-  const pName = (id: string | null) => places.find((p) => p.id === id)?.name ?? "Genel";
+  const pName = (id: string | null) => places.find((p) => p.id === id)?.name ?? "İşletme gideri";
   const fields = [...places.map((p) => p.id), null].map((id) => {
     const m = E.filter((e) => e.place_id === id).reduce((t, e) => t + e.amount, 0);
     const g = G.filter((e) => e.place_id === id).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
@@ -59,6 +60,11 @@ export default function Rapor() {
     const b = breakEven(m, V.filter((e) => e.place_id === id));
     return { id, name: pName(id), m, g, kar: g - m, d, v, be: b ? `${formatTL(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "", beRaw: b ? `${formatTLRaw(Math.round(b.perUnit * 100) / 100)}/${b.unit}` : "" };
   }).filter((x) => x.m || x.g || x.v);
+  // Tarlaya ait olmayanlar ayrı başlıkta: tarlaların dekar başı masrafına girmez
+  const tarlalar = fields.filter((f) => f.id !== null);
+  const isletme = fields.find((f) => f.id === null);
+  const isletmeTur = [...new Set(E.filter((e) => !e.place_id).map((e) => e.category))].map((c) => ({ c, t: E.filter((e) => !e.place_id && e.category === c).reduce((s, e) => s + e.amount, 0) })).sort((a, b) => b.t - a.t);
+  const tarlaKar = tarlalar.reduce((t, f) => t + f.kar, 0);
   // Geçen sezon: başlangıcı bundan önce olan en yakın sezon; yoksa aynı tarihlerin bir yıl öncesi
   const yr = (d: string, k: number) => `${Number(d.slice(0, 4)) + k}${d.slice(4)}`;
   const P = seasons.filter((x) => x.start < S.start).sort((a, b) => b.start.localeCompare(a.start))[0] ?? { id: "_", name: "Geçen yıl", start: yr(S.start, -1), end: yr(S.end, -1) };
@@ -103,7 +109,9 @@ export default function Rapor() {
       oz,
       { name: "Tarla tarla", title: `Tarla tarla · ${S.name}`, info: ["Kâr ve dekar başı masraf formüldür."],
         cols: [{ h: "Tarla", t: "text", w: 20 }, { h: "Dekar", t: "num", sum: true }, { h: "Gelir (TL)", t: "tl" }, { h: "Masraf (TL)", t: "tl" }, { h: "Kâr (TL)", t: "tl" }, { h: "Dekar başı masraf (TL)", t: "tl", sum: false }, { h: "Verim", t: "text", w: 20 }, { h: "Başabaş fiyatı", t: "text", w: 16 }],
-        rows: fields.map((f) => [f.name, f.d || null, f.g, f.m, { f: "={C:Gelir (TL)}{r}-{C:Masraf (TL)}{r}", v: f.kar }, { f: "=IF(N({C:Dekar}{r})>0,{C:Masraf (TL)}{r}/{C:Dekar}{r},\"\")", v: f.d ? f.m / f.d : "" }, f.v, f.beRaw]) },
+        rows: tarlalar.map((f) => [f.name, f.d || null, f.g, f.m, { f: "={C:Gelir (TL)}{r}-{C:Masraf (TL)}{r}", v: f.kar }, { f: "=IF(N({C:Dekar}{r})>0,{C:Masraf (TL)}{r}/{C:Dekar}{r},\"\")", v: f.d ? f.m / f.d : "" }, f.v, f.beRaw]) },
+      ...(isletmeTur.length ? [{ name: "İşletme giderleri", title: `İşletme giderleri · ${S.name}`, info: ["Belli bir tarlaya ait olmayan masraflar. Tarlaların dekar başı masrafına girmez; net kârdan düşülür."],
+        cols: [{ h: "Tür", t: "text" as const, w: 24 }, { h: "Tutar (TL)", t: "tl" as const }], rows: isletmeTur.map((x) => [x.c, x.t]) }] : []),
       M, GS,
       { name: "Tarla işleri", title: `Tarla günlüğü · ${S.name}`, totals: false,
         cols: [{ h: "Tarih", t: "date" }, { h: "Tarla", t: "text" }, { h: "İşlem", t: "text" }, { h: "Ürün / ilaç", t: "text" }, { h: "Doz", t: "text" }, { h: "Bekleme (gün)", t: "num", sum: false }, { h: "Not", t: "text", w: 30 }],
@@ -117,7 +125,7 @@ export default function Rapor() {
   return (
     <main className="ui-stack rapor">
       <div className="no-print ui-stack">
-        <BackButton onClick={() => go("ozet")} label="Özet" />
+        <BackButton onClick={() => back()} label="Geri" />
         <SeasonPicker onManage={() => go("sezonlar")} />
         <div className="ui-seg">
           <button type="button" onClick={() => window.print()}>PDF olarak kaydet</button>
@@ -183,9 +191,35 @@ export default function Rapor() {
       <div className="rapor-table">
         <table>
           <thead><tr><th>Tarla</th><th>Masraf</th><th>Gelir</th><th>Kâr</th><th>Dekar başı</th><th>Verim</th><th>Başabaş</th></tr></thead>
-          <tbody>{fields.map((f) => <tr key={f.name}><td>{f.name}</td><td>{formatTL(f.m)}</td><td>{formatTL(f.g)}</td><td className={f.kar < 0 ? "neg" : ""}>{formatTL(f.kar)}</td><td>{f.d ? formatTL(Math.round(f.m / f.d)) : "—"}</td><td>{f.v || "—"}</td><td>{f.be || "—"}</td></tr>)}</tbody>
+          <tbody>{tarlalar.map((f) => <tr key={f.name}><td>{f.name}</td><td>{formatTL(f.m)}</td><td>{formatTL(f.g)}</td><td className={f.kar < 0 ? "neg" : ""}>{formatTL(f.kar)}</td><td>{f.d ? formatTL(Math.round(f.m / f.d)) : "—"}</td><td>{f.v || "—"}</td><td>{f.be || "—"}</td></tr>)}</tbody>
         </table>
       </div>
+
+      {isletme && (
+        <>
+          <h2 className="ui-section">İşletme giderleri</h2>
+          <p className="ui-note">Belli bir tarlaya ait olmayan masraflar (mazot, tamir, sigorta…). Tarlaların dekar başı masrafına girmez; net kârdan düşülür.</p>
+          <div className="rapor-table">
+            <table>
+              <thead><tr><th>Tür</th><th>Tutar</th></tr></thead>
+              <tbody>
+                {isletmeTur.map((x) => <tr key={x.c}><td>{x.c}</td><td>{formatTL(x.t)}</td></tr>)}
+                <tr><td><b>Toplam işletme gideri</b></td><td><b>{formatTL(isletme.m)}</b></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="rapor-table">
+            <table>
+              <tbody>
+                <tr><td>Tarlaların kârı (toplam)</td><td>{formatTL(tarlaKar)}</td></tr>
+                <tr><td>İşletme gideri</td><td className="neg">− {formatTL(isletme.m)}</td></tr>
+                {isletme.g > 0 && <tr><td>Tarlaya ait olmayan gelir (destek vb.)</td><td>+ {formatTL(isletme.g)}</td></tr>}
+                <tr><td><b>Net kâr / zarar</b></td><td className={gelir - masraf < 0 ? "neg" : ""}><b>{formatTL(gelir - masraf)}</b></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       <h2 className="ui-section">Gelir</h2>
       <div className="rapor-table">

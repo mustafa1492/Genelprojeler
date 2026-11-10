@@ -7,7 +7,7 @@ import { listDues, remaining, type Due } from "@/core/dues/api";
 import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@/core/events/api";
 import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
-import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useTabParams, useBack } from "@/core/shell/TabShell";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { dayYear, GELIR, harvestFrom, HATIRLAT, ISLEM, MAKINE, todayStr, VERIM } from "../kayit";
 import { bakimDurumu } from "./Makineler";
@@ -24,6 +24,7 @@ const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString
 export default function Takvim() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { sees } = useRole();
   const money = sees("gelir");
   const vade = sees("vadeler");
@@ -32,7 +33,7 @@ export default function Takvim() {
   const [dues, setDues] = useState<Due[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [month, setMonth] = useState(ym(todayStr()));
-  const [day, setDay] = useState<string>(todayStr());
+  const [day, setDay] = useState<string | null>(null);   // null: ayın tamamı listelenir
   const [place, setPlace] = useState<string | null>(null);
   const [form, setForm] = useState<{ edit?: EventRow } | null>(null);
   const [done, setDone] = useState<{ message: string; undo?: () => Promise<unknown> } | null>(null);
@@ -49,7 +50,7 @@ export default function Takvim() {
   useEffect(() => { if (tp.p.yeni) { setDone(null); setForm({}); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
   const pName = (id: string | null | undefined) => places.find((p) => p.id === id)?.name ?? "";
 
-  if (form) return <HatirlatForm places={places} edit={form.edit} defDay={day} onCancel={() => setForm(null)}
+  if (form) return <HatirlatForm places={places} edit={form.edit} defDay={day ?? todayStr()} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.title)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
       if (form.edit) { const o = form.edit; await updateEvent(o.id, v); setDone({ message: `Değiştirdim: ${String(v.data.title)}.`, undo: () => updateEvent(o.id, { occurred_on: o.occurred_on, place_id: o.place_id, data: o.data }) }); }
@@ -75,8 +76,9 @@ export default function Takvim() {
   const nDays = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
   const cells = [...Array(lead).fill(null), ...Array.from({ length: nDays }, (_, i) => `${month}-${String(i + 1).padStart(2, "0")}`)];
   const today = todayStr();
-  const onDay = marks.filter((m) => m.day === day);
-  const lastYear = `${Number(day.slice(0, 4)) - 1}${day.slice(4)}`;
+  const onDay = (day ? marks.filter((m) => m.day === day) : marks.filter((m) => m.day.startsWith(month))).sort((a, b) => a.day.localeCompare(b.day));
+  const refDay = day ?? today;
+  const lastYear = `${Number(refDay.slice(0, 4)) - 1}${refDay.slice(4)}`;
   const lastYearNear = marks.filter((m) => m.kind === "is" && Math.abs((Date.parse(m.day) - Date.parse(lastYear)) / 86400000) <= 7);
 
   const open = (m: Mark) => {
@@ -89,11 +91,11 @@ export default function Takvim() {
   };
 
   return (
-    <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+    <main className="ui-stack" onClick={(e) => { if (day && !(e.target as HTMLElement).closest("button, a, input, select, label")) setDay(null); }}>
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Tarla işleri, hasat, vade, hatırlatma" title="Takvim" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
-      <MainButton onClick={() => { setDone(null); setForm({}); }}>+ Hatırlatma ekle</MainButton>
+      <MainButton className="kompakt" onClick={() => { setDone(null); setForm({}); }}>+ Hatırlatma ekle</MainButton>
       {places.length > 1 && (
         <div className="ui-chips wrap">
           <Chip selected={!place} onClick={() => setPlace(null)}>Bütün tarlalar</Chip>
@@ -101,9 +103,9 @@ export default function Takvim() {
         </div>
       )}
       <div className="takvim-bas">
-        <button type="button" onClick={() => setMonth(addMonth(month, -1))} aria-label="Önceki ay">‹</button>
+        <button type="button" onClick={() => { setMonth(addMonth(month, -1)); setDay(null); }} aria-label="Önceki ay">‹</button>
         <b>{monthName(month)}</b>
-        <button type="button" onClick={() => setMonth(addMonth(month, 1))} aria-label="Sonraki ay">›</button>
+        <button type="button" onClick={() => { setMonth(addMonth(month, 1)); setDay(null); }} aria-label="Sonraki ay">›</button>
       </div>
       <div className="takvim">
         {DAYS.map((d) => <span key={d} className="gun-ad">{d}</span>)}
@@ -112,7 +114,7 @@ export default function Takvim() {
           const ms = marks.filter((m) => m.day === c);
           const kinds = [...new Set(ms.map((m) => m.kind))];
           return (
-            <button key={c} type="button" className={`gun${c === day ? " secili" : ""}${c === today ? " bugun" : ""}`} onClick={() => setDay(c)} aria-label={`${dayYear(c)}, ${ms.length} kayıt`}>
+            <button key={c} type="button" className={`gun${c === day ? " secili" : ""}${c === today ? " bugun" : ""}`} onClick={() => setDay(c === day ? null : c)} aria-pressed={c === day} aria-label={`${dayYear(c)}, ${ms.length} kayıt`}>
               <span>{Number(c.slice(8))}</span>
               <i>{kinds.slice(0, 4).map((k) => <em key={k} style={{ background: COLOR[k] }} />)}</i>
             </button>
@@ -121,11 +123,12 @@ export default function Takvim() {
       </div>
       <div className="takvim-renk">{(Object.keys(LABEL) as Mark["kind"][]).filter((k) => money || !["satis", "vade"].includes(k)).map((k) => <span key={k}><em style={{ background: COLOR[k] }} />{LABEL[k]}</span>)}</div>
 
-      <h2 className="ui-section">{dayYear(day)}</h2>
-      {onDay.length === 0 && <div className="ui-empty">Bu gün kayıt yok.</div>}
+      <h2 className="ui-section" style={{ textTransform: day ? undefined : "capitalize" }}>{day ? dayYear(day) : `${monthName(month)} · hepsi`}</h2>
+      {day && <button type="button" className="ui-link" onClick={() => setDay(null)}>Bütün ayı göster</button>}
+      {onDay.length === 0 && <div className="ui-empty">{day ? "Bu gün kayıt yok." : "Bu ay kayıt yok."}</div>}
       {onDay.map((m, i) => (
         <button key={i} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer", borderLeft: `6px solid ${COLOR[m.kind]}` }} onClick={() => open(m)}>
-          <b style={{ minWidth: 0 }}>{m.text}<small>{[LABEL[m.kind], pName(m.place)].filter(Boolean).join(" · ")}</small></b><span>›</span>
+          <b style={{ minWidth: 0 }}>{m.text}<small>{[day ? "" : dayYear(m.day), LABEL[m.kind], pName(m.place)].filter(Boolean).join(" · ")}</small></b><span>›</span>
         </button>
       ))}
       {lastYearNear.length > 0 && (

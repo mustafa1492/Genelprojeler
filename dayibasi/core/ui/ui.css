@@ -571,3 +571,62 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
   .ui-auth-yan li::before { content: "✓  "; color: #a7c99c; }
   .ui-auth-kart { flex: 0 0 520px; max-width: 520px; margin: 0; border-radius: 0; padding: 0 56px; justify-content: center; }
 }
+/* --- 10 Kasım: telefon notundaki düzeltmeler --- */
+/* Alt çubuk: her sekme aynı hizada, tek satır; simgesiz sekmede emoji */
+.ui-nav a.m, .ui-nav button.ui-nav-menu { justify-content: center; min-width: 0; }
+.ui-nav a.m span, .ui-nav button.ui-nav-menu span { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.ui-nav .ui-nav-emoji { font-style: normal; font-size: 1.35rem; line-height: 26px; height: 26px; }
+.mn-cubuk select { font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+/* Ekle düğmeleri: daha küçük ve zarif */
+.ui-main-btn.kompakt { width: auto; align-self: flex-start; min-height: 50px; padding: 0 22px; font-size: 1rem; border-radius: 999px; box-shadow: none; }
+/* Eşitleme şeridi: sakin */
+.ui-sync.sakin { background: var(--notr2); color: var(--sessiz); font-size: 0.8rem; font-weight: 600; padding: 6px 16px; border-bottom: 1px solid var(--cizgi2); }
+.ui-sync.sakin button { min-height: 36px; background: transparent; border: 1px solid var(--cizgi); color: var(--ana-yazi); }
+.fis-kutu { border: 1px dashed var(--cizgi); box-shadow: none; }
+/* Açılır seçim */
+.ui-pick { display: flex; flex-direction: column; background: var(--kart); border: 1px solid var(--cizgi2); border-radius: 16px; overflow: hidden; }
+.ui-pick-bas { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 16px; cursor: pointer; width: 100%; }
+.ui-pick-bas span { color: var(--sessiz2); font-size: 0.85rem; font-weight: 700; flex: none; }
+.ui-pick-bas b { flex: 1; min-width: 0; text-align: right; font-size: 1rem; overflow-wrap: anywhere; }
+.ui-pick-bas i { font-style: normal; color: var(--sessiz2); flex: none; }
+.ui-pick-bas:focus-visible { outline: 3px solid var(--ana); outline-offset: -3px; }
+.ui-pick-liste { display: flex; flex-direction: column; border-top: 1px solid var(--cizgi2); max-height: 340px; overflow-y: auto; }
+.ui-pick-liste > button { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 8px 16px; cursor: pointer; font-weight: 700; border-top: 1px solid var(--cizgi2); }
+.ui-pick-liste > button:first-child { border-top: 0; }
+.ui-pick-liste > button[aria-selected="true"] { background: var(--ana-acik); color: var(--ana-yazi); }
+.ui-pick-liste > button span { display: flex; flex-direction: column; min-width: 0; }
+.ui-pick-liste > button small { font-size: 0.8rem; font-weight: 600; color: var(--sessiz2); }
+.ui-pick-liste > button i { font-style: normal; }
+.ui-pick-liste > button.ekle { color: var(--ana); }
+/* Tür seçimi: liste */
+.ui-liste-sec { display: flex; flex-direction: column; background: var(--kart); border-radius: 18px; box-shadow: var(--golge); overflow: hidden; }
+.ui-liste-sec > button { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 16px; cursor: pointer; border-top: 1px solid var(--cizgi2); }
+.ui-liste-sec > button:first-child { border-top: 0; }
+.ui-liste-sec > button b { flex: 1; min-width: 0; font-size: 1.05rem; }
+.ui-liste-sec > button small { color: var(--sessiz2); font-weight: 600; font-size: 0.82rem; white-space: nowrap; }
+.ui-liste-sec > button i { font-style: normal; color: var(--sessiz2); font-size: 1.2rem; }
+.ui-liste-sec > button.ekle b { color: var(--ana); }
+.ui-liste-sec > button:active { background: var(--notr2); }
+.liste-satir { gap: 8px; }
+.liste-satir b { flex: 1; min-width: 0; }
+/* Kâr kartı ayrıntısı */
+.ozet-kar .kar-ac { all: unset; cursor: pointer; font-size: clamp(1.5rem, 8vw, 2rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.ozet-kar .kar-ac:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 8px; }
+.kar-ayrinti { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--koyu-cizgi); padding-top: 12px; }
+.kar-donem { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; background: var(--koyu-cizgi); border-radius: 12px; padding: 4px; }
+.kar-donem button { all: unset; box-sizing: border-box; text-align: center; min-height: 44px; display: grid; place-items: center; border-radius: 9px; font-size: 0.85rem; font-weight: 800; color: var(--koyu-yazi2); cursor: pointer; }
+.kar-donem button[aria-pressed="true"] { background: #fff; color: var(--koyu); }
+.kar-liste { display: flex; flex-direction: column; gap: 4px; }
+.kar-liste b { font-size: 0.8rem; color: var(--koyu-yazi2); font-weight: 700; }
+.kar-liste span { display: flex; justify-content: space-between; gap: 10px; font-size: 0.95rem; }
+.kar-liste em { font-style: normal; font-weight: 700; white-space: nowrap; }
+.kar-bos { color: var(--koyu-yazi2); font-size: 0.9rem; }
+.kar-baglanti { display: flex; gap: 8px; flex-wrap: wrap; }
+.kar-baglanti button { all: unset; cursor: pointer; min-height: 44px; display: grid; place-items: center; padding: 0 14px; border-radius: 999px; background: var(--koyu-cizgi); color: #fff; font-weight: 800; font-size: 0.85rem; }
+/* Fotoğraflar */
+.foto-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.foto-izgara > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 2px; background: var(--kart); border-radius: 16px; box-shadow: var(--golge); padding: 8px; min-width: 0; }
+.foto-izgara img, .foto-izgara .bos { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: var(--notr); display: grid; place-items: center; color: var(--sessiz2); font-size: 0.8rem; }
+.foto-izgara b { font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.foto-izgara small { font-size: 0.78rem; color: var(--sessiz2); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (min-width: 900px) { .foto-izgara { grid-template-columns: repeat(5, minmax(0, 1fr)); } .ui-pick, .ui-liste-sec { max-width: 520px; } }

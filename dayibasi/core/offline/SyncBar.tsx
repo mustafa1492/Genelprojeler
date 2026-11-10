@@ -23,12 +23,13 @@ export function SyncBar() {
   }
   if (!st.online || st.pending) {
     return (
-      <div className="ui-sync yakin" role="status">
+      <div className="ui-sync sakin" role="status">
         <span>
-          {!st.online ? "İnternet yok. " : ""}
-          {st.pending ? `${st.pending} kayıt telefonda bekliyor, internet gelince kendiliğinden gönderilecek.` : "Yaptıkların telefonda saklanır."}
+          {!st.online
+            ? (st.pending ? `İnternet yok · ${st.pending} kayıt telefonda, internet gelince gider` : "İnternet yok · yazdıkların telefonda saklanır")
+            : `${st.pending} kayıt gönderiliyor…`}
         </span>
-        {st.online && st.pending > 0 && <button type="button" onClick={() => flush()}>Şimdi gönder</button>}
+        {st.online && st.pending > 0 && <button type="button" onClick={() => flush()}>Gönder</button>}
       </div>
     );
   }

@@ -7,11 +7,11 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
  * Alt menü her ekranda görünür. Etkin sekmeye tekrar dokununca o sekme başa döner.
  */
 /** side: bilgisayarda yan menüde ikinci grupta görünür (telefonda gizli). */
-export type ShellTab = { id: string; label: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; group?: string; emoji?: string; readOnly?: boolean; render: () => React.ReactNode };
+export type ShellTab = { id: string; label: string; /** alt çubukta görünen kısa ad */ short?: string; icon?: React.ReactNode; path: string; inNav: boolean; side?: boolean; group?: string; emoji?: string; readOnly?: boolean; render: () => React.ReactNode };
 type Params = Record<string, string | number | boolean>;
-type Ctx = { active: string; go: (id: string, params?: Params) => void; params: (id: string) => { p: Params; n: number } };
+type Ctx = { active: string; go: (id: string, params?: Params) => void; back: (fallback?: string) => void; params: (id: string) => { p: Params; n: number } };
 
-const ShellCtx = createContext<Ctx>({ active: "", go: () => {}, params: () => ({ p: {}, n: 0 }) });
+const ShellCtx = createContext<Ctx>({ active: "", go: () => {}, back: () => {}, params: () => ({ p: {}, n: 0 }) });
 const TabIdCtx = createContext<string>("");
 
 /**
@@ -26,10 +26,13 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
   const [params, setParams] = useState<Record<string, { p: Params; n: number }>>({ [initial]: { p: initialParams ?? {}, n: 1 } });
   const scrolls = useRef<Record<string, number>>({});
 
-  const go = useCallback((id: string, p?: Params) => {
+  // Gezinti geçmişi: "Geri" bir önceki ekrana döner (Ayarlar → Aile → Geri = Ayarlar)
+  const hist = useRef<string[]>([]);
+  const go = useCallback((id: string, p?: Params, isBack?: boolean) => {
     const t = tabs.find((x) => x.id === id);
     if (!t) return;
     setMenuOpen(false);
+    if (!isBack && id !== active) { hist.current.push(active); if (hist.current.length > 40) hist.current.shift(); }
     scrolls.current[active] = window.scrollY;
     if (p) setParams((s) => ({ ...s, [id]: { p, n: (s[id]?.n ?? 0) + 1 } }));
     setVisited((v) => (v.includes(id) ? v : [...v, id]));
@@ -37,6 +40,13 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
     try { history.replaceState(null, "", t.path); } catch { /* yok */ }
     requestAnimationFrame(() => window.scrollTo(0, p ? 0 : scrolls.current[id] ?? 0));
   }, [tabs, active]);
+
+  const back = useCallback((fallback = "ozet") => {
+    let prev: string | undefined;
+    do { prev = hist.current.pop(); } while (prev !== undefined && (prev === active || !tabs.some((x) => x.id === prev)));
+    const to = prev ?? fallback;
+    if (to !== active) go(to, undefined, true);
+  }, [tabs, active, go]);
 
   const navTap = (id: string) => {
     if (id === active) { setResets((r) => ({ ...r, [id]: (r[id] ?? 0) + 1 })); scrolls.current[id] = 0; window.scrollTo(0, 0); }
@@ -56,7 +66,7 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
     return () => window.removeEventListener("popstate", onPop);
   }, [tabs]);
 
-  const ctx: Ctx = { active, go, params: (id) => params[id] ?? { p: {}, n: 0 } };
+  const ctx: Ctx = { active, go: (id, p) => go(id, p), back, params: (id) => params[id] ?? { p: {}, n: 0 } };
   const navTabs = navIds ? navIds.map((id) => tabs.find((t) => t.id === id)).filter((t): t is ShellTab => !!t) : tabs.filter((t) => t.inNav);
   const navActive = navTabs.some((t) => t.id === active) ? active : "";
   useEffect(() => {
@@ -80,7 +90,7 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
         {navTabs.map((t) => (
           <a key={t.id} href={t.path} className="m" aria-current={navActive === t.id ? "page" : undefined}
             onClick={(e) => { e.preventDefault(); navTap(t.id); }}>
-            {t.icon}<span>{t.label}</span>
+            {t.icon ?? <em className="ui-nav-emoji" aria-hidden="true">{t.emoji ?? "•"}</em>}<span>{t.short ?? t.label}</span>
           </a>
         ))}
         {menu && (
@@ -116,6 +126,9 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
     </ShellCtx.Provider>
   );
 }
+
+/** Bir önceki ekrana dön (geçmiş boşsa Özet). */
+export const useBack = () => useContext(ShellCtx).back;
 
 /** Başka sekmeye geç (isteğe bağlı parametreyle, ör. {yeni: 1}). */
 export const useGo = () => useContext(ShellCtx).go;

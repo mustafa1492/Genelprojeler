@@ -50,7 +50,7 @@ export default function Depo() {
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={`${all.length} malzeme`} title="Depo" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
-      <MainButton onClick={() => { setDone(null); setForm({}); }}>+ Malzeme ekle</MainButton>
+      <MainButton className="kompakt" onClick={() => { setDone(null); setForm({}); }}>+ Malzeme ekle</MainButton>
       {cats.length > 2 && <div className="ui-chips">{cats.map((c) => <Chip key={c} selected={c === cat} onClick={() => setCat(c)}>{c}</Chip>)}</div>}
       {items && all.length === 0 && <div className="ui-empty">Depo boş. Gübre, ilaç, tohum ya da malzemeleri tek tek ekle.</div>}
       {shown.map((i) => (

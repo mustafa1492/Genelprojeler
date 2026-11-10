@@ -5,7 +5,7 @@ import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
 import { receiptUrl, uploadReceipt } from "@/core/expenses/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { useGo, useOnActivate } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { supabase } from "@/core/supabase/client";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { dayYear } from "../kayit";
@@ -27,7 +27,9 @@ export async function closeInbox(id: string, status: "islendi" | "atildi", expen
 export default function Fis() {
   const biz = useBusiness();
   const go = useGo();
-  const { money } = useRole();
+  const back = useBack();
+  const { money, writes } = useRole();
+  const writesMasraf = writes("masraf");
   const { nameOf } = useMembers(biz.id);
   const [places, setPlaces] = useState<Place[]>([]);
   const [placeId, setPlaceId] = useState<string | null>(null);
@@ -59,13 +61,13 @@ export default function Fis() {
     const { error } = await supabase().from("receipt_inbox").insert({ business_id: biz.id, photo_path: photo, note: note.trim() || null, place_id: placeId });
     setBusy(false);
     if (error) { setError("Gönderemedim, tekrar dene."); return; }
-    setDone(money ? "Fiş kutuya kondu. Masraf sekmesinden açıp tutarını girebilirsin." : "Fiş gönderildi. Defterin sahibi onaylayınca masraflara eklenecek.");
+    setDone(money ? "Fiş beklemeye alındı. Masraf ekranının üstünde görünür; açıp tutarını girebilirsin." : "Fiş gönderildi. Defterin sahibi onaylayınca masraflara eklenecek.");
     setPhoto(null); setPreview(null); setNote(""); load();
   };
 
   return (
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Fotoğrafını çek, gönder" title="Fiş yükle" />
       {done && <DoneCard message={done} />}
       <label className="ui-main-btn ikincil" style={{ textAlign: "center", cursor: "pointer" }}>
@@ -77,17 +79,25 @@ export default function Fis() {
         <div className="ui-stack" style={{ gap: 8 }}>
           <span className="ui-label">Hangi tarla için? (isteğe bağlı)</span>
           <div className="ui-chips wrap">
-            <Chip selected={!placeId} onClick={() => setPlaceId(null)}>Genel</Chip>
+            <Chip selected={!placeId} onClick={() => setPlaceId(null)}>İşletme gideri</Chip>
             {places.map((p) => <Chip key={p.id} selected={placeId === p.id} onClick={() => setPlaceId(p.id)}>{p.name}</Chip>)}
           </div>
         </div>
       )}
       <TextField id="fis_not" label="Not (isteğe bağlı)" placeholder="Örnek: Mazot, traktör için" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <ErrorText>{error}</ErrorText>}
-      <div className="ui-sticky-bottom"><MainButton disabled={!photo || busy} onClick={send}>Gönder</MainButton></div>
+      {writesMasraf ? (
+        <>
+          <div className="ui-sticky-bottom"><MainButton disabled={!photo || busy} onClick={() => {
+            const p: Record<string, string> = { fis: photo!, ...(note.trim() ? { not: note.trim() } : {}), ...(placeId ? { tarla: placeId } : {}) };
+            setPhoto(null); setPreview(null); setNote(""); go("masraf", p);
+          }}>Devam: tutarını gir</MainButton></div>
+          {photo && <button type="button" className="ui-link" disabled={busy} onClick={send}>Tutarı sonra gireceğim (fişi beklemeye al)</button>}
+        </>
+      ) : <div className="ui-sticky-bottom"><MainButton disabled={!photo || busy} onClick={send}>Gönder</MainButton></div>}
       {mine.length > 0 && (
         <>
-          <h2 className="ui-section">{money ? "Onay bekleyen fişler" : "Gönderdiğin, bekleyen fişler"}</h2>
+          <h2 className="ui-section">{money ? "Tutarı girilecek fişler" : "Gönderdiğin, bekleyen fişler"}</h2>
           {mine.map((x) => <div key={x.id} className="ui-moneyrow"><b>{x.note || "Fiş"}<small>{[dayYear(x.created_at.slice(0, 10)), places.find((p) => p.id === x.place_id)?.name, nameOf(x.created_by)].filter(Boolean).join(" · ")}</small></b><span>bekliyor</span></div>)}
           {money && <button type="button" className="ui-link" onClick={() => go("masraf", { fisler: 1 })}>Masraf sekmesinde aç ›</button>}
         </>
@@ -106,14 +116,14 @@ export function InboxCard({ onOpen }: { onOpen: (x: Inbox, url: string | null) =
   useOnActivate(load);
   if (!rows.length) return null;
   return (
-    <div className="ui-warn yakin">
+    <div className="ui-card fis-kutu">
       <div className="ui-stack" style={{ gap: 8 }}>
-        <b>Onay bekleyen fiş ({rows.length})</b>
+        <b>📷 Tutarı girilecek fiş ({rows.length})</b>
         {rows.map((x) => (
           <div key={x.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <span style={{ flex: 1, minWidth: 0 }}>{x.note || "Fiş"} · {nameOf(x.created_by)} · {dayYear(x.created_at.slice(0, 10))}</span>
-            <button type="button" className="ui-chip" onClick={async () => onOpen(x, await receiptUrl(x.photo_path))}>Aç</button>
-            <button type="button" className="ui-chip" onClick={async () => { await closeInbox(x.id, "atildi"); load(); }}>At</button>
+            <button type="button" className="ui-chip" onClick={async () => onOpen(x, await receiptUrl(x.photo_path))}>Tutarı gir</button>
+            <button type="button" className="ui-chip" onClick={async () => { await closeInbox(x.id, "atildi"); load(); }}>Sil</button>
           </div>
         ))}
       </div>
