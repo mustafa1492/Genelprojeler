@@ -304,3 +304,34 @@ button.tn-btn:disabled { opacity: .4; cursor: default; }
   .dn { grid-template-columns: 1fr 320px; padding: 28px 36px; gap: 40px; }
   .ms { grid-template-columns: 1.4fr 1fr; padding: 28px; gap: 28px; }
 }
+
+/* === Görsel düzen (10 Kasım 2026): buğday/toprak/krem paleti, tarla arka planı, dalga ayraçlar === */
+.tn { --yesil-k: #16351c; --yesil: #2e6a2b; --bugday: #e9c46a; --bugday-a: #f6e7c1; --toprak: #7a4a1f; --krem: #fbf7ee; --kart-g: 0 1px 2px rgba(40,35,20,.06), 0 6px 18px rgba(40,35,20,.07); background: var(--krem); }
+.tn h2 { letter-spacing: -0.01em; color: #13211a; }
+.tn h2::after { content: ""; display: block; width: 56px; height: 5px; border-radius: 3px; background: var(--bugday); margin-top: 12px; }
+.tn-kahraman { position: relative; background: url(/tanitim/tarla.svg) bottom center / 100% 200px no-repeat, radial-gradient(ellipse at 85% 10%, rgba(233,196,106,.16), transparent 55%), linear-gradient(170deg, #1d4423 0%, #16351c 60%, #12301a 100%); padding-bottom: 150px; }
+.tn-kahraman::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 44px; background: url(/tanitim/dalga-krem.svg) center / 100% 100% no-repeat; }
+.tn-kahraman h1 { letter-spacing: -0.015em; }
+.tn-kahraman .tn-btn.ana { background: var(--bugday); color: #1f1a08; }
+.tn-kahraman .tn-btn.ana:hover { background: #f1d283; }
+.tn-moduller { background: var(--krem); border-bottom: 0; }
+.tn-gorunum { background: linear-gradient(180deg, #e6f0dd, #dfeccf); }
+.tn-kart, .tn-dert > div, .tn-sss details, .tn-iletisim, .kh-form, .kh-sonuc, .dn, .nk { border-color: #e6e0d0; border-radius: 20px; box-shadow: var(--kart-g); }
+.tn-kart .ik { background: var(--bugday-a); }
+.tn-mk { box-shadow: var(--kart-g); transition: transform .15s ease, box-shadow .15s ease; }
+.tn-mk:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(40,35,20,.08), 0 12px 28px rgba(40,35,20,.10); }
+.tn-ilksezon { background: linear-gradient(120deg, #16351c, #245a2a); border-left: 6px solid var(--bugday); }
+.tn-paket .tn-kart.one { border-color: var(--yesil); box-shadow: 0 0 0 4px var(--bugday-a), var(--kart-g); }
+.tn-btn { transition: background-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.tn-btn.ana:hover { background: #245622; }
+.tn-btn.acik:hover, .tn-btn.cizgi2:hover { background: var(--bugday-a); }
+.tn-btn.cizgi:hover { background: rgba(255,255,255,.1); border-color: var(--bugday); }
+.tn-btn:active { transform: translateY(1px); }
+.tn a:focus-visible, .tn button:focus-visible, .tn summary:focus-visible, .tn input:focus-visible { outline: 3px solid var(--bugday); outline-offset: 3px; box-shadow: 0 0 0 6px var(--yesil-k); }
+.tn-mk .git:hover { background: var(--yesil); }
+.tn-ust nav a.giris:hover { background: var(--bugday); color: #1f1a08; }
+.tn-hmodul a:hover { border-color: var(--bugday); }
+.tn-alt { position: relative; margin-top: 44px; }
+.tn-alt::before { content: ""; position: absolute; left: 0; right: 0; top: -43px; height: 44px; background: url(/tanitim/dalga-yesil.svg) center / 100% 100% no-repeat; }
+@media (min-width: 1024px) { .tn-kahraman { padding-bottom: 200px; background-size: 100% 260px, auto, auto; } .tn-kahraman::after { height: 64px; } }
+@media (prefers-reduced-motion: reduce) { .tn-btn, .tn-mk { transition: none; } .tn-mk:hover, .tn-btn:active { transform: none; } }
