@@ -146,3 +146,51 @@
   .tn-pc .tablo { overflow-x: auto; }
   .tn-btn { width: 100%; }
 }
+
+/* WhatsApp düğmesi */
+.tn-btn.wa { background: #1f8f4e; color: #fff; gap: 10px; }
+.tn-btn.wa::before { content: "💬"; }
+.tn-btn.cizgi2 { border: 2px solid #a7c99c; color: #16351c; background: #fff; font: inherit; font-weight: 800; font-size: 1.125rem; cursor: pointer; }
+button.tn-btn { border: 0; font: inherit; font-weight: 800; font-size: 1.125rem; cursor: pointer; }
+button.tn-btn.cizgi2 { border: 2px solid #a7c99c; }
+button.tn-btn:disabled { opacity: .4; cursor: default; }
+
+/* Nasıl kullanılır */
+.nk { background: #fff; border: 1px solid #dfe6dd; border-radius: 22px; padding: 16px; }
+.nk-sekme { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.nk-sekme button { flex-shrink: 0; display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 14px 0 8px; border-radius: 999px; border: 2px solid #dfe6dd; background: #fff; color: #13211a; font: inherit; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+.nk-sekme button .no { width: 32px; height: 32px; border-radius: 50%; background: #e1efda; color: #1b4519; display: grid; place-items: center; font-size: 0.9rem; }
+.nk-sekme button.gecti .no { background: #a7c99c; }
+.nk-sekme button.on { border-color: #2e6a2b; background: #2e6a2b; color: #fff; }
+.nk-sekme button.on .no { background: #fff; color: #2e6a2b; }
+.nk-icerik { display: grid; gap: 24px; padding: 20px 4px 8px; align-items: center; }
+.nk-adim { color: #2e6a2b; font-weight: 800; margin: 0 0 4px; }
+.nk-yazi h3 { font-size: 1.5rem; }
+.nk-kisa { color: #445248; font-size: 1.125rem; }
+.nk-yazi ol { margin: 12px 0 0; padding-left: 1.4em; display: grid; gap: 10px; font-size: 1.125rem; }
+.nk-yazi li::marker { font-weight: 800; color: #2e6a2b; }
+.nk-tel { max-width: 260px; }
+.nk-tel .ekran { padding-bottom: 14px; min-height: 300px; }
+.nk-ust { font-weight: 800; font-size: 1rem; margin-bottom: 10px; }
+.nk-alan { background: #fff; border: 2px solid #cfd8cd; border-radius: 10px; padding: 6px 10px; margin-bottom: 8px; }
+.nk-alan small { display: block; color: #59665d; font-weight: 700; font-size: 0.7rem; }
+.nk-alan div { font-weight: 800; }
+.nk-dug { background: #2e6a2b; color: #fff; border-radius: 12px; padding: 11px; text-align: center; font-weight: 800; margin-top: 8px; }
+.nk-dug.ikincil { background: #fff; color: #1b4519; border: 2px solid #cfd8cd; }
+.nk-dug.parla { box-shadow: 0 0 0 4px #f5c451; animation: nk-parla 1.6s ease-in-out infinite; }
+@keyframes nk-parla { 50% { box-shadow: 0 0 0 7px rgba(245,196,81,.45); } }
+@media (prefers-reduced-motion: reduce) { .nk-dug.parla { animation: none; } }
+.nk-secim { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.nk-secim span { border: 2px solid #cfd8cd; background: #fff; border-radius: 999px; padding: 4px 10px; font-weight: 800; }
+.nk-secim span.on { border-color: #2e6a2b; background: #e1efda; }
+.nk-tel-sec { display: flex; gap: 8px; margin-top: 12px; }
+.nk-tel-sec button { min-height: 52px; padding: 0 20px; border-radius: 14px; border: 2px solid #cfd8cd; background: #fff; font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer; }
+.nk-tel-sec button[aria-pressed="true"] { border-color: #2e6a2b; background: #2e6a2b; color: #fff; }
+.nk-gezin { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #dfe6dd; padding-top: 14px; margin-top: 8px; }
+.nk-gezin .tn-btn { flex: 1; max-width: 220px; padding: 0 12px; }
+@media (min-width: 900px) {
+  .nk { padding: 24px 28px; }
+  .nk-sekme { flex-wrap: wrap; overflow: visible; }
+  .nk-icerik { grid-template-columns: 1fr 300px; gap: 48px; padding: 28px 8px 12px; min-height: 380px; }
+  .nk-genis { grid-column: 1 / -1; }
+}

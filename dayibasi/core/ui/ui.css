@@ -547,3 +547,27 @@ html.buyuk-yazi { font-size: 118%; }
 .ozet-kar .kar-goz { all: unset; cursor: pointer; width: 40px; height: 40px; border-radius: 999px; background: var(--koyu-cizgi); color: #fff; display: grid; place-items: center; }
 .ozet-kar .kar-goz[aria-pressed="true"] { background: #fff; color: var(--koyu); }
 .ozet-kar .kar-goz:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* Giriş ekranı: telefonda üstte yeşil şerit + kart, bilgisayarda iki sütun */
+main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; flex-direction: column; }
+.ui-auth-yan { background: #16351c; color: #fff; padding: 22px 20px 26px; }
+.ui-auth-logo { display: flex; align-items: center; gap: 10px; font-size: 1.333rem; font-weight: 800; }
+.ui-auth-logo span { width: 42px; height: 42px; border-radius: 12px; background: var(--ana); display: grid; place-items: center; font-size: 1.3rem; }
+.ui-auth-soz { color: #c9dcc6; font-size: 1.0rem; margin: 12px 0 0; }
+.ui-auth-yan ul { display: none; }
+.ui-auth-kart { flex: 1; width: 100%; max-width: 480px; margin: -14px auto 0; background: var(--kart); border-radius: 22px 22px 0 0; padding: 24px 16px 28px;
+  display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; }
+.ui-auth-kart h1 { font-size: 1.556rem; margin: 0; }
+.ui-auth-lead { margin: 0; color: var(--sessiz); font-size: 1.0rem; }
+.ui-auth-ayrac { border-top: 1px solid var(--cizgi2); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; text-align: center; font-weight: 700; color: var(--sessiz); }
+.ui-auth-alt { text-align: center; font-size: 0.833rem; margin: 4px 0 0; }
+@media (min-width: 900px) {
+  main.ui-auth { flex-direction: row; }
+  .ui-auth-yan { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 48px 6vw; }
+  .ui-auth-logo { font-size: 1.778rem; }
+  .ui-auth-soz { font-size: 1.444rem; max-width: 480px; margin-top: 20px; }
+  .ui-auth-yan ul { display: block; list-style: none; padding: 0; margin: 28px 0 0; font-size: 1.111rem; font-weight: 700; }
+  .ui-auth-yan li { padding: 8px 0; }
+  .ui-auth-yan li::before { content: "✓  "; color: #a7c99c; }
+  .ui-auth-kart { flex: 0 0 520px; max-width: 520px; margin: 0; border-radius: 0; padding: 0 56px; justify-content: center; }
+}

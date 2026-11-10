@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import "./tanitim.css";
+import { NasilKullanilir } from "./NasilKullanilir";
+
+// WhatsApp numarası: 90 ile başlayan, boşluksuz (ör. 905xxxxxxxxx). Boşsa düğme yerine not görünür.
+const WA_NUMARA = "";
+const WA_MESAJ = "Merhaba, Çiftçi Defteri hakkında bir sorum var.";
 
 // TASLAK tanıtım sayfası. Canlı ana sayfa değişmedi. İletişim onay bekliyor (docs/moduller/tanitim.md).
 // Paketler/fiyatlar şimdilik kaldırıldı (ücret alınmıyor); eski hâli cep.tsx'te saklı.
@@ -52,6 +57,7 @@ export default function Tanitim() {
           <a className="tn-logo" href="/tanitim"><span className="i" aria-hidden>🌱</span>Çiftçi Defteri</a>
           <nav aria-label="Bölümler">
             <a href="#ozellikler">Özellikler</a>
+            <a href="#nasil">Nasıl kullanılır</a>
             <a href="#sorular">Sorular</a>
             <a className="giris" href="/ciftci">Giriş yap</a>
           </nav>
@@ -64,7 +70,7 @@ export default function Tanitim() {
             <h1>Tarlanın hesabı cebinde.</h1>
             <p className="buyuk">Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör.</p>
             <div className="tn-dugmeler">
-              <a className="tn-btn ana" href="/ciftci">Hemen başla</a>
+              <a className="tn-btn ana" href="/ciftci?kayit=1">Hemen başla</a>
               <a className="tn-btn cizgi" href="/ciftci">Giriş yap</a>
             </div>
             <p className="not">Ücretsiz. Kredi kartı istemez.</p>
@@ -103,6 +109,14 @@ export default function Tanitim() {
             <div><Telefon /><p className="tn-etiket">Telefonda: Özet</p></div>
             <div><Bilgisayar /><p className="tn-etiket">Bilgisayarda: Masraflar</p></div>
           </div>
+        </div>
+      </section>
+
+      <section className="tn-bolum" id="nasil">
+        <div className="tn-ic">
+          <h2>Nasıl kullanılır?</h2>
+          <p className="tn-alt-baslik">Adım adım bak. Bir adıma dokun ya da “İleri” ile ilerle. Ekranlar örnek bilgilerle çizilmiştir.</p>
+          <NasilKullanilir />
         </div>
       </section>
 
@@ -145,8 +159,10 @@ export default function Tanitim() {
       <section className="tn-bolum" id="iletisim" style={{ paddingTop: 0 }}>
         <div className="tn-ic">
           <div className="tn-iletisim">
-            <div><h2>Bize ulaş</h2><p style={{ color: "#445248" }}>Sorunu yaz ya da ara, yardım edelim.</p></div>
-            <div className="tn-yer">[YER TUTUCU] Telefon, WhatsApp ve e-posta bilgisi buraya gelecek.</div>
+            <div><h2>Bize ulaş</h2><p style={{ color: "#445248" }}>Takıldığın yer olursa WhatsApp'tan yaz, yardım edelim.</p></div>
+            {WA_NUMARA
+              ? <a className="tn-btn wa" href={`https://wa.me/${WA_NUMARA}?text=${encodeURIComponent(WA_MESAJ)}`} target="_blank" rel="noopener noreferrer">WhatsApp'tan yaz</a>
+              : <div className="tn-yer">[YER TUTUCU] WhatsApp numarası bekleniyor.</div>}
           </div>
         </div>
       </section>

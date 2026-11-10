@@ -112,6 +112,8 @@ function Login({ appName }: { appName: string }) {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+  // Tanıtım sayfasındaki "Hemen başla" → ?kayit=1 ile doğrudan "Yeni hesap aç"
+  useEffect(() => { if (new URLSearchParams(location.search).has("kayit")) setMode("kayit"); }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,30 +151,46 @@ function Login({ appName }: { appName: string }) {
     }
   };
 
+  const title = mode === "giris" ? "Giriş yap" : mode === "kayit" ? "Yeni hesap aç" : "Şifremi unuttum";
+  const lead = mode === "giris" ? "Hoş geldin. Kullanıcı adını ya da e-postanı, sonra şifreni yaz." : mode === "kayit" ? "Bir dakika sürer. E-postanı ve kendine bir şifre yaz." : "E-postanı yaz, şifre yenileme bağlantısı göndereyim.";
   return (
-    <main style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <h1 style={{ marginBottom: 0 }}>{appName}</h1>
-      <p style={{ margin: 0, fontSize: "1.0rem" }}>{mode === "giris" ? "Hoş geldin. Giriş yap." : mode === "kayit" ? "Yeni hesap aç." : "E-postanı yaz, şifre yenileme bağlantısı göndereyim."}</p>
-      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <TextField id="email" label={mode === "giris" ? "E-posta ya da kullanıcı adı" : "E-posta"} type={mode === "giris" ? "text" : "email"} maxLength={254} autoCapitalize="none" autoCorrect="off" autoComplete="email" inputMode="email" required
-          value={email} onChange={(e) => setEmail(e.target.value)} />
-        {mode !== "unuttum" && (
-          <TextField id="password" label={mode === "kayit" ? "Şifre (en az 8 harf ya da rakam)" : "Şifre"} type="password" required
-            minLength={mode === "kayit" ? 8 : undefined} maxLength={72}
-            autoComplete={mode === "giris" ? "current-password" : "new-password"}
-            value={password} onChange={(e) => setPassword(e.target.value)} />
+    <main className="ui-auth">
+      <section className="ui-auth-yan" aria-hidden={false}>
+        <div className="ui-auth-logo"><span aria-hidden>🌱</span>{appName}</div>
+        <p className="ui-auth-soz">Masrafını, gelirini telefondan yaz; sezon sonunda ne kazandığını gör.</p>
+        <ul>
+          <li>Ücretsiz</li>
+          <li>İnternet yokken de çalışır</li>
+          <li>Bilgilerini yalnız sen ve eklediğin kişiler görür</li>
+        </ul>
+      </section>
+      <section className="ui-auth-kart">
+        <h1>{title}</h1>
+        <p className="ui-auth-lead">{lead}</p>
+        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <TextField id="email" label={mode === "giris" ? "E-posta ya da kullanıcı adı" : "E-posta"} type={mode === "giris" ? "text" : "email"} maxLength={254} autoCapitalize="none" autoCorrect="off" autoComplete="email" inputMode="email" required
+            value={email} onChange={(e) => setEmail(e.target.value)} />
+          {mode !== "unuttum" && (
+            <TextField id="password" label={mode === "kayit" ? "Şifre (en az 8 harf ya da rakam)" : "Şifre"} type="password" required
+              minLength={mode === "kayit" ? 8 : undefined} maxLength={72}
+              autoComplete={mode === "giris" ? "current-password" : "new-password"}
+              value={password} onChange={(e) => setPassword(e.target.value)} />
+          )}
+          {error && <ErrorText>{error}</ErrorText>}
+          {info && <div className="ui-done"><p>{info}</p></div>}
+          <MainButton type="submit" disabled={busy}>{busy ? "Bekle…" : mode === "giris" ? "Giriş yap" : mode === "kayit" ? "Hesap aç" : "Bağlantı gönder"}</MainButton>
+        </form>
+        {mode === "giris" && (
+          <button type="button" className="ui-link" onClick={() => { setMode("unuttum"); setError(""); setInfo(""); }}>Şifremi unuttum</button>
         )}
-        {error && <ErrorText>{error}</ErrorText>}
-        {info && <div className="ui-done"><p>{info}</p></div>}
-        <MainButton type="submit" disabled={busy}>{busy ? "Bekle…" : mode === "giris" ? "Giriş yap" : mode === "kayit" ? "Hesap aç" : "Bağlantı gönder"}</MainButton>
-      </form>
-      {mode === "giris" && (
-        <button type="button" className="ui-link" onClick={() => { setMode("unuttum"); setError(""); setInfo(""); }}>Şifremi unuttum</button>
-      )}
-      <button type="button" className="ui-link" onClick={() => { setMode(mode === "giris" ? "kayit" : "giris"); setError(""); }}>
-        {mode === "giris" ? "Hesabın yok mu? Yeni hesap aç" : "Giriş ekranına dön"}
-      </button>
-      <a className="ui-link" href="/kvkk" style={{ textAlign: "center", fontSize: "0.833rem" }}>Kişisel verilerin korunması</a>
+        <div className="ui-auth-ayrac">
+          <span>{mode === "giris" ? "Hesabın yok mu?" : "Hesabın var mı?"}</span>
+          <button type="button" className="ui-main-btn ikincil" onClick={() => { setMode(mode === "giris" ? "kayit" : "giris"); setError(""); }}>
+            {mode === "giris" ? "Yeni hesap aç" : "Giriş ekranına dön"}
+          </button>
+        </div>
+        <p className="ui-auth-alt"><a className="ui-link" href="/tanitim">Çiftçi Defteri nedir?</a> · <a className="ui-link" href="/kvkk">Kişisel verilerin korunması</a></p>
+      </section>
     </main>
   );
 }

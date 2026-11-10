@@ -18,6 +18,8 @@
 - Görüntüler: `docs/tasarim/tanitim-390.png`, `tanitim-320.png`, `tanitim-1366.png`. Yatay taşma yok, konsol hatası yok.
 - "Yakında" diye işaretlenenler (uygulamada yok): dekar/kilo başı kâr ve girdi fiyat geçmişi, tarla × yıl ekim tablosu, ilaçlama saati, süt defteri, kümeste yumurta ve dönem kapanışı, Google Play uygulaması.
 
+- 10 Kasım 2026: "Nasıl kullanılır" tıklanabilir rehber (6 adım + telefona ekleme, Android/iPhone; `app/tanitim/NasilKullanilir.tsx`), paylaşım görseli (`app/tanitim/opengraph-image.png`), WhatsApp düğmesi (numara bekleniyor: `page.tsx` `WA_NUMARA`). Giriş ekranı yenilendi (`core/auth/AuthGate.tsx` + `core/ui/ui.css`, Mustafa istedi); `?kayit=1` doğrudan "Yeni hesap aç" açar, "Hemen başla" buraya bağlı.
+
 ## Onay bekleyen metinler (Mustafa)
 - Ana cümle: "Tarlanın hesabı cebinde." / "Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör."
 - "Basit paket hep ücretsiz. Kredi kartı istemez." ve "İlk sezon ücret alınmaz."
@@ -28,7 +30,7 @@
 - İletişim: telefon / WhatsApp / e-posta ne yazılacak?
 - Alan adı (ertelendi).
 - Taslak ana sayfaya ne zaman geçecek (şu an `/` dayıbaşı; geçince `/tanitim` içeriği `/`'a taşınır)?
-- "Ücretsiz başla" doğrudan "Yeni hesap aç" ekranını açsın mı? (core'a not edildi)
+- WhatsApp numarası: verilen "0538313921" 10 hane, cep numarası 11 hane olmalı; doğrusu sorulacak.
 
 ## Sıradaki
 - Mustafa taslağa bakacak (önizleme adresinde `/tanitim`), metin ve fiyat onayı.
