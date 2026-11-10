@@ -20,6 +20,8 @@
 
 - 10 Kasım 2026: "Nasıl kullanılır" tıklanabilir rehber (6 adım + telefona ekleme, Android/iPhone; `app/tanitim/NasilKullanilir.tsx`), paylaşım görseli (`app/tanitim/opengraph-image.png`), WhatsApp düğmesi (numara bekleniyor: `page.tsx` `WA_NUMARA`). Giriş ekranı yenilendi (`core/auth/AuthGate.tsx` + `core/ui/ui.css`, Mustafa istedi); `?kayit=1` doğrudan "Yeni hesap aç" açar, "Hemen başla" buraya bağlı.
 
+- 10 Kasım 2026 (2): "Nasıl kullanılır" bütün bölümleri kapsıyor: 18 bölüm, 68 konu + Telefona ekle (`app/tanitim/rehber.ts` içerik, `NasilKullanilir.tsx` görünüm). Düğme/alan adları koddan alındı; uygulamada ekran değişince `rehber.ts` güncellenmeli.
+
 ## Onay bekleyen metinler (Mustafa)
 - Ana cümle: "Tarlanın hesabı cebinde." / "Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör."
 - "Basit paket hep ücretsiz. Kredi kartı istemez." ve "İlk sezon ücret alınmaz."

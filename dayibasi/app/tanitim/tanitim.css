@@ -194,3 +194,27 @@ button.tn-btn:disabled { opacity: .4; cursor: default; }
   .nk-icerik { grid-template-columns: 1fr 300px; gap: 48px; padding: 28px 8px 12px; min-height: 380px; }
   .nk-genis { grid-column: 1 / -1; }
 }
+
+/* Rehber: bölüm listesi + içerik */
+.nk { display: grid; gap: 16px; }
+.nk-bolumler { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.nk-bolumler button { display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 8px 10px; border-radius: 14px; border: 2px solid #dfe6dd; background: #fff;
+  color: #13211a; font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.nk-bolumler button .ik { font-size: 1.3rem; flex-shrink: 0; }
+.nk-bolumler button b { display: block; font-size: 0.95rem; line-height: 1.2; overflow-wrap: anywhere; }
+.nk-bolumler button small { display: none; }
+.nk-bolumler button.on { border-color: #2e6a2b; background: #e1efda; }
+.nk-sag { min-width: 0; scroll-margin-top: 12px; }
+.nk-ipucu { background: #fff7e6; border: 1px solid #f1dcae; border-radius: 12px; padding: 10px 12px; margin-top: 14px; color: #5b3a00; }
+.nk-gezin .tn-btn.ana { flex-direction: column; line-height: 1.15; }
+.nk-sonraki { display: block; font-size: 0.8rem; font-weight: 700; opacity: .85; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nk-tel .m-kart span:first-child { min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 900px) {
+  .nk { grid-template-columns: 290px 1fr; gap: 24px; align-items: start; }
+  .nk-bolumler { grid-template-columns: 1fr; gap: 6px; max-height: 760px; overflow-y: auto; padding-right: 4px; }
+  .nk-bolumler button small { display: block; color: #59665d; font-size: 0.8rem; margin-top: 2px; }
+  .nk-sag .nk-icerik { grid-template-columns: 1fr 270px; gap: 36px; }
+}
+/* konu düğmeleri telefonda da alt alta dizilsin, gizli kalmasın */
+.nk-sekme { flex-wrap: wrap; overflow: visible; }
+@media (max-width: 899px) { .nk-sekme button { min-height: 46px; font-size: 0.875rem; padding: 0 12px 0 6px; } .nk-sekme button .no { width: 28px; height: 28px; } }

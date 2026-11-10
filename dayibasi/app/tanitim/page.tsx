@@ -115,7 +115,7 @@ export default function Tanitim() {
       <section className="tn-bolum" id="nasil">
         <div className="tn-ic">
           <h2>Nasıl kullanılır?</h2>
-          <p className="tn-alt-baslik">Adım adım bak. Bir adıma dokun ya da “İleri” ile ilerle. Ekranlar örnek bilgilerle çizilmiştir.</p>
+          <p className="tn-alt-baslik">Uygulamanın her bölümü adım adım. Önce bölümü seç, sonra konuya dokun ya da “İleri” ile ilerle. Ekranlar örnek bilgilerle çizilmiştir.</p>
           <NasilKullanilir />
         </div>
       </section>
