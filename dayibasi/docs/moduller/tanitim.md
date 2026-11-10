@@ -24,6 +24,8 @@
 
 - 10 Kasım 2026 (3): **Ana sayfa (/) artık tanıtım sitesi** (Mustafa: "ilk site bu çıksın"). Arama motorlarına açık. Giriş yapmış kişi (çerezde oturum) / adresinden /ciftci'ye geçer; site /tanitim'de de açılır (yönlendirmesiz, noindex). Modüller öne çıkarıldı: girişte Tarla/Fidan/Kümes/Hayvan şeridi + "İşine göre modülünü seç" kartları (her kart rehberde o bölümü açar).
 
+- 10 Kasım 2026 (4): Etkileşimli parçalar (`app/tanitim/Etkilesim.tsx`, hiçbir yere kayıt göndermez): "Hesap açmadan dene" (sahte telefonda masraf/gelir yaz, kâr kartı değişir, geri al, tutarları gizle), "Kârını hesapla" (dekar, masraf, verim, fiyat → kâr/zarar, başabaş), "Hangi modül bana göre?" (5 evet/hayır → modül + hazır görünüm önerisi).
+
 ## Onay bekleyen metinler (Mustafa)
 - Ana cümle: "Tarlanın hesabı cebinde." / "Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör."
 - "Basit paket hep ücretsiz. Kredi kartı istemez." ve "İlk sezon ücret alınmaz."

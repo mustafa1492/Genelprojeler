@@ -1,5 +1,6 @@
 import "./tanitim.css";
 import { NasilKullanilir } from "./NasilKullanilir";
+import { DenemeEkrani, KarHesap, ModulSecici } from "./Etkilesim";
 
 // WhatsApp numarası: 90 ile başlayan, boşluksuz (ör. 905xxxxxxxxx). Boşsa düğme yerine not görünür.
 const WA_NUMARA = "";
@@ -61,6 +62,7 @@ export function TanitimSayfasi() {
           <a className="tn-logo" href="/"><span className="i" aria-hidden>🌱</span>Çiftçi Defteri</a>
           <nav aria-label="Bölümler">
             <a href="#moduller">Modüller</a>
+            <a href="#dene">Dene</a>
             <a href="#ozellikler">Özellikler</a>
             <a href="#nasil">Nasıl kullanılır</a>
             <a href="#sorular">Sorular</a>
@@ -100,6 +102,7 @@ export function TanitimSayfasi() {
               </div>
             ))}
           </div>
+          <ModulSecici />
           <div className="tn-yakinda">
             <h3>Yakında</h3>
             <p style={{ color: "#445248", margin: 0 }}>Bunlar üzerinde çalışıyoruz, henüz uygulamada yok:</p>
@@ -112,6 +115,17 @@ export function TanitimSayfasi() {
               <li>Google Play'den indirilebilen Android uygulaması</li>
             </ul>
           </div>
+        </div>
+      </section>
+
+      <section className="tn-bolum tn-gorunum" id="dene">
+        <div className="tn-ic">
+          <h2>Hesap açmadan dene</h2>
+          <p className="tn-alt-baslik">Aşağıdaki telefon gerçek gibi çalışır. Yazdıkların sadece bu sayfada kalır, hiçbir yere gönderilmez.</p>
+          <DenemeEkrani />
+          <h2 style={{ marginTop: 48 }} id="hesapla">Kârını hesapla</h2>
+          <p className="tn-alt-baslik">Tarlanın rakamlarını yaz; kâr mı zarar mı, kaça satarsan kurtarırsın, hemen gör.</p>
+          <KarHesap />
         </div>
       </section>
 
