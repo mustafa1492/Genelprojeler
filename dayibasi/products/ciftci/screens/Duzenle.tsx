@@ -5,6 +5,7 @@ import { BackButton, PageHeader } from "@/core/ui";
 import { CARDS, HAZIR, NAV_SLOTS, PERIODS, QUICK, QUICK_DEFAULT, VARSAYILAN, useGorunum, type CardId } from "../gorunum";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useRole } from "../rol";
+import { tabInModul, useModul } from "../modul";
 
 /** Ekranımı düzenle: hazır görünümler, kâr dönemi, özet kartları (aç/kapa + yukarı/aşağı), alt çubuk. Kişiye özel. */
 export default function Duzenle({ choices }: { choices: { id: string; label: string }[] }) {
@@ -31,7 +32,8 @@ export default function Duzenle({ choices }: { choices: { id: string; label: str
   const active = HAZIR.find((h) => same(h.g.cards, g.cards) && h.g.period === g.period && same(h.g.nav, g.nav))?.id;
   // Hızlı düğmeler: açık olanlar sırasıyla, sonra kapalılar (defterde olmayan modüller listelenmez)
   const mods = (Array.isArray(biz.settings?.modules) ? biz.settings!.modules : []) as string[];
-  const quickAll = QUICK.filter((q) => (!q.modul || mods.includes(q.modul)) && lvl(q.perm[0]) >= q.perm[1]);
+  const { modul: bolum } = useModul();
+  const quickAll = QUICK.filter((q) => (!q.modul || mods.includes(q.modul)) && tabInModul(q.to, bolum) && lvl(q.perm[0]) >= q.perm[1]);
   const quick = (g.quick ?? QUICK_DEFAULT).filter((id) => quickAll.some((q) => q.id === id));
   const quickOrder = [...quick, ...quickAll.map((q) => q.id).filter((id) => !quick.includes(id))];
   const toggleQuick = (id: string) => setG({ quick: quick.includes(id) ? quick.filter((q) => q !== id) : [...quick, id] });

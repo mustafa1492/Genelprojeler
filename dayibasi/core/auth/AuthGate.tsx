@@ -159,7 +159,6 @@ function Login({ appName }: { appName: string }) {
         <div className="ui-auth-logo"><span aria-hidden>🌱</span>{appName}</div>
         <p className="ui-auth-soz">Masrafını, gelirini telefondan yaz; sezon sonunda ne kazandığını gör.</p>
         <ul>
-          <li>Ücretsiz</li>
           <li>İnternet yokken de çalışır</li>
           <li>Bilgilerini yalnız sen ve eklediğin kişiler görür</li>
         </ul>

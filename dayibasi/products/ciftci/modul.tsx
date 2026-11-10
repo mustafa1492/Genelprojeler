@@ -6,11 +6,11 @@ import { hasTur } from "./hayvan/hayvan";
 
 // Bölümler (modüller): girişte seçilir, her birinin kendi rengi var. Tarlalar, Depo, Makineler, Takvim, Borç, Belgeler hepsinde ortak.
 export type Modul = "tarla" | "fidan" | "hayvan";
-type Renk = { ana: string; koyu: string; acik: string; yazi: string; orta: string };
+type Renk = { ana: string; koyu: string; acik: string; yazi: string; orta: string; zemin: string; zeminCizgi: string; zeminYazi: string };
 export const MODULLER: Record<Modul, { ad: string; alt: string; renk: Renk; ana: string[] }> = {
-  tarla: { ad: "Tarla", alt: "Tarla işleri, hasat, verim", renk: { ana: "#2e6a2b", koyu: "#245622", acik: "#e1efda", yazi: "#1b4519", orta: "#a7c99c" }, ana: ["tarlalar"] },
-  fidan: { ad: "Fidan", alt: "Dikim, sayım, stok, müşteri", renk: { ana: "#146c7c", koyu: "#0f5562", acik: "#dceff2", yazi: "#0b4450", orta: "#93c6cf" }, ana: ["fidan"] },
-  hayvan: { ad: "Hayvancılık", alt: "Kümes, büyükbaş, küçükbaş", renk: { ana: "#8a4b1f", koyu: "#6e3b17", acik: "#f3e5d8", yazi: "#5c3012", orta: "#d1ad8e" }, ana: ["kumes", "buyukbas", "kucukbas"] },
+  tarla: { ad: "Tarla", alt: "Tarla işleri, hasat, verim", renk: { ana: "#2e6a2b", koyu: "#245622", acik: "#e1efda", yazi: "#1b4519", orta: "#a7c99c", zemin: "#16351c", zeminCizgi: "#2e5534", zeminYazi: "#c9dcc6" }, ana: ["tarlalar"] },
+  fidan: { ad: "Fidan", alt: "Dikim, sayım, stok, müşteri", renk: { ana: "#146c7c", koyu: "#0f5562", acik: "#dceff2", yazi: "#0b4450", orta: "#93c6cf", zemin: "#0c3a43", zeminCizgi: "#22545e", zeminYazi: "#bfdde3" }, ana: ["fidan"] },
+  hayvan: { ad: "Hayvancılık", alt: "Kümes, büyükbaş, küçükbaş", renk: { ana: "#8a4b1f", koyu: "#6e3b17", acik: "#f3e5d8", yazi: "#5c3012", orta: "#d1ad8e", zemin: "#3f2410", zeminCizgi: "#5e3d24", zeminYazi: "#e6cdb6" }, ana: ["kumes", "buyukbas", "kucukbas"] },
 };
 /** Bölüme özel sekmeler: başka bölümdeyken gizlenir. Geri kalan her şey ortak. */
 const OZEL: Record<string, Modul> = { fidan: "fidan", kumes: "hayvan", buyukbas: "hayvan", kucukbas: "hayvan" };
@@ -26,7 +26,7 @@ export function modulsOf(b: Business): Modul[] {
 
 function boya(m: Modul) {
   const r = MODULLER[m].renk, s = document.documentElement.style;
-  s.setProperty("--ana", r.ana); s.setProperty("--ana-koyu", r.koyu); s.setProperty("--ana-acik", r.acik); s.setProperty("--ana-yazi", r.yazi); s.setProperty("--ana-orta", r.orta);
+  s.setProperty("--ana", r.ana); s.setProperty("--ana-koyu", r.koyu); s.setProperty("--ana-acik", r.acik); s.setProperty("--ana-yazi", r.yazi); s.setProperty("--ana-orta", r.orta); s.setProperty("--koyu", r.zemin); s.setProperty("--koyu-cizgi", r.zeminCizgi); s.setProperty("--koyu-yazi2", r.zeminYazi);
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", r.ana);
 }
 
@@ -42,6 +42,10 @@ export function ModulProvider({ biz, children }: { biz: Business; children: (m: 
   useEffect(() => {
     let v: string | null = null;
     try { v = localStorage.getItem(key); } catch { /* yok */ }
+    // Adres başka bölümün ekranıysa (ör. /ciftci/kumes) o bölümle aç
+    const yol = location.pathname.split("/").filter(Boolean).pop() ?? "";
+    const adrestenModul = OZEL[yol];
+    if (adrestenModul && moduller.includes(adrestenModul)) { try { localStorage.setItem(key, adrestenModul); } catch { /* yok */ } setModul(adrestenModul); return; }
     setModul(moduller.length === 1 ? moduller[0] : moduller.includes(v as Modul) ? (v as Modul) : null);
   }, [key, moduller.join()]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (modul) boya(modul); }, [modul]);

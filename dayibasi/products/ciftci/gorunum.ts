@@ -61,7 +61,7 @@ export function useGorunum() {
     nav: Array.isArray(raw.nav) && raw.nav.length ? raw.nav.slice(0, NAV_SLOTS) : VARSAYILAN.nav,
     quick: Array.isArray(raw.quick) ? raw.quick.filter((q) => QUICK.some((x) => x.id === q)) : QUICK_DEFAULT,
   };
-  return { g, setG: (patch: Partial<Gorunum>) => set({ ozet: { ...g, ...patch } }), large: prefs.buyukYazi === true, setLarge: (v: boolean) => set({ buyukYazi: v }) };
+  return { g, navSet: Array.isArray(raw.nav) && raw.nav.length > 0, setG: (patch: Partial<Gorunum>) => set({ ozet: { ...g, ...patch } }), large: prefs.buyukYazi === true, setLarge: (v: boolean) => set({ buyukYazi: v }) };
 }
 
 /** Kâr kartının tarih aralığı: [başlangıç, bitiş] (YYYY-AA-GG) ve karşılaştırma aralığı. */

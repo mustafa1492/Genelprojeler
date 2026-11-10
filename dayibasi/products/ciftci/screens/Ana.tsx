@@ -17,7 +17,7 @@ import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { config } from "../config";
 import { addDays, dayText, dayYear, GELIR, harvestFrom, HATIRLAT, incomeOpen, ISLEM, MAKINE, todayStr } from "../kayit";
 import { bakimDurumu } from "./Makineler";
-import { ModulChip } from "../modul";
+import { ModulChip, tabInModul, useModul } from "../modul";
 import { updateEvent } from "@/core/events/api";
 import { HistoryLink } from "../nav";
 import { Weather } from "../hava";
@@ -145,7 +145,8 @@ export default function Ana() {
   const topMasraf = Object.entries(exp.filter((e) => inK(e.occurred_on)).reduce<Record<string, number>>((m, e) => { m[e.category] = (m[e.category] ?? 0) + e.amount; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4);
   const topGelir = Object.entries(ev.filter((e) => e.kind === GELIR && inK(e.occurred_on)).reduce<Record<string, number>>((m, e) => { const k = String(e.data.crop || e.data.type || "Gelir"); m[k] = (m[k] ?? 0) + Number(e.quantity ?? 0); return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const mods = (Array.isArray(biz.settings?.modules) ? biz.settings!.modules : []) as string[];
-  const quickShown = (g.quick ?? QUICK_DEFAULT).map((id) => QUICK.find((q) => q.id === id)).filter((q): q is (typeof QUICK)[number] => !!q && (!q.modul || mods.includes(q.modul)) && can(q.perm[0], q.perm[1]));
+  const { modul: bolum } = useModul();
+  const quickShown = (g.quick ?? QUICK_DEFAULT).map((id) => QUICK.find((q) => q.id === id)).filter((q): q is (typeof QUICK)[number] => !!q && (!q.modul || mods.includes(q.modul)) && tabInModul(q.to, bolum) && can(q.perm[0], q.perm[1]));
 
   const blocks: Record<CardId, React.ReactNode> = {
     kar: can("rapor") ? (

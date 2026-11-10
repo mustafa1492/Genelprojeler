@@ -22,7 +22,7 @@ export default function Menu({ tabs }: { tabs: T[] }) {
   const { modul, moduller, sec } = useModul();
   return (
     <>
-      {moduller.length > 1 && <button type="button" className="mn-ayar" onClick={sec}><span aria-hidden="true">⇄</span>Bölüm: {MODULLER[modul].ad}<small>değiştir</small></button>}
+      {moduller.length > 1 && <button type="button" className="mn-bolum" onClick={sec}><span><small>Şu an açık bölüm</small><b>{MODULLER[modul].ad}</b></span><em>Bölüm değiştir ⇄</em></button>}
       {uretim.length > 0 && (
         <div className="mn-grp"><span>Tarla ve üretim</span>
           <div className="mn-kare">

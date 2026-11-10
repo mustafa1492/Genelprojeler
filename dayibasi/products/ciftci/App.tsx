@@ -80,7 +80,7 @@ export default function CiftciApp({ initial }: { initial: string }) {
 
 function Inner({ initial, modul }: { initial: string; modul: Modul }) {
   const biz = useBusiness();
-  const { g } = useGorunum();
+  const { g, navSet } = useGorunum();
   usePrivacy();   // "Tutarları gizle" değişince her ekran yeniden çizilir (*** TL)
   // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
   const { lvl } = useRole();
@@ -92,9 +92,10 @@ function Inner({ initial, modul }: { initial: string; modul: Modul }) {
     .filter((t) => tabInModul(t.id, modul)); // başka bölüme özel sekmeler gizli (tarlalar, depo, makineler… ortak)
   // Kişiye özel: alt çubuk (4 yer) ve Menü; "Ekranımı düzenle" seçilebilir sekmeleri bilir.
   const choices = NAV_CHOICES.map((id) => base.find((t) => t.id === id)).filter((t): t is ShellTab => !!t).map((t) => ({ id: t.id, label: t.short ?? t.label }));
-  // Alt çubuk: bölümün kendi ekranı 2. sırada (Özet'ten sonra), sonra kişinin seçtikleri
+  // Alt çubuk: kişi kendi düzenini kurduysa (Ekranımı düzenle) aynen; kurmadıysa bölümün ekranı Özet'ten sonra gelir
   const own = MODULLER[modul].ana.filter((id) => choices.some((c) => c.id === id));
-  let navIds = [...new Set([...(g.nav[0] === "ozet" ? ["ozet"] : []), ...own, ...g.nav])].filter((id) => choices.some((c) => c.id === id)).slice(0, NAV_SLOTS);
+  const kendiDuzeni = navSet;
+  let navIds = (kendiDuzeni ? g.nav : [...new Set([...(g.nav[0] === "ozet" ? ["ozet"] : []), ...own, ...g.nav])]).filter((id) => choices.some((c) => c.id === id)).slice(0, NAV_SLOTS);
   // Yetki ya da modül yüzünden boşalan yerleri görebildiği sekmelerle doldur (çalışan: Özet, Tarlalar, Depo, Takvim…)
   for (const c of choices) { if (navIds.length >= NAV_SLOTS) break; if (!navIds.includes(c.id)) navIds.push(c.id); }
   const tabs = base.map((t) => (t.id === "duzenle" ? { ...t, render: () => <Duzenle choices={choices} /> } : t));

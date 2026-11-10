@@ -409,7 +409,7 @@ body { background-image: none; background-color: var(--zemin); }
   .only-desk { display: block !important; }
   .only-mobile { display: none !important; }
   /* Yan menü: koyu yeşil, gruplu */
-  .ui-nav { top: 0; bottom: 0; right: auto; width: 240px; display: block; padding: 18px 12px; background: #16301A; border: 0; overflow-y: auto; }
+  .ui-nav { top: 0; bottom: 0; right: auto; width: 240px; display: block; padding: 18px 12px; background: var(--koyu, #16301A); border: 0; overflow-y: auto; }
   .ui-nav a.m, .ui-nav button.ui-nav-menu { display: none; }
   .ui-nav-desk { display: flex; flex-direction: column; gap: 2px; }
   .ui-nav-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; color: #fff; }
@@ -638,3 +638,12 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .modul-kart b { font-size: 1.55rem; }
 .modul-kart small { font-size: 1rem; opacity: .95; }
 .modul-chip { font: inherit; font-size: 1rem; font-weight: 700; min-height: 44px; padding: 0 14px; border-radius: 22px; border: 2px solid var(--ana); background: var(--ana-acik); color: var(--ana-yazi); cursor: pointer; vertical-align: middle; margin-left: 6px; }
+
+/* Menü: bölüm değiştirme (Ayarlar düğmesinden ayrı görünüm) */
+.mn-bolum { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; padding: 10px 16px;
+  border-radius: 18px; background: var(--ana-acik); border: 2px solid var(--ana-orta); cursor: pointer; color: var(--ana-yazi); }
+.mn-bolum span { display: flex; flex-direction: column; }
+.mn-bolum small { font-size: 0.78rem; font-weight: 700; opacity: 0.8; }
+.mn-bolum b { font-size: 1.15rem; }
+.mn-bolum em { font-style: normal; font-weight: 800; font-size: 0.9rem; white-space: nowrap; }
+.mn-bolum:focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
