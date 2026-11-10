@@ -1,5 +1,6 @@
 "use client";
 import { useGo } from "@/core/shell/TabShell";
+import { MODULLER, useModul } from "./modul";
 
 type T = { id: string; label: string; emoji?: string };
 
@@ -18,8 +19,10 @@ export default function Menu({ tabs }: { tabs: T[] }) {
   const link = (id: string, label: string) => (
     <a key={id} href="#" onClick={(e) => { e.preventDefault(); go(id); }}><div>{label}</div><i aria-hidden="true">›</i></a>
   );
+  const { modul, moduller, sec } = useModul();
   return (
     <>
+      {moduller.length > 1 && <button type="button" className="mn-ayar" onClick={sec}><span aria-hidden="true">⇄</span>Bölüm: {MODULLER[modul].ad}<small>değiştir</small></button>}
       {uretim.length > 0 && (
         <div className="mn-grp"><span>Tarla ve üretim</span>
           <div className="mn-kare">
