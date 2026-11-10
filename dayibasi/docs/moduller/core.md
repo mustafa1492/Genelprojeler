@@ -19,6 +19,7 @@
 
 ## Bekleyen istekler
 - **Modül seçimi ve renkler (Mustafa, 10 Kasım 2026, çiftçi oturumundan):** Girişte büyük kartlarla seçim: 🌾 Tarla / 🌱 Fidan / 🐄 Hayvancılık (hayvancılık tek kart; içinde kümes, büyükbaş, küçükbaş). Sadece defterde açık modüller çıkar; tek modül varsa sorulmaz. Son seçilen hatırlanır, üstte "🌱 Fidan ▾" ile değiştirilir. Her modülün kendi rengi (üst şerit, düğmeler, alt çubuk). Para: modülde sadece o modülün masraf/geliri görünür, bir düğmeyle "Hepsi" (bütün masraflar/gelirler, toplam kâr). Ortak kalanlar: borç-vade, belgeler, aile, ayarlar. Ayrıca konuşulan sadeleştirme: Fiş+Fotoğraflar → Masraf, Kayıtlar+Geçmiş birleşir, tarihler Takvim'de toplanır, Sezonlar → Rapor, alt çubuk sabit 5 (Özet · Üretim · ＋ Ekle · Para · Menü), belge/fotoğrafa "neye ait" (tarla/makine/sürü) alanı. Önce telefon taslağı (resim) gösterilecek, Mustafa onaylayınca kod.
+  - Ek (Mustafa, 10 Kasım): Seçim ekranında sadece hesaba açılmış modüller çıkar (ör. tarla + fidan açıksa yalnız o ikisi). Ortak kullanılabilen bölümler (masraf, gelir, depo, makineler, takvim, borç-vade, belgeler, rapor) **her modülün içinde** yer alır, kullanıcı modülden çıkmadan ulaşır; ayrı bir "ortak" alana gitmez. İlke: ulaşım kolaylığı en üstte, her şey en fazla 2 dokunuşta.
 - (Kanatlı, 4 Kasım 2026) Canlıda 0013_yedek uygulanmamış (`yedek.al` yok, gece yedeği çalışmıyor). Uygulanınca 0018_hayvan.sql sonundaki yedek bölümü de çalıştırılmalı (barns/herds/herd_days yedeğe girsin). (diğer oturumlardan)
 - (yok)
 
