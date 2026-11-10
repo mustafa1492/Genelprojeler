@@ -42,7 +42,7 @@ Büyükbaş ve Küçükbaş (4 Kasım 2026'da canlıya çıktı): küpe numaral�
 - Küçükbaş/büyükbaş için: `TURLER` içindeki adları kontrol et, App.tsx'e `<Barinak species="kucukbas" />` sekmesi ve panele modül kutusu ekle. Küpe kartı ve üreme döngüsü bu oturumda, ayrı tablo olarak.
 
 ## Saklanan fikirler
-(yok)
+- (Fidan oturumundan not, 10 Kasım 2026) Ortak alan hesaplayıcı tersinden barınak kapasitesi için kullanılabilir: barınak m² ÷ hayvan başı m² = kapasite; yem, yemlik, suluk ihtiyacı. Hesaplayıcı önce fidanda yazılıp core'a taşınacak; şablonu bu oturum ekler.
 
 ## Günlük
 - Yapıldı (4 Kasım'da gelistirme ve main'e birleştirildi, canlıda): göç `0019_hayvan_kart.sql` (animals, animal_events) CANLIYA UYGULANDI. Kod: `hayvan/kart.ts` (hesaplar, varsayılan süreler), `hayvan/Hayvanlar.tsx` (liste, "Bu hafta", kart, olay, doğumda yavru kaydı, satışta gelire yazma, ilaç arınma uyarısı, Süreler ekranı → settings.hayvan_sureler). Sekmeler Büyükbaş/Küçükbaş (modül anahtarı buyukbas/kucukbas, panel + /yonetim'de kutu). Ahır/ağıl ve toplu sürü: ortak Barinak ekranı.

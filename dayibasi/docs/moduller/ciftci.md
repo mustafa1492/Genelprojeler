@@ -19,6 +19,7 @@ Ayrıntı: `docs/istekler.md`, `docs/arastirma/research_notes/Kanatlı çiftlik 
 
 ## Saklanan fikirler
 - Kâr analizi, devlet destekleri takibi, satışta vergi kesintisi: `docs/istekler.md` (şimdilik yapılmayacak; oranlar doğrulanmadan yazılmaz).
+- (Fidan oturumundan not, 10 Kasım 2026) Dikim hesaplayıcı ortak olacak: çiftçi şablonları eklenebilir: fide (domates, biber; sıra arası × sıra üzeri, viyol adedi), bahçe (zeytin, meyve; 6×6 m gibi, dönüme ağaç), tohum (dönüme kg). Sonuç masrafa / tarla bilgisine aktarılır. Hesaplayıcı önce fidanda yazılıp core'a taşınacak; şablonları bu oturum ekler.
 
 ## Günlük
 - 2026-11-04: **Makine bakımı** yazıldı (`screens/Makineler.tsx`, sekme `makineler`, yetki = tarlalar). Makineler ve bakım işleri düzenlenebilir listede (`makineler`, `makine_isleri`). Kayıt: `events.kind = 'makine'`, quantity = motor saati, data {makine, is, not, next_on, next_hours, expense_id}. Tutar girilirse "Traktör / makine" masrafı (data.makine). Özet "Yaklaşanlar": sonraki tarih 7 gün kala (`config.remindDays.makine`, Mustafa'ya sorulmadı, değiştirilebilir) (motor saatine göre uyarı yok, Mustafa: sadece makine sayfasında "tavsiye X saatte" bilgisi). Takvimde görünür. Muayene/sigorta → Belgeler bağlantısı. Ekrandan denenmedi.

@@ -31,6 +31,7 @@
 - (Kanatlı, 4 Kasım) 0013 yedek uygulanınca `0018_hayvan.sql` sonundaki yedek bölümü de çalıştırılacak (barns/herds/herd_days); hayvancılık için `animals`, `animal_events` de eklenecek.
 - (Tanıtım) "Ücretsiz başla" doğrudan "Yeni hesap aç" ekranını açsın mı?
 - (Hayvancılık) Alt menü çok sekmeyle kalabalıktı → Menü ile çözüldü.
+- (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 
 ## Kararlar ve kalıcı bilgiler
 - **Yayın:** iş `gelistirme`'de yapılır, Mustafa "yükle" deyince main; Vercel main'i yayınlar. Veritabanı önizleme ve canlıda aynı.
