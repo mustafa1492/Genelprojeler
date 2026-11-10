@@ -5,7 +5,7 @@ import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@
 import { addExpense, deleteExpense, listExpenses, updateExpense, type Expense } from "@/core/expenses/api";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
-import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useTabParams, useBack } from "@/core/shell/TabShell";
 import { BackButton, Card, Chip, DoneCard, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
 import { useCList } from "../lists";
 import { dayYear, MAKINE, num, todayStr } from "../kayit";
@@ -34,6 +34,7 @@ export function bakimDurumu(ev: EventRow[]): Bakim[] {
 export default function Makineler() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { money, writes } = useRole();
   const canWrite = writes("tarlalar");
   const makineler = useCList("makineler");
@@ -122,7 +123,7 @@ export default function Makineler() {
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Bakım, motor saati, sonraki bakım" title="Makineler" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       {names.length === 0 && <div className="ui-empty">Henüz makine yok. Traktör, pulluk, ilaçlama makinesi gibi makinelerini ekle.</div>}

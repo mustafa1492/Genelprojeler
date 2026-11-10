@@ -6,7 +6,7 @@ import { listEvents, type EventRow } from "@/core/events/api";
 import { listExpenses, type Expense } from "@/core/expenses/api";
 import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { useGo, useOnActivate } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { BackButton, Chip, PageHeader, TextField } from "@/core/ui";
 import { GELIR, ISLEM } from "../kayit";
 import { DeskTable, Tag } from "@/core/ui/DeskTable";
@@ -18,6 +18,7 @@ type Row = { id: string; kind: "Masraf" | "Gelir" | "Tarla işi"; day: string; t
 export default function Kayitlar() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { nameOf } = useMembers(biz.id);
   const [exp, setExp] = useState<Expense[]>([]);
   const [ev, setEv] = useState<EventRow[]>([]);
@@ -51,7 +52,7 @@ export default function Kayitlar() {
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Masraf, gelir, tarla işleri" title="Kayıtlar" />
       <div className="ui-chips wrap">
         <Chip selected={!kind} onClick={() => setKind(null)}>Hepsi</Chip>

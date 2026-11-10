@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { ListEditor, resolveList } from "@/core/settings/lists";
-import { useGo, useTabParams } from "@/core/shell/TabShell";
+import { useGo, useTabParams, useBack } from "@/core/shell/TabShell";
 import { useEffect } from "react";
 import { BackButton, PageHeader } from "@/core/ui";
 import { config } from "./config";
@@ -54,15 +54,16 @@ export function EditListScreen({ k, onDone }: { k: ListKey; onDone: () => void }
 export default function Listeler() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const [k, setK] = useState<ListKey | null>(null);
   const [from, setFrom] = useState<string | null>(null);
   const tp = useTabParams();
   useEffect(() => { if (tp.p.liste) { setK(String(tp.p.liste) as ListKey); setFrom(tp.p.geri ? String(tp.p.geri) : "masraf"); } }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (k) return <EditListScreen k={k} onDone={() => { setK(null); if (from) { const f = from; setFrom(null); go(f); } }} />;
+  if (k) return <EditListScreen k={k} onDone={() => { setK(null); if (from) { setFrom(null); back(from); } }} />;
   const keys = (Object.keys(LISTS) as ListKey[]).filter((x) => !("fidan" in LISTS[x]) || hasFidan(biz));
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Kullanmadığını kaldır, ihtiyacın olanı ekle" title="Listeleri düzenle" />
       <div className="ui-links">
         {keys.map((x) => {

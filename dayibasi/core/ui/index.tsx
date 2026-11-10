@@ -1,4 +1,5 @@
 "use client";
+import { useState as usePickState } from "react";
 import Link from "next/link";
 import "./ui.css";
 
@@ -159,4 +160,33 @@ export function BackButton({ onClick, label = "Geri" }: { onClick: () => void; l
 /** Bilgi satırları: sol etiket, sağ değer. */
 export function InfoRows({ rows }: { rows: [string, React.ReactNode][] }) {
   return <div className="ui-rows">{rows.map(([k, v]) => <div key={k}><span>{k}</span><span>{v}</span></div>)}</div>;
+}
+
+/**
+ * Açılır seçim: kapalıyken tek satır ("Hangi tarla? · Dere tarla ▾"), dokununca seçenekler alt alta açılır.
+ * Çok seçenekli yan yana düğmelerin kalabalığını önler.
+ */
+export function Pick({ label, options, value, onChange, footer }: {
+  label: string; options: { value: string | null; label: string; hint?: string }[]; value: string | null; onChange: (v: string | null) => void;
+  footer?: (close: () => void) => React.ReactNode;
+}) {
+  const [open, setOpen] = usePickState(false);
+  const cur = options.find((o) => o.value === value);
+  return (
+    <div className="ui-pick">
+      <button type="button" className="ui-pick-bas" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span>{label}</span><b>{cur?.label ?? "Seç"}</b><i aria-hidden="true">{open ? "▴" : "▾"}</i>
+      </button>
+      {open && (
+        <div className="ui-pick-liste" role="listbox" aria-label={label}>
+          {options.map((o) => (
+            <button key={o.value ?? "_"} type="button" role="option" aria-selected={o.value === value} onClick={() => { onChange(o.value); setOpen(false); }}>
+              <span>{o.label}{o.hint && <small>{o.hint}</small>}</span>{o.value === value && <i aria-hidden="true">✓</i>}
+            </button>
+          ))}
+          {footer?.(() => setOpen(false))}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -10,7 +10,7 @@ import { fxFor, gelirSheet, masrafSheet, ozetSheet } from "../excel";
 import { listItems, type Item } from "@/core/inventory/api";
 import { formatTL, formatTLRaw } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
-import { useGo, useOnActivate } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { BackButton, MainButton } from "@/core/ui";
 import { useCList } from "../lists";
 import { branchOf, breakEven, dayYear, GELIR, incomeOpen, ISLEM, VERIM } from "../kayit";
@@ -23,6 +23,7 @@ const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString
 export default function Rapor() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { selected: S, seasons } = useSeason();
   const [exp, setExp] = useState<Expense[]>([]);
   const [ev, setEv] = useState<EventRow[]>([]);
@@ -117,7 +118,7 @@ export default function Rapor() {
   return (
     <main className="ui-stack rapor">
       <div className="no-print ui-stack">
-        <BackButton onClick={() => go("ozet")} label="Özet" />
+        <BackButton onClick={() => back()} label="Geri" />
         <SeasonPicker onManage={() => go("sezonlar")} />
         <div className="ui-seg">
           <button type="button" onClick={() => window.print()}>PDF olarak kaydet</button>
