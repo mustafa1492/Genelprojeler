@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 
-const CACHE = "dayibasi-v1"; // public/sw.js ile aynı
+const CACHE = "dayibasi-v2"; // public/sw.js ile aynı
 
 /** Service worker'ı kaydeder (yalnız yayında) ve ilk açılışta yüklenen dosyaları da telefona saklar. */
 export function RegisterSW() {
