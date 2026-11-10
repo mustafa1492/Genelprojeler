@@ -218,3 +218,27 @@ button.tn-btn:disabled { opacity: .4; cursor: default; }
 /* konu düğmeleri telefonda da alt alta dizilsin, gizli kalmasın */
 .nk-sekme { flex-wrap: wrap; overflow: visible; }
 @media (max-width: 899px) { .nk-sekme button { min-height: 46px; font-size: 0.875rem; padding: 0 12px 0 6px; } .nk-sekme button .no { width: 28px; height: 28px; } }
+
+/* Modüller: girişte şerit + büyük kartlar */
+.tn-hmodul { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.tn-hmodul a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 999px; background: #24502b;
+  color: #fff; text-decoration: none; font-weight: 800; border: 1px solid #3f7a47; }
+.tn-hmodul a span { font-size: 1.25rem; }
+.tn-hmodul a:hover { background: #2e6a2b; }
+.tn-moduller { background: #fff; border-bottom: 1px solid #dfe6dd; }
+.tn-mkart { display: grid; gap: 16px; }
+.tn-mk { border-radius: 22px; padding: 22px; border: 2px solid; display: flex; flex-direction: column; }
+.tn-mk.tarla { background: #eef6e9; border-color: #a7c99c; }
+.tn-mk.fidan { background: #edf7f1; border-color: #9ccdb0; }
+.tn-mk.kumes { background: #fff7e6; border-color: #f1d49a; }
+.tn-mk.hayvan { background: #f6f0e8; border-color: #d9c3a5; }
+.tn-mk .bas { display: flex; gap: 14px; align-items: center; }
+.tn-mk .ik { width: 64px; height: 64px; flex-shrink: 0; border-radius: 18px; background: #fff; display: grid; place-items: center; font-size: 2.1rem; box-shadow: 0 1px 3px rgba(20,45,25,.12); }
+.tn-mk h3 { font-size: 1.375rem; margin: 0 0 2px; }
+.tn-mk .bas p { margin: 0; color: #445248; font-weight: 600; }
+.tn-mk ul { margin: 16px 0 18px; padding-left: 0; list-style: none; display: grid; gap: 6px; flex: 1; }
+.tn-mk li { padding-left: 26px; position: relative; }
+.tn-mk li::before { content: "✓"; position: absolute; left: 2px; font-weight: 800; color: #2e6a2b; }
+.tn-mk .git { align-self: flex-start; min-height: 48px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 14px; background: #16351c; color: #fff; font-weight: 800; text-decoration: none; }
+@media (min-width: 700px) { .tn-mkart { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .tn-mkart { grid-template-columns: repeat(4, 1fr); } }

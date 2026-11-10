@@ -1,7 +1,7 @@
 // İnternetsiz açılış: sayfalar ve uygulama dosyaları telefonda saklanır.
 // Veriler (Supabase) burada saklanmaz; onları core/offline yönetir.
 const CACHE = "dayibasi-v1";
-const PAGES = ["/", "/ekip", "/arabalar", "/alacaklar", "/gecmis", "/kvkk", "/sifre"];
+const PAGES = ["/", "/ciftci", "/ekip", "/arabalar", "/alacaklar", "/gecmis", "/kvkk", "/sifre"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PAGES)).then(() => self.skipWaiting()));

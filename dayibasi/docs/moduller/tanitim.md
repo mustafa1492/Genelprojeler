@@ -22,6 +22,8 @@
 
 - 10 Kasım 2026 (2): "Nasıl kullanılır" bütün bölümleri kapsıyor: 18 bölüm, 68 konu + Telefona ekle (`app/tanitim/rehber.ts` içerik, `NasilKullanilir.tsx` görünüm). Düğme/alan adları koddan alındı; uygulamada ekran değişince `rehber.ts` güncellenmeli.
 
+- 10 Kasım 2026 (3): **Ana sayfa (/) artık tanıtım sitesi** (Mustafa: "ilk site bu çıksın"). Arama motorlarına açık. Giriş yapmış kişi (çerezde oturum) / adresinden /ciftci'ye geçer; site /tanitim'de de açılır (yönlendirmesiz, noindex). Modüller öne çıkarıldı: girişte Tarla/Fidan/Kümes/Hayvan şeridi + "İşine göre modülünü seç" kartları (her kart rehberde o bölümü açar).
+
 ## Onay bekleyen metinler (Mustafa)
 - Ana cümle: "Tarlanın hesabı cebinde." / "Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör."
 - "Basit paket hep ücretsiz. Kredi kartı istemez." ve "İlk sezon ücret alınmaz."
@@ -31,7 +33,6 @@
 ## Açık sorular
 - İletişim: telefon / WhatsApp / e-posta ne yazılacak?
 - Alan adı (ertelendi).
-- Taslak ana sayfaya ne zaman geçecek (şu an `/` dayıbaşı; geçince `/tanitim` içeriği `/`'a taşınır)?
 - WhatsApp numarası: verilen "0538313921" 10 hane, cep numarası 11 hane olmalı; doğrusu sorulacak.
 
 ## Sıradaki

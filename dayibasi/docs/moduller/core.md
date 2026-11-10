@@ -45,3 +45,4 @@
 - Açık küçük not: user_prefs için anon yetkisi kaldırılmadı (RLS zaten engelliyor); istenirse SQL Editor'den `revoke all on user_prefs from anon;`.
 
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
+- (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.

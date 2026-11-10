@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BOLUMLER, TELEFONA_EKLE, type Ekran } from "./rehber";
 
 /** Bölüm bölüm, tıklanarak gezilen "Nasıl kullanılır" rehberi. Ekranlar örnek bilgilerle çizilmiştir. */
@@ -27,6 +27,19 @@ export function NasilKullanilir() {
   const [k, setK] = useState(0);         // konu
   const [tel, setTel] = useState<"android" | "iphone">("android");
   const icerik = useRef<HTMLDivElement>(null);
+  // Modül kartlarındaki "Nasıl kullanılır →" bağlantısı (#rehber-<bölüm>) o bölümü açar
+  useEffect(() => {
+    const ac = () => {
+      const id = location.hash.startsWith("#rehber-") ? location.hash.slice(8) : "";
+      const n = BOLUMLER.findIndex((x) => x.id === id);
+      if (n < 0) return;
+      setB(n); setK(0);
+      requestAnimationFrame(() => document.getElementById("nasil")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    };
+    ac();
+    window.addEventListener("hashchange", ac);
+    return () => window.removeEventListener("hashchange", ac);
+  }, []);
   const telefonda = b === BOLUMLER.length;
   const bolum = BOLUMLER[b];
   const konu = bolum?.konular[k];

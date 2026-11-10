@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Çiftçi Defteri",
     short_name: "Çiftçi Defteri",
     description: "Tarla, masraf, gelir ve hasat defteri",
-    start_url: "/",
+    start_url: "/ciftci",
     display: "standalone",
     background_color: "#EEF2ED",
     theme_color: "#2E6A2B",

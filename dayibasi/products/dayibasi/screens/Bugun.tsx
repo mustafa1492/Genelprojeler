@@ -295,7 +295,7 @@ export default function Bugun() {
         <InfoRows rows={[["Bu hafta", `${weekKisi} kişi-gün`], ["Bu hafta senin payın", formatTL(weekPay)]]} />
       </Card>
       <SignOutLink />
-      <BottomNav items={navItems} current="/" />
+      <BottomNav items={navItems} current="/bugun" />
     </main>
   );
 }
