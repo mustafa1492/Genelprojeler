@@ -9,6 +9,7 @@ Tarlalar (köy/ilçe → hava), tarla günlüğü (ilaçlama bekleme, sulama saa
 - Baban: `abdullahsedat`, "Aile defteri" (2 tarla: Mehmet Ağa'nın yeri 25 dönüm, Çayın kenarı 12 dönüm; 2026 mısır verisi girildi). Tarlalara köy girilmedi (hava görünmez).
 
 ## Sıradaki (plan)
+- (Fidan oturumundan not, 10 Kasım 2026) Dikim hesaplayıcı ortak olacak: çiftçi şablonları eklenebilir: fide (domates, biber; sıra arası × sıra üzeri, viyol adedi), bahçe (zeytin, meyve; 6×6 m gibi, dönüme ağaç), tohum (dönüme kg). Sonuç masrafa / tarla bilgisine aktarılır. Hesaplayıcı önce fidanda yazılıp core'a taşınacak; şablonları bu oturum ekler.
 1. ~~Tapudan tarla getirme~~ (yazıldı, servis denendi) (TKGM servisi: `cbsapi.tkgm.gov.tr/megsiswebapi.v3/api` → idariYapi/ilListe, ilceListe/{il}, mahalleListe/{ilçe}, parsel/{mahalle}/{ada}/{parsel}; CORS açık; alan m²→dönüm).
 2. ~~Kâr analizi~~ → `docs/istekler.md`'ye yazıldı, şimdilik yapılmayacak (Mustafa).
 3. (Bekliyor, yapılmayacak) Devlet destekleri takibi (araştırma: `docs/fikirler/09-devlet-destekleri.md`; tutarlar sabit yazılmaz).

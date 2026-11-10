@@ -17,6 +17,7 @@
 - Taslakta tablonun sağında ayrıntı paneli vardı, yapılmadı (isteğe bağlı).
 
 ## Bekleyen istekler
+- (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 - (Kanatlı, 4 Kasım 2026) Canlıda 0013_yedek uygulanmamış (`yedek.al` yok, gece yedeği çalışmıyor). Uygulanınca 0018_hayvan.sql sonundaki yedek bölümü de çalıştırılmalı (barns/herds/herd_days yedeğe girsin). (diğer oturumlardan)
 - (yok)
 
