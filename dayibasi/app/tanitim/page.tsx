@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./tanitim.css";
 
-// TASLAK tanıtım sayfası. Canlı ana sayfa değişmedi. Fiyatlar ve iletişim onay bekliyor (docs/moduller/tanitim.md).
+// TASLAK tanıtım sayfası. Canlı ana sayfa değişmedi. İletişim onay bekliyor (docs/moduller/tanitim.md).
+// Paketler/fiyatlar şimdilik kaldırıldı (ücret alınmıyor); eski hâli cep.tsx'te saklı.
 const baslik = "Çiftçi Defteri: tarlanın hesabı cebinde";
-const aciklama = "Masrafını, gelirini, tarlanı, deponu ve hayvanını telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör. Basit paket ücretsiz.";
+const aciklama = "Masrafını, gelirini, tarlanı, deponu ve hayvanını telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör. Ücretsiz.";
 
 export const metadata: Metadata = {
   title: baslik,
@@ -39,7 +40,7 @@ const sss = [
   { s: "Bilgilerim güvende mi? Kim görür?", c: "Defterini yalnızca sen ve senin eklediğin aile üyeleri ya da çalışanlar görür. Çalışanın parayı görüp görmeyeceğine sen karar verirsin. Bilgilerin kimseyle paylaşılmaz, satılmaz." },
   { s: "Excel'e aktarabilir miyim?", c: "Evet. Sezon raporu ve masraf-gelir listeleri Excel dosyası olarak iner. Ayarlar'dan bütün kayıtlarını tek dosyada indirebilirsin." },
   { s: "Bilgisayarda da açılır mı?", c: "Evet. Aynı defter telefonda da bilgisayarda da açılır. Bilgisayarda yan menü ve geniş tablolar görünür." },
-  { s: "Ücretsiz paket ne kadar süre ücretsiz?", c: "Basit paket hep ücretsiz ve sınırsız. Orta ve Tam paketlerde ilk sezon ücret alınmaz." },
+  { s: "Ücretli mi?", c: "Hayır. Çiftçi Defteri ücretsizdir; bütün bölümler herkese açık." },
   { s: "Telefonuma ayrıca bir şey yüklemem gerekir mi?", c: "Gerekmez. Adresi açıp giriş yapman yeterli. İstersen ana ekrana ekleyip uygulama gibi kullanırsın." },
 ];
 
@@ -51,7 +52,6 @@ export default function Tanitim() {
           <a className="tn-logo" href="/tanitim"><span className="i" aria-hidden>🌱</span>Çiftçi Defteri</a>
           <nav aria-label="Bölümler">
             <a href="#ozellikler">Özellikler</a>
-            <a href="#paketler">Paketler</a>
             <a href="#sorular">Sorular</a>
             <a className="giris" href="/ciftci">Giriş yap</a>
           </nav>
@@ -64,10 +64,10 @@ export default function Tanitim() {
             <h1>Tarlanın hesabı cebinde.</h1>
             <p className="buyuk">Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör.</p>
             <div className="tn-dugmeler">
-              <a className="tn-btn ana" href="/ciftci">Ücretsiz başla</a>
+              <a className="tn-btn ana" href="/ciftci">Hemen başla</a>
               <a className="tn-btn cizgi" href="/ciftci">Giriş yap</a>
             </div>
-            <p className="not">Basit paket hep ücretsiz. Kredi kartı istemez.</p>
+            <p className="not">Ücretsiz. Kredi kartı istemez.</p>
           </div>
           <Telefon />
         </div>
@@ -111,12 +111,12 @@ export default function Tanitim() {
           <h2>Bölümler</h2>
           <p className="tn-alt-baslik">İşine göre aç. Kullanmadığın bölüm menüde görünmez.</p>
           <div className="tn-modul">
-            <div className="tn-kart"><h3>Tarla ve para <span className="tn-pk">Basit</span></h3><ul><li>Tarlalar (tapudan parsel)</li><li>Masraf ve gelir</li><li>Özet ve kâr kartı</li></ul></div>
-            <div className="tn-kart"><h3>Defter işleri <span className="tn-pk">Orta</span></h3><ul><li>Depo, makineler, takvim</li><li>Sezon raporu (PDF, Excel)</li><li>Dolar karşılığı, aile ve çalışan</li></ul></div>
-            <div className="tn-kart"><h3>Fidan <span className="tn-pk">Tam</span></h3><ul><li>Fidan stoğu</li><li>Müşteriler</li><li>Fiyat listesi</li></ul></div>
-            <div className="tn-kart"><h3>Kümes <span className="tn-pk">Tam</span></h3><ul><li>Kümes ve sürü kaydı</li><li>Günlük kayıt</li></ul></div>
-            <div className="tn-kart"><h3>Büyükbaş ve küçükbaş <span className="tn-pk">Tam</span></h3><ul><li>Küpe numarasıyla hayvan kartı</li><li>Aşı, ilaç, tohumlama gibi olaylar</li><li>İlaçtan sonra “sütü tanka katılmaz” uyarısı</li></ul></div>
-            <div className="tn-kart"><h3>Ekranımı düzenle <span className="tn-pk">Hepsinde</span></h3><ul><li>Hazır görünümler: Tarlacı, Kümesçi, Sadece para, En sade</li><li>Büyük yazı</li><li>Tutarları gizle</li></ul></div>
+            <div className="tn-kart"><h3>Tarla ve para</h3><ul><li>Tarlalar (tapudan parsel)</li><li>Masraf ve gelir</li><li>Özet ve kâr kartı</li></ul></div>
+            <div className="tn-kart"><h3>Defter işleri</h3><ul><li>Depo, makineler, takvim</li><li>Sezon raporu (PDF, Excel)</li><li>Dolar karşılığı, aile ve çalışan</li></ul></div>
+            <div className="tn-kart"><h3>Fidan</h3><ul><li>Fidan stoğu</li><li>Müşteriler</li><li>Fiyat listesi</li></ul></div>
+            <div className="tn-kart"><h3>Kümes</h3><ul><li>Kümes ve sürü kaydı</li><li>Günlük kayıt</li></ul></div>
+            <div className="tn-kart"><h3>Büyükbaş ve küçükbaş</h3><ul><li>Küpe numarasıyla hayvan kartı</li><li>Aşı, ilaç, tohumlama gibi olaylar</li><li>İlaçtan sonra “sütü tanka katılmaz” uyarısı</li></ul></div>
+            <div className="tn-kart"><h3>Ekranımı düzenle</h3><ul><li>Hazır görünümler: Tarlacı, Kümesçi, Sadece para, En sade</li><li>Büyük yazı</li><li>Tutarları gizle</li></ul></div>
           </div>
           <div className="tn-yakinda">
             <h3>Yakında</h3>
@@ -129,31 +129,6 @@ export default function Tanitim() {
               <li>Kümeste yumurta kaydı ve dönem kapanışı</li>
               <li>Google Play'den indirilebilen Android uygulaması</li>
             </ul>
-          </div>
-        </div>
-      </section>
-
-      <section className="tn-bolum tn-gorunum" id="paketler">
-        <div className="tn-ic">
-          <h2>Paketler <span className="tn-taslak">[taslak]</span></h2>
-          <p className="tn-alt-baslik">Fiyatlar henüz kesin değil.</p>
-          <div className="tn-ilksezon">İlk sezon ücret alınmaz. Basit paket ise hep ücretsiz.</div>
-          <div className="tn-paket">
-            <div className="tn-kart">
-              <h3>Basit</h3><p className="fiyat">Ücretsiz</p><p className="yil">Süre ve kayıt sınırı yok</p>
-              <ul><li>Tarlalar</li><li>Masraf ve gelir</li><li>Özet ve kâr kartı</li></ul>
-              <a className="tn-btn ana" href="/ciftci">Ücretsiz başla</a>
-            </div>
-            <div className="tn-kart one">
-              <h3>Orta <span className="tn-taslak">[taslak]</span></h3><p className="fiyat">99 TL <small>/ ay</small></p><p className="yil">ya da yıllık 790 TL</p>
-              <ul><li>Basit paketteki her şey</li><li>Depo, makineler, takvim</li><li>Sezon raporu, Excel</li><li>Dolar karşılığı</li><li>Aile ve çalışan</li></ul>
-              <a className="tn-btn ana" href="/ciftci">Başla</a>
-            </div>
-            <div className="tn-kart">
-              <h3>Tam <span className="tn-taslak">[taslak]</span></h3><p className="fiyat">199 TL <small>/ ay</small></p><p className="yil">ya da yıllık 1.590 TL</p>
-              <ul><li>Orta paketteki her şey</li><li>Fidan</li><li>Kümes</li><li>Büyükbaş ve küçükbaş</li></ul>
-              <a className="tn-btn ana" href="/ciftci">Başla</a>
-            </div>
           </div>
         </div>
       </section>

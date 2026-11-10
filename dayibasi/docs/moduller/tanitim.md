@@ -9,6 +9,10 @@
 - Alan adı ertelendi. Mağaza: önce Android.
 - Destek: uygulama içi kısa videolar.
 
+## Ücret kararı (10 Kasım 2026)
+- **Ücret alınmayacak.** Paketler/fiyatlar siteden kaldırıldı, `app/tanitim/cep.tsx`'te saklı (ileride yine eklenebilir). Aşağıdaki paket/fiyat notları ertelendi.
+- Proje TÜBİTAK başvurusuna çevrildi; sitede TÜBİTAK ile ilgili değişiklik yapılmayacak (Mustafa).
+
 ## Nerede kaldık
 - 4 Kasım 2026: **Site taslağı yapıldı** (`modul/tanitim` dalı, canlı ana sayfa değişmedi): `app/tanitim/page.tsx` + `tanitim.css` → adres `/tanitim`. Arama motoruna kapalı (noindex). Bölümler: giriş cümlesi + "Ücretsiz başla"/"Giriş yap" (ikisi de /ciftci), dert → çözüm, 12 özellik, telefon (Özet) ve bilgisayar (Masraflar) temsili çizimi (örnek rakamlar, HTML/CSS), bölümler/modüller + "Yakında", paketler [taslak], sık sorulan sorular, iletişim [YER TUTUCU], alt bilgi (/kvkk).
 - Görüntüler: `docs/tasarim/tanitim-390.png`, `tanitim-320.png`, `tanitim-1366.png`. Yatay taşma yok, konsol hatası yok.
@@ -22,7 +26,6 @@
 
 ## Açık sorular
 - İletişim: telefon / WhatsApp / e-posta ne yazılacak?
-- Fiyatlar kesinleşti mi (99/790, 199/1.590)?
 - Alan adı (ertelendi).
 - Taslak ana sayfaya ne zaman geçecek (şu an `/` dayıbaşı; geçince `/tanitim` içeriği `/`'a taşınır)?
 - "Ücretsiz başla" doğrudan "Yeni hesap aç" ekranını açsın mı? (core'a not edildi)
