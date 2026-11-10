@@ -1,6 +1,6 @@
 "use client";
 import { useCList } from "../lists";
-import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useBack, useTabParams } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { addDoc, daysLeft, deleteDoc, listDocs, restoreDoc, updateDoc, type Doc } from "@/core/documents/api";
@@ -16,6 +16,10 @@ export default function Belgeler() {
   const biz = useBusiness();
   const go = useGo();
   const back = useBack();
+  // Başka ekrandan (ör. Makineler) gelindiyse Geri oraya döner
+  const tp = useTabParams();
+  const [from, setFrom] = useState<string | null>(null);
+  useEffect(() => { setFrom(tp.p.geri ? String(tp.p.geri) : null); }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
   const [docs, setDocs] = useState<Doc[] | null>(null);
   const [form, setForm] = useState<{ edit?: Doc } | null>(null);
   const [done, setDone] = useState<Done>(null);
@@ -34,7 +38,7 @@ export default function Belgeler() {
   const list = (docs ?? []).slice().sort((a, b) => (a.expires_on ?? "9999").localeCompare(b.expires_on ?? "9999"));
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => back()} label="Geri" />
+      <BackButton onClick={() => { if (from) { const f = from; setFrom(null); go(f); } else back(); }} label="Geri" />
       <PageHeader sub="Bitiş tarihleri ve hatırlatma" title="Belgeler" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <MainButton className="kompakt" onClick={() => { setDone(null); setForm({}); }}>+ Belge ekle</MainButton>

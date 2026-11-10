@@ -55,7 +55,7 @@ export default function Makineler() {
   const durum = bakimDurumu(ev);
   const durumOf = (m: string) => durum.find((d) => d.makine === m);
   const masrafOf = (m: string) => exp.filter((x) => x.category === KATEGORI && x.data?.makine === m);
-  const names = [...new Set([...makineler, ...durum.map((d) => d.makine)])];
+  const names = [...makineler]; // listeden çıkarılan makine görünmez (kayıtları masrafta kalır)
   const nextText = (d?: Bakim) => [
     d?.nextOn ? `${dayYear(d.nextOn)}${d.nextOn < todayStr() ? " (geçti)" : ""}` : "",
     d?.nextHours ? `tavsiye ${d.nextHours.toLocaleString("tr-TR")} saatte${d.left !== null && d.left > 0 ? ` (${d.left.toLocaleString("tr-TR")} saat var)` : ""}` : "",
@@ -116,7 +116,7 @@ export default function Makineler() {
             </Card>
           );
         })}
-        <button type="button" className="ui-link" onClick={() => go("belgeler")}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
+        <button type="button" className="ui-link" onClick={() => go("belgeler", { geri: "makineler" })}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
       </main>
     );
   }
@@ -138,8 +138,8 @@ export default function Makineler() {
           </Card>
         );
       })}
-      {writes("ayarlar") && <MainButton secondary onClick={() => go("listeler", { liste: "makineler", geri: "makineler" })}>Makine ekle / çıkar</MainButton>}
-      <button type="button" className="ui-link" onClick={() => go("belgeler")}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
+      {writes("ayarlar") && <MainButton secondary onClick={() => go("listeler", { liste: "makineler", geri: "makineler" })}>Makine ekle ya da çıkar</MainButton>}
+      <button type="button" className="ui-link" onClick={() => go("belgeler", { geri: "makineler" })}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
     </main>
   );
 }
