@@ -49,6 +49,7 @@
 - Bilgisayarda tablonun sağında ayrıntı paneli; Menü'de borç/vade uyarı etiketi; hazır görünümlerin ne değiştirdiğini kartta açıkça yazmak.
 
 ## Günlük
+- 10 Kas: Az token kuralları (README §3), `kilavuz.md` (kontrol listesi, sözlük, şablon, rapor düzeni) ve `scripts/rapor.sh` (tek komutla durum) eklendi.
 - 10 Kas: Not düzeni ve çalışma ilkeleri yazıldı (README: ilkeler, kontrol listesi, sözlük, şablon); modül notları şablona çevrildi (tanitim.md kendi dalında, oturumu çevirecek).
 - 10 Kas: "Genel" masraf → "İşletme gideri"; raporda ayrı başlık + net kâr tablosu; Excel'de ayrı sayfa. gelistirme. Örnek veriyle denendi.
 - 10 Kas: Telefon notundaki 14 düzeltme (geri tuşu, liste geri al/sıralama, alt çubuk simgeleri, masraf formu, fiş akışı, kâr kartı ayrıntısı, hızlı düğmeler, takvim, fotoğraflar, sakin eşitleme şeridi). gelistirme. Sahte sunucuyla denendi.
