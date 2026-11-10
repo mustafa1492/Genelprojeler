@@ -29,11 +29,23 @@ import { SeasonProvider } from "./sezon";
 import { PrefsProvider } from "@/core/prefs";
 import { usePrivacy } from "@/core/ui/privacy";
 import Ayarlar from "./screens/Ayarlar";
+import Fotograflar from "./screens/Fotograflar";
 import Duzenle from "./screens/Duzenle";
 import Menu from "./Menu";
 import { NAV_CHOICES, NAV_SLOTS, useGorunum } from "./gorunum";
+import { ModulChip, ModulProvider, MODULLER, tabInModul, type Modul } from "./modul";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
+const nv = (d: React.ReactNode) => <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>;
+// Alt çubuğa konabilen her sekmenin simgesi olsun (simgesiz sekme sadece yazı olarak, biçimsiz duruyordu)
+const NAVI = {
+  rapor: nv(<><path d="M3 21h18" /><path d="M6 21V11M12 21V4M18 21v-7" /></>),
+  vadeler: nv(<><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20M6 15h4" /></>),
+  kayitlar: nv(<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />),
+  takvim: nv(<><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>),
+  makineler: nv(<><circle cx="7" cy="17" r="3" /><circle cx="18" cy="18" r="2" /><path d="M10 17h6M4 14V8h7l2 5h6v3M7 8V5" /></>),
+  belgeler: nv(<><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9 13h6M9 17h6" /></>),
+};
 const TABS: ShellTab[] = [
   { id: "ozet", label: "Özet", group: "Genel", emoji: "🏠", path: BASE, inNav: true, icon: icon(BASE), render: () => <Ana /> },
   { id: "tarlalar", label: "Tarlalar", group: "Tarla", emoji: "🌾", path: `${BASE}/tarlalar`, inNav: true, icon: icon(`${BASE}/tarlalar`), render: () => <Tarlalar /> },
@@ -44,17 +56,18 @@ const TABS: ShellTab[] = [
   { id: "buyukbas", label: "Büyükbaş", group: "Hayvan", emoji: "🐄", path: `${BASE}/buyukbas`, inNav: true, icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8c0-2 1-3 3-3h10c2 0 3 1 3 3v3c0 4-3 8-8 8s-8-4-8-8z" /><path d="M9 12h.01M15 12h.01M10 16h4" /></svg>, render: () => <Hayvanlar species="buyukbas" /> },
   { id: "kucukbas", label: "Küçükbaş", group: "Hayvan", emoji: "🐑", path: `${BASE}/kucukbas`, inNav: true, icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8c0-2 1-3 3-3h10c2 0 3 1 3 3v3c0 4-3 8-8 8s-8-4-8-8z" /><path d="M9 12h.01M15 12h.01M10 16h4" /></svg>, render: () => <Hayvanlar species="kucukbas" /> },
   { id: "depo", label: "Depo", group: "Tarla", emoji: "📦", path: `${BASE}/depo`, inNav: true, icon: icon(`${BASE}/depo`), render: () => <Depo /> },
-  { id: "makineler", label: "Makineler", group: "Tarla", emoji: "🚜", path: `${BASE}/makineler`, inNav: false, render: () => <Makineler /> },
-  { id: "vadeler", label: "Borç ve vadeler", group: "Para", emoji: "💳", path: `${BASE}/vadeler`, inNav: false, render: () => <Vadeler /> },
-  { id: "belgeler", label: "Belgeler", group: "Diğer", emoji: "📄", path: `${BASE}/belgeler`, inNav: false, render: () => <Belgeler /> },
+  { id: "makineler", label: "Makineler", icon: NAVI.makineler, group: "Tarla", emoji: "🚜", path: `${BASE}/makineler`, inNav: false, render: () => <Makineler /> },
+  { id: "vadeler", label: "Borç ve vadeler", short: "Vadeler", icon: NAVI.vadeler, group: "Para", emoji: "💳", path: `${BASE}/vadeler`, inNav: false, render: () => <Vadeler /> },
+  { id: "belgeler", label: "Belgeler", icon: NAVI.belgeler, group: "Diğer", emoji: "📄", path: `${BASE}/belgeler`, inNav: false, render: () => <Belgeler /> },
   { id: "aile", label: "Aile", group: "Diğer", emoji: "👪", path: `${BASE}/aile`, inNav: false, render: () => <Aile /> },
   { id: "sezonlar", label: "Sezonlar", path: `${BASE}/sezonlar`, inNav: false, render: () => <Sezonlar /> },
   { id: "listeler", label: "Listeler", group: "Diğer", emoji: "⚙️", path: `${BASE}/listeler`, inNav: false, render: () => <Listeler /> },
-  { id: "rapor", label: "Sezon raporu", group: "Para", emoji: "📊", path: `${BASE}/rapor`, inNav: false, render: () => <Rapor /> },
-  { id: "kayitlar", label: "Kayıtlar", group: "Para", emoji: "📋", path: `${BASE}/kayitlar`, inNav: false, render: () => <Kayitlar /> },
+  { id: "rapor", label: "Sezon raporu", short: "Rapor", icon: NAVI.rapor, group: "Para", emoji: "📊", path: `${BASE}/rapor`, inNav: false, render: () => <Rapor /> },
+  { id: "kayitlar", label: "Kayıtlar", icon: NAVI.kayitlar, group: "Para", emoji: "📋", path: `${BASE}/kayitlar`, inNav: false, render: () => <Kayitlar /> },
   { id: "fis", label: "Fiş yükle", group: "Para", emoji: "📷", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
-  { id: "takvim", label: "Takvim", group: "Genel", emoji: "📅", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
+  { id: "takvim", label: "Takvim", icon: NAVI.takvim, group: "Genel", emoji: "📅", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
+  { id: "fotograflar", label: "Fotoğraflar", group: "Diğer", emoji: "🖼️", path: `${BASE}/fotograflar`, inNav: false, render: () => <Fotograflar /> },
   { id: "ayarlar", label: "Ayarlar", group: "Diğer", emoji: "⚙️", path: `${BASE}/ayarlar`, inNav: false, render: () => <Ayarlar /> },
   { id: "duzenle", label: "Ekranımı düzenle", path: `${BASE}/duzenle`, inNav: false, render: () => null },
 ];
@@ -62,23 +75,27 @@ const TABS: ShellTab[] = [
 /** Çiftçi defteri: tek sayfalık sekmeli uygulama (sekmeler kaldığı yerde kalır). */
 export default function CiftciApp({ initial }: { initial: string }) {
   const biz = useBusiness();
-  return <PrefsProvider businessId={biz.id}><Inner initial={initial} /></PrefsProvider>;
+  return <PrefsProvider businessId={biz.id}><ModulProvider biz={biz}>{(m) => <Inner initial={initial} modul={m} />}</ModulProvider></PrefsProvider>;
 }
 
-function Inner({ initial }: { initial: string }) {
+function Inner({ initial, modul }: { initial: string; modul: Modul }) {
   const biz = useBusiness();
-  const { g } = useGorunum();
+  const { g, navSet } = useGorunum();
   usePrivacy();   // "Tutarları gizle" değişince her ekran yeniden çizilir (*** TL)
   // Yetkiler: her sekmenin bağlı olduğu ekran izni (0 gizli, 1 sadece görür, 2 değiştirir). Defter ayarında kapatılan ekranlar da gizli.
   const { lvl } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
   const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", kumes: "hayvan", buyukbas: "hayvan", kucukbas: "hayvan", depo: "depo", tarlalar: "tarlalar", makineler: "tarlalar", takvim: "takvim", rapor: "rapor",
-    vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
+    vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fotograflar: "masraf", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
   const base = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && (t.id !== "kumes" || hasTur(biz, "kanatli")) && (t.id !== "buyukbas" || hasTur(biz, "buyukbas")) && (t.id !== "kucukbas" || hasTur(biz, "kucukbas")) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
-    .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t));
+    .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t))
+    .filter((t) => tabInModul(t.id, modul)); // başka bölüme özel sekmeler gizli (tarlalar, depo, makineler… ortak)
   // Kişiye özel: alt çubuk (4 yer) ve Menü; "Ekranımı düzenle" seçilebilir sekmeleri bilir.
-  const choices = NAV_CHOICES.map((id) => base.find((t) => t.id === id)).filter((t): t is ShellTab => !!t).map((t) => ({ id: t.id, label: t.label }));
-  let navIds = g.nav.filter((id) => choices.some((c) => c.id === id));
+  const choices = NAV_CHOICES.map((id) => base.find((t) => t.id === id)).filter((t): t is ShellTab => !!t).map((t) => ({ id: t.id, label: t.short ?? t.label }));
+  // Alt çubuk: kişi kendi düzenini kurduysa (Ekranımı düzenle) aynen; kurmadıysa bölümün ekranı Özet'ten sonra gelir
+  const own = MODULLER[modul].ana.filter((id) => choices.some((c) => c.id === id));
+  const kendiDuzeni = navSet;
+  let navIds = (kendiDuzeni ? g.nav : [...new Set([...(g.nav[0] === "ozet" ? ["ozet"] : []), ...own, ...g.nav])]).filter((id) => choices.some((c) => c.id === id)).slice(0, NAV_SLOTS);
   // Yetki ya da modül yüzünden boşalan yerleri görebildiği sekmelerle doldur (çalışan: Özet, Tarlalar, Depo, Takvim…)
   for (const c of choices) { if (navIds.length >= NAV_SLOTS) break; if (!navIds.includes(c.id)) navIds.push(c.id); }
   const tabs = base.map((t) => (t.id === "duzenle" ? { ...t, render: () => <Duzenle choices={choices} /> } : t));
@@ -86,5 +103,5 @@ function Inner({ initial }: { initial: string }) {
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
   if (!tabs.some((t) => t.id === start)) start = "ozet";
-  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span></>} /></SeasonProvider>;
+  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span><ModulChip /></>} /></SeasonProvider>;
 }

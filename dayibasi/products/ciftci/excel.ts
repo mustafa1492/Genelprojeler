@@ -117,7 +117,7 @@ export function ozetSheet(o: { title: string; sub: string; M: TableSheet; G: Tab
         const r = R(); const key = n ? `A${r}` : `""`;
         const g = o.gel.filter((e) => (o.places.find((p) => p.id === e.place_id)?.name ?? "") === n).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
         const mm = o.exp.filter((e) => (o.places.find((p) => p.id === e.place_id)?.name ?? "") === n).reduce((t, e) => t + e.amount, 0);
-        rows.push({ cells: [n || "Genel (tarlasız)", { f: gP && hasG ? `=SUMIFS(${gTL},${gP},${key})` : "=0", v: g }, { f: hasM ? `=SUMIFS(${mTL},${mP},${key})` : "=0", v: mm }, { f: `=B${r}-C${r}`, v: g - mm }],
+        rows.push({ cells: [n || "İşletme gideri (tarlaya ait değil)", { f: gP && hasG ? `=SUMIFS(${gTL},${gP},${key})` : "=0", v: g }, { f: hasM ? `=SUMIFS(${mTL},${mP},${key})` : "=0", v: mm }, { f: `=B${r}-C${r}`, v: g - mm }],
           fmt: [undefined, "tl", "tl", "tl"] });
       }
     }

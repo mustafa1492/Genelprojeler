@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useGo } from "@/core/shell/TabShell";
+import { useGo, useBack } from "@/core/shell/TabShell";
 import { BackButton, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
 import { dayYear, thisYear } from "../kayit";
 import { useSeason, type Season } from "../sezon";
@@ -10,15 +10,18 @@ const nextYear = (d: string, n = 1) => `${Number(d.slice(0, 4)) + n}${d.slice(4)
 /** Sezonları aç / düzenle / sil. "Sonraki sezonu aç" son sezonun bir yıl sonrasını hazırlar. */
 export default function Sezonlar() {
   const go = useGo();
+  const back = useBack();
   const { seasons, real, save, select } = useSeason();
   const list = real ? seasons : [];
   const [form, setForm] = useState<Season | null>(null);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsgRaw] = useState<{ text: string; undo?: Season[] } | null>(null);
+  const setMsg = (t: string) => setMsgRaw(t ? { text: t } : null);
   const [error, setError] = useState("");
 
   const commit = async (next: Season[], m: string) => {
     setError("");
-    try { await save(next); setMsg(m); setForm(null); } catch { setError(navigator.onLine ? "Kaydedemedim, tekrar dene." : "Sezon kaydetmek için internet lazım."); }
+    const prev = list;
+    try { await save(next); setMsgRaw({ text: m, undo: prev }); setForm(null); } catch { setError(navigator.onLine ? "Kaydedemedim, tekrar dene." : "Sezon kaydetmek için internet lazım."); }
   };
 
   if (form) {
@@ -47,9 +50,10 @@ export default function Sezonlar() {
   const y = Number(thisYear());
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Gelir sezona göre, masraf hem ay ay hem sezona göre" title="Sezonlar" />
-      {msg && <DoneCard message={msg} />}
+      {msg && <DoneCard message={msg.text} onUndo={msg.undo ? async () => { try { await save(msg.undo!); setMsgRaw(null); } catch { setError("Geri alamadım, internet lazım."); } } : undefined} />}
+      {error && <ErrorText>{error}</ErrorText>}
       {list.length === 0 && <div className="ui-empty">Henüz sezon açılmadı; şimdilik takvim yılı kullanılıyor. İlk sezonunu aç.</div>}
       {list.map((s) => (
         <button key={s.id} type="button" className="ui-card" onClick={() => { setMsg(""); setForm(s); }}

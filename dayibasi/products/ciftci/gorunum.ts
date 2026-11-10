@@ -19,11 +19,28 @@ export const PERIODS = [
 ] as const;
 export type Period = (typeof PERIODS)[number]["id"];
 
+/** Özet'teki hızlı düğmeler: kişi hangilerini isterse (Ekranımı düzenle). perm: [ekran, 1 görür | 2 yazar]; modul: defterde açık olmalı. */
+export const QUICK: { id: string; label: string; emoji: string; to: string; params?: Record<string, number>; perm: [string, 1 | 2]; modul?: string }[] = [
+  { id: "masraf", label: "+ Masraf", emoji: "🧾", to: "masraf", params: { yeni: 1 }, perm: ["masraf", 2] },
+  { id: "gelir", label: "+ Gelir", emoji: "💰", to: "gelir", params: { yeni: 1 }, perm: ["gelir", 2] },
+  { id: "tarla", label: "Tarla işi", emoji: "🌾", to: "tarlalar", perm: ["tarlalar", 2] },
+  { id: "fis", label: "Fiş", emoji: "📷", to: "fis", perm: ["fis", 2] },
+  { id: "hatirlat", label: "Hatırlatma", emoji: "🔔", to: "takvim", params: { yeni: 1 }, perm: ["takvim", 2] },
+  { id: "depo", label: "Depo", emoji: "📦", to: "depo", perm: ["depo", 1] },
+  { id: "kumes", label: "Kümes", emoji: "🐔", to: "kumes", perm: ["hayvan", 1], modul: "kanatli" },
+  { id: "fidan", label: "Fidan", emoji: "🌱", to: "fidan", perm: ["fidan", 1], modul: "fidan" },
+  { id: "makine", label: "Makineler", emoji: "🚜", to: "makineler", perm: ["tarlalar", 1] },
+  { id: "vadeler", label: "Borçlar", emoji: "💳", to: "vadeler", perm: ["vadeler", 1] },
+  { id: "rapor", label: "Rapor", emoji: "📊", to: "rapor", perm: ["rapor", 1] },
+  { id: "kayitlar", label: "Kayıtlar", emoji: "📋", to: "kayitlar", perm: ["kayitlar", 1] },
+];
+export const QUICK_DEFAULT = ["masraf", "gelir", "tarla", "fis"];
+
 /** Alt çubuğa konabilecek sekmeler (Menü hep sağda, sabit). */
-export const NAV_CHOICES = ["ozet", "tarlalar", "masraf", "gelir", "depo", "fidan", "kumes", "buyukbas", "kucukbas", "takvim", "rapor", "vadeler", "kayitlar"];
+export const NAV_CHOICES = ["ozet", "tarlalar", "masraf", "gelir", "depo", "fidan", "kumes", "buyukbas", "kucukbas", "takvim", "rapor", "vadeler", "kayitlar", "makineler", "belgeler"];
 export const NAV_SLOTS = 4;
 
-export type Gorunum = { cards: CardId[]; period: Period; nav: string[] };
+export type Gorunum = { cards: CardId[]; period: Period; nav: string[]; quick?: string[] };
 export const VARSAYILAN: Gorunum = { cards: ["kar", "hizli", "yeni", "yakin", "hava"], period: "sezon", nav: ["ozet", "tarlalar", "masraf", "gelir"] };
 
 /** Hazır görünümler: tek dokunuşla. */
@@ -42,8 +59,9 @@ export function useGorunum() {
     cards: Array.isArray(raw.cards) ? raw.cards.filter((c) => ok.has(c)) : VARSAYILAN.cards,
     period: PERIODS.some((p) => p.id === raw.period) ? raw.period! : VARSAYILAN.period,
     nav: Array.isArray(raw.nav) && raw.nav.length ? raw.nav.slice(0, NAV_SLOTS) : VARSAYILAN.nav,
+    quick: Array.isArray(raw.quick) ? raw.quick.filter((q) => QUICK.some((x) => x.id === q)) : QUICK_DEFAULT,
   };
-  return { g, setG: (patch: Partial<Gorunum>) => set({ ozet: { ...g, ...patch } }), large: prefs.buyukYazi === true, setLarge: (v: boolean) => set({ buyukYazi: v }) };
+  return { g, navSet: Array.isArray(raw.nav) && raw.nav.length > 0, setG: (patch: Partial<Gorunum>) => set({ ozet: { ...g, ...patch } }), large: prefs.buyukYazi === true, setLarge: (v: boolean) => set({ buyukYazi: v }) };
 }
 
 /** Kâr kartının tarih aralığı: [başlangıç, bitiş] (YYYY-AA-GG) ve karşılaştırma aralığı. */

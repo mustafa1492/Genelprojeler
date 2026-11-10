@@ -1,5 +1,5 @@
 "use client";
-import { useGo } from "@/core/shell/TabShell";
+import { useGo, useBack } from "@/core/shell/TabShell";
 import { useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { createInvite, setMemberRole, setMyName, useMembers } from "@/core/auth/members";
@@ -13,6 +13,7 @@ import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextFiel
 export default function Aile() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { members, me, reload } = useMembers(biz.id);
   const mine = members.find((m) => m.user_id === me);
   const [name, setName] = useState("");
@@ -34,7 +35,7 @@ export default function Aile() {
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub={biz.name} title="Aile ve ortak defter" />
       {msg && <DoneCard message={msg} />}
       <p className="ui-note">Ailenden biri kendi hesabıyla bu deftere katılabilir; her kaydın yanında kimin girdiği yazar. Her üyenin hangi bölümü <b>görüp</b> hangisini <b>değiştirebileceğini</b> sen seçersin.</p>

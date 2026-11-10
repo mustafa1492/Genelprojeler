@@ -75,6 +75,7 @@ docs/
 - **Yevmiye:** işçinin günlük ücreti; dayıbaşı payı ayrıca eklenir
 
 ## Çalışma şekli
+- **Önce `docs/moduller/README.md` okunur** (kısa: çalışma kuralları, profesyonel çalışma ilkeleri, az token kuralları). Özellik ekleme/çıkarma kontrol listesi, sözlük, not şablonu ve rapor düzeni `docs/moduller/kilavuz.md` içinde, gerektiğinde okunur. Mustafa "durum" ya da "rapor" isteyince önce `bash dayibasi/scripts/rapor.sh` çalıştırılır.
 - **YAYIN ONAYI (Mustafa, 2 Kasım 2026):** main'e doğrudan push YOK. İş `gelistirme` dalında yapılır (Vercel bu dal için önizleme adresi verir); Mustafa "yükle/onay" deyince main'e birleştirilir. Veritabanı değişiklikleri de geriye uyumlu olmalı (önizleme ve canlı aynı Supabase'i kullanır).
 - **Sahibi genel izin verdi (1 Kasım 2026):** işleri sormadan yap, yapınca kısaca söyle. Yine de önce sor: gerçek kullanıcı verisini silme/değiştirme, para harcatan ya da geri alınamayan işler, para hesabı/oyun kuralı gibi iş kuralları (bunlar uydurulmaz).
 - Sahibi haftada 10-12 saat ayırabiliyor; işleri küçük, bitirilebilir parçalara böl

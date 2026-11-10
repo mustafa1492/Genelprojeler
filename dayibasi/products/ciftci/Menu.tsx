@@ -1,11 +1,12 @@
 "use client";
 import { useGo } from "@/core/shell/TabShell";
+import { MODULLER, useModul } from "./modul";
 
 type T = { id: string; label: string; emoji?: string };
 
 const URETIM = ["tarlalar", "fidan", "kumes", "buyukbas", "kucukbas", "depo", "makineler"];
 const PARA: [string, string][] = [["rapor", "Sezon raporu ve kâr"], ["vadeler", "Borç ve vadeler"], ["kayitlar", "Kayıtlar"], ["fis", "Fiş yükle"]];
-const DEFTER: [string, string][] = [["takvim", "Takvim ve hatırlatmalar"], ["belgeler", "Belgeler"], ["gecmis", "Geçmiş"]];
+const DEFTER: [string, string][] = [["takvim", "Takvim ve hatırlatmalar"], ["belgeler", "Belgeler"], ["fotograflar", "Fotoğraflar (fişler)"], ["gecmis", "Geçmiş"]];
 
 /** Alt çubuktaki "Menü" tuşunun açtığı sayfa: bütün bölümler gruplu. Sadece kişinin görebildikleri çıkar. */
 export default function Menu({ tabs }: { tabs: T[] }) {
@@ -18,8 +19,10 @@ export default function Menu({ tabs }: { tabs: T[] }) {
   const link = (id: string, label: string) => (
     <a key={id} href="#" onClick={(e) => { e.preventDefault(); go(id); }}><div>{label}</div><i aria-hidden="true">›</i></a>
   );
+  const { modul, moduller, sec } = useModul();
   return (
     <>
+      {moduller.length > 1 && <button type="button" className="mn-bolum" onClick={sec}><span><small>Şu an açık bölüm</small><b>{MODULLER[modul].ad}</b></span><em>Bölüm değiştir ⇄</em></button>}
       {uretim.length > 0 && (
         <div className="mn-grp"><span>Tarla ve üretim</span>
           <div className="mn-kare">

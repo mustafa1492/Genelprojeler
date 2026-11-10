@@ -39,7 +39,7 @@ export default function Masraf() {
   const go = useGo();
   const gelirS = income.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
-    <ExpenseScreen categories={cats} onEditCategories={() => go("listeler", { liste: "expense" })} places={places} branches={isler} onAddBranch={addIs}
+    <ExpenseScreen noPlaceLabel="İşletme gideri" categories={cats} onEditCategories={() => go("listeler", { liste: "expense" })} places={places} branches={isler} onAddBranch={addIs}
       inbox={(start) => <InboxCard onOpen={(x) => start(x.photo_path, x.note, x.place_id, (id) => { closeInbox(x.id, "islendi", id).catch(() => {}); })} />} headerRight={<HistoryLink />} memberName={nameOf}
       link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
       stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: invUnits }}

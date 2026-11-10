@@ -2,7 +2,7 @@
 import { useCList } from "../lists";
 import { DeskTable, Tag } from "@/core/ui/DeskTable";
 import { useAddToList, PickWithAdd } from "@/core/settings/lists";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { useMembers } from "@/core/auth/members";
 import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@/core/events/api";
@@ -16,7 +16,7 @@ import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextFiel
 import { config } from "../config";
 import { breakEven, dayText, GELIR, incomeOpen, num, todayStr, VERIM } from "../kayit";
 import { HistoryLink } from "../nav";
-import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useTabParams, useBack } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { listExpenses, type Expense } from "@/core/expenses/api";
 import { listLots, type Lot } from "@/core/lots/api";
@@ -51,6 +51,9 @@ export default function Gelir() {
   useOnActivate(load);
   const { doviz, conv } = useRates(useMemo(() => (rows ?? []).map((e) => e.occurred_on), [rows]));   // döviz karşılığı
   const tp = useTabParams();
+  const back = useBack();
+  const viaTab = useRef(false);
+  useEffect(() => { if (tp.n > 0 && (tp.p.duzenle || tp.p.yeni)) viaTab.current = true; }, [tp.n]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (tp.p.duzenle) { const e = (rows ?? []).find((x) => x.id === tp.p.duzenle); if (e) { setDone(null); setForm({ edit: e }); } return; } if (tp.p.yeni) { setDone(null); setForm(tp.p.parti || tp.p.adet ? { type: FIDAN_SATIS, prefill: tp.p } : {}); } }, [tp.n, !!rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const beOf = (placeId: string | null) => {
@@ -64,7 +67,7 @@ export default function Gelir() {
     const st = lotStats(l, lots, counts, (rows ?? []).filter((e) => e.data.type === FIDAN_SATIS), exps, moves, multi);
     return { alive: st.alive, perPlant: st.perPlant, suggested: suggestedPrice(st.perPlant, marginOf(biz)) };
   };
-  if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prices={fidan ? pricesOf(biz) : {}} prefill={form.prefill} onCancel={() => setForm(null)}
+  if (form) return <GelirForm places={places} beOf={beOf} lotInfo={lotInfo} type={form.type} edit={form.edit} lots={fidan ? lots.filter((l) => l.status === "aktif") : []} sizes={fidan ? sizesOf(biz) : []} prices={fidan ? pricesOf(biz) : {}} prefill={form.prefill} onCancel={() => { setForm(null); if (viaTab.current) { viaTab.current = false; back(); } }}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.type)} ${formatTL(Number(e.quantity))}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
       if (form.edit) {
@@ -89,7 +92,7 @@ export default function Gelir() {
     <main className="ui-has-nav ui-stack">
       <PageHeader sub="Satış, destek, diğer" title="Gelir" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
-      <MainButton onClick={() => { setDone(null); setForm({}); }}>+ Gelir ekle</MainButton>
+      <MainButton className="kompakt" onClick={() => { setDone(null); viaTab.current = false; setForm({}); }}>+ Gelir ekle</MainButton>
       <SeasonPicker onManage={() => go("sezonlar")} />
       <div className="ui-total">
         <span>{y} sezonu gelir</span><b>{formatTL(total)}</b>{doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(inY.reduce<number | null>((t, e) => { const v = conv(Number(e.quantity ?? 0), e.occurred_on); return t == null || v == null ? null : t + v; }, 0), doviz)}</small>}

@@ -5,7 +5,7 @@ import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@
 import { addExpense, deleteExpense, listExpenses, updateExpense, type Expense } from "@/core/expenses/api";
 import { formatTL } from "@/core/ledger/api";
 import { mutate } from "@/core/offline/store";
-import { useGo, useOnActivate, useTabParams } from "@/core/shell/TabShell";
+import { useGo, useOnActivate, useTabParams, useBack } from "@/core/shell/TabShell";
 import { BackButton, Card, Chip, DoneCard, InfoRows, MainButton, PageHeader, TextField } from "@/core/ui";
 import { useCList } from "../lists";
 import { dayYear, MAKINE, num, todayStr } from "../kayit";
@@ -34,6 +34,7 @@ export function bakimDurumu(ev: EventRow[]): Bakim[] {
 export default function Makineler() {
   const biz = useBusiness();
   const go = useGo();
+  const back = useBack();
   const { money, writes } = useRole();
   const canWrite = writes("tarlalar");
   const makineler = useCList("makineler");
@@ -54,7 +55,7 @@ export default function Makineler() {
   const durum = bakimDurumu(ev);
   const durumOf = (m: string) => durum.find((d) => d.makine === m);
   const masrafOf = (m: string) => exp.filter((x) => x.category === KATEGORI && x.data?.makine === m);
-  const names = [...new Set([...makineler, ...durum.map((d) => d.makine)])];
+  const names = [...makineler]; // listeden çıkarılan makine görünmez (kayıtları masrafta kalır)
   const nextText = (d?: Bakim) => [
     d?.nextOn ? `${dayYear(d.nextOn)}${d.nextOn < todayStr() ? " (geçti)" : ""}` : "",
     d?.nextHours ? `tavsiye ${d.nextHours.toLocaleString("tr-TR")} saatte${d.left !== null && d.left > 0 ? ` (${d.left.toLocaleString("tr-TR")} saat var)` : ""}` : "",
@@ -115,14 +116,14 @@ export default function Makineler() {
             </Card>
           );
         })}
-        <button type="button" className="ui-link" onClick={() => go("belgeler")}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
+        <button type="button" className="ui-link" onClick={() => go("belgeler", { geri: "makineler" })}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
       </main>
     );
   }
 
   return (
     <main className="ui-stack">
-      <BackButton onClick={() => go("ozet")} label="Özet" />
+      <BackButton onClick={() => back()} label="Geri" />
       <PageHeader sub="Bakım, motor saati, sonraki bakım" title="Makineler" />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       {names.length === 0 && <div className="ui-empty">Henüz makine yok. Traktör, pulluk, ilaçlama makinesi gibi makinelerini ekle.</div>}
@@ -137,8 +138,8 @@ export default function Makineler() {
           </Card>
         );
       })}
-      {writes("ayarlar") && <MainButton secondary onClick={() => go("listeler", { liste: "makineler", geri: "makineler" })}>Makine ekle / çıkar</MainButton>}
-      <button type="button" className="ui-link" onClick={() => go("belgeler")}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
+      {writes("ayarlar") && <MainButton secondary onClick={() => go("listeler", { liste: "makineler", geri: "makineler" })}>Makine ekle ya da çıkar</MainButton>}
+      <button type="button" className="ui-link" onClick={() => go("belgeler", { geri: "makineler" })}>📄 Muayene ve sigorta tarihleri: Belgeler ›</button>
     </main>
   );
 }
