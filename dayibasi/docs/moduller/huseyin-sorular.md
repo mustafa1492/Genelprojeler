@@ -50,5 +50,20 @@ Amaç: dikim hesaplayıcı, satış ve diğer fidan işlerini gerçek kullanıma
 - Tanıtımda ne yazsın: kuruluş yılı, kaç dönüm, kaç fidan, hangi boylar, sertifika / bitki pasaportu, teslimat bölgesi?
 - Teklifte geçerlilik süresi, teslim şartları, nakliye kimde yazsın mı?
 
+## 6. Hastalık, sulama, tarla
+- Şimşir güvesi ya da yanıklık (yaprak dökülmesi) sorunu yaşadın mı? Feromon tuzağı kullanıyor musun, tuzakları ne sıklıkla kontrol ediyorsun?
+- Hangi ilaçları kullanıyorsun, kaç günde bir?
+- Sulamayı nasıl yapıyorsun (damla, yağmurlama, salma)? Kuyu / pompa mı, su faturası mı? Saatini / miktarını not ediyor musun?
+- Don ya da sıcak dalgası sana zarar verdi mi? Saksıları örtüyor musun?
+- Partileri tarlada nasıl ayırıyorsun? Etiket / kazık kullanıyor musun? QR etiket basıp dikmek işine yarar mı?
+- Söküm nasıl oluyor: kaç işçi, günde kaç fidan sökülür, kaç gün önceden planlıyorsun?
+
+## 7. Satış (ek)
+- Çok adet alana indirim yapıyor musun? Kademeler ne (ör. 1.000 üstü %10)?
+- Henüz satış boyuna gelmemiş fidana önceden sipariş / kapora alıyor musun?
+- Müşteri (belediye, ihracat) izlenebilirlik belgesi ya da ilaç geçmişi istiyor mu?
+- Herkese açık bir sayfada fidanlarını ve boylarını göstermek ister misin? Fiyatlar görünsün mü?
+- Hibe ya da kredi başvurusu yaptın mı / düşünüyor musun (TKDK, Ziraat)?
+
 ## Cevaplar
 (henüz yok)

@@ -16,6 +16,19 @@ Mustafa'nın onayladığı işler (10 Kasım 2026), sıra henüz kesin değil:
 4. **Müşteri telefonu ve tekrar satış:** telefon bir kez girilir; hesap / fiyat listesi doğrudan kişiye; geçmiş müşterilere fiyat listesi gönderme.
 5. **Teklif PDF'i (estetik):** sadece fiyat teklifi değil, içinde **tanıtım** da olacak (işletme hakkında yazı, fotoğraflar, iletişim, belki pasaport/sertifika bilgisi). Tanıtım içeriği **uygulamadan düzenlenebilir** olmalı. Tasarımı özenli olmalı (kapak, logo, düzenli tablo).
 6. **Dikim hesaplayıcı (konuşuluyor):** tarla dönümü + kullanılacak alan + sıra arası / sıra üzeri → fidan adedi (yol ve yedek payıyla), sıra uzunluğu, damla boru, işçilik, gübre/torf, maliyet; ters hesap; "bu planla dikim ekle". Birim değerler kullanıcıdan, uydurulmaz.
+7. **Ek fikirler (10 Kasım 2026, listeye alındı).** Önce: 7a, 7b, 7c.
+   - 7a. **Şimşir güvesi / yanıklık takibi:** feromon tuzağı sayımı, artınca ilaçlama uyarısı; atılan ilaç ve etki süresi.
+   - 7b. **Herkese açık katalog sayfası:** teklif PDF'iyle aynı tanıtım içeriği (tek yerde düzenlenir); stokla güncel boylar, isteğe bağlı fiyat, fotoğraf, "WhatsApp'tan sipariş ver".
+   - 7c. **Söküm ve sevk planı:** bekleyen siparişlerin teslim tarihine göre hangi partiden / boydan kaç sökülecek, işçi tahmini.
+   - QR etiket (parti/sıraya; okutunca parti açılır, sayım/bakım girilir).
+   - Tarla haritası (hangi sırada hangi parti).
+   - Don / sıcak uyarısı (tarla konumundan ücretsiz hava tahmini).
+   - Sulama günlüğü (su/elektrik maliyeti fidan başına).
+   - Adete göre fiyat kademesi (indirim teklif ve satışta kendiliğinden).
+   - Gelecek sezona ön sipariş (büyüme tahminiyle, kaporalı).
+   - İzlenebilirlik belgesi (dikim, kaynak, ilaçlar, pasaport; sevk listesiyle).
+   - Elde kalan fidanın değeri (fiyat listesine göre).
+   - Hibe / kredi raporu (TKDK, Ziraat; maliyet, gelir, üretim özeti PDF).
 - **Hüseyin'e sorulacaklar:** `huseyin-sorular.md` (üretim, dikim ihtiyaç listesi ve birim değerler, büyüme, satış, teklif PDF'i). Hepsi bir seferde sorulacak; dikim hesaplayıcının birim değerleri oradan gelecek.
 - Diğer: Hüseyin'in geri bildirimi; tür/çeşit bazlı fiyat (birden çok tür üretilirse); hızlı (tahmini) sayım, çelikle üretim, parti karşılaştırma raporu (öneri, onaylanmadı).
 
