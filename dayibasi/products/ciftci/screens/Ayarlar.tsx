@@ -75,6 +75,7 @@ export default function Ayarlar() {
 
       <div className="mn-grp"><span>Görünüm</span>
         <div className="mn-liste">
+          <label><div>Büyük yazı<small>Bütün ekranlarda yazılar büyür</small></div><input type="checkbox" checked={large} onChange={(e) => setLarge(e.target.checked)} /></label>
           {row("duzenle", "Ekranımı düzenle", "Özet kartları, alt çubuk, kâr dönemi, hazır görünümler")}
           <label><div>Tutarları gizle<small>Telefonu birine gösterirken para yazan her yer *** olur</small></div><input type="checkbox" checked={privacy.on} onChange={privacy.toggle} /></label>
           <div className="mn-doviz"><div>Döviz karşılığı<small>{kurBugun ? `Bugün 1 $ = ${kurBugun.usd.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL · 1 € = ${kurBugun.eur.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL (TCMB)` : "Tutarların yanında, kaydın günündeki kurla"}</small></div>
@@ -82,7 +83,6 @@ export default function Ayarlar() {
               {([["kapali", "Kapalı"], ["usd", "Dolar"], ["eur", "Euro"]] as const).map(([k, l]) => <button key={k} type="button" aria-pressed={doviz === k} onClick={() => setDoviz(k)}>{l}</button>)}
             </div>
           </div>
-          <label><div>Büyük yazı<small>Bütün ekranlarda yazılar büyür</small></div><input type="checkbox" checked={large} onChange={(e) => setLarge(e.target.checked)} /></label>
         </div>
       </div>
 

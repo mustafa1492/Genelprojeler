@@ -647,3 +647,20 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .mn-bolum b { font-size: 1.15rem; }
 .mn-bolum em { font-style: normal; font-weight: 800; font-size: 0.9rem; white-space: nowrap; }
 .mn-bolum:focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
+
+/* Arayüz raporu, hızlı kazanımlar (11 Kasım 2026): okunur yazı, büyük dokunma alanı */
+.ui-note, .ui-chip, .ui-pill, .ui-history, .ui-back, .ui-header small { font-size: 1rem; }
+.ui-link.inline { padding: 12px 6px; margin: -12px -6px; }
+.ui-check { min-height: 56px; cursor: pointer; }
+.ui-check input, .mn-liste input[type="checkbox"] { width: 32px; height: 32px; cursor: pointer; }
+.mn-liste > label { cursor: pointer; }
+/* Ayar satırlarında (yazıdan sonra gelen kutu) açma-kapama anahtarı */
+.mn-liste label > div + input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 56px; height: 32px; border-radius: 999px;
+  background: var(--cizgi); position: relative; transition: background .15s; margin: 0; }
+.mn-liste label > div + input[type="checkbox"]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s; }
+.mn-liste label > div + input[type="checkbox"]:checked { background: var(--ana); }
+.mn-liste label > div + input[type="checkbox"]:checked::after { transform: translateX(24px); }
+.mn-liste label > div + input[type="checkbox"]:focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
+@media (max-width: 340px) { .ozet-hizli { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { html.buyuk-yazi .ozet-hizli { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

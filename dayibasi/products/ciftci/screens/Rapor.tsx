@@ -142,7 +142,7 @@ export default function Rapor() {
       <div className="rapor-kpi">
         <div><span>Gelir</span><b>{formatTL(gelir)}</b>{fxG != null && <small className="ui-fx">{fmtFx(fxG, doviz)}</small>}</div>
         <div><span>Masraf</span><b>{formatTL(masraf)}</b>{fxM != null && <small className="ui-fx">{fmtFx(fxM, doviz)}</small>}</div>
-        <div className={gelir - masraf >= 0 ? "pos" : "neg"}><span>Kâr / zarar</span><b>{formatTL(gelir - masraf)}</b>{fxG != null && fxM != null && <small className="ui-fx">{fmtFx(fxG - fxM, doviz)} (her kayıt kendi günündeki kurla)</small>}</div>
+        <div className={gelir - masraf >= 0 ? "pos" : "neg"}><span>{gelir - masraf >= 0 ? "Kâr" : "Zarar"}</span><b>{formatTL(Math.abs(gelir - masraf))}</b>{fxG != null && fxM != null && <small className="ui-fx">{fmtFx(fxG - fxM, doviz)} (her kayıt kendi günündeki kurla)</small>}</div>
       </div>
       {(alinacak > 0 || borc > 0 || alacak > 0) && <p className="ui-note">Alınacak (bu sezonun satışları): {formatTL(alinacak)} · Bugün toplam borç: {formatTL(borc)} · alacak: {formatTL(alacak)}</p>}
 
