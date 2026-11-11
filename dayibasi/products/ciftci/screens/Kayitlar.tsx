@@ -58,7 +58,7 @@ export default function Kayitlar() {
         <Chip selected={!kind} onClick={() => setKind(null)}>Hepsi</Chip>
         {(["Masraf", "Gelir", "Tarla işi"] as const).map((k) => <Chip key={k} selected={kind === k} onClick={() => setKind(k)}>{k}</Chip>)}
       </div>
-      <TextField id="k_ara" label="Ara (isteğe bağlı)" placeholder="Örnek: mazot, Kınık yolu" maxLength={40} value={q} onChange={(e) => setQ(e.target.value)} />
+      <TextField id="k_ara" label="Ara" placeholder="Örnek: mazot, Kınık yolu" maxLength={40} value={q} onChange={(e) => setQ(e.target.value)} />
       <p className="ui-note" style={{ margin: 0 }}>Düzeltmek ya da silmek için kayda dokun.</p>
       {rows.length === 0 && <div className="ui-empty">Kayıt yok.</div>}
       <DeskTable rows={shown} rowKey={(r) => r.kind + r.id} onRow={(r) => r.open()}

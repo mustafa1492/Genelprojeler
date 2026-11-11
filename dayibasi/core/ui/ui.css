@@ -686,3 +686,7 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
   .rapor-table table.kart tfoot tr { display: flex; justify-content: space-between; background: var(--ana-acik); }
   .rapor-table table.kart tfoot td { background: none; }
 }
+/* Arayüz raporu: Menü bölüm başlıkları normal harf (10), "son:" ve rol açıklamaları (22, 45, 46) */
+.mn-grp > span { font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.ui-liste-sec > button small, .ui-pick-liste > button small, .yetki-roller button small, .yetki-tablo th, .yetki-tablo td small { font-size: 0.9rem; }
+.mn-liste .mn-seg { display: grid; flex: none; } /* (15) döviz seçenekleri yan yana: .mn-liste div kuralı eziyordu */

@@ -219,8 +219,9 @@ export default function Tarlalar() {
               {money && <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(Math.abs(st.kar))} {st.kar < 0 ? "zarar" : "kâr"}</span>}
             </span>
             <span className="ui-note" style={{ margin: 0 }}>
-              {[p.custom?.urun, st.donum ? `${st.donum} dekar` : "", money ? `masraf ${formatTL(st.m)}` : "", money ? `gelir ${formatTL(st.g)}` : ""].filter(Boolean).join(" · ")}
+              {[p.custom?.urun, st.donum ? `${st.donum} dekar` : ""].filter(Boolean).join(" · ")}
             </span>
+            {money && <span className="ui-note" style={{ margin: 0, display: "flex", flexWrap: "wrap", gap: "0 14px" }}><span style={{ whiteSpace: "nowrap" }}>masraf {formatTL(st.m)}</span><span style={{ whiteSpace: "nowrap" }}>gelir {formatTL(st.g)}</span></span>}
             {last && <span className="ui-note" style={{ margin: 0 }}>Son iş: {String(last.data.type)} · {dayText(last.occurred_on)}</span>}
             {(() => { const f = fidanOf(p.id); return f ? <span style={{ fontWeight: 800, color: "var(--ana-yazi)" }}>{f.alive.toLocaleString("tr-TR")} fidan · fidan başı {formatTL(Math.round(f.per * 100) / 100)}</span> : null; })()}
           </button>
