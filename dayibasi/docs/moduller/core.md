@@ -7,10 +7,10 @@
 - Kişiye özel ayarlar (`user_prefs`), internetsiz kayıt, tutarları gizle (`*** TL`), büyük yazı.
 - Döviz karşılığı (TCMB, kaydın günü; `/api/kur`), yeni Excel (tablolar, formüller, Özet sayfası), bütün verimi indir.
 - Modüller: fidan, kümes, büyükbaş, küçükbaş, makineler, tapudan parsel sorgusu.
-- Son yayın: 10 Kasım 2026 (main `87c56f4`).
+- Son yayın: 11 Kasım 2026 (arayüz raporu düzeltmeleri: okunur yazı, zarar yazısı, telefonda Rapor kartları, anahtarlar).
 
 ## Yapılacaklar (sırayla)
-1. **Yayın bekliyor (gelistirme'de):** arayüz raporu hızlı kazanımları (1, 2, 3, 5, 6, 8), kalan küçük yazılar (A) ve telefonda Rapor (B: 37, 38). Mustafa "yükle" deyince main'e. Kalan: 9 (gelir türü adı kararı).
+1. (boş) Yayın bekleyen iş yok; arayüz raporundan kalanlar "Kararlar"da.
 2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
@@ -37,6 +37,7 @@
 - (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 
 ## Kararlar ve kalıcı bilgiler
+- **Arayüz raporu kalanları (11 Kasım, Mustafa kararı Core'a bıraktı):** gelir türü adı "Hasat satışı" kalır (kayıtlı veride bu ad var, değiştirmek veri değişikliği olur); "Tahsil ettim" kalır (Fidan ve Geçmiş'te aynı söz); Vadeler çift sayım (41) kod hatası değil, alacak elle iki yere yazılırsa olur (gelirden otomatik vade açılmıyor); Makineler "saat" (30) doğru. "parti → dikim" (32) fidan oturumuna bırakıldı. Bilgisayar görünümü (iki sütun Özet, geniş ekran), sezon çipleri (3) ve başlık düzeni (2) modül seçimi/sadeleştirme taslağıyla birlikte ele alınacak.
 - **Yayın:** iş `gelistirme`'de yapılır, Mustafa "yükle" deyince main; Vercel main'i yayınlar. Veritabanı önizleme ve canlıda aynı.
 - **Kişiye özel görünüm** kişi başına tutulur (deftere değil); sürükleme yok, seçerek ve ↑ ↓ ile (Mustafa: sürükleme uygulamayı kastırır).
 - **Döviz:** her kayıt kendi günündeki TCMB döviz satış kuruyla; hafta sonu/tatilde önceki iş günü; varsayılan dolar; altın yok.
@@ -73,6 +74,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 11 Kas: Canlıya çıktı: arayüz raporu düzeltmeleri (3 commit). Yayın öncesi 23 ekran × telefon/bilgisayar sahte sunucuyla açıldı, hata ve yatay taşma yok.
 - 11 Kas: Arayüz raporu küçükler: tarla kartında masraf/gelir ayrı satır (20), döviz seçenekleri yan yana (15), "uzun bas" ipucu ilk 5 açılışta (8), Menü bölüm başlıkları normal harf (10), "Ara" (44), küçük açıklamalar (22, 45, 46). Madde 30 hata değil (kayıt gerçekten motor saati).
 - 11 Kas: Arayüz raporu A+B: kalan küçük etiketler büyütüldü; Rapor'da geniş tablolar telefonda kart listesi (bilgisayar/yazıcıda tablo), paylaş düğmeleri en altta. Örnek veriyle Rapor ve Tarlalar (zarar yazısı dahil) telefonda görüldü.
 - 11 Kas: Arayüz raporu hızlı kazanımları: küçük yazılar 1rem, zarara "zarar" yazısı (Tarlalar, Rapor), dar ekran/büyük yazıda hızlı düğmeler 2×2, büyük onay kutusu ve Ayarlar'da anahtar, "Büyük yazı" Görünüm'ün başında. Derlendi; Özet, Ayarlar, Düzenle boş veriyle görüldü, zarar yazısı veriyle denenmedi.
