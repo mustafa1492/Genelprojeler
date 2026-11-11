@@ -664,3 +664,25 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .mn-liste label > div + input[type="checkbox"]:focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
 @media (max-width: 340px) { .ozet-hizli { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { html.buyuk-yazi .ozet-hizli { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Arayüz raporu A: kalan küçük etiketler (27, 29, 32, 43, 13, 18, 36, 34) */
+.ui-stats span, .ui-stats > button span, .ui-split span, .ui-split small, .ui-total-row span, .ui-moneyrow small, .rapor-kpi span { font-size: 0.9rem; }
+.ui-stepper output small { font-size: 1rem; }
+.mn-liste small, .mn-hazir button small, .mn-grp > span { font-size: 0.9rem; }
+.takvim .gun-ad { font-size: 0.9rem; }
+.ui-tabs button, .ui-tabs:has(> :nth-child(4)) button { font-size: 0.944rem; }
+/* Arayüz raporu B (37): telefonda geniş rapor tabloları kart listesi; bilgisayar ve yazıcıda tablo kalır */
+@media screen and (max-width: 600px) {
+  .rapor-table table { font-size: 0.95rem; }
+  .rapor-table table.kart thead { display: none; }
+  .rapor-table table.kart, .rapor-table table.kart tbody, .rapor-table table.kart tr, .rapor-table table.kart td { display: block; }
+  .rapor-table table.kart tr { padding: 10px 12px; border-top: 1px solid var(--cizgi2); }
+  .rapor-table table.kart tbody tr:first-child { border-top: 0; }
+  .rapor-table table.kart td { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; white-space: normal; }
+  .rapor-table table.kart td[data-label]::before { content: attr(data-label); color: var(--sessiz2); font-weight: 600; text-align: left; flex: none; }
+  .rapor-table table.kart td:first-child { font-weight: 800; font-size: 1rem; text-align: left; }
+  .rapor-table table.kart td:empty { display: none; }
+  .rapor-table table.kart tfoot { display: block; }
+  .rapor-table table.kart tfoot tr { display: flex; justify-content: space-between; background: var(--ana-acik); }
+  .rapor-table table.kart tfoot td { background: none; }
+}

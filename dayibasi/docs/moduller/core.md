@@ -10,7 +10,7 @@
 - Son yayın: 10 Kasım 2026 (main `87c56f4`).
 
 ## Yapılacaklar (sırayla)
-1. **Yayın bekliyor (gelistirme'de):** arayüz raporu hızlı kazanımları (1, 2, 3, 5, 6, 8). Mustafa "yükle" deyince main'e. Kalan: 9 (gelir türü adı kararı).
+1. **Yayın bekliyor (gelistirme'de):** arayüz raporu hızlı kazanımları (1, 2, 3, 5, 6, 8), kalan küçük yazılar (A) ve telefonda Rapor (B: 37, 38). Mustafa "yükle" deyince main'e. Kalan: 9 (gelir türü adı kararı).
 2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
@@ -73,6 +73,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 11 Kas: Arayüz raporu A+B: kalan küçük etiketler büyütüldü; Rapor'da geniş tablolar telefonda kart listesi (bilgisayar/yazıcıda tablo), paylaş düğmeleri en altta. Örnek veriyle Rapor ve Tarlalar (zarar yazısı dahil) telefonda görüldü.
 - 11 Kas: Arayüz raporu hızlı kazanımları: küçük yazılar 1rem, zarara "zarar" yazısı (Tarlalar, Rapor), dar ekran/büyük yazıda hızlı düğmeler 2×2, büyük onay kutusu ve Ayarlar'da anahtar, "Büyük yazı" Görünüm'ün başında. Derlendi; Özet, Ayarlar, Düzenle boş veriyle görüldü, zarar yazısı veriyle denenmedi.
 - 10 Kas: Dallar birleştirildi (çiftçi: bölüm seçimi ve renkler; tanıtım: ana sayfa site, yeni giriş ekranı, logo; fidan ve hayvancılık notları). Düzeltmeler: başka bölümün hızlı düğmesi gizli, adresle açılan ekran kendi bölümüne geçer, kişinin alt çubuk düzeni korunur, koyu renkler (kâr kartı, yan menü) bölüme göre, Menü'de bölüm düğmesi ayrı görünüm, girişte "Ücretsiz" kaldırıldı (fiyat kararı bekliyor). Not: ortak dosyalara (core/, App, Menü) modül oturumları dokunmuştu; kural README'de duruyor.
 - 10 Kas: Az token kuralları (README §3), `kilavuz.md` (kontrol listesi, sözlük, şablon, rapor düzeni) ve `scripts/rapor.sh` (tek komutla durum) eklendi.

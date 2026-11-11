@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { listDues, remaining, type Due } from "@/core/dues/api";
 import { listEvents, type EventRow } from "@/core/events/api";
@@ -122,16 +122,22 @@ export default function Rapor() {
     ], { title: `${biz.name} ${S.name} sezon raporu` });
   };
 
+  // Telefonda geniş tablolar kart listesi olur (ui.css .kart): her hücreye sütun başlığı etiket olarak yazılır
+  const kartRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    kartRef.current?.querySelectorAll<HTMLTableElement>(".rapor-table table").forEach((t) => {
+      const heads = [...t.querySelectorAll("thead th")].map((h) => h.textContent ?? "");
+      if (heads.length < 4) return;
+      t.classList.add("kart");
+      t.querySelectorAll("tbody tr").forEach((r) => [...r.children].forEach((c, i) => { if (i > 0) (c as HTMLElement).dataset.label = heads[i]; }));
+    });
+  });
+
   return (
-    <main className="ui-stack rapor">
+    <main className="ui-stack rapor" ref={kartRef}>
       <div className="no-print ui-stack">
         <BackButton onClick={() => back()} label="Geri" />
         <SeasonPicker onManage={() => go("sezonlar")} />
-        <div className="ui-seg">
-          <button type="button" onClick={() => window.print()}>PDF olarak kaydet</button>
-          <button type="button" onClick={excel}>Excel (tüm sezon)</button>
-        </div>
-        <p className="ui-note">PDF: açılan pencerede “PDF olarak kaydet” ya da iPhone’da Paylaş → Yazdır → iki parmakla büyüt → Paylaş.</p>
       </div>
 
       <header className="rapor-head">
@@ -249,6 +255,14 @@ export default function Rapor() {
           </div>
         </>
       )}
+      <div className="no-print ui-stack">
+        <h2 className="ui-section">Paylaş / indir</h2>
+        <div className="ui-seg">
+          <button type="button" onClick={() => window.print()}>PDF olarak kaydet</button>
+          <button type="button" onClick={excel}>Excel (tüm sezon)</button>
+        </div>
+        <p className="ui-note">PDF: açılan pencerede “PDF olarak kaydet” ya da iPhone’da Paylaş → Yazdır → iki parmakla büyüt → Paylaş.</p>
+      </div>
     </main>
   );
 }
