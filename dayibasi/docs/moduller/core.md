@@ -10,7 +10,7 @@
 - Son yayın: 11 Kasım 2026 (arayüz raporu düzeltmeleri: okunur yazı, zarar yazısı, telefonda Rapor kartları, anahtarlar).
 
 ## Yapılacaklar (sırayla)
-1. (boş) Yayın bekleyen iş yok; arayüz raporundan kalanlar "Kararlar"da.
+1. **Yayın bekliyor (gelistirme'de):** TÜBİTAK deneme hesabı için uygulama tarafı (Özet'te deneme notu, /sifre deneme hesabında kapalı, ana sayfada kısa başlık). Mustafa onay verince main'e. Veritabanı tarafı (0021 + örnek veri) uygulandı.
 2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
@@ -37,6 +37,7 @@
 - (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 
 ## Kararlar ve kalıcı bilgiler
+- **Deneme hesabı `denememcbü` (TÜBİTAK 2209-A hakemleri, son gün 18 Kasım 2026):** defter `settings.demo = true`, modül yok, tek sezon (2026), 3 tarla (Bergama: mısır, ayçiçeği, domates), uydurma veri. Üyelik `ozel`: kayıt ekler/değiştirir; ayarlar ve geçmiş yalnız görülür; üye/davet yok. Göç `0021_deneme.sql`: demo defterde örnek kayıt (created_by boş) silinemez; kullanıcının eklediği silinir. **Sıfırlama:** `supabase/seed/deneme_mcbu.sql` tekrar çalıştırılır (ilaç bekleme örneği çalıştırıldığı güne göre tarihlenir; değerlendirme öncesi yeniden çalıştırmak iyi olur). Bilinen açık: örnek kayıtlar değiştirilebilir (silinemez); şifre değişimi yalnız uygulamada kapalı (/sifre), Supabase tarafında değil.
 - **Arayüz raporu kalanları (11 Kasım, Mustafa kararı Core'a bıraktı):** gelir türü adı "Hasat satışı" kalır (kayıtlı veride bu ad var, değiştirmek veri değişikliği olur); "Tahsil ettim" kalır (Fidan ve Geçmiş'te aynı söz); Vadeler çift sayım (41) kod hatası değil, alacak elle iki yere yazılırsa olur (gelirden otomatik vade açılmıyor); Makineler "saat" (30) doğru. "parti → dikim" (32) fidan oturumuna bırakıldı. Bilgisayar görünümü (iki sütun Özet, geniş ekran), sezon çipleri (3) ve başlık düzeni (2) modül seçimi/sadeleştirme taslağıyla birlikte ele alınacak.
 - **Yayın:** iş `gelistirme`'de yapılır, Mustafa "yükle" deyince main; Vercel main'i yayınlar. Veritabanı önizleme ve canlıda aynı.
 - **Kişiye özel görünüm** kişi başına tutulur (deftere değil); sürükleme yok, seçerek ve ↑ ↓ ile (Mustafa: sürükleme uygulamayı kastırır).
@@ -74,6 +75,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 11 Kas: TÜBİTAK deneme hesabı hazırlandı: 0021 koruması ve örnek veri canlı veritabanında; uygulama tarafı gelistirme'de.
 - 11 Kas: Canlıya çıktı: arayüz raporu düzeltmeleri (3 commit). Yayın öncesi 23 ekran × telefon/bilgisayar sahte sunucuyla açıldı, hata ve yatay taşma yok.
 - 11 Kas: Arayüz raporu küçükler: tarla kartında masraf/gelir ayrı satır (20), döviz seçenekleri yan yana (15), "uzun bas" ipucu ilk 5 açılışta (8), Menü bölüm başlıkları normal harf (10), "Ara" (44), küçük açıklamalar (22, 45, 46). Madde 30 hata değil (kayıt gerçekten motor saati).
 - 11 Kas: Arayüz raporu A+B: kalan küçük etiketler büyütüldü; Rapor'da geniş tablolar telefonda kart listesi (bilgisayar/yazıcıda tablo), paylaş düğmeleri en altta. Örnek veriyle Rapor ve Tarlalar (zarar yazısı dahil) telefonda görüldü.
