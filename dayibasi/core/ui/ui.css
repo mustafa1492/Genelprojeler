@@ -647,3 +647,46 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .mn-bolum b { font-size: 1.15rem; }
 .mn-bolum em { font-style: normal; font-weight: 800; font-size: 0.9rem; white-space: nowrap; }
 .mn-bolum:focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
+
+/* Arayüz raporu, hızlı kazanımlar (11 Kasım 2026): okunur yazı, büyük dokunma alanı */
+.ui-note, .ui-chip, .ui-pill, .ui-history, .ui-back, .ui-header small { font-size: 1rem; }
+.ui-link.inline { padding: 12px 6px; margin: -12px -6px; }
+.ui-check { min-height: 56px; cursor: pointer; }
+.ui-check input, .mn-liste input[type="checkbox"] { width: 32px; height: 32px; cursor: pointer; }
+.mn-liste > label { cursor: pointer; }
+/* Ayar satırlarında (yazıdan sonra gelen kutu) açma-kapama anahtarı */
+.mn-liste label > div + input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 56px; height: 32px; border-radius: 999px;
+  background: var(--cizgi); position: relative; transition: background .15s; margin: 0; }
+.mn-liste label > div + input[type="checkbox"]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s; }
+.mn-liste label > div + input[type="checkbox"]:checked { background: var(--ana); }
+.mn-liste label > div + input[type="checkbox"]:checked::after { transform: translateX(24px); }
+.mn-liste label > div + input[type="checkbox"]:focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
+@media (max-width: 340px) { .ozet-hizli { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { html.buyuk-yazi .ozet-hizli { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Arayüz raporu A: kalan küçük etiketler (27, 29, 32, 43, 13, 18, 36, 34) */
+.ui-stats span, .ui-stats > button span, .ui-split span, .ui-split small, .ui-total-row span, .ui-moneyrow small, .rapor-kpi span { font-size: 0.9rem; }
+.ui-stepper output small { font-size: 1rem; }
+.mn-liste small, .mn-hazir button small, .mn-grp > span { font-size: 0.9rem; }
+.takvim .gun-ad { font-size: 0.9rem; }
+.ui-tabs button, .ui-tabs:has(> :nth-child(4)) button { font-size: 0.944rem; }
+/* Arayüz raporu B (37): telefonda geniş rapor tabloları kart listesi; bilgisayar ve yazıcıda tablo kalır */
+@media screen and (max-width: 600px) {
+  .rapor-table table { font-size: 0.95rem; }
+  .rapor-table table.kart thead { display: none; }
+  .rapor-table table.kart, .rapor-table table.kart tbody, .rapor-table table.kart tr, .rapor-table table.kart td { display: block; }
+  .rapor-table table.kart tr { padding: 10px 12px; border-top: 1px solid var(--cizgi2); }
+  .rapor-table table.kart tbody tr:first-child { border-top: 0; }
+  .rapor-table table.kart td { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; white-space: normal; }
+  .rapor-table table.kart td[data-label]::before { content: attr(data-label); color: var(--sessiz2); font-weight: 600; text-align: left; flex: none; }
+  .rapor-table table.kart td:first-child { font-weight: 800; font-size: 1rem; text-align: left; }
+  .rapor-table table.kart td:empty { display: none; }
+  .rapor-table table.kart tfoot { display: block; }
+  .rapor-table table.kart tfoot tr { display: flex; justify-content: space-between; background: var(--ana-acik); }
+  .rapor-table table.kart tfoot td { background: none; }
+}
+/* Arayüz raporu: Menü bölüm başlıkları normal harf (10), "son:" ve rol açıklamaları (22, 45, 46) */
+.mn-grp > span { font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.ui-liste-sec > button small, .ui-pick-liste > button small, .yetki-roller button small, .yetki-tablo th, .yetki-tablo td small { font-size: 0.9rem; }
+.mn-liste .mn-seg { display: grid; flex: none; } /* (15) döviz seçenekleri yan yana: .mn-liste div kuralı eziyordu */

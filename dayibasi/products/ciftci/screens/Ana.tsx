@@ -142,6 +142,11 @@ export default function Ana() {
   const kFxM = fxOf(exp.filter((e) => inK(e.occurred_on)).map((e) => ({ a: e.amount, d: e.occurred_on })));
   const kFx = kFxG != null && kFxM != null && (kG || kM) ? kFxG - kFxM : null;
   const [karAcik, setKarAcik] = useState(false);
+  // "Uzun bas" ipucu ilk 5 açılışta görünür; ana yol Ekranımı düzenle
+  const [ipucu, setIpucu] = useState(false);
+  useEffect(() => {
+    try { const n = Number(localStorage.getItem("ko:ipucu:uzunbas") ?? 0); if (n < 5) { setIpucu(true); localStorage.setItem("ko:ipucu:uzunbas", String(n + 1)); } } catch { /* yok */ }
+  }, []);
   const topMasraf = Object.entries(exp.filter((e) => inK(e.occurred_on)).reduce<Record<string, number>>((m, e) => { m[e.category] = (m[e.category] ?? 0) + e.amount; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4);
   const topGelir = Object.entries(ev.filter((e) => e.kind === GELIR && inK(e.occurred_on)).reduce<Record<string, number>>((m, e) => { const k = String(e.data.crop || e.data.type || "Gelir"); m[k] = (m[k] ?? 0) + Number(e.quantity ?? 0); return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const mods = (Array.isArray(biz.settings?.modules) ? biz.settings!.modules : []) as string[];
@@ -247,7 +252,7 @@ export default function Ana() {
         );
       })}
       {shown.length === 0 && <div className="ui-empty">Özette kart yok. <button type="button" className="ui-link" onClick={() => go("duzenle")}>Kart ekle</button></div>}
-      <p className="ozet-ipucu">Bir karta uzun basarak gizleyebilir ya da yerini değiştirebilirsin.</p>
+      {ipucu && <p className="ozet-ipucu">Bir karta uzun basarak gizleyebilir ya da yerini değiştirebilirsin.</p>}
     </main>
   );
 }

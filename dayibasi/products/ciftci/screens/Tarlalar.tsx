@@ -144,7 +144,7 @@ export default function Tarlalar() {
           {wait && <div className="ui-warn yakin"><div className="ui-warn-row"><span>Hasat en erken <b>{dayYear(wait.h!)}</b> ({String(wait.e.data.product ?? "ilaç")}, {dayText(wait.e.occurred_on)} ilaçlaması).</span></div></div>}
           {money && <div className="ui-split">
             <div><span>{y} masraf</span><b>{formatTL(st.m)}</b>{st.donum ? <small>dekar başı {formatTL(Math.round(st.perDonum))}</small> : <small>&nbsp;</small>}</div>
-            <div className="mine"><span>{y} kâr</span><b>{formatTL(st.kar)}</b><small>gelir {formatTL(st.g)}</small></div>
+            <div className="mine"><span>{y} {st.kar < 0 ? "zarar" : "kâr"}</span><b>{formatTL(Math.abs(st.kar))}</b><small>gelir {formatTL(st.g)}</small></div>
           </div>}
           {!money ? null : be ? (
             <div className="ui-card ui-stack" style={{ gap: 4 }}>
@@ -216,11 +216,12 @@ export default function Tarlalar() {
           <button key={p.id} type="button" className="ui-card ui-stack" style={{ gap: 6 }} onClick={() => { setDone(null); setView({ v: "tarla", id: p.id }); }}>
             <span style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
               <b style={{ fontSize: "1.15rem" }}>{p.name}</b>
-              {money && <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(st.kar)}</span>}
+              {money && <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(Math.abs(st.kar))} {st.kar < 0 ? "zarar" : "kâr"}</span>}
             </span>
             <span className="ui-note" style={{ margin: 0 }}>
-              {[p.custom?.urun, st.donum ? `${st.donum} dekar` : "", money ? `masraf ${formatTL(st.m)}` : "", money ? `gelir ${formatTL(st.g)}` : ""].filter(Boolean).join(" · ")}
+              {[p.custom?.urun, st.donum ? `${st.donum} dekar` : ""].filter(Boolean).join(" · ")}
             </span>
+            {money && <span className="ui-note" style={{ margin: 0, display: "flex", flexWrap: "wrap", gap: "0 14px" }}><span style={{ whiteSpace: "nowrap" }}>masraf {formatTL(st.m)}</span><span style={{ whiteSpace: "nowrap" }}>gelir {formatTL(st.g)}</span></span>}
             {last && <span className="ui-note" style={{ margin: 0 }}>Son iş: {String(last.data.type)} · {dayText(last.occurred_on)}</span>}
             {(() => { const f = fidanOf(p.id); return f ? <span style={{ fontWeight: 800, color: "var(--ana-yazi)" }}>{f.alive.toLocaleString("tr-TR")} fidan · fidan başı {formatTL(Math.round(f.per * 100) / 100)}</span> : null; })()}
           </button>
