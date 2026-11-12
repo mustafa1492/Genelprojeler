@@ -30,13 +30,36 @@ Mustafa'nın onayladığı işler (10 Kasım 2026), sıra henüz kesin değil:
 
 ## Mustafa'dan beklenenler
 - Hüseyin'e sorulacaklar (`huseyin-sorular.md`) ve kullanımından geri bildirim.
-- Yapılacakların sırası (onaylandı, sıra kesin değil).
+- Yapılacakların sırası (onaylandı, sıra kesin değil). Önerilen ilk iş: madde 1 (Hüseyin'in cevabını beklemiyor); planı yazılıp onay alınacak.
+- Core'un bıraktığı arayüz raporu maddesi "parti → dikim" (32): ne yapılacağı konuşulmadı.
 
 ## Kararlar ve kalıcı bilgiler
 - Hüseyin: `hüseyinköprü`, "Köprü fidancılık". Deneme: `ornekfidan`.
+- Fiyat listesi boy başına tek fiyat (settings.fidan_prices); neden: şimdilik sadece şimşir üretiliyor. Birden çok tür olursa tür/çeşit bazlı fiyat (Mustafa, 4 Kas).
+- Müşteriden ödeme en eski borçlu satıştan başlayarak düşer (Mustafa, 4 Kas); borçtan fazlası yazılamaz, avans tutulmaz (oturumun seçimi).
+- Satışta fiyat listeden gelir ama kolay değiştirilebilir olmalı (Mustafa, 4 Kas): elle yazılan fiyat bir daha ezilmez.
+- Müşteri = satıştaki alıcı / siparişteki müşteri adı (büyük/küçük harf ve boşluk farkı yok); borç ayrı defter değil, Gelir'deki "alınan"dan hesaplanır.
+- Dikim hesaplayıcı: birim değerler (işçi/gün, gübre/dönüm, fiyatlar) kullanıcıdan, uydurulmaz; değerler Hüseyin'e sorulacak (Mustafa, 10 Kas).
+- Dikim hesaplayıcı ortak olacak: önce fidanda ürünlerden bağımsız yazılır, sonra Core `core/`'a taşır; çiftçi/hayvancılık şablonlarını kendi oturumları ekler (Mustafa "tamam", 10 Kas).
+- Teklif PDF'inde tanıtım olacak ve uygulamadan düzenlenebilir olacak; katalog sayfası aynı tanıtımı kullanır (Mustafa, 10 Kas).
 
 ## Saklanan fikirler
 (Yapılacaklar madde 7 ve "Diğer" satırı)
 
+## Bilinen açıklar
+- 4 Kasım işleri tarayıcıda hiç denenmedi (sadece tip kontrolü); `denemetum` / `ornekfidan` ile bakılmalı.
+- "Ödeme al" sadece satışın alınan tutarını artırır; ödemenin tarihi ayrı tutulmaz.
+- Müşteri eşleşmesi yalnız ada göre (aynı adlı iki müşteri birleşir); telefon yok, WhatsApp kişi seçtiriyor.
+- Fiyat listesinde stok adedi yazılsın mı Mustafa'ya soruldu, cevap gelmedi; ekranda Evet/Hayır seçimine bırakıldı.
+
+## Tuzaklar (ortam)
+- `npx tsc` için önce `npm ci` gerekiyor. `npx next lint` lint ayarı olmadığından soru sorup duruyor; lint çalışmıyor.
+- `git reset --hard` / zorla push izin sisteminde reddediliyor; dalı güncellemek için `git merge --ff-only origin/gelistirme`.
+
 ## Günlük
-- 4 Kasım 2026 (modul/fidan): Stok ekranı (boy boy elde / siparişte / satılabilir, parti dağılımı, boyu sayılmamışlar), Müşteriler (fidan satışı alıcısı + sipariş müşterisi, ad eşleşmesi büyük/küçük harf duyarsız; borç = Gelir'deki kalan), müşteri hesabını WhatsApp'tan gönderme, Fiyat listesi (settings.fidan_prices, boy başına tek fiyat: şimdilik sadece şimşir) + WhatsApp paylaşma (stok adediyle ya da adetsiz). Müşteriden "Ödeme al": tutar en eski borçlu satıştan başlayarak düşer (Mustafa kararı), satışın data.received'ı artar (Vadeler ile aynı yol), borçtan fazlası girilemez, geri alınabilir. Gelir'de fidan satışı: boy seçince fiyat listesinden fiyat dolar (elle yazılınca bir daha değişmez; siparişten gelen fiyat ve düzenlenen satış ezilmez). Canlıda (Core birleştirdi).
+- 4 Kas (modul/fidan, canlıda): Stok ekranı (boy boy elde / siparişte / satılabilir, parti dağılımı).
+- 4 Kas (modul/fidan, canlıda): Müşteriler, borç ve hesabı WhatsApp'tan gönderme.
+- 4 Kas (modul/fidan, canlıda): Fiyat listesi ve WhatsApp'ta paylaşma.
+- 4 Kas (modul/fidan, canlıda): Müşteriden "Ödeme al" (satışın data.received'ı artar, Vadeler ile aynı yol, geri alınabilir).
+- 4 Kas (modul/fidan, canlıda): Gelir'de fidan satışında boy seçince fiyat listeden dolar.
+- 10 Kas (modul/fidan, not): Onaylanan işler (Yapılacaklar 1-7) ve `huseyin-sorular.md` yazıldı; hesaplayıcı notu core/çiftçi/hayvancılık dosyalarına bırakıldı.
