@@ -1,45 +1,48 @@
 # Tanıtım + Pazarlama oturumu
+**Kapsam:** tanıtım sitesi (ana sayfa `/`, "Giriş yap" uygulamaya), logo, paylaşım görseli, pazarlama içerikleri, mağaza metni · **Dal:** `modul/tanitim` · **Kod:** `app/page.tsx`, `app/tanitim/` (Tanitim.tsx, rehber.ts, NasilKullanilir.tsx, Etkilesim.tsx, tanitim.css, cep.tsx), `public/tanitim/` · **Sınır:** core/, App, Menü, veritabanına dokunmaz (dokunulanlar core.md "Diğer oturumlardan istekler"de). Hiçbir şey Mustafa onayı olmadan yayınlanmaz/gönderilmez.
 
-**Kapsam:** tanıtım sitesi (uygulamayla aynı adreste; ana sayfa tanıtım, "Giriş yap" uygulamaya), paket/fiyat metinleri, uygulama içi kısa videolar (senaryo), Google Play mağaza metni, pazarlama içerikleri (Canva, Gmail taslak, Drive). Hiçbir şey Mustafa onayı olmadan yayınlanmaz/gönderilmez.
+## Canlıda ne var
+- (yok) Site henüz canlıda değil; son yayın main `69f32dd` (4 Kas) sitesizdir. Bütün iş `gelistirme`'ye birleştirildi (`daced8c`, 10 Kas), Vercel önizlemesinde görülür.
 
-## Kararlar
-- Tasarım: Mustafa'nın verdiği Dribbble sayfaları (web-design / mobile popüler) ve bulunan örnekler; dribbble.com bu ortamdan açılmıyor (ağ izni gerekir). Seçilen uygulama tarzı: telefonda sade kartlar, bilgisayarda yan menü + tablo (`docs/tasarim/`).
-- Paket taslağı: Basit (ücretsiz: tarla, masraf, gelir, özet) / Orta (~99 TL/ay, 790 TL/yıl) / Tam (~199 TL/ay, 1.590 TL/yıl). Yıllık + "hasattan sonra öde".
-- Paket kararları (Kasım 2026): Basit pakette sınır yok. Fidan / hayvancılık Tam pakete dahil. Deneme süresi yok; ilk sezon ücret alınmayacak.
-- Alan adı ertelendi. Mağaza: önce Android.
-- Destek: uygulama içi kısa videolar.
+## Yapılacaklar (sırayla)
+1. Mustafa doğru WhatsApp numarasını verince `app/tanitim/Tanitim.tsx` → `WA_NUMARA` (90 ile başlayan, boşluksuz) doldurulacak; boşken sitede "[YER TUTUCU] numara bekleniyor" görünür.
+2. Canlıya çıkış: Mustafa Core'a "yükle" der (ya da bu oturuma main izni verir).
+3. Uygulamada ekran/düğme adı değişince `app/tanitim/rehber.ts` (Nasıl kullanılır, 18 bölüm 68 konu) güncellenecek.
 
-## Ücret kararı (10 Kasım 2026)
-- **Ücret alınmayacak.** Paketler/fiyatlar siteden kaldırıldı, `app/tanitim/cep.tsx`'te saklı (ileride yine eklenebilir). Aşağıdaki paket/fiyat notları ertelendi.
-- Proje TÜBİTAK başvurusuna çevrildi; sitede TÜBİTAK ile ilgili değişiklik yapılmayacak (Mustafa).
-
-## Nerede kaldık
-- 4 Kasım 2026: **Site taslağı yapıldı** (`modul/tanitim` dalı, canlı ana sayfa değişmedi): `app/tanitim/page.tsx` + `tanitim.css` → adres `/tanitim`. Arama motoruna kapalı (noindex). Bölümler: giriş cümlesi + "Ücretsiz başla"/"Giriş yap" (ikisi de /ciftci), dert → çözüm, 12 özellik, telefon (Özet) ve bilgisayar (Masraflar) temsili çizimi (örnek rakamlar, HTML/CSS), bölümler/modüller + "Yakında", paketler [taslak], sık sorulan sorular, iletişim [YER TUTUCU], alt bilgi (/kvkk).
-- Görüntüler: `docs/tasarim/tanitim-390.png`, `tanitim-320.png`, `tanitim-1366.png`. Yatay taşma yok, konsol hatası yok.
-- "Yakında" diye işaretlenenler (uygulamada yok): dekar/kilo başı kâr ve girdi fiyat geçmişi, tarla × yıl ekim tablosu, ilaçlama saati, süt defteri, kümeste yumurta ve dönem kapanışı, Google Play uygulaması.
-- 10 Kasım 2026: **Görsel düzen**: buğday/toprak/krem tamamlayıcı palet (koyu yeşil korunarak), girişte gradyan + tepe/tarla sırası SVG arka planı (`public/tanitim/tarla.svg`), dalga ayraçlar (giriş altı, alt bilgi üstü), tutarlı kart gölge/köşeleri, düğme hover/odak (buğday odak halkası), başlık altı buğday çizgisi. Metin değişmedi. Görüntüler yenilendi.
-
-- 10 Kasım 2026: "Nasıl kullanılır" tıklanabilir rehber (6 adım + telefona ekleme, Android/iPhone; `app/tanitim/NasilKullanilir.tsx`), paylaşım görseli (`app/tanitim/opengraph-image.png`), WhatsApp düğmesi (numara bekleniyor: `page.tsx` `WA_NUMARA`). Giriş ekranı yenilendi (`core/auth/AuthGate.tsx` + `core/ui/ui.css`, Mustafa istedi); `?kayit=1` doğrudan "Yeni hesap aç" açar, "Hemen başla" buraya bağlı.
-
-- 10 Kasım 2026 (2): "Nasıl kullanılır" bütün bölümleri kapsıyor: 18 bölüm, 68 konu + Telefona ekle (`app/tanitim/rehber.ts` içerik, `NasilKullanilir.tsx` görünüm). Düğme/alan adları koddan alındı; uygulamada ekran değişince `rehber.ts` güncellenmeli.
-
-- 10 Kasım 2026 (3): **Ana sayfa (/) artık tanıtım sitesi** (Mustafa: "ilk site bu çıksın"). Arama motorlarına açık. Giriş yapmış kişi (çerezde oturum) / adresinden /ciftci'ye geçer; site /tanitim'de de açılır (yönlendirmesiz, noindex). Modüller öne çıkarıldı: girişte Tarla/Fidan/Kümes/Hayvan şeridi + "İşine göre modülünü seç" kartları (her kart rehberde o bölümü açar).
-
-- 10 Kasım 2026 (4): Etkileşimli parçalar (`app/tanitim/Etkilesim.tsx`, hiçbir yere kayıt göndermez): "Hesap açmadan dene" (sahte telefonda masraf/gelir yaz, kâr kartı değişir, geri al, tutarları gizle), "Kârını hesapla" (dekar, masraf, verim, fiyat → kâr/zarar, başabaş), "Hangi modül bana göre?" (5 evet/hayır → modül + hazır görünüm önerisi).
-
-- 10 Kasım 2026 (5): Yeni logo (Mustafa'nın verdiği resim, kaynak `docs/tasarim/logo-kaynak.jpg`; arka planı temizlenmiş `public/tanitim/logo-512.png`, `logo-128.png`). Sitede üst şeritte krem kutu içinde; logo yazısı Nunito 900, "Defteri" buğday sarısı. Uygulama simgesi ve paylaşım görseli henüz eski.
-
-## Onay bekleyen metinler (Mustafa)
-- Ana cümle: "Tarlanın hesabı cebinde." / "Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör."
-- "Basit paket hep ücretsiz. Kredi kartı istemez." ve "İlk sezon ücret alınmaz."
-- Paketlerin içerik dağılımı (Orta: depo, makineler, takvim, sezon raporu/Excel, dolar karşılığı, aile ve çalışan; Tam: + fidan, kümes, büyükbaş/küçükbaş). Bu dağılım Claude önerisi, karar değil.
-- Sık sorulan soruların cevapları (özellikle veri güvenliği: "kimseyle paylaşılmaz, satılmaz").
-
-## Açık sorular
-- İletişim: telefon / WhatsApp / e-posta ne yazılacak?
+## Mustafa'dan beklenenler
+- WhatsApp numarasının doğrusu nedir? (Verilen numarada bir hane eksikti; numara nota yazılmaz.)
+- Canlıya çıkarma: Core'a "yükle" mi diyeceksin, yoksa bu oturuma main izni mi vereceksin?
+- Metin onayı: ana cümle ("Tarlanın hesabı cebinde."), "Ücretsiz. Kredi kartı istemez.", sık sorulan soruların cevapları (özellikle "bilgilerin kimseyle paylaşılmaz, satılmaz").
 - Alan adı (ertelendi).
-- WhatsApp numarası: verilen "0538313921" 10 hane, cep numarası 11 hane olmalı; doğrusu sorulacak.
 
-## Sıradaki
-- Mustafa taslağa bakacak (önizleme adresinde `/tanitim`), metin ve fiyat onayı.
-- Ödemeler konuşulurken açılacak: "hasattan sonra öde" nasıl çalışacak (tahsil zamanı, gecikme).
+## Kararlar ve kalıcı bilgiler
+- 10 Kas: **Ücret alınmayacak.** Paket/fiyat bölümleri siteden kaldırıldı, `app/tanitim/cep.tsx`'te saklı (Mustafa: "cebe at, ileride yine ekleriz").
+- 10 Kas: Proje TÜBİTAK başvurusuna çevrildi; sitede TÜBİTAK ile ilgili değişiklik yapılmayacak, sadece ücret kısmı kalktı (Mustafa).
+- 10 Kas: **Ana sayfa `/` = tanıtım sitesi** (Mustafa: "ilk site bu çıksın"); modüller öne çıkarıldı ("göz önünde olsun"). Giriş yapmış kişi (oturum çerezi) `/`'dan `/ciftci`'ye geçer; `/tanitim` yönlendirmesiz kopya (noindex).
+- 10 Kas: İletişim = WhatsApp düğmesi (Mustafa "WhatsApp'tan bana ulaşılabilsin").
+- 10 Kas: Logo = Mustafa'nın verdiği resim (`docs/tasarim/logo-kaynak.jpg`); Canva logosu ve SVG denemesi beğenilmedi. Logo yazısı Nunito 900, "Defteri" buğday sarısı. Uygulama simgeleri, favicon ve paylaşım görseli de bu logoyla.
+- 10 Kas: Etkileşimli parçalar (Mustafa seçti): Hesap açmadan dene, Kârını hesapla, Hangi modül bana göre? Hiçbiri kayıt göndermez.
+- Eski paket kararları (ertelendi, cep.tsx'te): Basit ücretsiz ve sınırsız; fidan/hayvancılık Tam'a dahil; deneme süresi yok; "hasattan sonra öde" ödemeler konuşulurken açılacak.
+- Alan adı ertelendi. Mağaza: önce Android. Destek: uygulama içi kısa videolar.
+- Renkler: koyu yeşil #16351c, ana #2e6a2b, buğday #e9c46a, krem zemin #fbf7ee. Dış font/görsel/script yok (CSP); fontlar next/font ile gömülü.
+
+## Saklanan fikirler
+- Paketler ve fiyatlar (`app/tanitim/cep.tsx`).
+- Uygulama içi kısa videolar (senaryo), Google Play mağaza metni.
+- Sitedeki örnek ekranda "Tutarları gizle / büyük yazı" gösterimi (sunuldu, seçilmedi).
+
+## Tuzaklar (ortam)
+- Canva ücretsiz plan şeffaf PNG vermiyor; arka plan Python ile temizlendi. Google/Flow resim aracı bağlı değil; ElevenLabs bağlayıcısı kısıtlı (resim yok).
+- Otomatik izin denetimi main'e push'u ve geniş `pkill`'i engelliyor; önizleme sunucusu (port 3125) arka plan görevi olarak açılıp TaskStop ile kapatılmalı.
+- Dosya taşıyınca `tsc` eski `.next/types` yüzünden hata verir: önce `next build`.
+- Vercel hesabına bu ortamdan erişim yok (önizleme adresi kontrol edilemiyor).
+
+## Günlük
+- 10 Kas: Yeni logo (site, uygulama simgeleri, favicon, paylaşım görseli), önbellek adı `dayibasi-v2`; `gelistirme`'ye birleştirildi (`daced8c`), main'e gönderim izinle engellendi.
+- 10 Kas: Görsel tasarım (yardımcı ajan): buğday/krem palet, tarla SVG arka planı, dalga ayraçlar.
+- 10 Kas: Etkileşimli parçalar (dene, kâr hesapla, modül seçici); 320/390/1366 px'te tıklanarak denendi.
+- 10 Kas: Ana sayfa tanıtım sitesi oldu, dayıbaşı "Bugün" `/bugun`'a taşındı, modül kartları eklendi.
+- 10 Kas: "Nasıl kullanılır" bütün bölümler (18 bölüm, 68 konu), adlar koddan doğrulandı; giriş ekranı yenilendi (`?kayit=1`).
+- 10 Kas: Ücret kısımları kaldırıldı (cep.tsx), WhatsApp düğmesi yeri, paylaşım görseli.
+- 4 Kas: Site taslağı `/tanitim` (yardımcı ajan), `modul/tanitim`.
+- 4 Kas: Paket kararları alındı (sonradan ertelendi).

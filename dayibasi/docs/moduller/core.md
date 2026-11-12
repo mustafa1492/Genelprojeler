@@ -11,7 +11,7 @@
 
 ## Yapılacaklar (sırayla)
 1. **Yayın bekliyor (gelistirme'de, test edildi):** telefon notundaki düzeltmeler ve "İşletme gideri". Mustafa "yükle" deyince main'e.
-2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
+2. Tanıtım sitesi `gelistirme`'ye birleştirildi (10 Kas, `daced8c`; ana sayfa, giriş ekranı, logo/simgeler dahil): Mustafa "yükle" deyince 1. maddeyle birlikte main'e.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
 5. Nisan öncesi: paket sistemi (Basit/Orta/Tam), basit mod + ilk açılış rehberi, yedek (0013), deneme hesaplarını silme, SMTP (şifre sıfırlama), KVKK, Supabase uyku çözümü, son güvenlik kontrolü, Android (TWA).
@@ -20,17 +20,19 @@
 - Parsel sorgu canlıda çalışıyor mu (il listesi geliyor mu)? Gelmezse sunucu üzerinden çağırma denenecek.
 - Sezon mu, yıl mı? (Öneri: sezon kalsın, varsayılan takvim yılı olsun.)
 - Uygulamada "bizim yaptığımız belli olsun" için görünecek ad/imza ne?
-- Giriş ekranında ne değişsin?
+- Giriş ekranında ne değişsin? (Tanıtım oturumu 10 Kas'ta yeni görünüm yaptı, `gelistirme`'de; Mustafa bakacak.)
 - Gelir ve hatırlatmada tarla seçilmeyince yazan "Genel" kalsın mı?
 
 ## Bekleyen istekler
-- (Tanıtım, 4 Kasım 2026) Tanıtım sitesindeki "Ücretsiz başla" /ciftci'ye gidiyor ve giriş ekranı açılıyor. AuthGate `?kayit=1` gibi bir adresle doğrudan "Yeni hesap aç" kipinde açılabilirse oraya bağlanacak.
 - (Kanatlı, 4 Kasım 2026) Canlıda 0013_yedek uygulanmamış (`yedek.al` yok, gece yedeği çalışmıyor). Uygulanınca 0018_hayvan.sql sonundaki yedek bölümü de çalıştırılmalı (barns/herds/herd_days yedeğe girsin). (diğer oturumlardan)
 - (yok)
 ## Diğer oturumlardan istekler
 - (Kanatlı, 4 Kasım) 0013 yedek uygulanınca `0018_hayvan.sql` sonundaki yedek bölümü de çalıştırılacak (barns/herds/herd_days); hayvancılık için `animals`, `animal_events` de eklenecek.
-- (Tanıtım) "Ücretsiz başla" doğrudan "Yeni hesap aç" ekranını açsın mı?
+- (Tanıtım, 10 Kas, yapıldı) `/ciftci?kayit=1` doğrudan "Yeni hesap aç" açar; sitedeki "Hemen başla" buna bağlı.
 - (Hayvancılık) Alt menü çok sekmeyle kalabalıktı → Menü ile çözüldü.
+- (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
+- (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı sonra `dayibasi-v2` yapıldı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
+- (Tanıtım, 10 Kas, Mustafa'nın isteğiyle) Yeni logo: `public/icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `app/favicon.ico` değişti; telefonlarda eski simge kalmasın diye önbellek adı `dayibasi-v2` (`public/sw.js` + `RegisterSW.tsx`).
 
 ## Kararlar ve kalıcı bilgiler
 - **Yayın:** iş `gelistirme`'de yapılır, Mustafa "yükle" deyince main; Vercel main'i yayınlar. Veritabanı önizleme ve canlıda aynı.
@@ -65,9 +67,6 @@
 - **CANLIDA** (4 Kasım, main d820174). Mustafa: bir süre yeni özellik yok, sadece hata avı. Elle test listesi: `docs/test-plani.md` (A–J). Mustafa'nın bildirdiği hatalar numarasıyla gelecek; düzelt, otomatik testi tekrar çalıştır, sonra yayınla.
 - Otomatik deneme betiği oturum geçici klasöründeydi (kalıcı değil); gerekirse yeniden yazılır: sahte Supabase (Playwright route), girişte /auth/v1/token sahte cevap, 9 yapılandırma × 22 ekran.
 - Açık küçük not: user_prefs için anon yetkisi kaldırılmadı (RLS zaten engelliyor); istenirse SQL Editor'den `revoke all on user_prefs from anon;`.
-
-- (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
-- (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
 - 10 Kas: Az token kuralları (README §3), `kilavuz.md` (kontrol listesi, sözlük, şablon, rapor düzeni) ve `scripts/rapor.sh` (tek komutla durum) eklendi.
 - 10 Kas: Not düzeni ve çalışma ilkeleri yazıldı (README: ilkeler, kontrol listesi, sözlük, şablon); modül notları şablona çevrildi (tanitim.md kendi dalında, oturumu çevirecek).
