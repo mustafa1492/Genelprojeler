@@ -17,6 +17,11 @@
 5. Nisan öncesi: paket sistemi (Basit/Orta/Tam), basit mod + ilk açılış rehberi, yedek (0013), deneme hesaplarını silme, SMTP (şifre sıfırlama), KVKK, Supabase uyku çözümü, son güvenlik kontrolü, Android (TWA).
 
 ## Mustafa'dan beklenenler
+- **Depoyu gizli yap** (11 Kasım isteği; oturum depo ayarını değiştiremiyor): GitHub → Settings → Danger Zone → Change visibility → private.
+- **"Yükle" onayı:** deneme hesabının uygulama tarafı gelistirme'de bekliyor (Özet notu, /sifre kapalı, ana sayfa başlık satırı, Ayarlar etiketi).
+- **Supabase onayı gereken iki komut** (onay penceresi cevapsız kaldı): deneme defterinin Geçmiş'indeki iki "koruma denemesi" izini silmek; `is_demo` fonksiyonunu `security invoker` yapmak.
+- Supabase panelinde "sızdırılmış şifre koruması"nı açmak (Authentication → şifre ayarları).
+- Telefon/WhatsApp numarasının doğrusu (11 hane) ve nerede görüneceği (bkz. `tanitim.md`).
 - Parsel sorgu canlıda çalışıyor mu (il listesi geliyor mu)? Gelmezse sunucu üzerinden çağırma denenecek.
 - Sezon mu, yıl mı? (Öneri: sezon kalsın, varsayılan takvim yılı olsun.)
 - Uygulamada "bizim yaptığımız belli olsun" için görünecek ad/imza ne?
@@ -37,6 +42,9 @@
 - (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 
 ## Kararlar ve kalıcı bilgiler
+- **Güvenlik kontrolü (11 Kasım 2026):** bütün dallardaki 194 commit tarandı: gizli anahtar, şifre, belirteç yok; `.env` yalnız herkese açık anahtar. Depo o gün herkese açıktı, fork 0. Supabase denetimi: kritik yok; uyarılar: sızdırılmış şifre koruması kapalı, `admin_table_ok` ve `event_screen` arama yolu sabit değil, `is_demo` girişsiz çağrılabiliyor (veri sızdırmaz).
+- **Vercel önizleme adresi** (`genelprojeler-git-gelistirme-mustii1.vercel.app`) Vercel girişi ister; oturum giremez. Önizleme yerine aynı sürüm yerelde gerçek veritabanına bağlı çalıştırılıp denenir.
+- **Sığ klonda `rapor.sh` yanıltır:** main geçmişi eksikse "canlıya gitmemiş commit" sayısı şişer; önce `git fetch origin main gelistirme` (derinlikli).
 - **Deneme hesabı `denememcbü` (TÜBİTAK 2209-A hakemleri, son gün 18 Kasım 2026):** defter `settings.demo = true`, modül yok, tek sezon (2026), 3 tarla (Bergama: mısır, ayçiçeği, domates), uydurma veri. Üyelik `ozel`: kayıt ekler/değiştirir; ayarlar ve geçmiş yalnız görülür; üye/davet yok. Göç `0021_deneme.sql`: demo defterde örnek kayıt (created_by boş) silinemez; kullanıcının eklediği silinir. **Sıfırlama:** `supabase/seed/deneme_mcbu.sql` tekrar çalıştırılır (ilaç bekleme örneği çalıştırıldığı güne göre tarihlenir; değerlendirme öncesi yeniden çalıştırmak iyi olur). Bilinen açık: örnek kayıtlar değiştirilebilir (silinemez); şifre değişimi yalnız uygulamada kapalı (/sifre), Supabase tarafında değil.
 - **Arayüz raporu kalanları (11 Kasım, Mustafa kararı Core'a bıraktı):** gelir türü adı "Hasat satışı" kalır (kayıtlı veride bu ad var, değiştirmek veri değişikliği olur); "Tahsil ettim" kalır (Fidan ve Geçmiş'te aynı söz); Vadeler çift sayım (41) kod hatası değil, alacak elle iki yere yazılırsa olur (gelirden otomatik vade açılmıyor); Makineler "saat" (30) doğru. "parti → dikim" (32) fidan oturumuna bırakıldı. Bilgisayar görünümü (iki sütun Özet, geniş ekran), sezon çipleri (3) ve başlık düzeni (2) modül seçimi/sadeleştirme taslağıyla birlikte ele alınacak.
 - **Yayın:** iş `gelistirme`'de yapılır, Mustafa "yükle" deyince main; Vercel main'i yayınlar. Veritabanı önizleme ve canlıda aynı.
