@@ -1,51 +1,40 @@
 # Hayvancılık oturumu
-**Not:** Kanatlı (kümes) ayrı oturumda: `kanatli.md`. Ortak iskelet (barınak, modül anahtarı, olay/hatırlatma) bu oturumda.
-**Kapsam:** büyükbaş + küçükbaş. Yeni modül, `products/ciftci/hayvan/` altında (fidan gibi panelden açılıp kapanan modül: settings.modules "hayvan"). Ortak masraf/gelir/depo/takvim/yetki kullanılır, yeniden yazılmaz. · **Dal:** `modul/hayvancilik`
+**Kapsam:** büyükbaş + küçükbaş (kümes ayrı oturum: `kanatli.md`), `products/ciftci/hayvan/` (kart.ts, Hayvanlar.tsx; ortak iskelet api.ts, hayvan.ts, Barinak.tsx). Panelden defter başına açılan modüller: settings.modules `buyukbas`, `kucukbas`. Yetki ekranı `hayvan`. Ortak masraf/gelir/depo/takvim kullanılır. · **Dal:** `modul/hayvancilik`
 
 ## Canlıda ne var
-Büyükbaş ve Küçükbaş (4 Kasım 2026'da canlıya çıktı): küpe numaralı hayvan kartı, olaylar (doğum, tohumlama, gebelik, ilaç, aşı, tartım, satış, ölüm), "Bu hafta" listesi, doğumda yavru kaydı, satışta gelire yazma, ilaç arınma uyarısı, Süreler ekranı; ahır/ağıl ve toplu sürü ortak Barınak ekranında. Panelde modül kutusu açılan defterlerde görünür.
+Küpe numaralı hayvan kartı (inek/koyun/keçi, dişi/erkek, ahır/ağıl), olaylar (doğum, kızgın, tohum, gebe/boş, kuruya, ilaç, aşı, tartım, satış, ölüm, not), "Bu hafta" hatırlatmaları, ilaç arınma uyarısı, doğumda yavru kaydı (annesine bağlı), satış fiyatı gelire yazılır, Süreler ekranı (settings.hayvan_sureler), ahır/ağıl ve toplu sürü (ortak Barinak). Tablolar: `animals`, `animal_events` (göç 0019).
 
 ## Yapılacaklar (sırayla)
-- Veteriner/hayvancı cevaplarıyla süreleri düzelt; aşı takvimi önerisi.
-- Süt defteri (mandıra cevapları gelince), çoban hesabı, verimsiz hayvan listesi.
+1. Veteriner/hayvancı cevaplarıyla varsayılan süreleri düzelt; aşı takvimi önerisi.
+2. Süt defteri (mandıra cevapları gelince), çoban hesabı.
+3. Verimsiz hayvan listesi (eşikler Mustafa'dan).
 
 ## Mustafa'dan beklenenler
-- Veteriner ve hayvancı cevapları (süreler, aşı takvimi, mandıra süt parası, çobana ödeme): `hayvancilik-sorular.md`.
-- Deneyecek gerçek bir hayvancı.
+- Veteriner ve hayvancının cevapları: `hayvancilik-sorular.md` (38 soru).
+- Varsayılan süreler onayı (inek 280/21/35/60/45, koyun 150/17/35, keçi 150/21/35 gün; `kart.ts` SURE_VARSAYILAN). Onaysız kondu, kullanıcı değiştirebiliyor.
+- Verimsiz hayvan listesi: eşikleri ilk sürümde kullanıcı mı girsin, cevaplar mı beklensin? (9 Kasım soruldu)
+- Soru listesindeki kümes soruları (36-37) çıkarılsın mı? (4 Kasım soruldu)
 
 ## Kararlar ve kalıcı bilgiler
-### Kaynaklar
-- Rapor: `docs/arastirma/reports/Hayvancılık modülü ihtiyaçları.md`
-- Kümes raporu: `docs/arastirma/reports/Kanatlı çiftlik modülü.md`
-- Notlar: `docs/arastirma/research_notes/…`
+- (Mustafa, 4 Kasım) İlk sürüm inek + koyun + keçi birlikte.
+- (Mustafa, 4 Kasım) Hayvancılık Tam paketin içinde; başka modül de isteyene eklenti yapılır.
+- (Mustafa, 4 Kasım) Kümes hayvancılıktan ayrı modül.
+- (Mustafa, 4 Kasım) Deneyecek hayvancıya hesap açmaya gerek yok.
+- (Mustafa, 4 Kasım) Cevapları beklemeden başlandı ("başla"); süreler varsayılan, sonra düzeltilecek.
+- (Oturum, onaysız) İlaç arınma süresini kullanıcı ilacın kutusundan girer; hazır ilaç listesi yok (kaynak belirsiz). Satışta gelir türü "Hayvan satışı".
 
-### Tasarım özeti
-- Barınak (ahır/ağıl/kümes) → hayvan (küpe no ile kart; büyük/küçükbaş) ya da sürü (kanatlı, toplu sayı).
-- Tek ekranda olay: doğurdu, kızgın, tohumlandı, gebe/boş, kuruya, ilaç, aşı, tartım, satış, ölüm. Sonraki tarihleri uygulama hesaplar, hatırlatır.
-- Fark yaratacaklar: ilaç arınma etiketi ("sütü tanka katılmaz, şu tarihe kadar satılmaz"), mandıra kontrolü (litre, yağ/protein, kesinti, yem borcu), çobanla ortak defter (çalışan modu).
-- Sıra: ortak iskelet + hayvan kartı + olay + hatırlatma + arınma → süt defteri → kümes → besi, yem stoğu, çoban hesabı, verimsiz hayvan listesi → sesli kayıt, küpe okuma.
+## Bilinen açıklar
+- Gerçek veritabanıyla denenmedi; yalnız sahte sunucuyla (4 Kasım).
+- Olay düzenlenemiyor, sadece silinip yeniden girilir.
+- Süreler ayarını yalnız defter sahibi kaydedebilir (businesses güncelleme yetkisi).
+- 0013 yedek canlıda yok; uygulanınca yedek.al()'a `animals`, `animal_events` eklenmeli (core.md'de yazılı).
 
-### Kararlar (Mustafa, 2026-11-04)
-- İlk sürüm: inek + koyun + keçi birlikte.
-- Paket: Tam paketin içinde. Başka modül de isteyene eklenti olarak satılır.
-- Kümes: hayvancılıktan ayrı modül.
-- Süre/aşı/ilaç/mandıra/çoban soruları veteriner ve hayvancıya soruluyor: `hayvancilik-sorular.md`.
-
-### Eski karar listesi
-- İlk sürüm inek mi, koyun-keçi mi?
-- Varsayılan süreler (gebelik inek ~280, koyun ~150, kuruya ~60 gün, aşı yaşları) onayı — kullanıcı değiştirebilir olacak.
-- Mandıra süt parası hesabı, çobana ödeme şekli, ortaklı sürü.
-- Deneyecek gerçek bir hayvancı.
-
-### Ortak iskelet hazır (kanatlı oturumu kurdu, 4 Kasım 2026)
-- Tablolar `barns`, `herds`, `herd_days` (göç 0018, `species` alanıyla), yetki ekranı `hayvan`, kod `products/ciftci/hayvan/` (api.ts, hayvan.ts, Barinak.tsx). Ayrıntı: `kanatli.md` "Yapı".
-- Küçükbaş/büyükbaş için: `TURLER` içindeki adları kontrol et, App.tsx'e `<Barinak species="kucukbas" />` sekmesi ve panele modül kutusu ekle. Küpe kartı ve üreme döngüsü bu oturumda, ayrı tablo olarak.
-
-## Saklanan fikirler
-- (Fidan oturumundan not, 10 Kasım 2026) Ortak alan hesaplayıcı tersinden barınak kapasitesi için kullanılabilir: barınak m² ÷ hayvan başı m² = kapasite; yem, yemlik, suluk ihtiyacı. Hesaplayıcı önce fidanda yazılıp core'a taşınacak; şablonu bu oturum ekler.
+## Tuzaklar
+- Dalı açmadan önce `git fetch`: eski gelistirme'den açılırsa ortak iskelet görünmez.
+- `next dev` CSP (eval) yüzünden boş açılır; ekran denemesi `next build` + `next start` ile. Oturum çerezde (`sb-<ref>-auth-token` = "base64-" + JSON), localStorage'da değil. Projede eslint ayarı yok.
 
 ## Günlük
-- Yapıldı (4 Kasım'da gelistirme ve main'e birleştirildi, canlıda): göç `0019_hayvan_kart.sql` (animals, animal_events) CANLIYA UYGULANDI. Kod: `hayvan/kart.ts` (hesaplar, varsayılan süreler), `hayvan/Hayvanlar.tsx` (liste, "Bu hafta", kart, olay, doğumda yavru kaydı, satışta gelire yazma, ilaç arınma uyarısı, Süreler ekranı → settings.hayvan_sureler). Sekmeler Büyükbaş/Küçükbaş (modül anahtarı buyukbas/kucukbas, panel + /yonetim'de kutu). Ahır/ağıl ve toplu sürü: ortak Barinak ekranı.
-- Ekran denemesi geçti (sahte sunucu, telefon boyu, 4 Kasım). Alt menü kalabalığı Core'da Menü tuşuyla çözüldü.
-- Varsayılan süreler veteriner onayı bekliyor (`hayvancilik-sorular.md`).
-- 0013 yedek uygulanınca yedek.al()'a animals, animal_events eklenmeli.
+- 4 Kasım: soru listesi (`hayvancilik-sorular.md`) ve kararlar, `modul/hayvancilik` gelistirme'den açıldı.
+- 4 Kasım: 0019 (animals, animal_events) canlı veritabanına uygulandı; dosya ile aynı.
+- 4 Kasım: hayvan kartı, olay, hatırlatma, arınma, Süreler; sekmeler, panel ve /yonetim modül kutuları, Geçmiş metinleri; ekran denemesi geçti.
+- 4 Kasım: Core gelistirme ve main'e birleştirdi; büyükbaş/küçükbaş Menü'ye eklendi (canlıda).
