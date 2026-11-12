@@ -44,7 +44,7 @@ Amaç: uygulama büyürken **karışmasın**. Her ekleme ve çıkarma, kullanıc
 | Dosya | Ne zaman okunur |
 |---|---|
 | `README.md` (bu) + kendi modül notun | her oturum başında |
-| `kilavuz.md` | özellik ekleme/çıkarma, ad verme, not yazma, rapor |
+| `kilavuz.md` | özellik ekleme/çıkarma, ad verme, not yazma, rapor, not kontrolü (§5) |
 | başka modülün notu | o modülü etkileyen iş |
 | `docs/istekler.md`, `docs/fikirler/…` | ilgili istek/fikir konuşulurken |
 | `CLAUDE.md` | zaten kendiliğinden yüklenir |
