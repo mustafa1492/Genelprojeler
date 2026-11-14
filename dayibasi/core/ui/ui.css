@@ -722,3 +722,13 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .baslarken-adim[data-bitti] em { background: var(--ana); color: #fff; }
 .baslarken-adim[data-bitti] span { color: var(--sessiz); }
 .baslarken-adim button { font: inherit; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--ana); color: #fff; cursor: pointer; white-space: nowrap; }
+
+/* Sesle masraf (küçük, ikincil seçenek) */
+.ui-ses { font: inherit; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-height: 56px; padding: 8px 16px; border-radius: 16px; border: 2px dashed var(--ana-orta);
+  background: var(--kart); color: var(--ana-yazi); font-weight: 800; cursor: pointer; text-align: left; }
+.ui-ses span { font-size: 1.4rem; }
+.ui-ses small { flex-basis: 100%; padding-left: 34px; font-weight: 600; color: var(--sessiz2); font-size: 0.9rem; }
+.ui-ses.dinliyor { border-style: solid; border-color: var(--ana); background: var(--ana-acik); cursor: default; }
+.ui-ses.dinliyor .ui-link { margin-left: auto; }
+@media (prefers-reduced-motion: no-preference) { .ui-ses.dinliyor span { animation: ses-nabiz 1.2s ease-in-out infinite; } }
+@keyframes ses-nabiz { 50% { opacity: 0.4; } }

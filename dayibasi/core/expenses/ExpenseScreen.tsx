@@ -1,5 +1,6 @@
 "use client";
 // Ortak masraf ekranı (dayıbaşı + çiftçi defteri). Ürün farkları prop olarak gelir.
+import { dinle, sesVarMi, turBul, tutarBul } from "./ses";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBack, useOnActivate, useTabParams } from "@/core/shell/TabShell";
 import { useBusiness, useSetBusiness } from "@/core/auth/AuthGate";
@@ -54,7 +55,7 @@ export type ExpenseScreenProps = {
 };
 type StockAdd = { itemId: string | null; name: string; qty: number; unit: string; category: string };
 
-type View = { v: "list" } | { v: "tur" } | { v: "form"; cat: string; edit?: Expense } | { v: "veresiye" } | { v: "ode"; vendor: string } | { v: "foto"; url: string };
+type View = { v: "list" } | { v: "tur" } | { v: "form"; cat: string; edit?: Expense; tutar?: number } | { v: "veresiye" } | { v: "ode"; vendor: string } | { v: "foto"; url: string };
 type Done = { message: string; undo?: () => Promise<void> } | null;
 const num = (s: string) => Number(s.replace(/\./g, "").replace(",", "."));
 const monthName = (m: string) => new Date(m + "-15T12:00:00").toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
@@ -105,7 +106,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Tür seç
   if (view.v === "tur") {
     return <TurSec categories={categories} lastOf={lastOf} onEdit={onEditCategories} onCancel={leave}
-      onPick={(cat) => setView({ v: "form", cat })}
+      onPick={(cat, tutar) => setView({ v: "form", cat, tutar })}
       onAddCategory={async (name) => {
         const settings = { ...biz.settings, expense_categories: [...custom, name] };
         const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
@@ -118,7 +119,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Ekle / düzenle
   if (view.v === "form") {
     const ed = view.edit;
-    return <MasrafForm noPlaceLabel={noPlaceLabel} categories={categories} cat={view.cat} edit={ed} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} presetPhoto={ed ? null : fromInbox?.photo} presetNote={ed ? null : fromInbox?.note} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
+    return <MasrafForm noPlaceLabel={noPlaceLabel} categories={categories} cat={view.cat} edit={ed} presetAmount={view.tutar} lastAmount={lastOf(view.cat)} vendors={vendors} farmers={farmers} places={places} presetPlace={presetPlace} presetPhoto={ed ? null : fromInbox?.photo} presetNote={ed ? null : fromInbox?.note} link={link} presetLink={presetLink} branches={branches} onAddBranch={onAddBranch}
       stockCategory={stock && !ed ? stock.categoryOf(view.cat) : null} stockUnits={stock?.units ?? []} stockItems={stockItems}
       onCancel={leave}
       onSave={async (input, add) => {
@@ -331,18 +332,37 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
 }
 
 function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }: {
-  categories: string[]; onEdit?: () => void; lastOf: (c: string) => number | undefined; onPick: (c: string) => void; onCancel: () => void; onAddCategory: (n: string) => Promise<void>;
+  categories: string[]; onEdit?: () => void; lastOf: (c: string) => number | undefined; onPick: (c: string, tutar?: number) => void; onCancel: () => void; onAddCategory: (n: string) => Promise<void>;
 }) {
   const [adding, setAdding] = useState(false);
+  // Sesle masraf: "mazota üç bin verdim" → tür ve tutar dolu form. Tür anlaşılmazsa tutar saklanır, tür listeden seçilir.
+  const [sesVar, setSesVar] = useState(false);
+  useEffect(() => setSesVar(sesVarMi()), []);
+  const [ses, setSes] = useState<{ durum: "dinliyor" } | { durum: "anlasilmadi"; metin: string; tutar: number | null } | { durum: "hata"; yazi: string } | null>(null);
+  const durdur = useRef<(() => void) | null>(null);
+  useEffect(() => () => durdur.current?.(), []);
+  const sesBasla = () => {
+    setSes({ durum: "dinliyor" });
+    durdur.current = dinle((metin) => {
+      const tutar = tutarBul(metin), tur = turBul(metin, categories);
+      if (tur) { setSes(null); onPick(tur, tutar ?? undefined); }
+      else setSes({ durum: "anlasilmadi", metin, tutar });
+    }, (neden) => setSes({ durum: "hata", yazi: neden === "izin" ? "Mikrofon izni verilmedi. Telefonun ayarından bu siteye mikrofon izni verebilirsin." : neden === "internet" ? "Ses için internet lazım. Listeden seçerek yazabilirsin." : "Duyamadım. Tekrar dene ya da listeden seç." }));
+  };
+  const bekleyenTutar = ses?.durum === "anlasilmadi" ? ses.tutar ?? undefined : undefined;
   const [name, setName] = useState("");
   const [err, setErr] = useState("");
   return (
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Yeni masraf" title="Ne için harcadın?" />
+      {sesVar && !ses && <button type="button" className="ui-ses" onClick={sesBasla}><span aria-hidden="true">🎤</span>Söyleyerek yaz<small>Örnek: “mazota üç bin verdim”</small></button>}
+      {ses?.durum === "dinliyor" && <div className="ui-ses dinliyor" role="status"><span aria-hidden="true">🎤</span>Dinliyorum… şimdi söyle<button type="button" className="ui-link inline" onClick={() => { durdur.current?.(); setSes(null); }}>Vazgeç</button></div>}
+      {ses?.durum === "anlasilmadi" && <p className="ui-note" role="status">Duyduğum: “{ses.metin}”{ses.tutar ? ` · ${formatTL(ses.tutar)}` : ""}. Türünü aşağıdan seç.</p>}
+      {ses?.durum === "hata" && <p className="ui-note" role="status">{ses.yazi}</p>}
       <div className="ui-liste-sec">
         {categories.map((c) => (
-          <button key={c} type="button" onClick={() => onPick(c)}>
+          <button key={c} type="button" onClick={() => onPick(c, bekleyenTutar)}>
             <b>{c}</b>{lastOf(c) ? <small>son: {formatTL(lastOf(c)!)}</small> : null}<i aria-hidden="true">›</i>
           </button>
         ))}
@@ -362,15 +382,15 @@ function TurSec({ categories, lastOf, onPick, onCancel, onAddCategory, onEdit }:
   );
 }
 
-function MasrafForm({ noPlaceLabel = "Genel", presetPhoto, presetNote, categories = [], branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
+function MasrafForm({ noPlaceLabel = "Genel", presetPhoto, presetNote, presetAmount, categories = [], branches = [], onAddBranch, cat, edit, lastAmount, vendors, farmers, places, presetPlace, link, presetLink, stockCategory, stockUnits = [], stockItems = [], onSave, onCancel, onDelete, onPhoto }: {
   stockCategory?: string | null; stockUnits?: readonly string[]; stockItems?: Item[]; noPlaceLabel?: string;
-  presetPhoto?: string | null; presetNote?: string | null; categories?: string[]; cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
+  presetPhoto?: string | null; presetNote?: string | null; presetAmount?: number; categories?: string[]; cat: string; edit?: Expense; lastAmount?: number; vendors: string[]; farmers: Person[]; places: Place[]; presetPlace?: string | null;
   link?: ExpenseScreenProps["link"]; presetLink?: string | null; branches?: readonly string[]; onAddBranch?: (name: string) => Promise<void>;
   onSave: (e: Omit<Expense, "id" | "business_id" | "created_at" | "data"> & { data?: Record<string, unknown> }, stockAdd?: StockAdd | null) => Promise<void>; onCancel: () => void;
   onDelete?: () => Promise<void>; onPhoto: (path: string) => void;
 }) {
   const biz = useBusiness();
-  const [amount, setAmount] = useState(edit ? String(edit.amount) : "");
+  const [amount, setAmount] = useState(edit ? String(edit.amount) : presetAmount ? String(presetAmount) : "");
   const [category, setCategory] = useState(cat);
   const [day, setDay] = useState(edit?.occurred_on ?? todayIstanbul());
   const [note, setNote] = useState(edit?.note ?? presetNote ?? "");
