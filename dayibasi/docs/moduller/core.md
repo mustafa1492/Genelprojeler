@@ -7,7 +7,7 @@
 - Kişiye özel ayarlar (`user_prefs`), internetsiz kayıt, tutarları gizle (`*** TL`), büyük yazı.
 - Döviz karşılığı (TCMB, kaydın günü; `/api/kur`), yeni Excel (tablolar, formüller, Özet sayfası), bütün verimi indir.
 - Modüller: fidan, kümes, büyükbaş, küçükbaş, makineler, tapudan parsel sorgusu.
-- Son yayın: 14 Kasım 2026 (main `d009338`): TÜBİTAK deneme hesabı uygulama tarafı, veritabanı uyumasın (/api/uyanik).
+- Son yayın: 14 Kasım 2026 (main `5949837`): giriş düzeltmesi. Öncesi `d009338`: deneme hesabı uygulama tarafı + /api/uyanik.
 
 ## Yapılacaklar (sırayla)
 1. **Yayın bekliyor (18 Kasım TÜBİTAK'tan sonra, Mustafa "yükle" deyince):** hayvancılık/kümes arşivi + sadeleştirme (＋ Ekle, Menü, Başlarken, ürün kataloğu, tek sezonda çip gizli, sesle masraf, tanıtım metinleri). Yüklemeden önce `node scripts/deneme.cjs` (ve `--bos`) "sorun: 0" vermeli. Sonraki işler `docs/plan/uzun-vadeli-plan.md` §8 sırasıyla.
@@ -89,6 +89,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 14 Kas: Canlıya çıktı (yalnız bu): "Yeni hesap aç"ta kullanıcı adı yazılınca giriş yapılır (deneme hesabı "Hemen başla"dan girilemiyordu). main `5949837`, canlıda deneme hesabıyla iki yoldan girildi.
 - 14 Kas (gece 3): eksikler tamamlandı: hatırlatmadan masraf, takvim kutucuğunda simge, ayrı "Tarlalara böl" düğmesi, 4 ekrana Geçmiş, Fotoğraflar ekranı → "Fişli olanlar" süzgeci, tohum ve masraf notunda öneri. Rapor §10.1.
 - 14 Kas (gece 2): sesle gelir/tarla işi, tekrarlayan hatırlatma, takvimde 7 gün, ay şeridi, Fişler bağlantısı, girdi kataloğu, Köy pazarı taslağı. Sıra: plan §8.
 - 14 Kas (akşam): Görünüm turu: renkler bölüme uyar, masraf son dolu aydan açılır, Özet'e son kayıtlar, Rapor kutuları; site: yer tutucu iletişim gizli, modül kartları, telefonda üst menü ve özellik kartları. Rapor §9.
