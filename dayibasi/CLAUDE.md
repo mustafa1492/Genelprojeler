@@ -89,6 +89,7 @@ docs/
 - İstemci: `core/supabase/client.ts`.
 
 ## Kaldığımız yer (1 Kasım 2026)
+> **Güncel durum ve yön için:** `docs/moduller/README.md` → `docs/moduller/core.md` → `docs/plan/uzun-vadeli-plan.md`. Aşağıdaki satırlar 1–2 Kasım'dan kalmadır; çelişirse yenisi geçerli. Hayvancılık/kümes 14 Kasım'da arşivlendi.
 - **İLK HEDEF: çiftçi defteri — `docs/ciftci-plan.md`** (Mustafa 2 Kasım 2026: önce bu bitecek). Sonra `docs/istekler.md`.
 - **Sıradaki işler: `docs/istekler.md`** (Mustafa'nın not ettirdiği istekler; önce onu oku).
 - Yapıldı: Next.js kurulumu, Supabase, core/ui, giriş + işletme oluştur, Ekibim (ara/WhatsApp, kişi kartı, avans/ödeme, akşam yoklaması), Geçmiş ekranı (uygulama tarafı).

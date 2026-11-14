@@ -153,3 +153,22 @@ Puan: ★★★ çiftçinin işini çok azaltır · ★★ orta · ★ hoş ama 
 4. Pilot köy, muhtar ve kooperatifle görüşme zamanı.
 5. Deneme sezonu bitiş tarihi ve "kurucu çiftçi" ödülü.
 6. Fikir havuzundan 1. aşamaya alınacaklar (öneri: sesle masraf, fişten masraf, münavebe tablosu, kredi dosyası).
+
+---
+
+## 7. Durum (14 Kasım gece, `gelistirme`'de, yüklenmedi)
+| Plan maddesi | Durum |
+|---|---|
+| 1. Hayvancılık/kümes arşivi | Yapıldı |
+| 2.1 Ekran birleştirme | Kısmen: Menü 9 öğeye indi (Fiş ＋ Ekle'de, Geçmiş Kayıtlar'da); Fiş/Fotoğraflar ekranları ayrı sayfa olarak duruyor, Sezonlar ve Listeler Ayarlar'dan açılıyor |
+| 2.2 Alt çubuk | Yapıldı, değiştirilerek: "Para" sekmesi yerine 3 kişisel yer + ortada "＋ Ekle" + Menü (kişiye özel alt çubuk korunsun diye) |
+| 2.2 İlk açılış rehberi | Yapıldı ("Başlarken" kartı, kendiliğinden işaretlenir, gizlenebilir) |
+| 2.2 Basit mod varsayılan | Yapılmadı: varsayılan görünüm zaten 5 kart; "En sade" hazır görünüm duruyor. Gerçek kullanıcı denemesinden sonra karar |
+| 2.3 Ortak katalog | Ürün kataloğu yapıldı (tarla, verim, gelir). Girdi ve iş türü kataloğu sonra (masraf türleri zaten listeden) |
+| 2.4 Fidan sadeleştirme | Yapılmadı: fidan oturumunun işi, Hüseyin'in geri bildirimiyle |
+| 2.5 Kalıcı deneme betiği | Yapıldı (`scripts/deneme.cjs`) |
+| 4. Sesle masraf | Yapıldı (gerçek telefonda denenmeli) |
+| 4. Yıllara göre ürün | Yapıldı (tarla kartında "Yıllara göre ürün ve verim") |
+| 4. Fişten masraf, kredi dosyası, ÇKS takvimi | Yapılmadı |
+| Tanıtım sitesi | Yapıldı: tarla+fidan, "Deneme sürümü", Yakında'ya Köy pazarı, rehber adımları ＋ Ekle'ye göre |
+

@@ -48,7 +48,7 @@ export type ExpenseScreenProps = {
   onEditCategories?: () => void;
   /** Birden çok iş varsa (ör. Fidan, Buğday): "Hangi iş için?" seçimi, data.branch'e yazılır. Tarlanın işi (custom.is) önceden seçilir. */
   branches?: readonly string[];
-  /** Verilirse "Hangi iş için?" her zaman çıkar ve yerinde yeni iş eklenir. */
+  /** Verilirse ve en az bir iş tanımlıysa "Hangi iş için?" çıkar ve yerinde yeni iş eklenir. */
   onAddBranch?: (name: string) => Promise<void>;
   /** Liste üstünde (ör. onay bekleyen fişler). start(foto, not, tarla, kaydedilince) ile masraf formunu açar. */
   inbox?: (start: (photo: string, note: string | null, placeId: string | null, saved: (expenseId: string) => void) => void) => React.ReactNode;
@@ -458,7 +458,8 @@ function MasrafForm({ noPlaceLabel = "Genel", presetPhoto, presetNote, presetAmo
           })()}
         </div>
       )}
-      {(branches.length > 1 || onAddBranch) && (onAddBranch
+      {/* Defterde hiç iş tanımlı değilse (yalnız tarla) satır çıkmaz; iş Ayarlar → Listeler'den eklenir. */}
+      {(branches.length > 1 || (onAddBranch && branches.length > 0)) && (onAddBranch
         ? <PickWithAdd label="Hangi iş için?" items={branches} value={branch} onChange={setBranch} noneLabel="Genel (hepsi)" onAdd={onAddBranch} addLabel="+ Yeni iş" placeholder="Örnek: Buğday" />
         : <Pick label="Hangi iş için?" value={branch} onChange={setBranch} options={[{ value: null, label: "Genel (hepsi)" }, ...branches.map((b) => ({ value: b, label: b }))]} />)}
       {link && link.options.length > 0 && (
