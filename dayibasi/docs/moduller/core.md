@@ -89,6 +89,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 14 Kas (akşam): Görünüm turu: renkler bölüme uyar, masraf son dolu aydan açılır, Özet'e son kayıtlar, Rapor kutuları; site: yer tutucu iletişim gizli, modül kartları, telefonda üst menü ve özellik kartları. Rapor §9.
 - 14 Kas (gece): Sadeleştirme: ＋ Ekle, Menü/yan menü, Başlarken, ürün kataloğu, tek sezonda çip gizli, yıllara göre ürün-verim, sesle masraf, tanıtım metinleri, kalıcı deneme betiği. gelistirme; 40+40 ekran temiz.
 - 14 Kas: Hayvancılık/kümes koddan çıkarıldı (arşiv dalı), tanıtım sitesi tarla+fidana göre; derleme ve 16 ekran denemesi temiz. Uzun vadeli plan yazıldı.
 - 14 Kas: Canlıya çıktı: deneme hesabı uygulama tarafı + /api/uyanik; canlıda /api/uyanik ok, ana sayfa başlığı görünüyor.

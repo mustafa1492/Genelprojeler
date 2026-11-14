@@ -126,3 +126,32 @@
 - Deneme betiği: `scripts/deneme.cjs`
 - Arşiv dalı: `arsiv/hayvancilik`
 - `gelistirme`, `main`'den 7 commit ileride; 44 dosyada +947 / −1.090 satır.
+
+---
+
+## 9. Ek: görünüm turu (14 Kasım akşam)
+Ekran görüntülerine tek tek bakılarak bulunan sorunlar ve yapılanlar. Hepsi `gelistirme`'de, yüklenmedi.
+
+**Uygulama**
+| Sorun | Ne yapıldı |
+|---|---|
+| Fidan bölümünde ana düğmeler yeşil-mavi karışık degrade, toplam kutuları ve seçili sekme sabit yeşil | Degradeler bölüm rengini kullanıyor; eski tarayıcı için düz renk yedeği var |
+| Bilgisayar yan menüsünde seçili satır her bölümde yeşil | Bölüm rengi |
+| Yan menünün başında "Fidan ▾" çipi iki satıra kırılıyordu | Yan menüde gizli; bölüm değiştirme Özet'in başında ve Menü'de |
+| Masraf ekranı içinde bulunulan ay boşsa "0 TL" ile açılıyordu (ilk izlenim kötü) | Kaydı olan son aydan açılır; başlık "Haziran 2026 masrafı" gibi doğru ayı yazar |
+| Özet az kayıtla boş görünüyordu (bilgisayarda yarısı boş) | Varsayılan kartlara "Son kayıtlar" eklendi (kişi Ekranımı düzenle'den kapatabilir) |
+| Rapor'da telefonda üç rakam kutusu sıkışık, "125.800 TL" ikiye kırılıyordu | Gelir ve Masraf yan yana, Kâr/Zarar alt satırda tam genişlik ve büyük |
+
+**Web sitesi**
+| Sorun | Ne yapıldı |
+|---|---|
+| Ziyaretçiye **"[YER TUTUCU] WhatsApp numarası bekleniyor."** yazısı görünüyordu | Numara girilene kadar "Bize ulaş" bölümü hiç görünmez (`WA_NUMARA` doldurulunca kendiliğinden çıkar) |
+| İki modül kartı bilgisayarda sayfanın yalnız sol yarısındaydı | İki geniş kart; kart içinde özellikler iki sütun |
+| "Hangi modül bana göre?" testi "beş soru" diyordu ama üç soru vardı; iki modülle anlamı kalmamıştı | Kaldırıldı |
+| Telefonda üst menü iki satıra kırılıp 165 piksel yer kaplıyordu | Telefonda yalnız logo ve "Giriş yap" (bölümler sayfada sırayla zaten) |
+| Telefonda "Neler yapabilirsin?" 12 büyük kartla yaklaşık üç ekran boyuydu | Kartlar yatay ve sıkı (simge solda); bölüm 2.687 → 1.793 piksel |
+| Sesle masraf "Yakında" listesindeydi | Özelliklere taşındı ("İstersen söyle: 'mazota üç bin verdim'") |
+
+**Denendi:** her adımda derleme; 20 ekran × 2 genişlik × (örnek veri + boş defter) = 80 açılış, sorun 0; sitede telefonda yatay taşma yok; ekran görüntüleriyle bakıldı.
+**Denenmedi:** gerçek telefon, eski Android tarayıcıda renk yedeği (kod incelemesiyle doğrulandı).
+

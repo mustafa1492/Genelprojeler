@@ -738,3 +738,11 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
   .ui-nav-brand .modul-chip { display: none; } /* bölüm değiştirme Özet'in başında ve Menü'de */
   .ui-nav-brand span b { font-size: 0.95rem; white-space: nowrap; }
 }
+
+/* Rapor: telefonda üç kutu sıkışmasın; Gelir ve Masraf yan yana, Kâr/Zarar alt satırda tam genişlik ve büyük */
+@media (max-width: 600px) {
+  .rapor-kpi { grid-template-columns: 1fr 1fr; }
+  .rapor-kpi > div:nth-child(3) { grid-column: 1 / -1; }
+  .rapor-kpi > div:nth-child(3) b { font-size: 1.5rem; }
+  .rapor-kpi b { white-space: nowrap; }
+}
