@@ -61,6 +61,7 @@
 - Supabase ücretsiz plan: 7 gün kullanılmazsa uyur, veri silinmez, panelden Restore. `user_prefs` için anon yetkisi kaldırılmadı (erişim kuralı zaten engelliyor); istenirse SQL Editor'den `revoke all on user_prefs from anon;`.
 
 ## Saklanan fikirler
+- **Vizyon notu (14 Kasım 2026):** `docs/fikirler/vizyon.md`. Core'u ilgilendiren hazırlıklar (§8–9): ortak ürün kataloğu (listeden seçim), masraf→tarla→dekar bağı, ayrı ve geri alınabilir paylaşım onayı, KVKK iki ayrı metin, onay akışı ("tek kayıt, iki taraf"). Hiçbiri kodlanmadı; Mustafa sıra verince.
 - İlaçlama saati (hava durumuna göre saat saat uygun/değil): `docs/fikirler/ilaclama-saati.md`. Eşikler onaylanmadan kodlanmaz.
 - Arayüz incelemesi, 48 bulgu: `docs/fikirler/arayuz-onerileri.md` (içinde: Vadeler'de aynı alacağın iki kez sayılma riski).
 - TÜBİTAK 2209-A başvurusu: `docs/tubitak/README.md` (ayrı oturumda yürüyor).

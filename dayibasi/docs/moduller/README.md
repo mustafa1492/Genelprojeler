@@ -3,7 +3,7 @@
 Her oturum **önce bu dosyayı, sonra kendi modül dosyasını** okur. Buradaki kurallar bütün modüller için geçerlidir; bir modül dosyası bu dosyayla çelişirse bu dosya geçerlidir.
 
 Proje: Çiftçi Defteri (Next.js + Supabase, depo `mustafa1492/genelprojeler`, klasör `dayibasi/`). Canlı: https://genelprojeler.vercel.app, panel: /panel.
-Diğer belgeler: ayrıntılı kurallar `dayibasi/CLAUDE.md` · istekler ve kararlar `docs/istekler.md` · plan `docs/plan/is-plani-ve-maliyet.md` (en alttaki "Güncelleme") · araştırmalar `docs/arastirma/reports/` · tasarım `docs/tasarim/` · saklanan fikirler `docs/fikirler/` · elle test listesi `docs/test-plani.md`.
+Diğer belgeler: ayrıntılı kurallar `dayibasi/CLAUDE.md` · istekler ve kararlar `docs/istekler.md` · plan `docs/plan/is-plani-ve-maliyet.md` (en alttaki "Güncelleme") · araştırmalar `docs/arastirma/reports/` · tasarım `docs/tasarim/` · saklanan fikirler `docs/fikirler/` · **vizyon ve büyüme yönü** `docs/fikirler/vizyon.md` (öneri; "Mustafa'nın kararı" yazmayan madde kesin değil) · elle test listesi `docs/test-plani.md`.
 
 ## 1. Çalışma kuralları (Mustafa)
 - Cevaplar kısa ve Türkçe. Kural, para, süre, eşik **uydurulmaz**: sorulur. Gerçek veri silinmeden/değiştirilmeden önce sorulur.
