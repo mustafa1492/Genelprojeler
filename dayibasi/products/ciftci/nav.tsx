@@ -14,6 +14,14 @@ export const navItems: NavItem[] = [
   { href: `${BASE}/depo`, label: "Depo", icon: ic(<><path d="M3 9 12 4l9 5v11H3z" /><path d="M7 20v-7h10v7" /><path d="M7 16h10" /></>) },
 ];
 
+/** Masraf ekranının başında: bütün fiş ve belge fotoğrafları (Menü'de ayrı satır yok). */
+export const PhotosLink = () => (
+  <TabLink to="fotograflar" className="ui-history">
+    {ic(<><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="m21 17-5-5-8 8" /></>)}
+    Fişler
+  </TabLink>
+);
+
 export const HistoryLink = () => (
   <TabLink to="gecmis" className="ui-history">
     {ic(<><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>)}

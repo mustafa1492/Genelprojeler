@@ -63,7 +63,7 @@ const TABS: ShellTab[] = [
   { id: "fis", label: "Fiş yükle", emoji: "📷", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
   { id: "takvim", label: "Takvim", icon: NAVI.takvim, group: "Genel", emoji: "📅", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
-  { id: "fotograflar", label: "Fotoğraflar", group: "Diğer", emoji: "🖼️", path: `${BASE}/fotograflar`, inNav: false, render: () => <Fotograflar /> },
+  { id: "fotograflar", label: "Fotoğraflar", emoji: "🖼️", path: `${BASE}/fotograflar`, inNav: false, render: () => <Fotograflar /> },
   { id: "ayarlar", label: "Ayarlar", group: "Diğer", emoji: "⚙️", path: `${BASE}/ayarlar`, inNav: false, render: () => <Ayarlar /> },
   { id: "duzenle", label: "Ekranımı düzenle", path: `${BASE}/duzenle`, inNav: false, render: () => null },
 ];

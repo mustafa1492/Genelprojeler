@@ -72,6 +72,9 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   const [stockItems, setStockItems] = useState<Item[]>([]);
   const [month, setMonth] = useState(todayIstanbul().slice(0, 7));
   const ayAyarlandi = useRef(false);
+  // Seçili ay şeridin dışında kalmasın
+  const aySerit = useRef<HTMLDivElement>(null);
+  useEffect(() => { aySerit.current?.querySelector<HTMLElement>('[aria-pressed="true"]')?.scrollIntoView({ inline: "center", block: "nearest" }); }, [month, view]);
   useEffect(() => {
     if (ayAyarlandi.current || !items) return;
     ayAyarlandi.current = true;
@@ -268,7 +271,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
         </div>
       )}
       {bySeason ? periodPicker : (
-        <div className="ui-chips" role="group" aria-label="Ay seç">
+        <div className="ui-chips kaydir" role="group" aria-label="Ay seç" ref={aySerit}>
           {months.map((m) => <Chip key={m} selected={m === month} onClick={() => setMonth(m)}>{monthName(m)}</Chip>)}
         </div>
       )}

@@ -10,7 +10,7 @@ import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { config } from "../config";
 import { GELIR } from "../kayit";
-import { HistoryLink } from "../nav";
+import { HistoryLink, PhotosLink } from "../nav";
 import { useGo, useOnActivate } from "@/core/shell/TabShell";
 import { inSeason, SeasonPicker, useSeason } from "../sezon";
 import { listLots, type Lot } from "@/core/lots/api";
@@ -40,7 +40,7 @@ export default function Masraf() {
   const gelirS = income.filter((e) => inSeason(e.occurred_on, S)).reduce((t, e) => t + Number(e.quantity ?? 0), 0);
   return (
     <ExpenseScreen noPlaceLabel="İşletme gideri" categories={cats} onEditCategories={() => go("listeler", { liste: "expense" })} places={places} branches={isler} onAddBranch={addIs}
-      inbox={(start) => <InboxCard onOpen={(x) => start(x.photo_path, x.note, x.place_id, (id) => { closeInbox(x.id, "islendi", id).catch(() => {}); })} />} headerRight={<HistoryLink />} memberName={nameOf}
+      inbox={(start) => <InboxCard onOpen={(x) => start(x.photo_path, x.note, x.place_id, (id) => { closeInbox(x.id, "islendi", id).catch(() => {}); })} />} headerRight={<span style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}><PhotosLink /><HistoryLink /></span>} memberName={nameOf}
       link={hasFidan(biz) ? { label: "Hangi fidan partisi? (isteğe bağlı)", key: "lot_id", param: "parti", options: lots.filter((l) => l.status === "aktif").map((l) => ({ id: l.id, name: l.name })) } : undefined}
       stock={{ categoryOf: (c) => (c === "Gübre" ? "Gübre" : c === "İlaç" ? "İlaç" : c.startsWith("Tohum") ? "Tohum" : null), units: invUnits }}
       period={S} periodPicker={<SeasonPicker onManage={() => go("sezonlar")} />}

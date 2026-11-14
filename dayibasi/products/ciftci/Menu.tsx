@@ -6,7 +6,7 @@ type T = { id: string; label: string; emoji?: string };
 
 const URETIM = ["tarlalar", "fidan", "depo", "makineler"];
 const PARA: [string, string][] = [["masraf", "Masraf"], ["gelir", "Gelir"], ["rapor", "Sezon raporu ve kâr"], ["vadeler", "Borç ve vadeler"]];
-const DEFTER: [string, string][] = [["takvim", "Takvim ve hatırlatmalar"], ["kayitlar", "Kayıtlar ve geçmiş"], ["belgeler", "Belgeler"], ["fotograflar", "Fotoğraflar (fişler)"]];
+const DEFTER: [string, string][] = [["takvim", "Takvim ve hatırlatmalar"], ["kayitlar", "Kayıtlar ve geçmiş"], ["belgeler", "Belgeler"]];
 
 /** Alt çubuktaki "Menü" tuşunun açtığı sayfa: bütün bölümler gruplu. Sadece kişinin görebildikleri çıkar. */
 export default function Menu({ tabs }: { tabs: T[] }) {
