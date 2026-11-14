@@ -1,5 +1,5 @@
 # Çiftçi Defteri: Vizyon ve Büyüme Notu
-*14 Kasım 2026. Mustafa ile yapılan fikir alışverişinden derlendi. Kod yazdırmak için değil; yön, kural ve karar noktalarını başka oturumlara taşımak için.*
+*14 Kasım 2026. Mustafa ile yapılan fikir alışverişinden derlendi (6.7 Köy pazarı aynı gün eklendi). Kod yazdırmak için değil; yön, kural ve karar noktalarını başka oturumlara taşımak için.*
 
 > **Okuyan oturuma not:** Bu belgedeki her şey **vizyon ve öneri**dir. "Mustafa'nın kararı" diye işaretlenmemiş hiçbir madde kesinleşmiş değildir. Para, süre, eşik, fiyat gibi rakamlar uydurulmaz; Mustafa'ya sorulur. Canlıya yalnız Mustafa "yükle" deyince çıkılır. Mevcut çalışma kuralları (`dayibasi/docs/moduller/README.md`) aynen geçerlidir.
 
@@ -54,6 +54,7 @@ Bir kişi girer, iki tarafta görünür. İşçilik masrafını dayıbaşı yaza
 
 ### 2. Aşama: Bağlantı
 **Hedef:** Bir kişi girsin, iki tarafta görünsün.
+- **Köy pazarı** (saman, makine ve hizmet, işçilik; bkz. 6.7): bağlantıların çiftçiye görünen kapısı
 - Dayıbaşı bağlantısı ve işçi bağlama (bkz. 6.1)
 - Kooperatif ve bayi stoğu, veresiyesi (bkz. 6.2)
 - Makine sahibi ve biçerdöverci hizmeti (bkz. 6.3)
@@ -114,8 +115,8 @@ Mustafa'nın tespiti: bir sezonu ücretsiz geçirmek gerekiyor. Öneri, bunu bed
 4. **İş kesinleşince:** dayıbaşının uygulamasında ekip ve puantaj açılır. İş bitince yevmiye toplamı çiftçinin defterine **onay bekleyen masraf** olarak, dayıbaşının tarafına **alacak** olarak düşer. Vade iki tarafta da takip edilir.
 
 **Hassas noktalar:**
-- **"İşçimi alıyor" meselesi (Mustafa'nın özellikle hatırlatılmasını istediği konu).** Burada daha da büyüyor. Çiftçi işçinin adını/telefonunu görürse sonraki sezon dayıbaşını atlayabilir. **Öneri:** çiftçi sadece dayıbaşıyı ve kişi sayısını görür, işçi bilgisi dayıbaşında kalır. **Dayıbaşılarıyla yüz yüze/telefonda konuşulup sorulacak.**
-- **Fiyat kırma:** ilan açık artırmaya dönerse ("en ucuz kim?") dayıbaşılar birbirine düşer ve sistemden kaçar. İhale listesi yerine "uygun dayıbaşılar" ya da "ilk alan alır". **Mustafa'nın kararı, dayıbaşılarına da sorulacak.**
+- ~~"İşçimi alıyor" meselesi~~ **Geçersiz (Mustafa, 14 Kasım):** dayıbaşı tek kişi değil 20–30 kişilik ekip getirir; iletişim yalnız dayıbaşı ile çiftçi arasındadır, çiftçi işçilerle muhatap olmaz. Çiftçi ekranında yalnız "dayıbaşı · kişi sayısı" görünür.
+- **Fiyat kırma:** Mustafa'nın kararı (14 Kasım): teklifte fiyat açıkça görünür, cevap sayısına sınır yok. Bkz. 6.7.
 - **Puan/yorum yok.** Köyde açık puanlama kavga çıkarır. Yerine tarafsız bilgi: "Uygulamada 23 iş tamamladı", "Belgesi var".
 - **Dayıbaşının asıl derdi tahsilat.** Ona en büyük fayda, iş bulmaktan çok alacak takibi olabilir.
 - **WhatsApp:** dayıbaşılar teknolojiye uzak; yanıt WhatsApp üzerinden gelmeli. WhatsApp'ın resmi mesaj altyapısı ücretli, hesaba katılmalı. (Saha takip projesindeki WhatsApp fikri burada kullanılabilir.)
@@ -212,6 +213,36 @@ Mustafa'nın tespiti: veriyi hizmete çevirme fikri iyi.
 
 **Gerçekçi beklenti:** bir sezonda birkaç düzine çiftçinin verisi satılabilir değer taşımaz; değer birkaç bin çiftçiye ulaşınca oluşur. İlk sezonun verisi satış için değil, **kanıt** için.
 
+### 6.7 Köy pazarı (14 Kasım fikir alışverişi)
+**Mustafa'nın kararı:** çiftçilerin birbirine (ve çevresindeki iş yapanlara) satış yapabildiği bir yer. Genel sosyal medya değil (akış, beğeni, yorum yok); yerel, düzenli ve defterle bağlı bir ilan ve talep-teklif yeri. Armut'a benzer: talep açılır, iş yapanlar teklif verir.
+
+**Üç bölüm (Mustafa'nın seçimi; fide yok):**
+| Bölüm | Veren | Arayan | Usul | Defterde |
+|---|---|---|---|---|
+| **Saman** | Çiftçi | Hayvancı / çiftçi | Basit ilan: satılık / aranıyor | Satıcıda gelir ve depodan düşüm, alıcıda masraf ve depo girişi |
+| **Makine ve hizmet** | Makine sahibi (sürüm, balya, biçerdöver…) | Çiftçi | Talep → teklif | Makine sahibinde alacak, çiftçide masraf (tarlasıyla) |
+| **İşçilik** | Dayıbaşı (20–30 kişilik ekip) | Çiftçi | Talep → teklif | Dayıbaşında alacak, çiftçide masraf |
+
+**Talep → teklif akışı:**
+1. Çiftçi talep açar: kısa sorularla (iş türü, tarih, dekar ya da kişi sayısı, gün). Tarla ve köy defterden gelir; 2–3 dokunuş.
+2. Talep, o işi yapan ve o bölgede olan makine sahiplerine / dayıbaşılarına bildirim olarak gider. Tersi de var: "boşum / ekibim var" ilanı, arayan çiftçilere gider.
+3. **Teklifte fiyat açıkça görünür; cevap sayısına sınır yok** (Mustafa'nın kararı).
+4. Çiftçi birini seçer; iletişim taraflar arasında (WhatsApp / telefon). Para uygulamadan geçmez.
+5. İş bitince karşı taraf "bitti, toplam şu kadar" yazar → çiftçide **onay bekleyen masraf**; onaylanınca iki defterde kesinleşir, vade takip edilir.
+
+**Para:** çiftçi ödemez. Başlangıçta herkes için ücretsiz. İleride makine sahibi ve dayıbaşı **iş başına** öder (Mustafa'nın kararı); "tamamlanan iş" = çiftçinin onayladığı kayıt. Ücret, aracılık komisyonu gibi değil, alacak takibi ve kaydın karşılığı olarak sunulmalı (hukuken de bu ayrım önemli). Tutar ve başlangıç tarihi Mustafa'nın kararı.
+- Risk: ilk tanışmadan sonra işin uygulama dışına kaçması. Çözüm yasak değil fayda: alacak ve vade takibi yalnız uygulamaya girilen işte tutulur.
+
+**Güven:** puan ve yorum yok. Tarafsız bilgi: "Uygulamada 23 iş", "Muhtar onaylı", "Aracılık belgesi var". Her ilanda "Bildir" düğmesi. Telefon numarası ancak taraf "görüşelim" deyince açılır.
+
+**İlk kalabalık (Mustafa):** bir muhtar ve bir kooperatif. Öneri: muhtar köy doğrulaması ("muhtar onaylı") ve köy duyuruları; kooperatif ilk ilanlar ve "Bildir"e ilk bakan. Pilot: tek köy/ilçe.
+
+**Zamanlama:** saman yaz sonu–sonbahar; makine sürümde (sonbahar, ilkbahar) ve hasatta (yaz); işçilik hasat ve çapada. Pilotun başlama ayı, önce hangi bölümün dolacağını belirler.
+
+**Dikkat / araştırılacak:** platform aracı değil, ilan ve kayıt aracı (tarım aracılığı + e-ticaret "aracı hizmet sağlayıcı" yükümlülükleri avukata sorulacak). Satışı kurala bağlı ürünler (zirai ilaç, tohumluk, hayvan) Köy pazarında yok ya da uyarılı.
+
+**Açık sorular:** muhtar ve kooperatif hangi köy/ilçeden, onlarla konuşuldu mu; pilot ne zaman; köyden tek tük gündelikçi de ilan verebilsin mi yoksa işçilik yalnız dayıbaşı üzerinden mi; iş başı ücretin tutarı.
+
 ---
 
 ## 7. Gizlilik ve hukuk: ortak kurallar
@@ -262,7 +293,7 @@ Bir kere yazılıp Çiftçi Defteri, Dayıbaşı, kurumsal panel ve ileride esna
 2. Deneme sezonunun bitiş tarihi ve "kurucu çiftçi" ödülünün ne olacağı.
 3. Bölge karşılaştırmasında **alt sınır** (en az kaç çiftçi).
 4. "Paylaşan görür" kuralı uygulanacak mı (avukat görüşüyle).
-5. İşçi bağlamada: ilk sürüm sadece bilinen dayıbaşıyla mı; fiyat kırmayı önleme yolu; belgesiz dayıbaşı politikası.
+5. İşçi bağlamada: ilk sürüm sadece bilinen dayıbaşıyla mı; belgesiz dayıbaşı politikası. (Fiyat açık, cevap sınırsız, ücret iş başı: kararlandı, bkz. 6.7.)
 6. Hedef ölçek: Bergama ve çevresinde iyi oturmuş yerel bir ürün mü, Türkiye geneline açılan bir platform mu?
 7. Kurumsal tarafta pilot kurum: Yaklaşım Tarım ya da tanıdık bir kooperatif pilot olabilir mi?
 
