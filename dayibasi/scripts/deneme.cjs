@@ -4,11 +4,14 @@
 //   node scripts/deneme.cjs                 → örnek veriyle bütün ekranlar
 //   node scripts/deneme.cjs --bos           → boş defter (ilk açılış)
 //   node scripts/deneme.cjs --resim <klasör> → her ekranın telefon görüntüsü
+//   node scripts/deneme.cjs --akis          → kayıt akışları: masraf/gelir/tarla işi/hatırlatma/depo ekle, masraf sil + geri al, ＋ Ekle
 // Bir ekranda sayfa hatası, yatay taşma, başlıksız ekran ya da "Yükleniyor"da kalma varsa sayar; sonunda "sorun: 0" beklenir.
 const { chromium } = require("playwright");
 
 const ADRES = process.env.ADRES || "http://localhost:3111";
 const BOS = process.argv.includes("--bos");
+const AKIS = process.argv.includes("--akis");
+const yazilan = [];   // sahte sunucuya giden yazma istekleri (POST/PATCH/DELETE)
 const ri = process.argv.indexOf("--resim");
 const RESIM = ri > 0 ? process.argv[ri + 1] : null;
 const EKRANLAR = ["", "tarlalar", "masraf", "gelir", "depo", "makineler", "takvim", "rapor", "vadeler", "kayitlar", "belgeler", "fotograflar", "fis", "gecmis", "aile", "ayarlar", "listeler", "sezonlar", "duzenle", "fidan"];
@@ -39,6 +42,8 @@ const OLAY = BOS ? [] : [
   await ctx.addCookies([{ name: "sb-x-auth-token", value: `base64-${b64(oturum)}`, domain: new URL(ADRES).hostname, path: "/" }]);
   await ctx.route("**://x.supabase.co/**", (r) => {
     const u = r.request().url(); let body = "[]";
+    const m = r.request().method();
+    if (["POST", "PATCH", "DELETE"].includes(m) && u.includes("/rest/v1/") && !u.includes("/rpc/")) { yazilan.push(`${m} ${u.split("/rest/v1/")[1].split("?")[0]}`); return r.fulfill({ status: 201, contentType: "application/json", body: "[]" }); }
     if (u.includes("/auth/v1/user")) body = JSON.stringify(user);
     else if (u.includes("/auth/v1/token")) body = JSON.stringify(oturum);
     else if (u.includes("/memberships")) body = JSON.stringify([{ business_id: "b1", role: "sahip", businesses: { id: "b1", name: "Deneme defteri", product: "ciftci", settings: { modules: ["fidan"] } } }]);
@@ -51,6 +56,7 @@ const OLAY = BOS ? [] : [
   const s = await ctx.newPage();
   let sorun = 0, simdi = "";
   s.on("pageerror", (e) => { sorun++; console.log("HATA", simdi, e.message.slice(0, 200)); });
+  if (AKIS) { await akislar(s, () => sorun++, (x) => { simdi = x; }); console.log(`bitti, kayıt akışları, sorun: ${sorun}`); await tarayici.close(); process.exit(sorun ? 1 : 0); }
   for (const w of [390, 1366]) {
     await s.setViewportSize({ width: w, height: 844 });
     for (const r of EKRANLAR) {
@@ -70,3 +76,57 @@ const OLAY = BOS ? [] : [
   await tarayici.close();
   process.exit(sorun ? 1 : 0);
 })();
+
+// ---------- Kayıt akışları: her adımda "Kaydettim/Sildim" onayı ve sunucuya giden yazma isteği beklenir ----------
+async function akislar(s, hata, yer) {
+  const B = `${ADRES}/ciftci`;
+  const ac = async (yol) => { await s.goto(B + yol, { waitUntil: "networkidle" }); await s.waitForTimeout(600); const k = s.locator(".modul-kart").first(); if (await k.count()) { await k.click(); await s.waitForTimeout(300); } };
+  const tik = (sec) => s.locator(`section:not([hidden]) ${sec}`).first().click();
+  const onay = async (ad, bek, tablo) => {
+    yer(ad);
+    const metin = await s.locator("section:not([hidden]) .ui-done[role=status]", { hasText: bek }).first().innerText({ timeout: 5000 }).catch(() => "");
+    await s.waitForTimeout(1500);   // giden kutusu sunucuya göndersin
+    const gitti = !tablo || yazilan.some((y) => y.includes(tablo));
+    const ok = metin.includes(bek) && gitti;
+    if (!ok) hata();
+    console.log(ok ? "tamam" : "SORUN", ad, "·", metin.replace(/\s+/g, " ").slice(0, 70), tablo ? `· sunucuya: ${gitti ? "gitti" : "GİTMEDİ"}` : "");
+  };
+  // 1. Masraf ekle
+  await ac("/masraf?yeni=1"); await tik(".ui-liste-sec button:has-text('Mazot')"); await s.waitForTimeout(400);
+  await s.fill("#masraf_tutar", "1250"); await tik(".ui-sticky-bottom button"); await onay("masraf ekle", "Kaydettim: Mazot", "expenses");
+  // 2. Masraf sil + geri al (boş defterde silinecek kayıt yok)
+  if (!BOS) {
+  yazilan.length = 0;
+  await ac("/masraf"); await tik(".ui-chips button:has-text('2026')").catch(() => {});
+  await tik(".ui-tabs button:has-text('Sezon'), [role=tab]:has-text('Sezon')"); await s.waitForTimeout(400);
+  await tik(".only-mobile .ui-moneyrow"); await s.waitForTimeout(400);
+  await tik("button:has-text('Bu masrafı sil')"); await onay("masraf sil", "Sildim:", "expenses");
+  await tik(".ui-done button:has-text('Geri al')"); await s.waitForTimeout(800);
+  const kaldi = await s.locator("section:not([hidden]) .ui-done").count(); if (kaldi) { hata(); console.log("SORUN geri al: onay kartı kapanmadı"); } else console.log("tamam masraf geri al");
+  }
+  // 3. Gelir ekle
+  yazilan.length = 0;
+  await ac("/gelir?yeni=1"); await tik(".ui-tiles button:has-text('Hasat satışı')"); await s.waitForTimeout(400);
+  await s.fill("#g_miktar", "10"); await s.fill("#g_fiyat", "100"); await tik(".ui-sticky-bottom button"); await onay("gelir ekle", "Kaydettim: Hasat satışı", "events");
+  // 4. Tarla işi
+  if (!BOS) {
+    yazilan.length = 0;
+    await ac("/tarlalar"); await tik("button.ui-card"); await s.waitForTimeout(400);
+    await tik("button:has-text('+ İşlem')"); await s.waitForTimeout(300); await tik(".ui-tiles button:has-text('Sulama')"); await s.waitForTimeout(300);
+    await tik(".ui-sticky-bottom button"); await onay("tarla işi", "Kaydettim:", "events");
+  }
+  // 5. Hatırlatma
+  yazilan.length = 0;
+  await ac("/takvim"); await tik("button:has-text('+ Hatırlatma ekle')"); await s.waitForTimeout(300);
+  await s.fill("#h_ne", "Deneme hatırlatması"); await tik(".ui-sticky-bottom button"); await onay("hatırlatma", "Hatırlatma kuruldu", "events");
+  // 6. Depo
+  yazilan.length = 0;
+  await ac("/depo"); await tik("button:has-text('Malzeme ekle')"); await s.waitForTimeout(300);
+  await tik(".ui-chips button:has-text('Gübre')"); await tik("[aria-label='Sık kullanılanlar'] button"); await s.fill("#d_miktar", "5");
+  await tik(".ui-sticky-bottom button"); await onay("depo ekle", "Depoya ekledim", "inventory_items");
+  // 7. ＋ Ekle → Gelir
+  await ac(""); await s.locator(".ui-nav-ekle").click(); await s.waitForTimeout(300); await s.locator(".ui-ekle button:has-text('Gelir')").click(); await s.waitForTimeout(600);
+  yer("＋ Ekle"); const h = await s.locator("section:not([hidden]) h1").first().innerText().catch(() => "");
+  if (h.includes("Ne geliri")) console.log("tamam ＋ Ekle → Gelir"); else { hata(); console.log("SORUN ＋ Ekle → Gelir:", h); }
+}
+
