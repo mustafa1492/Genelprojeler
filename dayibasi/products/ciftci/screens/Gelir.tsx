@@ -1,4 +1,7 @@
 "use client";
+import { SesDugmesi } from "@/core/ui/SesDugmesi";
+import { gelirCoz } from "@/core/expenses/ses";
+import { URUNLER } from "@/core/catalog/urunler";
 import { UrunSec } from "@/core/catalog/UrunSec";
 import { useCList } from "../lists";
 import { DeskTable, Tag } from "@/core/ui/DeskTable";
@@ -165,6 +168,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
   const [received, setReceived] = useState(d.received ? String(d.received) : prefill.alinan ? String(prefill.alinan) : "");
   const [due, setDue] = useState(String(d.due_on ?? ""));
   const [error, setError] = useState("");
+  const [sesNot, setSesNot] = useState("");
   const isPlant = type === FIDAN_SATIS;
   const isSale = type === "Hasat satışı" || isPlant;
   const autoTotal = isSale && num(qty) > 0 && num(price) > 0 ? num(qty) * num(price) : 0;
@@ -173,6 +177,16 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
     <main className="ui-stack">
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Yeni gelir" title="Ne geliri?" />
+      <SesDugmesi ornek="domatesi 50 tona 4 bin 800'den sattım" onMetin={(m) => {
+        const g = gelirCoz(m, URUNLER.map((u) => u.ad), [...incomeKinds]);
+        setSesNot(`Duyduğum: “${m}”. Kontrol et, sonra kaydet.`);
+        if (g.urun) setCrop(g.urun);
+        if (g.miktar) setQty(String(g.miktar));
+        if (g.birim) setUnit(g.birim);
+        if (g.fiyat) setPrice(String(g.fiyat));
+        if (g.toplam) setTotal(String(g.toplam));
+        setType(g.tur ?? incomeKinds[incomeKinds.length - 1]);
+      }} />
       <div className="ui-tiles">{[...(lots.length ? [FIDAN_SATIS] : []), ...incomeKinds].map((k) => <button key={k} type="button" onClick={() => setType(k)}><b>{k}</b></button>)}</div>
     </main>
   );
@@ -196,6 +210,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
       <BackButton onClick={() => (edit || t0 ? onCancel() : setType(null))} label="Geri" />
       <PageHeader sub={edit ? "Geliri düzenle" : "Yeni gelir"} title={type} />
+      {sesNot && <p className="ui-note" role="status">{sesNot}</p>}
       <TextField id="g_gun" label="Tarih" type="date" value={day} onChange={(e) => setDay(e.target.value)} />
       {places.length > 0 && (
         <div className="ui-stack" style={{ gap: 8 }}>

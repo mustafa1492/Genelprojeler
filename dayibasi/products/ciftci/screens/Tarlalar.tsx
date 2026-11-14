@@ -1,4 +1,6 @@
 "use client";
+import { SesDugmesi } from "@/core/ui/SesDugmesi";
+import { islemCoz } from "@/core/expenses/ses";
 import { UrunSec } from "@/core/catalog/UrunSec";
 import { useCList } from "../lists";
 import { listLots, type Lot } from "@/core/lots/api";
@@ -61,6 +63,8 @@ export default function Tarlalar() {
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
   // Fidan modülü: tarladaki aktif partilerin canlı fidan sayısı ve maliyeti
   const multi = useCList("isler").length > 1;
+  const islerListe = useCList("operations");
+  const [sesNot, setSesNot] = useState("");
   const fidanOf = (pid: string) => {
     if (!fidan || !money) return null;
     const counts = events.filter((e) => e.kind === SAYIM), sales = events.filter((e) => e.kind === GELIR && e.data.type === FIDAN_SATIS), moves = events.filter((e) => e.kind === AKTARIM);
@@ -208,6 +212,12 @@ export default function Tarlalar() {
   return (
     <main className="ui-has-nav ui-stack">
       <PageHeader sub={`${(places ?? []).length} tarla`} title="Tarlalar" right={<HistoryLink />} />
+      {(places ?? []).length > 0 && <SesDugmesi ornek="ova tarlasını ilaçladım" onMetin={(m) => {
+        const c = islemCoz(m, places ?? [], [...islerListe]);
+        if (c.tarla) { setSesNot(""); setDone(null); setView({ v: "islem", id: c.tarla, type: c.tur ?? undefined }); }
+        else setSesNot(`Duyduğum: “${m}”. Hangi tarla olduğunu anlayamadım; aşağıdan tarlaya dokun.`);
+      }} />}
+      {sesNot && <p className="ui-note" role="status">{sesNot}</p>}
       {doneCard}
       <SeasonPicker onManage={() => go("sezonlar")} />
       {places?.length === 0 && <div className="ui-empty">Henüz tarla yok. İlk tarlanı ekle.</div>}
