@@ -235,7 +235,7 @@ button.ui-card { display: block; }
 a.ui-warn { color: inherit; }
 
 /* --- Düğmeler: dolgun, basınca içe göçer (yalnız transform: hızlı) --- */
-.ui-main-btn { background: linear-gradient(180deg, #367a32 0%, var(--ana) 55%, #285e26 100%); box-shadow: 0 3px 0 var(--ana-koyu), 0 6px 14px rgba(36, 86, 34, 0.18);
+.ui-main-btn { background: var(--ana); background: linear-gradient(180deg, color-mix(in srgb, var(--ana) 88%, #fff) 0%, var(--ana) 55%, var(--ana-koyu) 100%); box-shadow: 0 3px 0 var(--ana-koyu), 0 6px 14px rgba(36, 86, 34, 0.18);
   transition: transform 0.08s ease, box-shadow 0.08s ease; -webkit-tap-highlight-color: transparent; letter-spacing: 0.01em; }
 .ui-main-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ana-koyu), 0 2px 6px rgba(36, 86, 34, 0.16); }
 .ui-main-btn.ikincil { background: var(--kart); box-shadow: 0 2px 0 var(--cizgi); }
@@ -249,10 +249,10 @@ a.ui-warn { color: inherit; }
 .ui-chip[aria-pressed="true"] { box-shadow: 0 2px 6px rgba(36, 86, 34, 0.25); }
 .ui-tiles button, .ui-tiles a { background: linear-gradient(180deg, #fff 0%, var(--notr2) 100%); }
 .ui-tiles button b, .ui-tiles a b { color: var(--ana-yazi); }
-.ui-total { background: linear-gradient(140deg, #1d4a23 0%, var(--koyu) 60%, #12291a 100%); position: relative; overflow: hidden; }
+.ui-total { background: var(--koyu); background: linear-gradient(140deg, color-mix(in srgb, var(--koyu) 82%, var(--ana)) 0%, var(--koyu) 60%, color-mix(in srgb, var(--koyu) 80%, #000) 100%); position: relative; overflow: hidden; }
 .ui-total::after { content: ""; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%;
   background: radial-gradient(circle, rgba(167, 201, 156, 0.18), transparent 70%); pointer-events: none; }
-.ui-nav a[aria-current="page"] { background: linear-gradient(180deg, var(--ana-acik), #d4e8cb); }
+.ui-nav a[aria-current="page"] { background: var(--ana-acik); background: linear-gradient(180deg, var(--ana-acik), color-mix(in srgb, var(--ana-acik) 85%, var(--ana))); }
 .ui-header h1 { letter-spacing: -0.01em; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 .tab-shell main { padding-bottom: 120px !important; }
@@ -419,7 +419,7 @@ body { background-image: none; background-color: var(--zemin); }
   .ui-nav-gl { margin: 14px 12px 4px; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #7F9A7C; font-weight: 700; }
   .ui-nav-desk a { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; color: #D6E4D3; text-decoration: none; font-weight: 600; font-size: 0.93rem; }
   .ui-nav-desk a:hover { background: rgba(255,255,255,0.06); }
-  .ui-nav-desk a[aria-current="page"] { background: #2B5A2C; color: #fff; }
+  .ui-nav-desk a[aria-current="page"] { background: var(--ana); color: #fff; }
   .ui-nav-desk em { font-style: normal; width: 22px; text-align: center; }
   .tab-shell { margin-left: 240px; }
   .tab-shell main { max-width: 1120px; padding: 26px 36px 60px !important; margin: 0 auto; }
@@ -732,3 +732,9 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .ui-ses.dinliyor .ui-link { margin-left: auto; }
 @media (prefers-reduced-motion: no-preference) { .ui-ses.dinliyor span { animation: ses-nabiz 1.2s ease-in-out infinite; } }
 @keyframes ses-nabiz { 50% { opacity: 0.4; } }
+
+/* Bilgisayar: yan menüdeki bölüm çipi tek satırda, küçük */
+@media (min-width: 900px) {
+  .ui-nav-brand .modul-chip { display: none; } /* bölüm değiştirme Özet'in başında ve Menü'de */
+  .ui-nav-brand span b { font-size: 0.95rem; white-space: nowrap; }
+}

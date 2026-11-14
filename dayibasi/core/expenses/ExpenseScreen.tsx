@@ -71,6 +71,13 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   const [presetLink, setPresetLink] = useState<string | null>(null);
   const [stockItems, setStockItems] = useState<Item[]>([]);
   const [month, setMonth] = useState(todayIstanbul().slice(0, 7));
+  const ayAyarlandi = useRef(false);
+  useEffect(() => {
+    if (ayAyarlandi.current || !items) return;
+    ayAyarlandi.current = true;
+    const bu = todayIstanbul().slice(0, 7);
+    if (items.length && !items.some((e) => e.occurred_on.startsWith(bu))) setMonth(items.map((e) => e.occurred_on.slice(0, 7)).sort().at(-1)!);
+  }, [items]);
   const [mode, setMode] = useState<"ay" | "sezon">("ay");
   const bySeason = !!period && mode === "sezon";
   const [done, setDone] = useState<Done>(null);
@@ -268,7 +275,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
 
       {bySeason
         ? (periodSummary ? periodSummary(total, totalFx != null && total > 0 ? fmtFx(totalFx, doviz) : "") : <div className="ui-total"><span>{label} masraf</span><b>{formatTL(total)}</b>{totalFx != null && doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(totalFx, doviz)}</small>}</div>)
-        : summary ? summary(month, total) : <div className="ui-total"><span>Bu ay masraf</span><b>{formatTL(total)}</b>{totalFx != null && doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(totalFx, doviz)}</small>}</div>}
+        : summary ? summary(month, total) : <div className="ui-total"><span>{month === todayIstanbul().slice(0, 7) ? "Bu ay masraf" : `${monthName(month)} masrafı`}</span><b>{formatTL(total)}</b>{totalFx != null && doviz !== "kapali" && total > 0 && <small className="ui-fx ui-money">{fmtFx(totalFx, doviz)}</small>}</div>}
       {bySeason && perMonth.length > 0 && (
         <div className="ui-card ui-stack" style={{ gap: 10 }}>
           <b>Ay ay</b>
@@ -301,7 +308,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
         </div>
       )}
 
-      {items && inMonth.length === 0 && <div className="ui-empty">{bySeason ? "Bu sezon masraf yok." : "Bu ay masraf yok."}</div>}
+      {items && inMonth.length === 0 && <div className="ui-empty">{bySeason ? "Bu sezon masraf yok." : (month === todayIstanbul().slice(0, 7) ? "Bu ay masraf yok." : `${monthName(month)} için masraf yok.`)}</div>}
       <DeskTable rows={inMonth} rowKey={(e) => e.id} onRow={(e) => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}
         cols={[
           { label: "Tarih", cell: (e) => `${e.occurred_on.slice(8)}.${e.occurred_on.slice(5, 7)}.${e.occurred_on.slice(0, 4)}`, width: "110px" },

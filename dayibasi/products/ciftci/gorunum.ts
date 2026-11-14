@@ -40,7 +40,7 @@ export const NAV_CHOICES = ["ozet", "tarlalar", "masraf", "gelir", "depo", "fida
 export const NAV_SLOTS = 3;
 
 export type Gorunum = { cards: CardId[]; period: Period; nav: string[]; quick?: string[] };
-export const VARSAYILAN: Gorunum = { cards: ["kar", "hizli", "yeni", "yakin", "hava"], period: "sezon", nav: ["ozet", "tarlalar", "masraf"] };
+export const VARSAYILAN: Gorunum = { cards: ["kar", "hizli", "yeni", "yakin", "hava", "son"], period: "sezon", nav: ["ozet", "tarlalar", "masraf"] };
 
 /** Hazır görünümler: tek dokunuşla. */
 export const HAZIR: { id: string; label: string; hint: string; g: Gorunum }[] = [

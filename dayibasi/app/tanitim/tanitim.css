@@ -240,7 +240,8 @@ button.tn-btn:disabled { opacity: .4; cursor: default; }
 .tn-mk li::before { content: "✓"; position: absolute; left: 2px; font-weight: 800; color: #2e6a2b; }
 .tn-mk .git { align-self: flex-start; min-height: 48px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 14px; background: #16351c; color: #fff; font-weight: 800; text-decoration: none; }
 @media (min-width: 700px) { .tn-mkart { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 1100px) { .tn-mkart { grid-template-columns: repeat(4, 1fr); } }
+/* İki bölüm (tarla, fidan): bilgisayarda iki geniş kart; kart içinde liste iki sütun */
+@media (min-width: 1100px) { .tn-mkart .tn-mk ul { grid-template-columns: 1fr 1fr; column-gap: 24px; align-content: start; } }
 
 /* Etkileşimli parçalar */
 .kh, .dn, .ms { display: grid; gap: 20px; }

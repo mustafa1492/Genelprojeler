@@ -4,7 +4,7 @@ import { Nunito } from "next/font/google";
 // Logo yazısı: yuvarlak, kalın, Türkçe harfleri tam. Derlemede siteye gömülür, dışarıdan yüklenmez.
 const logoFont = Nunito({ subsets: ["latin", "latin-ext"], weight: ["900"], display: "swap" });
 import { NasilKullanilir } from "./NasilKullanilir";
-import { DenemeEkrani, KarHesap, ModulSecici } from "./Etkilesim";
+import { DenemeEkrani, KarHesap } from "./Etkilesim";
 
 // WhatsApp numarası: 90 ile başlayan, boşluksuz (ör. 905xxxxxxxxx). Boşsa düğme yerine not görünür.
 const WA_NUMARA = "";
@@ -103,7 +103,6 @@ export function TanitimSayfasi() {
               </div>
             ))}
           </div>
-          <ModulSecici />
           <div className="tn-yakinda">
             <h3>Yakında</h3>
             <p style={{ color: "#445248", margin: 0 }}>Bunlar üzerinde çalışıyoruz, henüz uygulamada yok:</p>
@@ -179,16 +178,15 @@ export function TanitimSayfasi() {
         </div>
       </section>
 
-      <section className="tn-bolum" id="iletisim" style={{ paddingTop: 0 }}>
+      {/* Numara gelene kadar bölüm hiç görünmez (ziyaretçi "yer tutucu" yazısı görmesin). Numara: WA_NUMARA, 90 ile başlayan 12 hane. */}
+      {WA_NUMARA && <section className="tn-bolum" id="iletisim" style={{ paddingTop: 0 }}>
         <div className="tn-ic">
           <div className="tn-iletisim">
             <div><h2>Bize ulaş</h2><p style={{ color: "#445248" }}>Takıldığın yer olursa WhatsApp'tan yaz, yardım edelim.</p></div>
-            {WA_NUMARA
-              ? <a className="tn-btn wa" href={`https://wa.me/${WA_NUMARA}?text=${encodeURIComponent(WA_MESAJ)}`} target="_blank" rel="noopener noreferrer">WhatsApp'tan yaz</a>
-              : <div className="tn-yer">[YER TUTUCU] WhatsApp numarası bekleniyor.</div>}
+            <a className="tn-btn wa" href={`https://wa.me/${WA_NUMARA}?text=${encodeURIComponent(WA_MESAJ)}`} target="_blank" rel="noopener noreferrer">WhatsApp'tan yaz</a>
           </div>
         </div>
-      </section>
+      </section>}
 
       <footer className="tn-alt">
         <div className="tn-ic">
