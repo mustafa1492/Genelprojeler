@@ -180,9 +180,9 @@ Puan: ★★★ çiftçinin işini çok azaltır · ★★ orta · ★ hoş ama 
 **Sıradaki (bu sırayla):**
 | Sıra | İş | Neden bu sırada | Dış şart |
 |---|---|---|---|
-| 1 | Otomatik denemeyi genişletmek (kayıt ekle/sil akışları) | Daha fazla özellikten önce güvenlik ağı | — |
-| 2 | Bilgisayar görünümü (Özet iki sütun, Tarlalar tablo, geniş ekran) | Kooperatif/firma görüşmelerinde bilgisayarda gösterilecek | — |
-| 3 | Fidan stoğundan ilan (WhatsApp'a tek dokunuşla) | Köy pazarına ilk küçük adım; gerçek kullanıcısı (Hüseyin) var | — |
+| 1 | ✅ (14 Kasım) Otomatik denemeyi genişletmek (kayıt ekle/sil akışları) | Daha fazla özellikten önce güvenlik ağı | — |
+| 2 | ✅ (14 Kasım) Bilgisayar görünümü (Özet iki sütun, Tarlalar tablo, geniş ekran) | Kooperatif/firma görüşmelerinde bilgisayarda gösterilecek | — |
+| 3 | ✅ (14 Kasım) Fidan stoğundan ilan (WhatsApp'a tek dokunuşla) | Köy pazarına ilk küçük adım; gerçek kullanıcısı (Hüseyin) var | — |
 | 4 | ÇKS ve destek takvimi | Tarihler Mustafa onaylayınca | Tarih onayı |
 | 5 | Veritabanı işleri tek oturumda: güvenlik uyarıları + gece yedeği (0013) + deneme izleri | Hepsi aynı onay penceresi | Supabase onayı |
 | 6 | E-postayla şifre sıfırlama | Gerçek kullanıcıdan önce şart | SMTP ayarı (Mustafa) |

@@ -185,3 +185,12 @@ Ekran görüntülerine tek tek bakılarak bulunan sorunlar ve yapılanlar. Hepsi
 | 3 | Tohum ve masraf yoktu | Tohum/fide önerileri; masraf formunda (Detaylandır → Not) Gübre, İlaç, Tohum türünde aynı öneriler |
 **Denendi:** derleme; 80 ekran açılışı sorun 0; altı iş tek tek ekranda (sahte sunucu). **Denenmedi:** gerçek telefon.
 
+## 11. Ek: plan §8'in ilk üç maddesi (14 Kasım gece)
+| İş | Ne oldu | Denendi |
+|---|---|---|
+| Otomatik deneme: kayıt akışları | `node scripts/deneme.cjs --akis` (ve `--bos`): masraf ekle, masraf sil + geri al, gelir ekle, tarla işi, hatırlatma, depo ekle, ＋ Ekle → Gelir. Her adımda "Kaydettim/Sildim" onayı **ve** sunucuya giden yazma isteği denetlenir | Dolu ve boş defterde sorun 0 |
+| Bilgisayar görünümü | Tarlalar bilgisayarda tablo: ürün, dekar, masraf, gelir, kâr/zarar (yazıyla), dekar başı masraf, son iş; satıra tıklayınca tarla açılır. Telefonda kartlar aynı. 1600 px üstü ekranda içerik daha geniş. Özet zaten iki sütunluydu | Ekran görüntüsü, 80 açılış |
+| Fidan stoğundan ilan | Fiyat listesinden WhatsApp paylaşımı zaten vardı. Stok ekranına tek dokunuşluk düğme eklendi: fiyat kayıtlıysa "Satılık listesini WhatsApp'ta paylaş" (boy, satılabilir adet, fiyat), fiyat yoksa "Fiyat yaz, sonra paylaş" fiyat listesini açar | Sahte veriyle iki durum |
+
+Kalan sıra (§8 4–12) dış şarta bağlı: ÇKS tarih onayı, Supabase onayı, SMTP, avukat, Google Play hesabı, servis maliyeti, görüşmeler.
+

@@ -91,6 +91,17 @@ export default function Fidan() {
         <BackButton onClick={back} label="Fidan" />
         <PageHeader sub="Son sayımlardan; satılan ve taşınan düşüldü" title="Stok" />
         {keys.length === 0 && <div className="ui-empty">Boy boy sayım yok. Partiye “+ Sayım” girip boyları yazınca burada görünür.</div>}
+        {keys.length > 0 && (() => {
+          // Tek dokunuşla satılık listesi: kayıtlı fiyat varsa doğrudan WhatsApp, yoksa fiyat listesi ekranı (Köy pazarına ilk adım)
+          const fiyat = pricesOf(biz);
+          const satir = keys.map((k) => ({ k, free: Math.max(0, (ready[k] ?? 0) - (reserved[k] ?? 0)) })).filter((x) => x.free > 0);
+          const metin = [`${biz.name} · satılık fidanlar`, `Tarih: ${dayYear(todayStr())}`, "",
+            ...satir.map((x) => `${x.k}: ${fmt(x.free)} adet${fiyat[x.k] ? ` · ${formatTL(fiyat[x.k])} / adet` : ""}`)].join("\n");
+          return <MainButton secondary disabled={satir.length === 0} onClick={() => {
+            if (!satir.some((x) => fiyat[x.k])) { setDone(null); setView({ v: "fiyat" }); return; }
+            window.open(`https://wa.me/?text=${encodeURIComponent(metin)}`, "_blank");
+          }}>{satir.some((x) => fiyat[x.k]) ? "Satılık listesini WhatsApp’ta paylaş" : "Fiyat yaz, sonra paylaş"}</MainButton>;
+        })()}
         {keys.map((k) => {
           const have = ready[k] ?? 0, res = reserved[k] ?? 0, free = have - res;
           return (
