@@ -40,6 +40,8 @@ export const useSeason = () => useContext(SeasonCtx)!;
 /** Sezon seçici (bütün sekmelerde ortak seçim). */
 export function SeasonPicker({ onManage }: { onManage?: () => void }) {
   const { seasons, selected, select, real } = useSeason();
+  // Tek sezon varken seçecek bir şey yok: çipler ekranın tepesini kaplamasın (sezon yönetimi Ayarlar → Sezonlar'da)
+  if (seasons.length <= 1) return null;
   return (
     <div className="ui-chips" role="group" aria-label="Sezon seç">
       {seasons.map((s) => <Chip key={s.id} selected={s.id === selected.id} onClick={() => select(s.id)}>{s.name}</Chip>)}

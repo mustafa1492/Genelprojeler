@@ -1,4 +1,5 @@
 "use client";
+import { UrunSec } from "@/core/catalog/UrunSec";
 import { useCList } from "../lists";
 import { DeskTable, Tag } from "@/core/ui/DeskTable";
 import { useAddToList, PickWithAdd } from "@/core/settings/lists";
@@ -227,7 +228,7 @@ function GelirForm({ places, beOf, lotInfo, type: t0, edit, lots = [], sizes = [
       )}
       {isSale && !isPlant && (
         <>
-          <TextField id="g_urun" label="Ürün" placeholder="Örnek: Zeytin" maxLength={40} value={crop} onChange={(e) => setCrop(e.target.value)} />
+          <UrunSec id="g_urun" label="Ürün" value={crop} onChange={setCrop} />
           <div className="ui-quickadd">
             <TextField id="g_miktar" label="Miktar" inputMode="decimal" placeholder="4500" maxLength={12} value={qty} onChange={(e) => setQty(e.target.value)} />
             <TextField id="g_fiyat" label="Birim fiyat (TL)" inputMode="decimal" placeholder="38" maxLength={12} value={price} onChange={(e) => setPrice(e.target.value)} />

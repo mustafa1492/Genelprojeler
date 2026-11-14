@@ -182,7 +182,7 @@ export function ModulSecici() {
               <p>Sadece <b>masraf ve gelir</b> defteri bile işini görür: ne harcadığını, ne kazandığını yaz.</p>
             )}
             <p>Ekran düzeni: <b>{gorunum}</b>{zor ? " ve Büyük yazı" : ""}. Bunu uygulamada Ayarlar → Ekranımı düzenle’den seçersin.</p>
-            <p className="ms-not">Hepsi ücretsiz ve aynı defterde. Kullanmadığın modül menüde görünmez.</p>
+            <p className="ms-not">Hepsi aynı defterde. Kullanmadığın bölüm menüde görünmez.</p>
             <a className="tn-btn ana" href="/ciftci?kayit=1">Hemen başla</a>
           </>
         )}

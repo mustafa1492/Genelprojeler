@@ -1,4 +1,5 @@
 "use client";
+import { UrunSec } from "@/core/catalog/UrunSec";
 import { useCList } from "../lists";
 import { listLots, type Lot } from "@/core/lots/api";
 import { AKTARIM, FIDAN_SATIS, hasFidan, lotStats, SAYIM } from "../fidan";
@@ -54,6 +55,7 @@ export default function Tarlalar() {
   useEffect(() => {
     if (tp.p.islem) { const e = events.find((x) => x.id === tp.p.islem); if (e?.place_id) { setDone(null); setView({ v: "islem", id: e.place_id, type: String(e.data.type), edit: e }); return; } }
     if (tp.p.tarla) setView({ v: "tarla", id: String(tp.p.tarla) });
+    if (tp.p.yeni && tp.n > 0) { setDone(null); setView({ v: "yeni" }); }
   }, [tp.n, events.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const find = (id: string) => (places ?? []).find((p) => p.id === id);
@@ -188,9 +190,9 @@ export default function Tarlalar() {
             </div>
           ))}
 
-          <h2 className="ui-section">Verim</h2>
-          {yields.length === 0 && <div className="ui-empty">Henüz verim girilmedi.</div>}
-          {yields.length > 0 && <Card><InfoRows rows={yields.map((e) => [`${String(e.data.year)} · ${String(e.data.crop || p.custom?.urun || "")}`,
+          <h2 className="ui-section">Yıllara göre ürün ve verim</h2>
+          {yields.length === 0 && <div className="ui-empty">Henüz verim girilmedi. Hasattan sonra "Verim gir" ile her yıl ne ektiğin ve ne aldığın burada birikir.</div>}
+          {yields.length > 0 && <Card><InfoRows rows={yields.slice().sort((a, b) => String(b.data.year).localeCompare(String(a.data.year))).map((e) => [`${String(e.data.year)} · ${String(e.data.crop || p.custom?.urun || "")}`,
             `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)}${st.donum ? ` · dekar başı ${Math.round(Number(e.quantity) / st.donum).toLocaleString("tr-TR")}` : ""}`] as [string, string])} /></Card>}
 
           {money && <h2 className="ui-section">{y} sezonu masrafları</h2>}
@@ -258,7 +260,7 @@ function TarlaForm({ edit, onSave, onCancel }: { edit?: Place; onSave: (name: st
       <PageHeader sub="Tarla" title={edit ? "Tarlayı düzenle" : "Yeni tarla"} />
       <TextField id="t_ad" label="Tarlanın adı" placeholder="Örnek: Kınık yolu, Dere kenarı" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
       <TextField id="t_donum" label="Kaç dekar? (isteğe bağlı)" inputMode="decimal" placeholder="Örnek: 12" maxLength={8} value={donum} onChange={(e) => setDonum(e.target.value)} />
-      <TextField id="t_urun" label="Ürün (isteğe bağlı)" placeholder="Örnek: Zeytin, Pamuk, Domates" maxLength={40} value={urun} onChange={(e) => setUrun(e.target.value)} />
+      <UrunSec id="t_urun" label="Ürün (isteğe bağlı)" value={urun} onChange={setUrun} />
       {isler.length > 1 && (
         <div className="ui-stack" style={{ gap: 8 }}>
           <span className="ui-label">Bu tarlada hangi iş?</span>
@@ -500,7 +502,7 @@ function VerimForm({ place, seasons, current, onSave, onCancel }: { place: Place
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub={place.name} title="Verim" />
       <div className="ui-chips">{ys.map((x) => <Chip key={x} selected={x === yy} onClick={() => setYy(x)}>{x}</Chip>)}</div>
-      <TextField id="v_urun" label="Ürün" placeholder="Örnek: Zeytin" maxLength={40} value={crop} onChange={(e) => setCrop(e.target.value)} />
+      <UrunSec id="v_urun" label="Ürün" value={crop} onChange={setCrop} />
       <TextField id="v_miktar" label="Ne kadar alındı?" inputMode="decimal" placeholder="Örnek: 4500" maxLength={12} value={amount} onChange={(e) => setAmount(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />
       <div className="ui-chips">{units.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div>
       {error && <ErrorText>{error}</ErrorText>}

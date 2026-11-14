@@ -35,19 +35,19 @@ export const QUICK: { id: string; label: string; emoji: string; to: string; para
 ];
 export const QUICK_DEFAULT = ["masraf", "gelir", "tarla", "fis"];
 
-/** Alt çubuğa konabilecek sekmeler (Menü hep sağda, sabit). */
+/** Alt çubuğa konabilecek sekmeler. Ortada "＋ Ekle", sağda "Menü" sabit; kişi 3 yeri seçer. */
 export const NAV_CHOICES = ["ozet", "tarlalar", "masraf", "gelir", "depo", "fidan", "takvim", "rapor", "vadeler", "kayitlar", "makineler", "belgeler"];
-export const NAV_SLOTS = 4;
+export const NAV_SLOTS = 3;
 
 export type Gorunum = { cards: CardId[]; period: Period; nav: string[]; quick?: string[] };
-export const VARSAYILAN: Gorunum = { cards: ["kar", "hizli", "yeni", "yakin", "hava"], period: "sezon", nav: ["ozet", "tarlalar", "masraf", "gelir"] };
+export const VARSAYILAN: Gorunum = { cards: ["kar", "hizli", "yeni", "yakin", "hava"], period: "sezon", nav: ["ozet", "tarlalar", "masraf"] };
 
 /** Hazır görünümler: tek dokunuşla. */
 export const HAZIR: { id: string; label: string; hint: string; g: Gorunum }[] = [
-  { id: "tarla", label: "Tarlacı", hint: "Tarla işi, hava, yaklaşanlar önde", g: { cards: ["hizli", "yakin", "hava", "kar"], period: "sezon", nav: ["ozet", "tarlalar", "masraf", "depo"] } },
-  { id: "fidan", label: "Fidancı", hint: "Fidan alt çubukta, aylık kâr", g: { cards: ["hizli", "kar", "yakin", "son"], period: "ay", nav: ["ozet", "fidan", "masraf", "gelir"] } },
-  { id: "para", label: "Sadece para", hint: "Kâr, borç, son kayıtlar", g: { cards: ["kar", "yakin", "son"], period: "ay", nav: ["ozet", "masraf", "gelir", "vadeler"] } },
-  { id: "sade", label: "En sade", hint: "Sadece hızlı düğmeler ve yaklaşanlar", g: { cards: ["hizli", "yakin"], period: "sezon", nav: ["ozet", "tarlalar", "masraf", "gelir"] } },
+  { id: "tarla", label: "Tarlacı", hint: "Tarla işi, hava, yaklaşanlar önde", g: { cards: ["hizli", "yakin", "hava", "kar"], period: "sezon", nav: ["ozet", "tarlalar", "depo"] } },
+  { id: "fidan", label: "Fidancı", hint: "Fidan alt çubukta, aylık kâr", g: { cards: ["hizli", "kar", "yakin", "son"], period: "ay", nav: ["ozet", "fidan", "masraf"] } },
+  { id: "para", label: "Sadece para", hint: "Kâr, borç, son kayıtlar", g: { cards: ["kar", "yakin", "son"], period: "ay", nav: ["ozet", "masraf", "vadeler"] } },
+  { id: "sade", label: "En sade", hint: "Sadece hızlı düğmeler ve yaklaşanlar", g: { cards: ["hizli", "yakin"], period: "sezon", nav: ["ozet", "tarlalar", "masraf"] } },
 ];
 
 export function useGorunum() {

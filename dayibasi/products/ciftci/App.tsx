@@ -30,6 +30,7 @@ import Fotograflar from "./screens/Fotograflar";
 import Duzenle from "./screens/Duzenle";
 import Menu from "./Menu";
 import { NAV_CHOICES, NAV_SLOTS, useGorunum } from "./gorunum";
+import { EkleSayfasi } from "./Ekle";
 import { ModulChip, ModulProvider, MODULLER, tabInModul, type Modul } from "./modul";
 
 const icon = (href: string) => navItems.find((n) => n.href === href)?.icon;
@@ -43,6 +44,7 @@ const NAVI = {
   makineler: nv(<><circle cx="7" cy="17" r="3" /><circle cx="18" cy="18" r="2" /><path d="M10 17h6M4 14V8h7l2 5h6v3M7 8V5" /></>),
   belgeler: nv(<><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9 13h6M9 17h6" /></>),
 };
+// Bilgisayarda yan menü yalnız "group"u olan sekmeleri gösterir. Fiş "＋ Yeni kayıt"ta, Listeler Ayarlar'da.
 const TABS: ShellTab[] = [
   { id: "ozet", label: "Özet", group: "Genel", emoji: "🏠", path: BASE, inNav: true, icon: icon(BASE), render: () => <Ana /> },
   { id: "tarlalar", label: "Tarlalar", group: "Tarla", emoji: "🌾", path: `${BASE}/tarlalar`, inNav: true, icon: icon(`${BASE}/tarlalar`), render: () => <Tarlalar /> },
@@ -55,10 +57,10 @@ const TABS: ShellTab[] = [
   { id: "belgeler", label: "Belgeler", icon: NAVI.belgeler, group: "Diğer", emoji: "📄", path: `${BASE}/belgeler`, inNav: false, render: () => <Belgeler /> },
   { id: "aile", label: "Aile", group: "Diğer", emoji: "👪", path: `${BASE}/aile`, inNav: false, render: () => <Aile /> },
   { id: "sezonlar", label: "Sezonlar", path: `${BASE}/sezonlar`, inNav: false, render: () => <Sezonlar /> },
-  { id: "listeler", label: "Listeler", group: "Diğer", emoji: "⚙️", path: `${BASE}/listeler`, inNav: false, render: () => <Listeler /> },
+  { id: "listeler", label: "Listeler", emoji: "⚙️", path: `${BASE}/listeler`, inNav: false, render: () => <Listeler /> },
   { id: "rapor", label: "Sezon raporu", short: "Rapor", icon: NAVI.rapor, group: "Para", emoji: "📊", path: `${BASE}/rapor`, inNav: false, render: () => <Rapor /> },
   { id: "kayitlar", label: "Kayıtlar", icon: NAVI.kayitlar, group: "Para", emoji: "📋", path: `${BASE}/kayitlar`, inNav: false, render: () => <Kayitlar /> },
-  { id: "fis", label: "Fiş yükle", group: "Para", emoji: "📷", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
+  { id: "fis", label: "Fiş yükle", emoji: "📷", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
   { id: "takvim", label: "Takvim", icon: NAVI.takvim, group: "Genel", emoji: "📅", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
   { id: "fotograflar", label: "Fotoğraflar", group: "Diğer", emoji: "🖼️", path: `${BASE}/fotograflar`, inNav: false, render: () => <Fotograflar /> },
@@ -97,5 +99,5 @@ function Inner({ initial, modul }: { initial: string; modul: Modul }) {
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
   if (!tabs.some((t) => t.id === start)) start = "ozet";
-  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span><ModulChip /></>} /></SeasonProvider>;
+  return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} add={(close) => <EkleSayfasi tabs={menuTabs} close={close} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span><ModulChip /></>} /></SeasonProvider>;
 }

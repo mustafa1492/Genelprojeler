@@ -110,7 +110,7 @@ export const BOLUMLER: Bolum[] = [
     konular: [
       {
         b: "Masraf yaz", k: "Gübre, ilaç, mazot, işçilik… Ne verdiysen.",
-        m: ["Özet’te “+ Masraf”a ya da Masraf’ta “+ Masraf ekle”ye dokun.", "“Ne için harcadın?” sorusunda türü seç: Tohum / fide, Gübre, İlaç, Mazot, İşçilik, Sulama / elektrik, Kira, Traktör / makine, Nakliye, Diğer.", "“Kaç TL?” yaz, tarihi ve tarlayı seç.", "İstersen not ve fişin fotoğrafını ekle, “Kaydet”e dokun."],
+        m: ["Alttaki yeşil “＋ Ekle”ye, sonra “Masraf”a dokun (Özet’teki “+ Masraf” da aynı yere gider).", "“Ne için harcadın?” sorusunda türü seç: Tohum / fide, Gübre, İlaç, Mazot, İşçilik, Sulama / elektrik, Kira, Traktör / makine, Nakliye, Diğer.", "“Kaç TL?” yaz, tarihi ve tarlayı seç.", "İstersen not ve fişin fotoğrafını ekle, “Kaydet”e dokun."],
         ekran: { baslik: "Ne için harcadın?", secim: [{ ad: "Gübre", on: true }, { ad: "İlaç" }, { ad: "Mazot" }, { ad: "İşçilik" }], alanlar: [["Kaç TL?", "18.400"], ["Tarla", "Kınık yolu"]], dugme: "Kaydet" },
       },
       {
@@ -142,7 +142,7 @@ export const BOLUMLER: Bolum[] = [
     konular: [
       {
         b: "Satış yaz", k: "Ürününü sattın.",
-        m: ["Özet’te “+ Gelir”e dokun, “Hasat satışı”nı seç.", "Ürünü, miktarı ve birim fiyatını yaz; toplamı kendisi hesaplar.", "Tarlayı seçersen tarlanın başabaş fiyatı da görünür.", "İstersen “Kime sattın?” yaz. Örnek: “Tüccar Ahmet”."],
+        m: ["Alttaki “＋ Ekle” → “Gelir”e (ya da Özet’te “+ Gelir”e) dokun, “Hasat satışı”nı seç.", "Ürünü, miktarı ve birim fiyatını yaz; toplamı kendisi hesaplar.", "Tarlayı seçersen tarlanın başabaş fiyatı da görünür.", "İstersen “Kime sattın?” yaz. Örnek: “Tüccar Ahmet”."],
         ekran: { baslik: "Yeni gelir", alanlar: [["Ürün", "Pamuk"], ["Miktar", "4.000 kg"], ["Birim fiyat (TL)", "24"]], kartlar: [["Toplam", "96.000 TL"]], dugme: "Kaydet" },
       },
       {
@@ -200,7 +200,7 @@ export const BOLUMLER: Bolum[] = [
     konular: [
       {
         b: "Hatırlatma ekle", k: "Unutmak istemediğin her şey.",
-        m: ["Menü’den “Takvim”e gir, “+ Hatırlatma ekle”ye dokun.", "Hazırlardan seç (İlaçlama, Gübre, Sulama, Hasat, Kira ödemesi, Kredi taksiti, ÇKS başvurusu, Traktör muayenesi) ya da kendin yaz.", "Günü ve istersen tarlayı seç, “Kaydet”e dokun.", "Günü gelince Özet’te çıkar; yapınca “Yapıldı”ya dokun."],
+        m: ["Alttaki “＋ Ekle” → “Hatırlatma”ya ya da Menü’den “Takvim”e girip “+ Hatırlatma ekle”ye dokun.", "Hazırlardan seç (İlaçlama, Gübre, Sulama, Hasat, Kira ödemesi, Kredi taksiti, ÇKS başvurusu, Traktör muayenesi) ya da kendin yaz.", "Günü ve istersen tarlayı seç, “Kaydet”e dokun.", "Günü gelince Özet’te çıkar; yapınca “Yapıldı”ya dokun."],
         ekran: { baslik: "Ne zaman, ne yapılacak?", alanlar: [["Ne yapılacak?", "Mısıra ikinci gübre"], ["Hangi gün?", "Yarın"], ["Hangi tarla?", "Dere kenarı"]], dugme: "Kaydet" },
       },
       {
@@ -239,7 +239,7 @@ export const BOLUMLER: Bolum[] = [
     konular: [
       {
         b: "Fiş yükle", k: "Tarlada vaktin yoksa fotoğrafını çek, geç.",
-        m: ["Özet’te “Fiş”e ya da tarlada “Fiş yükle”ye dokun.", "Fişin fotoğrafını çek.", "İstersen tarlayı seç ve not yaz. Örnek: “Mazot, traktör için”.", "“Gönder”e dokun. Fiş kutuya kondu."],
+        m: ["Alttaki “＋ Ekle” → “Fiş fotoğrafı”na ya da tarlada “Fiş yükle”ye dokun.", "Fişin fotoğrafını çek.", "İstersen tarlayı seç ve not yaz. Örnek: “Mazot, traktör için”.", "“Gönder”e dokun. Fiş kutuya kondu."],
         ekran: { baslik: "Fiş yükle", alanlar: [["Hangi tarla için?", "Genel"], ["Not", "Mazot, traktör için"]], dugme: "Gönder" },
       },
       {
@@ -277,7 +277,7 @@ export const BOLUMLER: Bolum[] = [
       },
       {
         b: "Geçmiş", k: "Kim, ne zaman, ne değiştirdi.",
-        m: ["Ayarlar’da ya da ekranların üstündeki “Geçmiş”e dokun.", "Aileden ya da çalışanlardan kimin ne eklediğini, neyi değiştirdiğini görürsün.", "Geçmişe bakmak için internet gerekir."],
+        m: ["Ekranların üstündeki “Geçmiş”e ya da Menü → “Kayıtlar ve geçmiş”e dokun.", "Aileden ya da çalışanlardan kimin ne eklediğini, neyi değiştirdiğini görürsün.", "Geçmişe bakmak için internet gerekir."],
       },
     ],
   },

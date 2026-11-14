@@ -8,6 +8,7 @@ import { formatTL } from "@/core/ledger/api";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { BackButton, Chip, PageHeader, TextField } from "@/core/ui";
+import { HistoryLink } from "../nav";
 import { GELIR, ISLEM } from "../kayit";
 import { DeskTable, Tag } from "@/core/ui/DeskTable";
 
@@ -53,7 +54,7 @@ export default function Kayitlar() {
   return (
     <main className="ui-stack">
       <BackButton onClick={() => back()} label="Geri" />
-      <PageHeader sub="Masraf, gelir, tarla işleri" title="Kayıtlar" />
+      <PageHeader sub="Masraf, gelir, tarla işleri" title="Kayıtlar" right={<HistoryLink />} />
       <div className="ui-chips wrap">
         <Chip selected={!kind} onClick={() => setKind(null)}>Hepsi</Chip>
         {(["Masraf", "Gelir", "Tarla işi"] as const).map((k) => <Chip key={k} selected={kind === k} onClick={() => setKind(k)}>{k}</Chip>)}

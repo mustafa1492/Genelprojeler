@@ -17,9 +17,11 @@ const TabIdCtx = createContext<string>("");
 /**
  * navIds: telefonda alt çubukta görünecek sekmeler (sırayla); yoksa inNav olanlar.
  * menu: verilirse alt çubuğun sağında "Menü" tuşu çıkar, alttan açılan bir sayfa gösterir.
+ * add: verilirse alt çubuğun ortasında "＋ Ekle" tuşu çıkar (her ekrandan tek dokunuşla yeni kayıt); bilgisayarda yan menünün başında.
  */
-export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: { tabs: ShellTab[]; initial: string; initialParams?: Params; brand?: React.ReactNode; navIds?: string[]; menu?: (close: () => void) => React.ReactNode }) {
+export function TabShell({ tabs, initial, initialParams, brand, navIds, menu, add }: { tabs: ShellTab[]; initial: string; initialParams?: Params; brand?: React.ReactNode; navIds?: string[]; menu?: (close: () => void) => React.ReactNode; add?: (close: () => void) => React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [active, setActive] = useState(initial);
   const [visited, setVisited] = useState<string[]>([initial]);
   const [resets, setResets] = useState<Record<string, number>>({});
@@ -31,7 +33,7 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
   const go = useCallback((id: string, p?: Params, isBack?: boolean) => {
     const t = tabs.find((x) => x.id === id);
     if (!t) return;
-    setMenuOpen(false);
+    setMenuOpen(false); setAddOpen(false);
     if (!isBack && id !== active) { hist.current.push(active); if (hist.current.length > 40) hist.current.shift(); }
     scrolls.current[active] = window.scrollY;
     if (p) setParams((s) => ({ ...s, [id]: { p, n: (s[id]?.n ?? 0) + 1 } }));
@@ -70,11 +72,18 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
   const navTabs = navIds ? navIds.map((id) => tabs.find((t) => t.id === id)).filter((t): t is ShellTab => !!t) : tabs.filter((t) => t.inNav);
   const navActive = navTabs.some((t) => t.id === active) ? active : "";
   useEffect(() => {
-    if (!menuOpen) return;
-    const k = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    if (!menuOpen && !addOpen) return;
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape") { setMenuOpen(false); setAddOpen(false); } };
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
-  }, [menuOpen]);
+  }, [menuOpen, addOpen]);
+  const half = Math.ceil(navTabs.length / 2);
+  const navLink = (t: ShellTab) => (
+    <a key={t.id} href={t.path} className="m" aria-current={navActive === t.id ? "page" : undefined}
+      onClick={(e) => { e.preventDefault(); navTap(t.id); }}>
+      {t.icon ?? <em className="ui-nav-emoji" aria-hidden="true">{t.emoji ?? "•"}</em>}<span>{t.short ?? t.label}</span>
+    </a>
+  );
 
   return (
     <ShellCtx.Provider value={ctx}>
@@ -87,14 +96,15 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
         ))}
       </div>
       <nav className="ui-nav" aria-label="Ana menü">
-        {navTabs.map((t) => (
-          <a key={t.id} href={t.path} className="m" aria-current={navActive === t.id ? "page" : undefined}
-            onClick={(e) => { e.preventDefault(); navTap(t.id); }}>
-            {t.icon ?? <em className="ui-nav-emoji" aria-hidden="true">{t.emoji ?? "•"}</em>}<span>{t.short ?? t.label}</span>
-          </a>
-        ))}
+        {(add ? navTabs.slice(0, half) : navTabs).map(navLink)}
+        {add && (
+          <button type="button" className="m ui-nav-ekle" aria-expanded={addOpen} onClick={() => { setMenuOpen(false); setAddOpen((o) => !o); }}>
+            <b aria-hidden="true">＋</b><span>Ekle</span>
+          </button>
+        )}
+        {add && navTabs.slice(half).map(navLink)}
         {menu && (
-          <button type="button" className="m ui-nav-menu" aria-expanded={menuOpen} aria-current={!navActive && !menuOpen ? "page" : undefined} onClick={() => setMenuOpen((o) => !o)}>
+          <button type="button" className="m ui-nav-menu" aria-expanded={menuOpen} aria-current={!navActive && !menuOpen ? "page" : undefined} onClick={() => { setAddOpen(false); setMenuOpen((o) => !o); }}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5" /><rect x="14" y="4" width="6" height="6" rx="1.5" /><rect x="4" y="14" width="6" height="6" rx="1.5" /><rect x="14" y="14" width="6" height="6" rx="1.5" /></svg>
             <span>Menü</span>
           </button>
@@ -102,6 +112,7 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
         {/* Bilgisayar: gruplu yan menü (telefonda gizli) */}
         <div className="ui-nav-desk">
           {brand && <div className="ui-nav-brand">{brand}</div>}
+          {add && <button type="button" className="ui-nav-desk-ekle" aria-expanded={addOpen} onClick={() => setAddOpen((o) => !o)}>＋ Yeni kayıt</button>}
           {[...new Set(tabs.filter((t) => t.group).map((t) => t.group!))].map((g) => (
             <div key={g} className="ui-nav-grp">
               <div className="ui-nav-gl">{g}</div>
@@ -115,6 +126,14 @@ export function TabShell({ tabs, initial, initialParams, brand, navIds, menu }: 
           ))}
         </div>
       </nav>
+      {add && addOpen && (
+        <div className="ui-sheet-bg ekle" onClick={() => setAddOpen(false)}>
+          <div className="ui-sheet" role="dialog" aria-modal="true" aria-label="Ne eklemek istiyorsun?" onClick={(e) => e.stopPropagation()}>
+            <div className="ui-sheet-bas"><b>Ne eklemek istiyorsun?</b><button type="button" aria-label="Kapat" onClick={() => setAddOpen(false)}>✕</button></div>
+            {add(() => setAddOpen(false))}
+          </div>
+        </div>
+      )}
       {menu && menuOpen && (
         <div className="ui-sheet-bg" onClick={() => setMenuOpen(false)}>
           <div className="ui-sheet" role="dialog" aria-modal="true" aria-label="Menü" onClick={(e) => e.stopPropagation()}>

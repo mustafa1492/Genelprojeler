@@ -35,18 +35,19 @@ export default function Ana() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
+  const [yuklendi, setYuklendi] = useState({ exp: false, places: false });
   const { selected: S, seasons } = useSeason();
   const go = useGo();
   const { sees, writes } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
   const can = (s: string, w = 1) => !off.includes(s) && (w === 2 ? writes(s) : sees(s));
   const load = useCallback(() => {
-    listExpenses(biz.id).then(setExp).catch(() => {});
+    listExpenses(biz.id).then((x) => { setExp(x); setYuklendi((y) => ({ ...y, exp: true })); }).catch(() => {});
     Promise.all([listEvents(biz.id, GELIR), listEvents(biz.id, ISLEM), listEvents(biz.id, HATIRLAT), listEvents(biz.id, MAKINE)]).then(([a, b, c, d]) => setEv([...a, ...b, ...c, ...d])).catch(() => {});
     listDues(biz.id).then(setDues).catch(() => {});
     listDocs(biz.id).then(setDocs).catch(() => {});
     listItems(biz.id).then(setItems).catch(() => {});
-    listPlaces(biz.id).then(setPlaces).catch(() => {});
+    listPlaces(biz.id).then((x) => { setPlaces(x); setYuklendi((y) => ({ ...y, places: true })); }).catch(() => {});
   }, [biz.id]);
   useEffect(load, [load]);
   useOnActivate(load);
@@ -234,6 +235,7 @@ export default function Ana() {
       <div className="ozet-selam">{selam}{myName ? `, ${myName}` : ""} <ModulChip /></div>
       <PageHeader title={biz.name} right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}>{can("rapor") && !g.cards.includes("kar") && <span className="ozet-gizle"><PrivacyButton /></span>}<HistoryLink /></span>} />
       {biz.settings?.demo === true && <p className="ui-note">Deneme hesabı: buradaki kayıtlar uydurma örnek veridir. Kayıt ekleyip deneyebilirsiniz; örnek kayıtlar silinmez.</p>}
+      {yuklendi.exp && yuklendi.places && can("masraf", 2) && can("tarlalar", 2) && <Baslarken bizId={biz.id} tarla={places.length > 0} masraf={exp.length > 0} go={go} />}
       {can("rapor") && g.period === "sezon" && g.cards.includes("kar") && <SeasonPicker onManage={() => go("sezonlar")} />}
       {shown.map((id) => {
         const i = g.cards.indexOf(id);
@@ -257,3 +259,28 @@ export default function Ana() {
     </main>
   );
 }
+
+/** İlk açılış rehberi: yeni defterde 3 adım. Adımlar kayıt girildikçe kendiliğinden işaretlenir; bitince ya da "Gizle" ile kaybolur. */
+function Baslarken({ bizId, tarla, masraf, go }: { bizId: string; tarla: boolean; masraf: boolean; go: (id: string, p?: Record<string, number>) => void }) {
+  const key = `ko:baslarken:${bizId}`;
+  const [gizli, setGizli] = useState(true);
+  useEffect(() => { try { setGizli(localStorage.getItem(key) === "1"); } catch { setGizli(false); } }, [key]);
+  if (gizli || (tarla && masraf)) return null;
+  const gizle = () => { setGizli(true); try { localStorage.setItem(key, "1"); } catch { /* yok */ } };
+  const adim = (bitti: boolean, no: number, yazi: string, dugme: string, to: string, p?: Record<string, number>) => (
+    <div className="baslarken-adim" data-bitti={bitti ? "" : undefined}>
+      <em aria-hidden="true">{bitti ? "✓" : no}</em>
+      <span>{yazi}{bitti && <small> · tamam</small>}</span>
+      {!bitti && dugme && <button type="button" onClick={() => go(to, p)}>{dugme}</button>}
+    </div>
+  );
+  return (
+    <section className="ui-card baslarken" aria-label="Başlarken">
+      <div className="baslarken-bas"><b>Başlarken</b><button type="button" className="ui-link inline" onClick={gizle}>Gizle</button></div>
+      {adim(tarla, 1, "Tarlanı ekle (adı, kaç dekar, ne ektin)", "Tarla ekle", "tarlalar", { yeni: 1 })}
+      {adim(masraf, 2, "İlk masrafını yaz (gübre, mazot, ilaç…)", "Masraf yaz", "masraf", { yeni: 1 })}
+      {adim(false, 3, "Kâr kartına bak: ne harcadın, ne kazandın, burada görünür", "", "ozet")}
+    </section>
+  );
+}
+

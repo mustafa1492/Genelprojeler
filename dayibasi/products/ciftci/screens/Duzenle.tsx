@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useGo, useBack } from "@/core/shell/TabShell";
 import { BackButton, PageHeader } from "@/core/ui";
 import { CARDS, HAZIR, NAV_SLOTS, PERIODS, QUICK, QUICK_DEFAULT, VARSAYILAN, useGorunum, type CardId } from "../gorunum";
@@ -105,17 +105,20 @@ export default function Duzenle({ choices }: { choices: { id: string; label: str
         </div>
       )}
 
-      <div className="mn-grp"><span>Alt çubuk (4 yer + Menü)</span>
+      <div className="mn-grp"><span>Alt çubuk (3 yer + Ekle + Menü)</span>
         <div className="mn-cubuk">
           {nav.map((id, i) => (
-            <select key={i} aria-label={`Alt çubuk ${i + 1}. yer`} value={id} onChange={(e) => setSlot(i, e.target.value)}>
-              {!id && <option value="">Boş</option>}
-              {choices.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-            </select>
+            <Fragment key={i}>
+              {i === Math.ceil(NAV_SLOTS / 2) && <span>＋ Ekle</span>}
+              <select aria-label={`Alt çubuk ${i + 1}. yer`} value={id} onChange={(e) => setSlot(i, e.target.value)}>
+                {!id && <option value="">Boş</option>}
+                {choices.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </Fragment>
           ))}
           <span>Menü</span>
         </div>
-        <small style={{ color: "var(--sessiz2)", fontWeight: 600, marginLeft: 4 }}>Bir yere dokun, oraya ne geleceğini seç. Menü hep sağda kalır.</small>
+        <small style={{ color: "var(--sessiz2)", fontWeight: 600, marginLeft: 4 }}>Bir yere dokun, oraya ne geleceğini seç. Ortadaki "＋ Ekle" ve sağdaki Menü sabit.</small>
       </div>
 
       {done && <div className="ui-done" role="status"><span>{done}</span></div>}

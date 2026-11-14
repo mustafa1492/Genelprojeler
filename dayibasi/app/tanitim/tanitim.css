@@ -69,6 +69,7 @@
 .m-pill { font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #fff0d9; color: #7a3d00; }
 .m-alt { display: grid; grid-template-columns: repeat(5, 1fr); background: #fff; border-top: 1px solid #dfe6dd; margin: 10px -12px 0; padding: 8px 0 12px; text-align: center; font-size: 0.65rem; font-weight: 700; color: #59665d; }
 .m-alt b { color: #2e6a2b; }
+.m-alt .m-ekle { justify-self: center; display: grid; place-items: center; width: 26px; height: 26px; margin-top: -10px; border-radius: 999px; background: #2e6a2b; color: #fff; font-size: 1rem; font-weight: 800; }
 .tn-pc { background: #cfd8cd; border-radius: 14px; padding: 10px; }
 .tn-pc .ekran { background: #eef2ed; border-radius: 8px; display: grid; grid-template-columns: 170px 1fr; min-height: 360px; overflow: hidden; font-size: 0.8rem; }
 .tn-pc .yan { background: #16351c; color: #c9dcc6; padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; }

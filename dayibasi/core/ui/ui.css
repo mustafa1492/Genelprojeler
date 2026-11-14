@@ -690,3 +690,35 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 .mn-grp > span { font-size: 1rem; text-transform: none; letter-spacing: 0; }
 .ui-liste-sec > button small, .ui-pick-liste > button small, .yetki-roller button small, .yetki-tablo th, .yetki-tablo td small { font-size: 0.9rem; }
 .mn-liste .mn-seg { display: grid; flex: none; } /* (15) döviz seçenekleri yan yana: .mn-liste div kuralı eziyordu */
+
+/* Alt çubuğun ortasında "＋ Ekle": her ekrandan tek dokunuşla yeni kayıt */
+.ui-nav button.ui-nav-ekle { all: unset; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 2px; min-width: 0;
+  color: var(--ana-yazi); font-size: 0.75rem; font-weight: 800; cursor: pointer; }
+.ui-nav button.ui-nav-ekle b { display: grid; place-items: center; width: 52px; height: 52px; margin-top: -18px; border-radius: 999px; background: var(--ana); color: #fff;
+  font-size: 1.9rem; font-weight: 700; line-height: 1; box-shadow: 0 4px 12px rgba(30, 60, 30, 0.28); border: 3px solid var(--zemin); }
+.ui-nav button.ui-nav-ekle[aria-expanded="true"] b { background: var(--ana-koyu); }
+.ui-nav button.ui-nav-ekle:focus-visible b { outline: 3px solid var(--ana); outline-offset: 2px; }
+.ui-ekle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ui-ekle button { font: inherit; min-height: 96px; border-radius: 18px; border: 2px solid var(--cizgi2); background: var(--kart); color: var(--yazi); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 1.05rem; box-shadow: var(--golge); }
+.ui-ekle button em { font-style: normal; font-size: 1.9rem; line-height: 1; }
+.ui-ekle button small { font-size: 0.85rem; font-weight: 600; color: var(--sessiz2); }
+.ui-ekle button:active { background: var(--ana-acik); }
+.ui-nav-desk-ekle { display: none; }
+@media (min-width: 900px) {
+  .ui-nav button.ui-nav-ekle { display: none; }
+  .ui-nav-desk-ekle { display: block; font: inherit; margin: 0 4px 10px; min-height: 48px; border-radius: 12px; border: 0; background: #fff; color: var(--koyu, #16301A); font-weight: 800; cursor: pointer; }
+  .ui-sheet-bg.ekle { display: flex; align-items: center; justify-content: center; }
+  .ui-sheet-bg.ekle .ui-sheet { max-width: 520px; border-radius: 24px; padding-bottom: 20px; }
+  .ui-ekle { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Özet: ilk açılış rehberi (Başlarken) */
+.baslarken { display: flex; flex-direction: column; gap: 10px; border: 2px solid var(--ana-orta); }
+.baslarken-bas { display: flex; justify-content: space-between; align-items: center; }
+.baslarken-bas b { font-size: 1.15rem; }
+.baslarken-adim { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; min-height: 52px; }
+.baslarken-adim em { font-style: normal; width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--notr); color: var(--yazi); font-weight: 800; }
+.baslarken-adim[data-bitti] em { background: var(--ana); color: #fff; }
+.baslarken-adim[data-bitti] span { color: var(--sessiz); }
+.baslarken-adim button { font: inherit; font-weight: 800; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--ana); color: #fff; cursor: pointer; white-space: nowrap; }

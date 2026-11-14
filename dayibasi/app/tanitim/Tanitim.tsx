@@ -13,12 +13,12 @@ const WA_MESAJ = "Merhaba, Çiftçi Defteri hakkında bir sorum var.";
 // Tanıtım sayfası: "/" (ana sayfa) ve "/tanitim" bunu gösterir. İletişim onay bekliyor (docs/moduller/tanitim.md).
 // Paketler/fiyatlar şimdilik kaldırıldı (ücret alınmıyor); eski hâli cep.tsx'te saklı.
 export const baslik = "Çiftçi Defteri: tarlanın hesabı cebinde";
-export const aciklama = "Masrafını, gelirini, tarlanı ve fidanını telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör. Ücretsiz.";
+export const aciklama = "Masrafını, gelirini, tarlanı ve fidanını telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör.";
 export const ogResim = { url: "/tanitim/opengraph-image.png", width: 1200, height: 630, alt: "Çiftçi Defteri: tarlanın hesabı cebinde" };
 
 const MODULLER = [
   { id: "tarla", rehber: "tarlalar", ik: "🌾", kisa: "Tarla", ad: "Tarla ve para", soz: "Her çiftçinin defteri. Herkese açık.",
-    ne: ["Tarlalar, tapudan parsel", "Masraf, gelir, veresiye", "İlaçlama, gübre, sulama, verim", "Depo, makineler, takvim", "Sezon raporu (PDF, Excel)"] },
+    ne: ["Tarlalar, tapudan parsel", "Masraf, gelir, veresiye", "İlaçlama, gübre, sulama, verim", "Yıllara göre ürün ve verim", "Depo, makineler, takvim", "Sezon raporu (PDF, Excel)"] },
   { id: "fidan", rehber: "fidan", ik: "🌱", kisa: "Fidan", ad: "Fidancılık", soz: "Partiden satışa fidanın hesabı.",
     ne: ["Dikim partileri ve boy boy sayım", "Fidan başı maliyet, önerilen fiyat", "Sipariş, kapora, sevk listesi", "Müşteriler ve alacak"] },
 ];
@@ -50,7 +50,7 @@ const sss = [
   { s: "Bilgilerim güvende mi? Kim görür?", c: "Defterini yalnızca sen ve senin eklediğin aile üyeleri ya da çalışanlar görür. Çalışanın parayı görüp görmeyeceğine sen karar verirsin. Bilgilerin kimseyle paylaşılmaz, satılmaz." },
   { s: "Excel'e aktarabilir miyim?", c: "Evet. Sezon raporu ve masraf-gelir listeleri Excel dosyası olarak iner. Ayarlar'dan bütün kayıtlarını tek dosyada indirebilirsin." },
   { s: "Bilgisayarda da açılır mı?", c: "Evet. Aynı defter telefonda da bilgisayarda da açılır. Bilgisayarda yan menü ve geniş tablolar görünür." },
-  { s: "Ücretli mi?", c: "Hayır. Çiftçi Defteri ücretsizdir; bütün bölümler herkese açık." },
+  { s: "Ücretli mi?", c: "Şu an deneme sürümündedir, ücret alınmaz. İleride bir ücret konuşulursa önceden haber verilir. Kayıtların her zaman senindir; Excel olarak indirebilirsin." },
   { s: "Telefonuma ayrıca bir şey yüklemem gerekir mi?", c: "Gerekmez. Adresi açıp giriş yapman yeterli. İstersen ana ekrana ekleyip uygulama gibi kullanırsın." },
 ];
 
@@ -81,7 +81,7 @@ export function TanitimSayfasi() {
               <a className="tn-btn ana" href="/ciftci?kayit=1">Hemen başla</a>
               <a className="tn-btn cizgi" href="/ciftci">Giriş yap</a>
             </div>
-            <p className="not">Ücretsiz. Kredi kartı istemez.</p>
+            <p className="not">Deneme sürümü: ücret alınmaz, kredi kartı istemez.</p>
             <div className="tn-hmodul" aria-label="Modüller">
               {MODULLER.map((m) => <a key={m.id} href="#moduller"><span aria-hidden>{m.ik}</span>{m.kisa}</a>)}
             </div>
@@ -92,8 +92,8 @@ export function TanitimSayfasi() {
 
       <section className="tn-bolum tn-moduller" id="moduller">
         <div className="tn-ic">
-          <h2>İşine göre modülünü seç</h2>
-          <p className="tn-alt-baslik">Tarlan da olsa, fidanın, kümesin ya da ahırın da olsa hepsi aynı defterde. Kullanmadığın modül menüde görünmez.</p>
+          <h2>Tarla da, fidan da aynı defterde</h2>
+          <p className="tn-alt-baslik">Her çiftçinin defteri tarla ve para. Fidan yetiştiriyorsan fidan bölümü açılır; kullanmadığın bölüm menüde görünmez.</p>
           <div className="tn-mkart">
             {MODULLER.map((m) => (
               <div className={"tn-mk " + m.id} key={m.id}>
@@ -109,7 +109,8 @@ export function TanitimSayfasi() {
             <p style={{ color: "#445248", margin: 0 }}>Bunlar üzerinde çalışıyoruz, henüz uygulamada yok:</p>
             <ul>
               <li>Dekar başı ve kilo başı kâr, girdi fiyatlarının yıllara göre karşılaştırması</li>
-              <li>Hangi yıl hangi tarlaya ne ekildi tablosu</li>
+              <li>Köy pazarı: köyündeki çiftçilerle saman, fide ve fidan alıp satma; makine ve işçilik ilanları</li>
+              <li>Sesle masraf yazma ve fiş fotoğrafından masrafı kendiliğinden doldurma</li>
               <li>Hava durumuna göre ilaçlama saati önerisi</li>
               <li>Google Play'den indirilebilen Android uygulaması</li>
             </ul>
@@ -211,7 +212,7 @@ function Telefon() {
         <div className="m-kart"><span>Ova tarlası ilaçlama</span><span className="m-pill">Yarın</span></div>
         <div className="m-kart"><span>Gübre (20 çuval)</span><span>18.400 TL</span></div>
         <div className="m-kart"><span>Pamuk satışı</span><span>96.000 TL</span></div>
-        <div className="m-alt"><b>Özet</b><span>Tarlalar</span><span>Masraf</span><span>Depo</span><span>Menü</span></div>
+        <div className="m-alt"><b>Özet</b><span>Tarlalar</span><span className="m-ekle">＋</span><span>Masraf</span><span>Menü</span></div>
       </div>
     </div>
   );
