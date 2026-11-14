@@ -127,9 +127,13 @@ function Login({ appName }: { appName: string }) {
       else { setInfo("E-postana şifre yenileme bağlantısı gönderdim. Ona dokun, yeni şifreni yaz."); setMode("giris"); }
       return;
     }
+    // "Yeni hesap aç"ta kullanıcı adı (@ yok) yazıldıysa kişinin zaten hesabı vardır: giriş yapmayı dene.
+    // (Tanıtım sayfasındaki "Hemen başla" kayıt ekranını açar; deneme hesabıyla gelenler orada takılıyordu.)
+    let kip = mode;
+    if (kip === "kayit" && !email.includes("@")) { kip = "giris"; setMode("giris"); setInfo("Kullanıcı adıyla yeni hesap açılmaz; hesabına giriş yapıyorum."); }
     // Yanıt gelmezse (telefonda takılma) sayfayı yenile: oturum kaydedildiyse içeri girer.
     const stuck = setTimeout(() => location.reload(), 15000);
-    const { data, error } = mode === "giris"
+    const { data, error } = kip === "giris"
       ? await sb.signInWithPassword({ email: toEmail(email), password })
       : await sb.signUp({ email: toEmail(email), password });
     clearTimeout(stuck);
@@ -145,7 +149,7 @@ function Login({ appName }: { appName: string }) {
         error.status === 0 || !error.status ? "İnternet yok gibi. Bağlantını kontrol et." :
         "Olmadı, tekrar dene.",
       );
-    } else if (mode === "kayit" && !data.session) {
+    } else if (kip === "kayit" && !data.session) {
       setInfo("E-postana bir bağlantı gönderdim. Ona dokun, sonra buradan giriş yap.");
       setMode("giris");
     }
@@ -166,8 +170,9 @@ function Login({ appName }: { appName: string }) {
       <section className="ui-auth-kart">
         <h1>{title}</h1>
         <p className="ui-auth-lead">{lead}</p>
+        {mode === "kayit" && <p className="ui-auth-lead" style={{ marginTop: -6 }}><b>Hesabın var mı?</b> <button type="button" className="ui-link inline" onClick={() => { setMode("giris"); setError(""); }}>Giriş yap</button></p>}
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <TextField id="email" label={mode === "giris" ? "E-posta ya da kullanıcı adı" : "E-posta"} type={mode === "giris" ? "text" : "email"} maxLength={254} autoCapitalize="none" autoCorrect="off" autoComplete="email" inputMode="email" required
+          <TextField id="email" label={mode === "unuttum" ? "E-posta" : mode === "giris" ? "E-posta ya da kullanıcı adı" : "E-posta (hesabın varsa kullanıcı adın)"} type={mode === "unuttum" ? "email" : "text"} maxLength={254} autoCapitalize="none" autoCorrect="off" autoComplete="email" inputMode="email" required
             value={email} onChange={(e) => setEmail(e.target.value)} />
           {mode !== "unuttum" && (
             <TextField id="password" label={mode === "kayit" ? "Şifre (en az 8 harf ya da rakam)" : "Şifre"} type="password" required
