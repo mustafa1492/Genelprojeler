@@ -78,6 +78,7 @@ export function TanitimSayfasi() {
       <section className="tn-kahraman">
         <div className="tn-ic">
           <div>
+            <p style={{ margin: "0 0 8px", fontWeight: 800, letterSpacing: "0.02em" }}>Çiftçi Defteri · çiftçiler için masraf ve gelir kaydı</p>
             <h1>Tarlanın hesabı cebinde.</h1>
             <p className="buyuk">Masrafını, gelirini, tarlanı ve deponu telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör.</p>
             <div className="tn-dugmeler">

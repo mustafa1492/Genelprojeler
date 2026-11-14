@@ -233,6 +233,7 @@ export default function Ana() {
     <main className="ui-has-nav ui-stack ozet-izgara" onClick={(e) => { if (sel && !(e.target as HTMLElement).closest(".ozet-blok.secili")) setSel(null); }}>
       <div className="ozet-selam">{selam}{myName ? `, ${myName}` : ""} <ModulChip /></div>
       <PageHeader title={biz.name} right={<span style={{ display: "flex", gap: 8, alignItems: "center" }}>{can("rapor") && !g.cards.includes("kar") && <span className="ozet-gizle"><PrivacyButton /></span>}<HistoryLink /></span>} />
+      {biz.settings?.demo === true && <p className="ui-note">Deneme hesabı: buradaki kayıtlar uydurma örnek veridir. Kayıt ekleyip deneyebilirsiniz; örnek kayıtlar silinmez.</p>}
       {can("rapor") && g.period === "sezon" && g.cards.includes("kar") && <SeasonPicker onManage={() => go("sezonlar")} />}
       {shown.map((id) => {
         const i = g.cards.indexOf(id);

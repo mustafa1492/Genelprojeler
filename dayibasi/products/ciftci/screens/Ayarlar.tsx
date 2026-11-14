@@ -61,7 +61,7 @@ export default function Ayarlar() {
         <span className="ui-avatar" style={{ width: 48, height: 48, borderRadius: 999, background: "var(--ana-acik)", color: "var(--ana-yazi)", display: "grid", placeItems: "center", fontWeight: 800 }}>{initials}</span>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
           <b>{myName}</b>
-          <small style={{ color: "var(--sessiz2)", fontWeight: 600 }}>{worker ? "Çalışan" : "Defter sahibi / yönetici"} · {biz.name}</small>
+          <small style={{ color: "var(--sessiz2)", fontWeight: 600 }}>{biz.settings?.demo === true ? "Deneme hesabı" : worker ? "Çalışan" : "Defter sahibi / yönetici"} · {biz.name}</small>
         </div>
       </div>
 

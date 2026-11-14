@@ -98,3 +98,20 @@ Mustafa iki şey isteyebilir. İkisi de **önce `bash dayibasi/scripts/rapor.sh`
 11. **Öneri:** bundan sonra hangi işle başlanmalı ve neden (tek paragraf).
 
 Kurallar: rapor notlardan ve depodan yazılır, hafızadan değil. Notta olmayan bir şey söyleniyorsa "notta yok" diye belirtilir. Rakam ve tarih uydurulmaz. Rapor uzun olacağı için başlıklı ve maddeli yazılır; Mustafa "kısa" derse durum biçimi kullanılır.
+
+## 5. Not kontrolü (Mustafa "not kontrolünü yap" deyince)
+Amaç: oturumda konuşulan ya da yapılan ama md dosyalarına yazılmamış şey kalmasın. Oturumun konuşması baştan taranır, her madde için "notta var mı?" diye bakılır:
+
+1. **Yapılan işler:** kodlanan, dala gönderilen, canlıya çıkan her iş Günlük'te mi? Tarih ve dal doğru mu?
+2. **Kararlar:** Mustafa'nın verdiği ya da oturuma bıraktığı her karar "Kararlar"da, gerekçesiyle yazılı mı? (ad, kural, eşik, süre, para hesabı, neyin yapılmayacağı)
+3. **Mustafa'dan beklenenler:** cevabı gelmeyen her soru, onay bekleyen her iş (yükle, birleştir, veritabanı onayı) listede mi? Cevaplananlar çıkarıldı mı?
+4. **Yarım kalanlar ve bilinen açıklar:** denenmeyenler, bilerek yapılmayanlar, geçici çözümler yazılı mı?
+5. **Diğer oturumlardan istekler:** ortak parçaya (`core/`, App, Menü, veritabanı kuralı) dokunmayı gerektiren her şey `core.md` → "Diğer oturumlardan istekler"de mi?
+6. **Veritabanı:** çalıştırılan her SQL'in karşılığı `supabase/migrations` ya da `supabase/seed` altında dosya olarak var mı? Dosya ile uygulanan hâl aynı mı?
+7. **Eskimiş satırlar:** artık doğru olmayan not var mı? ("yayın bekliyor" deyip yayınlanmış iş, cevaplanmış soru, değişmiş tarih)
+8. **Tuzaklar:** sonraki oturumun zaman kaybetmemesi için ortam/araç sorunları (çalışmayan komut, erişilemeyen adres) kısa not olarak yazılı mı?
+9. **Dal durumu:** commit edilmemiş ya da gönderilmemiş değişiklik var mı? (`git status`, `git log origin/<dal>..HEAD`)
+
+Kurallar: sadece md dosyalarına dokunulur (kod ve veritabanı yok). Konuşmada geçmeyen karar, kural, tarih yazılmaz; emin olunmayan sorulur. Not kısa kalır (Günlük satır başına tek cümle, en fazla 10 satır). Şifre, anahtar, telefon numarası gibi bilgiler yazılmaz. Değişiklik oturumun kendi dalına `[skip ci]` ile gönderilir; main'e dokunulmaz.
+
+Rapor (kısa): (a) zaten yazılı olanlar tek satırda, (b) şimdi eklenenler, (c) eskidiği için düzeltilenler, (d) nota yazılamayan ve Mustafa'ya sorulacaklar. Eksik yoksa "eksik yok".

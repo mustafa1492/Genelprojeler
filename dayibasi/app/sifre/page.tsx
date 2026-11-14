@@ -10,6 +10,7 @@ export default function Page() {
   const [error, setError] = useState("");
   const [ok, setOk] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [demo, setDemo] = useState(false);   // ortak deneme hesabının şifresi değişmez
 
   useEffect(() => {
     const sb = supabase();
@@ -17,9 +18,16 @@ export default function Page() {
     const { data } = sb.auth.onAuthStateChange((e, s) => { if (s && (e === "PASSWORD_RECOVERY" || e === "SIGNED_IN")) setReady(true); });
     return () => data.subscription.unsubscribe();
   }, []);
+  useEffect(() => {
+    if (!ready) return;
+    supabase().from("memberships").select("businesses(settings)").then(({ data }) => {
+      if ((data ?? []).some((m) => (m.businesses as unknown as { settings?: { demo?: boolean } } | null)?.settings?.demo === true)) setDemo(true);
+    });
+  }, [ready]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (demo) return;
     setBusy(true); setError("");
     const { error } = await supabase().auth.updateUser({ password });
     setBusy(false);
@@ -31,7 +39,9 @@ export default function Page() {
   return (
     <main className="ui-stack">
       <PageHeader sub="Şifre yenileme" title="Yeni şifren" />
-      {ok ? (
+      {demo ? (
+        <div className="ui-empty">Bu ortak bir deneme hesabı; şifresi değiştirilemez.</div>
+      ) : ok ? (
         <>
           <DoneCard message="Şifreni değiştirdim. Artık yeni şifrenle girebilirsin." />
           <MainButton onClick={() => (location.href = "/")}>Uygulamaya gir</MainButton>
