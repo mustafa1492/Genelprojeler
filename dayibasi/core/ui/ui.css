@@ -771,3 +771,7 @@ main.ui-auth { max-width: none; padding: 0; min-height: 100dvh; display: flex; f
 /* Takvim kutucuğu: renkli nokta yerine küçük simge (renk tek başına anlam taşımasın) */
 .takvim .gun i.simge { display: flex; justify-content: center; gap: 1px; min-height: 14px; }
 .takvim .gun i.simge em { width: auto; height: auto; background: none; border-radius: 0; font-style: normal; font-size: 0.72rem; line-height: 1; }
+
+/* Geniş ekran: içerik ortada dar şerit kalmasın */
+@media (min-width: 1600px) { .tab-shell main { max-width: 1360px; } }
+@media (min-width: 900px) { .ui-ses { max-width: 460px; } }

@@ -1,4 +1,5 @@
 "use client";
+import { DeskTable } from "@/core/ui/DeskTable";
 import { GUBRELER, ILAC_TURLERI } from "@/core/catalog/girdiler";
 import { SesDugmesi } from "@/core/ui/SesDugmesi";
 import { islemCoz } from "@/core/expenses/ses";
@@ -222,11 +223,25 @@ export default function Tarlalar() {
       {doneCard}
       <SeasonPicker onManage={() => go("sezonlar")} />
       {places?.length === 0 && <div className="ui-empty">Henüz tarla yok. İlk tarlanı ekle.</div>}
+      {/* Bilgisayar: tarlalar tablo (sütunlara göre karşılaştırma); telefonda kartlar */}
+      {(places ?? []).length > 0 && <DeskTable rows={places ?? []} rowKey={(p) => p.id} onRow={(p) => { setDone(null); setView({ v: "tarla", id: p.id }); }}
+        cols={[
+          { label: "Tarla", cell: (p) => <b>{p.name}</b> },
+          { label: "Ürün", cell: (p) => p.custom?.urun || "—" },
+          { label: "Dekar", num: true, cell: (p) => (statsOf(p, S).donum ? statsOf(p, S).donum.toLocaleString("tr-TR") : "—"), width: "90px" },
+          ...(money ? [
+            { label: "Masraf", num: true, cell: (p: Place) => formatTL(statsOf(p, S).m) },
+            { label: "Gelir", num: true, cell: (p: Place) => formatTL(statsOf(p, S).g) },
+            { label: "Kâr / zarar", num: true, cell: (p: Place) => { const k = statsOf(p, S).kar; return <b style={{ color: k < 0 ? "var(--tehlike)" : undefined }}>{formatTL(Math.abs(k))} {k < 0 ? "zarar" : "kâr"}</b>; } },
+            { label: "Dekar başı masraf", num: true, cell: (p: Place) => { const x = statsOf(p, S); return x.donum ? formatTL(Math.round(x.perDonum)) : "—"; } },
+          ] : []),
+          { label: "Son iş", cell: (p) => { const l = events.filter((e) => e.kind === ISLEM && e.place_id === p.id).sort((a, b) => b.occurred_on.localeCompare(a.occurred_on))[0]; return l ? `${String(l.data.type)} · ${dayText(l.occurred_on)}` : "—"; } },
+        ]} />}
       {(places ?? []).map((p) => {
         const st = statsOf(p, S);
         const last = events.filter((e) => e.kind === ISLEM && e.place_id === p.id).sort((a, b) => b.occurred_on.localeCompare(a.occurred_on))[0];
         return (
-          <button key={p.id} type="button" className="ui-card ui-stack" style={{ gap: 6 }} onClick={() => { setDone(null); setView({ v: "tarla", id: p.id }); }}>
+          <button key={p.id} type="button" className="ui-card ui-stack only-mobile" style={{ gap: 6 }} onClick={() => { setDone(null); setView({ v: "tarla", id: p.id }); }}>
             <span style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
               <b style={{ fontSize: "1.15rem" }}>{p.name}</b>
               {money && <span className={st.kar >= 0 ? "ui-amount" : "ui-amount borc"}>{formatTL(Math.abs(st.kar))} {st.kar < 0 ? "zarar" : "kâr"}</span>}
