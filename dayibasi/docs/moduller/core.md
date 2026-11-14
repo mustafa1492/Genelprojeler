@@ -14,7 +14,7 @@
 2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
-5. Nisan öncesi: paket sistemi (Basit/Orta/Tam), basit mod + ilk açılış rehberi, yedek (0013), deneme hesaplarını silme, SMTP (şifre sıfırlama), KVKK, Supabase uyku çözümü, son güvenlik kontrolü, Android (TWA).
+5. Nisan öncesi: paket sistemi (Basit/Orta/Tam), basit mod + ilk açılış rehberi, yedek (0013), deneme hesaplarını silme, SMTP (şifre sıfırlama), KVKK, son güvenlik kontrolü, Android (TWA).
 
 ## Mustafa'dan beklenenler
 - **Depoyu gizli yap** (11 Kasım isteği; oturum depo ayarını değiştiremiyor): GitHub → Settings → Danger Zone → Change visibility → private.
@@ -42,6 +42,7 @@
 - (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 
 ## Kararlar ve kalıcı bilgiler
+- **Veritabanı uyumasın (14 Kasım 2026):** Supabase ücretsiz plan 7 gün istek almazsa projeyi duraklatır. Önlem: `app/api/uyanik` veritabanından tek satır okur; `vercel.json` → crons her gün 03:17 UTC (06:17 TR) çağırır. Zamanlayıcı yalnız canlıda (main) çalışır. **Kontrol:** tarayıcıda `/api/uyanik` → `{"ok":true}`; Vercel → proje → Settings → Cron Jobs'ta görünür, Logs'ta günlük çağrı. **Uyursa:** Supabase paneli → proje → "Restore project" (veri silinmez, birkaç dakika sürer), sonra `/api/uyanik` ile doğrula. Ücretli plana geçilirse bu adım gereksiz olur.
 - **Güvenlik kontrolü (11 Kasım 2026):** bütün dallardaki 194 commit tarandı: gizli anahtar, şifre, belirteç yok; `.env` yalnız herkese açık anahtar. Depo o gün herkese açıktı, fork 0. Supabase denetimi: kritik yok; uyarılar: sızdırılmış şifre koruması kapalı, `admin_table_ok` ve `event_screen` arama yolu sabit değil, `is_demo` girişsiz çağrılabiliyor (veri sızdırmaz).
 - **Vercel önizleme adresi** (`genelprojeler-git-gelistirme-mustii1.vercel.app`) Vercel girişi ister; oturum giremez. Önizleme yerine aynı sürüm yerelde gerçek veritabanına bağlı çalıştırılıp denenir.
 - **Sığ klonda `rapor.sh` yanıltır:** main geçmişi eksikse "canlıya gitmemiş commit" sayısı şişer; önce `git fetch origin main gelistirme` (derinlikli).
@@ -83,6 +84,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 14 Kas: Veritabanı uyumasın: `/api/uyanik` + günlük Vercel zamanlayıcısı (gelistirme; canlıya çıkınca çalışır).
 - 11 Kas: TÜBİTAK deneme hesabı hazırlandı: 0021 koruması ve örnek veri canlı veritabanında; uygulama tarafı gelistirme'de.
 - 11 Kas: Canlıya çıktı: arayüz raporu düzeltmeleri (3 commit). Yayın öncesi 23 ekran × telefon/bilgisayar sahte sunucuyla açıldı, hata ve yatay taşma yok.
 - 11 Kas: Arayüz raporu küçükler: tarla kartında masraf/gelir ayrı satır (20), döviz seçenekleri yan yana (15), "uzun bas" ipucu ilk 5 açılışta (8), Menü bölüm başlıkları normal harf (10), "Ara" (44), küçük açıklamalar (22, 45, 46). Madde 30 hata değil (kayıt gerçekten motor saati).
