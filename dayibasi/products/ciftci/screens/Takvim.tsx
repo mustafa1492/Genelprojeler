@@ -9,13 +9,15 @@ import { mutate } from "@/core/offline/store";
 import { listPlaces, type Place } from "@/core/places/api";
 import { useGo, useOnActivate, useTabParams, useBack } from "@/core/shell/TabShell";
 import { BackButton, Chip, DoneCard, ErrorText, MainButton, PageHeader, TextField } from "@/core/ui";
-import { dayYear, GELIR, harvestFrom, HATIRLAT, ISLEM, MAKINE, todayStr, VERIM } from "../kayit";
+import { dayText, dayYear, GELIR, harvestFrom, HATIRLAT, ISLEM, MAKINE, todayStr, VERIM } from "../kayit";
 import { bakimDurumu } from "./Makineler";
 import { useRole } from "../rol";
 
 type Mark = { day: string; kind: "is" | "hasat" | "satis" | "verim" | "vade" | "belge" | "hatir" | "makine"; text: string; place?: string | null; ev?: EventRow };
 const COLOR: Record<Mark["kind"], string> = { is: "var(--yesil, #2E6A2B)", hasat: "#C98A00", satis: "#1F7A8C", verim: "#7A5C1F", vade: "#B3261E", belge: "#6B4FA0", hatir: "#E07A00", makine: "#5B6770" };
 const LABEL: Record<Mark["kind"], string> = { is: "Tarla işi", hasat: "Hasat olur", satis: "Satış", verim: "Verim", vade: "Vade", belge: "Belge bitişi", hatir: "Hatırlatma", makine: "Makine bakımı" };
+// Renk tek başına anlam taşımasın (Kural 2): her türün simgesi de var
+const SIMGE: Record<Mark["kind"], string> = { is: "🌾", hasat: "🧺", satis: "💰", verim: "⚖️", vade: "💳", belge: "📄", hatir: "🔔", makine: "🚜" };
 const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 const ym = (d: string) => d.slice(0, 7);
 const addMonth = (m: string, k: number) => { const d = new Date(m + "-15T12:00:00Z"); d.setUTCMonth(d.getUTCMonth() + k); return d.toISOString().slice(0, 7); };
@@ -53,7 +55,16 @@ export default function Takvim() {
   if (form) return <HatirlatForm places={places} edit={form.edit} defDay={day ?? todayStr()} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.title)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
     onSave={async (v) => {
-      if (form.edit) { const o = form.edit; await updateEvent(o.id, v); setDone({ message: `Değiştirdim: ${String(v.data.title)}.`, undo: () => updateEvent(o.id, { occurred_on: o.occurred_on, place_id: o.place_id, data: o.data }) }); }
+      if (form.edit) {
+        const o = form.edit; await updateEvent(o.id, v);
+        // Tekrarlayan hatırlatma "Yapıldı" olunca bir sonraki kendiliğinden kurulur (kira, kredi taksiti, sigorta…)
+        const t = v.data.tekrar as "ay" | "yil" | undefined;
+        if (t && v.data.done && !o.data.done) {
+          const sonraki = sonrakiGun(v.occurred_on, t);
+          const n = await addEvent(biz.id, { kind: HATIRLAT, person_id: null, quantity: null, occurred_on: sonraki, place_id: v.place_id, data: { title: v.data.title, tekrar: t } });
+          setDone({ message: `Yapıldı: ${String(v.data.title)}. Sonraki hatırlatma: ${dayYear(sonraki)}.`, undo: async () => { await deleteEvent(n.id); await updateEvent(o.id, { occurred_on: o.occurred_on, place_id: o.place_id, data: o.data }); } });
+        } else setDone({ message: `Değiştirdim: ${String(v.data.title)}.`, undo: () => updateEvent(o.id, { occurred_on: o.occurred_on, place_id: o.place_id, data: o.data }) });
+      }
       else { const e = await addEvent(biz.id, { kind: HATIRLAT, person_id: null, quantity: null, ...v }); setDone({ message: `Hatırlatma kuruldu: ${dayYear(v.occurred_on)}, ${String(v.data.title)}.`, undo: () => deleteEvent(e.id) }); }
       setMonth(ym(v.occurred_on)); setDay(v.occurred_on); setForm(null); load();
     }} />;
@@ -63,7 +74,7 @@ export default function Takvim() {
     ...ev.filter((e) => e.kind === ISLEM && harvestFrom(e)).map((e): Mark => ({ day: harvestFrom(e)!, kind: "hasat", text: `Hasat edilebilir (${String(e.data.product ?? "ilaç")} beklemesi bitti)`, place: e.place_id })),
     ...ev.filter((e) => e.kind === GELIR).map((e): Mark => ({ day: e.occurred_on, kind: "satis", text: `${String(e.data.type)}${e.data.crop ? ` · ${String(e.data.crop)}` : ""}`, place: e.place_id, ev: e })),
     ...ev.filter((e) => e.kind === VERIM).map((e): Mark => ({ day: e.occurred_on, kind: "verim", text: `${Number(e.quantity).toLocaleString("tr-TR")} ${String(e.data.unit)} ${String(e.data.crop ?? "")}`, place: e.place_id, ev: e })),
-    ...ev.filter((e) => e.kind === HATIRLAT).map((e): Mark => ({ day: e.occurred_on, kind: "hatir", text: `${e.data.done ? "✓ " : ""}${String(e.data.title)}`, place: e.place_id, ev: e })),
+    ...ev.filter((e) => e.kind === HATIRLAT).map((e): Mark => ({ day: e.occurred_on, kind: "hatir", text: `${e.data.done ? "✓ " : ""}${String(e.data.title)}${e.data.tekrar ? (e.data.tekrar === "ay" ? " (her ay)" : " (her yıl)") : ""}`, place: e.place_id, ev: e })),
     ...dues.filter((d) => d.due_on && remaining(d) > 0).map((d): Mark => ({ day: d.due_on!, kind: "vade", text: `${d.direction === "borc" ? "Ödenecek" : "Alınacak"}: ${d.party}` })),
     ...bakimDurumu(ev).filter((b) => b.nextOn).map((b): Mark => ({ day: b.nextOn!, kind: "makine", text: `${b.makine} bakımı` })),
     ...ev.filter((e) => e.kind === MAKINE).map((e): Mark => ({ day: e.occurred_on, kind: "makine", text: `${String(e.data.makine)}: ${String(e.data.is)} yapıldı` })),
@@ -79,6 +90,9 @@ export default function Takvim() {
   const onDay = (day ? marks.filter((m) => m.day === day) : marks.filter((m) => m.day.startsWith(month))).sort((a, b) => a.day.localeCompare(b.day));
   const refDay = day ?? today;
   const lastYear = `${Number(refDay.slice(0, 4)) - 1}${refDay.slice(4)}`;
+  // Takvimin üstünde: önümüzdeki 7 gün (yapılmamışlar), en fazla 5 satır
+  const haftaSonu = (() => { const d = new Date(today + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + 7); return d.toISOString().slice(0, 10); })();
+  const yakin = marks.filter((m) => m.day >= today && m.day <= haftaSonu && !m.text.startsWith("✓ ")).sort((a, b) => a.day.localeCompare(b.day)).slice(0, 5);
   const lastYearNear = marks.filter((m) => m.kind === "is" && Math.abs((Date.parse(m.day) - Date.parse(lastYear)) / 86400000) <= 7);
 
   const open = (m: Mark) => {
@@ -102,6 +116,17 @@ export default function Takvim() {
           {places.map((p) => <Chip key={p.id} selected={place === p.id} onClick={() => setPlace(p.id)}>{p.name}</Chip>)}
         </div>
       )}
+      <section className="ui-card takvim-yakin" aria-label="Önümüzdeki 7 gün">
+        <b>Önümüzdeki 7 gün</b>
+        {yakin.length === 0 && <span className="ui-note" style={{ margin: 0 }}>Bu hafta için kayıt yok.</span>}
+        {yakin.map((m, i) => (
+          <button key={i} type="button" onClick={() => open(m)}>
+            <em aria-hidden="true">{SIMGE[m.kind]}</em>
+            <span>{m.text}<small>{[m.day === today ? "Bugün" : dayText(m.day), pName(m.place)].filter(Boolean).join(" · ")}</small></span>
+            <i aria-hidden="true">›</i>
+          </button>
+        ))}
+      </section>
       <div className="takvim-bas">
         <button type="button" onClick={() => { setMonth(addMonth(month, -1)); setDay(null); }} aria-label="Önceki ay">‹</button>
         <b>{monthName(month)}</b>
@@ -121,14 +146,14 @@ export default function Takvim() {
           );
         })}
       </div>
-      <div className="takvim-renk">{(Object.keys(LABEL) as Mark["kind"][]).filter((k) => money || !["satis", "vade"].includes(k)).map((k) => <span key={k}><em style={{ background: COLOR[k] }} />{LABEL[k]}</span>)}</div>
+      <div className="takvim-renk">{(Object.keys(LABEL) as Mark["kind"][]).filter((k) => money || !["satis", "vade"].includes(k)).map((k) => <span key={k}><em style={{ background: COLOR[k] }} />{SIMGE[k]} {LABEL[k]}</span>)}</div>
 
       <h2 className="ui-section" style={{ textTransform: day ? undefined : "capitalize" }}>{day ? dayYear(day) : `${monthName(month)} · hepsi`}</h2>
       {day && <button type="button" className="ui-link" onClick={() => setDay(null)}>Bütün ayı göster</button>}
       {onDay.length === 0 && <div className="ui-empty">{day ? "Bu gün kayıt yok." : "Bu ay kayıt yok."}</div>}
       {onDay.map((m, i) => (
         <button key={i} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer", borderLeft: `6px solid ${COLOR[m.kind]}` }} onClick={() => open(m)}>
-          <b style={{ minWidth: 0 }}>{m.text}<small>{[day ? "" : dayYear(m.day), LABEL[m.kind], pName(m.place)].filter(Boolean).join(" · ")}</small></b><span>›</span>
+          <b style={{ minWidth: 0 }}><span aria-hidden="true">{SIMGE[m.kind]} </span>{m.text}<small>{[day ? "" : dayYear(m.day), LABEL[m.kind], pName(m.place)].filter(Boolean).join(" · ")}</small></b><span>›</span>
         </button>
       ))}
       {lastYearNear.length > 0 && (
@@ -150,6 +175,7 @@ function HatirlatForm({ places, edit, defDay, onSave, onCancel, onDelete }: {
   const [day, setDay] = useState(edit?.occurred_on ?? (defDay >= todayStr() ? defDay : todayStr()));
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? null);
   const [doneF, setDoneF] = useState(!!edit?.data.done);
+  const [tekrar, setTekrar] = useState<"yok" | "ay" | "yil">((edit?.data.tekrar as "ay" | "yil") ?? "yok");
   const [error, setError] = useState("");
   const quick = ["İlaçlama", "Gübre", "Sulama", "Hasat", "Kira ödemesi", "Kredi taksiti", "ÇKS başvurusu", "Traktör muayenesi"];
   const plus = (k: number) => { const d = new Date(todayStr() + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + k); setDay(d.toISOString().slice(0, 10)); };
@@ -170,16 +196,32 @@ function HatirlatForm({ places, edit, defDay, onSave, onCancel, onDelete }: {
           </div>
         </div>
       )}
+      <div className="ui-stack" style={{ gap: 8 }}>
+        <span className="ui-label">Tekrarlansın mı?</span>
+        <div className="ui-chips wrap">
+          {([["yok", "Bir kere"], ["ay", "Her ay"], ["yil", "Her yıl"]] as const).map(([k, l]) => <Chip key={k} selected={tekrar === k} onClick={() => setTekrar(k)}>{l}</Chip>)}
+        </div>
+        {tekrar !== "yok" && <span className="ui-note" style={{ margin: 0 }}>"Yapıldı" dediğinde bir sonraki {tekrar === "ay" ? "ay" : "yıl"} için kendiliğinden kurulur.</span>}
+      </div>
       {edit && <label className="ui-check"><input type="checkbox" checked={doneF} onChange={(e) => setDoneF(e.target.checked)} /> Yapıldı</label>}
       {error && <ErrorText>{error}</ErrorText>}
       <div className="ui-sticky-bottom">
         <MainButton onClick={async () => {
           if (!title.trim()) { setError("Ne yapılacağını yaz."); return; }
           if (!day) { setError("Günü seç."); return; }
-          await onSave({ occurred_on: day, place_id: placeId, data: { title: title.trim(), ...(doneF ? { done: true } : {}) } });
+          await onSave({ occurred_on: day, place_id: placeId, data: { title: title.trim(), ...(doneF ? { done: true } : {}), ...(tekrar !== "yok" ? { tekrar } : {}) } });
         }}>Kaydet</MainButton>
       </div>
       {onDelete && <button type="button" className="ui-link" style={{ color: "var(--tehlike)" }} onClick={onDelete}>Bu hatırlatmayı sil</button>}
     </main>
   );
 }
+
+/** Tekrarlayan hatırlatmanın sonraki günü: ayın 31'i gibi günler kısa ayda ayın son gününe çekilir. */
+function sonrakiGun(gun: string, t: "ay" | "yil"): string {
+  const [y, m, d] = gun.split("-").map(Number);
+  const ny = t === "yil" ? y + 1 : m === 12 ? y + 1 : y, nm = t === "yil" ? m : m === 12 ? 1 : m + 1;
+  const son = new Date(Date.UTC(ny, nm, 0)).getUTCDate();
+  return `${ny}-${String(nm).padStart(2, "0")}-${String(Math.min(d, son)).padStart(2, "0")}`;
+}
+
