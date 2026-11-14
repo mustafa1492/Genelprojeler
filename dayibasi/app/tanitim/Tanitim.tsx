@@ -13,7 +13,7 @@ const WA_MESAJ = "Merhaba, Çiftçi Defteri hakkında bir sorum var.";
 // Tanıtım sayfası: "/" (ana sayfa) ve "/tanitim" bunu gösterir. İletişim onay bekliyor (docs/moduller/tanitim.md).
 // Paketler/fiyatlar şimdilik kaldırıldı (ücret alınmıyor); eski hâli cep.tsx'te saklı.
 export const baslik = "Çiftçi Defteri: tarlanın hesabı cebinde";
-export const aciklama = "Masrafını, gelirini, tarlanı, fidanını, kümesini ve hayvanını telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör. Ücretsiz.";
+export const aciklama = "Masrafını, gelirini, tarlanı ve fidanını telefondan yaz; sezon sonunda ne kazandığını tek bakışta gör. Ücretsiz.";
 export const ogResim = { url: "/tanitim/opengraph-image.png", width: 1200, height: 630, alt: "Çiftçi Defteri: tarlanın hesabı cebinde" };
 
 const MODULLER = [
@@ -21,10 +21,6 @@ const MODULLER = [
     ne: ["Tarlalar, tapudan parsel", "Masraf, gelir, veresiye", "İlaçlama, gübre, sulama, verim", "Depo, makineler, takvim", "Sezon raporu (PDF, Excel)"] },
   { id: "fidan", rehber: "fidan", ik: "🌱", kisa: "Fidan", ad: "Fidancılık", soz: "Partiden satışa fidanın hesabı.",
     ne: ["Dikim partileri ve boy boy sayım", "Fidan başı maliyet, önerilen fiyat", "Sipariş, kapora, sevk listesi", "Müşteriler ve alacak"] },
-  { id: "kumes", rehber: "kumes", ik: "🐔", kisa: "Kümes", ad: "Kümes", soz: "Sürünün günlük kaydı bir dakikada.",
-    ne: ["Kümes ve sürü kartı", "Günlük ölü, ayıklanan, yem", "Tartım, tahmini canlı ağırlık", "Yemden yararlanma"] },
-  { id: "hayvan", rehber: "hayvan", ik: "🐄", kisa: "Hayvan", ad: "Büyükbaş ve küçükbaş", soz: "Küpe numarasıyla her hayvanın kartı.",
-    ne: ["İnek, koyun, keçi kartı", "Doğum, tohumlama, gebelik takibi", "Aşı hatırlatma", "İlaçtan sonra “sütü tanka katma” uyarısı"] },
 ];
 
 const dertler = [
@@ -115,8 +111,6 @@ export function TanitimSayfasi() {
               <li>Dekar başı ve kilo başı kâr, girdi fiyatlarının yıllara göre karşılaştırması</li>
               <li>Hangi yıl hangi tarlaya ne ekildi tablosu</li>
               <li>Hava durumuna göre ilaçlama saati önerisi</li>
-              <li>Süt defteri (mandıra, süt parası)</li>
-              <li>Kümeste yumurta kaydı ve dönem kapanışı</li>
               <li>Google Play'den indirilebilen Android uygulaması</li>
             </ul>
           </div>

@@ -1,4 +1,5 @@
 # Kanatlı (kümes) oturumu
+> **ARŞİVLENDİ (14 Kasım 2026, Mustafa'nın isteğiyle Core kararı):** gerçek kullanıcı yok; kod `gelistirme`'den çıkarıldı, tamamı `arsiv/hayvancilik` dalında. Veritabanı tabloları ve deneme verisi duruyor. Geri dönüş yolu: `docs/plan/uzun-vadeli-plan.md` §1. Bu oturum kod yazmaz.
 **Kapsam:** kanatlı hayvancılık: kümes, sürü (toplu sayı), günlük ölüm/yem/yumurta, dönem kârı, yumurta ve gübre satışı, köy tavuğu sade modu, kuluçka, sözleşmeli yetiştirici karşılaştırması. Kod: `products/ciftci/hayvan/kanatli/`. Dal: `modul/kanatli`.
 
 ## Canlıda ne var

@@ -24,8 +24,8 @@ async function all(table: string, biz: string): Promise<Row[]> {
 }
 
 export async function exportAll(biz: Business, opts: { eur?: boolean } = {}) {
-  const [places, expenses, events, items, dues, docs, lots, barns, herds, herdDays, animals, animalEvents] = await Promise.all(
-    ["places", "expenses", "events", "inventory_items", "dues", "documents", "lots", "barns", "herds", "herd_days", "animals", "animal_events"]
+  const [places, expenses, events, items, dues, docs, lots] = await Promise.all(
+    ["places", "expenses", "events", "inventory_items", "dues", "documents", "lots"]
       .map((t) => all(t, biz.id).catch((e) => (["places", "expenses", "events"].includes(t) ? Promise.reject(e) : []))),
   );
   const pName = (id: unknown) => s(places.find((p) => p.id === id)?.name) || "Genel";
@@ -40,10 +40,6 @@ export async function exportAll(biz: Business, opts: { eur?: boolean } = {}) {
   const M = masrafSheet(exp, P, fx, { title: `${biz.name} · Masraflar · bütün tarihler` }), G = gelirSheet(gel, P, fx, { title: `${biz.name} · Gelirler · bütün tarihler` });
   const borc = dues.filter((x) => x.direction === "borc").reduce((t, x) => t + Math.max(0, Number(x.amount) - Number(x.paid_amount ?? 0)), 0) + exp.reduce((t, e) => t + owed(e), 0);
   const alacak = dues.filter((x) => x.direction === "alacak").reduce((t, x) => t + Math.max(0, Number(x.amount) - Number(x.paid_amount ?? 0)), 0) + gel.reduce((t, e) => t + incomeOpen(e), 0);
-  const herdName = (id: unknown) => s(herds.find((h) => h.id === id)?.name);
-  const barnName = (id: unknown) => s(barns.find((h) => h.id === id)?.name);
-  const animalName = (id: unknown) => { const a = animals.find((x) => x.id === id); return a ? [s(a.tag), s(a.name)].filter(Boolean).join(" · ") : ""; };
-  const TUR: Record<string, string> = { kanatli: "Kanatlı", kucukbas: "Küçükbaş", buyukbas: "Büyükbaş" };
   const opt = (cond: boolean, sh: TableSheet) => (cond ? [sh] : []);
   const mak = ev(MAKINE);
 
@@ -66,23 +62,11 @@ export async function exportAll(biz: Business, opts: { eur?: boolean } = {}) {
       rows: docs.map((x) => [s(x.title), xDate(s(x.expires_on)), s(x.notes)]) },
     ...opt(lots.length > 0, { name: "Fidan partileri", cols: [{ h: "Parti", t: "text" }, { h: "Tarla", t: "text" }, { h: "Dikim", t: "date" }, { h: "Başlangıç adedi", t: "num", sum: true }, { h: "Durum", t: "text" }],
       rows: lots.map((l) => [s(l.name), pName(l.place_id), xDate(s(l.planted_on)), Number(l.initial_count ?? 0), s(l.status)]) }),
-    ...opt(barns.length > 0, { name: "Barınaklar", cols: [{ h: "Barınak", t: "text", w: 20 }, { h: "Tür", t: "text" }, { h: "Alan (m²)", t: "num", sum: true }, { h: "Kapasite", t: "num", sum: true }, { h: "Not", t: "text", w: 30 }],
-      rows: barns.map((b) => [s(b.name), TUR[s(b.species)] ?? s(b.species), b.area_m2 == null ? null : Number(b.area_m2), b.capacity == null ? null : Number(b.capacity), s(b.note)]) }),
-    ...opt(herds.length > 0, { name: "Sürüler", cols: [{ h: "Sürü / dönem", t: "text", w: 22 }, { h: "Tür", t: "text" }, { h: "Çeşit", t: "text" }, { h: "Barınak", t: "text" }, { h: "Giriş", t: "date" }, { h: "Giriş adedi", t: "num", sum: true }, { h: "Nereden", t: "text" }, { h: "Durum", t: "text" }, { h: "Kapanış", t: "date" }, { h: "Not", t: "text", w: 30 }],
-      rows: herds.map((h) => [s(h.name), TUR[s(h.species)] ?? s(h.species), s(h.kind), barnName(h.barn_id), xDate(s(h.started_on)), Number(h.initial_count ?? 0), s(h.source), h.status === "kapandi" ? "Kapandı" : "Açık", xDate(s(h.closed_on)), s(h.note)]) }),
-    ...opt(herdDays.length > 0, { name: "Sürü günlük kayıt", info: ["Yem (kg) = çuval × çuval kg (formül)."], cols: [{ h: "Gün", t: "date" }, { h: "Sürü", t: "text", w: 20 }, { h: "Ölen", t: "num", sum: true }, { h: "Ayıklanan", t: "num", sum: true }, { h: "Yem çuvalı", t: "num", sum: true }, { h: "Çuval kg", t: "num", sum: false }, { h: "Yem (kg)", t: "num", sum: true }, { h: "Ortalama ağırlık (g)", t: "num", sum: false }, { h: "Tartılan", t: "num", sum: false }, { h: "Not", t: "text", w: 26 }],
-      rows: herdDays.slice().sort((a, b) => s(a.day).localeCompare(s(b.day))).map((x) => [xDate(s(x.day)), herdName(x.herd_id), Number(x.dead ?? 0), Number(x.culled ?? 0), Number(x.feed_bags ?? 0), x.bag_kg == null ? null : Number(x.bag_kg),
-        { f: "=IF(N({C:Çuval kg}{r})>0,{C:Yem çuvalı}{r}*{C:Çuval kg}{r},\"\")", v: x.bag_kg ? Number(x.feed_bags) * Number(x.bag_kg) : "" }, x.avg_weight_g == null ? null : Number(x.avg_weight_g), x.weighed_n == null ? null : Number(x.weighed_n), s(x.note)]) }),
-    ...opt(animals.length > 0, { name: "Hayvanlar", cols: [{ h: "Küpe no", t: "text" }, { h: "Adı", t: "text" }, { h: "Cins", t: "text" }, { h: "Cinsiyet", t: "text" }, { h: "Irk", t: "text" }, { h: "Doğum", t: "date" }, { h: "Anası", t: "text" }, { h: "Barınak", t: "text" }, { h: "Durum", t: "text" }, { h: "Çıkış", t: "date" }, { h: "Not", t: "text", w: 30 }], totals: false,
-      rows: animals.map((a) => [s(a.tag), s(a.name), ({ inek: "İnek", koyun: "Koyun", keci: "Keçi" } as Record<string, string>)[s(a.kind)] ?? s(a.kind), a.sex === "disi" ? "Dişi" : "Erkek", s(a.breed), xDate(s(a.born_on)), animalName(a.mother_id), barnName(a.barn_id),
-        ({ var: "Var", satildi: "Satıldı", oldu: "Öldü" } as Record<string, string>)[s(a.status)] ?? s(a.status), xDate(s(a.left_on)), s(a.note)]) }),
-    ...opt(animalEvents.length > 0, { name: "Hayvan olayları", cols: [{ h: "Gün", t: "date" }, { h: "Hayvan", t: "text", w: 20 }, { h: "Olay", t: "text" }, { h: "Ayrıntı", t: "text", w: 30 }, { h: "Not", t: "text", w: 30 }], totals: false,
-      rows: animalEvents.slice().sort((a, b) => s(a.day).localeCompare(s(b.day))).map((x) => [xDate(s(x.day)), animalName(x.animal_id), s(x.type), Object.entries(d(x)).map(([k, v]) => `${k}: ${s(v)}`).join(", "), s(x.note)]) }),
   ], { title: `${biz.name} bütün kayıtlar` });
 
   // Geri yükleme için ham kopya
   const json = JSON.stringify({ surum: 1, alindi: new Date().toISOString(), defter: { id: biz.id, name: biz.name, settings: biz.settings },
-    places, expenses, events, inventory_items: items, dues, documents: docs, lots, barns, herds, herd_days: herdDays, animals, animal_events: animalEvents }, null, 1);
+    places, expenses, events, inventory_items: items, dues, documents: docs, lots }, null, 1);
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([json], { type: "application/json" }));
   a.download = `${base}.json`;

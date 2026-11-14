@@ -1,4 +1,5 @@
 # Hayvancılık oturumu
+> **ARŞİVLENDİ (14 Kasım 2026, Mustafa'nın isteğiyle Core kararı):** gerçek kullanıcı yok; kod `gelistirme`'den çıkarıldı, tamamı `arsiv/hayvancilik` dalında. Veritabanı tabloları ve deneme verisi duruyor. Geri dönüş yolu: `docs/plan/uzun-vadeli-plan.md` §1. Bu oturum kod yazmaz.
 **Not:** Kanatlı (kümes) ayrı oturumda: `kanatli.md`. Ortak iskelet (barınak, modül anahtarı, olay/hatırlatma) bu oturumda.
 **Kapsam:** büyükbaş + küçükbaş. Yeni modül, `products/ciftci/hayvan/` altında (fidan gibi panelden açılıp kapanan modül: settings.modules "hayvan"). Ortak masraf/gelir/depo/takvim/yetki kullanılır, yeniden yazılmaz. · **Dal:** `modul/hayvancilik`
 

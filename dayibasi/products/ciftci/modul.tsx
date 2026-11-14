@@ -2,25 +2,22 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Business } from "@/core/auth/AuthGate";
 import { hasFidan } from "./fidan";
-import { hasTur } from "./hayvan/hayvan";
 
 // Bölümler (modüller): girişte seçilir, her birinin kendi rengi var. Tarlalar, Depo, Makineler, Takvim, Borç, Belgeler hepsinde ortak.
-export type Modul = "tarla" | "fidan" | "hayvan";
+export type Modul = "tarla" | "fidan";
 type Renk = { ana: string; koyu: string; acik: string; yazi: string; orta: string; zemin: string; zeminCizgi: string; zeminYazi: string };
 export const MODULLER: Record<Modul, { ad: string; alt: string; renk: Renk; ana: string[] }> = {
   tarla: { ad: "Tarla", alt: "Tarla işleri, hasat, verim", renk: { ana: "#2e6a2b", koyu: "#245622", acik: "#e1efda", yazi: "#1b4519", orta: "#a7c99c", zemin: "#16351c", zeminCizgi: "#2e5534", zeminYazi: "#c9dcc6" }, ana: ["tarlalar"] },
   fidan: { ad: "Fidan", alt: "Dikim, sayım, stok, müşteri", renk: { ana: "#146c7c", koyu: "#0f5562", acik: "#dceff2", yazi: "#0b4450", orta: "#93c6cf", zemin: "#0c3a43", zeminCizgi: "#22545e", zeminYazi: "#bfdde3" }, ana: ["fidan"] },
-  hayvan: { ad: "Hayvancılık", alt: "Kümes, büyükbaş, küçükbaş", renk: { ana: "#8a4b1f", koyu: "#6e3b17", acik: "#f3e5d8", yazi: "#5c3012", orta: "#d1ad8e", zemin: "#3f2410", zeminCizgi: "#5e3d24", zeminYazi: "#e6cdb6" }, ana: ["kumes", "buyukbas", "kucukbas"] },
 };
 /** Bölüme özel sekmeler: başka bölümdeyken gizlenir. Geri kalan her şey ortak. */
-const OZEL: Record<string, Modul> = { fidan: "fidan", kumes: "hayvan", buyukbas: "hayvan", kucukbas: "hayvan" };
+const OZEL: Record<string, Modul> = { fidan: "fidan" };
 export const tabInModul = (id: string, m: Modul) => !OZEL[id] || OZEL[id] === m;
 
-/** Deftere açık bölümler. Tarla her defterde var (tarlalar ortak); fidan ve hayvancılık ayarla açılır. */
+/** Deftere açık bölümler. Tarla her defterde var (tarlalar ortak); fidan ayarla açılır. */
 export function modulsOf(b: Business): Modul[] {
   const l: Modul[] = ["tarla"];
   if (hasFidan(b)) l.push("fidan");
-  if (hasTur(b, "kanatli") || hasTur(b, "buyukbas") || hasTur(b, "kucukbas")) l.push("hayvan");
   return l;
 }
 
@@ -58,7 +55,6 @@ export function ModulProvider({ biz, children }: { biz: Business; children: (m: 
 const IKON: Record<Modul, React.ReactNode> = {
   tarla: <><path d="M3 20h18" /><path d="M5 20c0-6 3-9 7-11" /><path d="M12 9c4 2 7 5 7 11" /><path d="M12 3v6" /></>,
   fidan: <><circle cx="12" cy="9" r="6" /><path d="M12 15v6M8 21h8" /><path d="M9 8c1 1 2 1 3 0s2-1 3 0" /></>,
-  hayvan: <><path d="M4 9c0-3 2-5 5-5h6c3 0 5 2 5 5v4c0 4-3 7-8 7s-8-3-8-7z" /><path d="M4 9 2 6M20 9l2-3" /><circle cx="9" cy="11" r="1" /><circle cx="15" cy="11" r="1" /><path d="M10 16h4" /></>,
 };
 
 function ModulSec({ moduller, onPick }: { moduller: Modul[]; onPick: (m: Modul) => void }) {

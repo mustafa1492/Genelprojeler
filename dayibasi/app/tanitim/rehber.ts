@@ -1,5 +1,5 @@
 // "Nasıl kullanılır" rehberinin içeriği. Düğme ve alan adları uygulamadaki gerçek yazılarla aynı tutuldu
-// (products/ciftci/screens, core/expenses, products/ciftci/hayvan). Uygulama değişince burası da güncellenmeli.
+// (products/ciftci/screens, core/expenses). Uygulama değişince burası da güncellenmeli.
 
 /** Telefon çizimi: başlık, alanlar (etiket: örnek), seçim düğmeleri, ana düğme, kart. */
 export type Ekran = {
@@ -300,9 +300,9 @@ export const BOLUMLER: Bolum[] = [
     konular: [
       {
         b: "Ekranımı düzenle", k: "Uygulama sana göre olsun.",
-        m: ["Menü → Ayarlar → “Ekranımı düzenle”ye gir.", "Hazır görünümlerden birini seç: Tarlacı, Kümesçi, Sadece para, En sade.", "Kâr kartının neyi göstereceğini seç: Sezon, Bu ay, Bu yıl, 30 gün.", "Özette görünen kartları gizle ya da yerlerini değiştir.", "Alt çubuktaki 4 yere dokun, oraya ne geleceğini seç. Beğenmezsen “Varsayılana dön”."],
+        m: ["Menü → Ayarlar → “Ekranımı düzenle”ye gir.", "Hazır görünümlerden birini seç: Tarlacı, Fidancı, Sadece para, En sade.", "Kâr kartının neyi göstereceğini seç: Sezon, Bu ay, Bu yıl, 30 gün.", "Özette görünen kartları gizle ya da yerlerini değiştir.", "Alt çubuktaki 4 yere dokun, oraya ne geleceğini seç. Beğenmezsen “Varsayılana dön”."],
         ipucu: "Sadece senin ekranın değişir; ailedeki diğer kişiler etkilenmez.",
-        ekran: { baslik: "Hazır görünümler", secim: [{ ad: "Tarlacı", on: true }, { ad: "Kümesçi" }, { ad: "Sadece para" }, { ad: "En sade" }] },
+        ekran: { baslik: "Hazır görünümler", secim: [{ ad: "Tarlacı", on: true }, { ad: "Fidancı" }, { ad: "Sadece para" }, { ad: "En sade" }] },
       },
       {
         b: "Tutarları gizle", k: "Yanında biri varken.",
@@ -363,53 +363,6 @@ export const BOLUMLER: Bolum[] = [
         ekran: { baslik: "Müşteriler", kartlar: [["Toplam alacak", "38.500 TL"], ["Ali Usta", "12.000 TL"], ["Köprü Peyzaj", "26.500 TL"]], dugme: "Ödeme al" },
       },
       { b: "Stok, fiyat listesi, Excel", k: "Elinde ne var.", m: ["“Stok”ta boylara göre satışa hazır fidanlar görünür.", "“Fiyat listesi”nde boy boy fiyatlar durur.", "“Excel’e indir” ile partiler, boy stoku ve siparişler iner."] },
-    ],
-  },
-  {
-    id: "kumes", ad: "Kümes", ik: "🐔", ozet: "Sürü, günlük kayıt, yem, tartım.",
-    konular: [
-      {
-        b: "Kümes ve sürü aç", k: "Her dönem ayrı bir sürü.",
-        m: ["Kümes ekranında kümesini ekle: adı, alanı, kaç hayvan aldığı, istersen Bakanlık işletme no.", "“Yeni sürü aç”a dokun.", "Giriş gününü, kaç hayvan girdiğini, civcivin nereden geldiğini, istersen entegre firma ve sözleşme noyu yaz.", "Uygulamaya geç başladıysan önceden verilen yemi ve ölenleri de yazabilirsin."],
-        ekran: { baslik: "Yeni sürü", alanlar: [["Giriş günü", "1 Kasım"], ["Kaç hayvan?", "12.000"], ["Entegre firma", "—"]], dugme: "Sürüyü aç" },
-      },
-      {
-        b: "Bugünün kaydı", k: "Her gün bir dakika.",
-        m: ["“Bugünün kaydı”na dokun (dünü de girebilirsin).", "Ölü ve ayıklanan sayısını − / + ile gir.", "Verilen yemi çuval olarak yaz; bir çuvalın kaç kilo olduğu bir kere sorulur.", "“Daha fazla: tartım, not” ile ortalama gramı ve kaç hayvan tartıldığını yaz."],
-        ekran: { baslik: "Bugünün kaydı", kartlar: [["Ölü", "−  3  +"], ["Ayıklanan", "−  1  +"], ["Yem", "−  8 çuval  +"]], dugme: "Kaydet" },
-      },
-      {
-        b: "Sürünün durumu", k: "Sürü kartı.",
-        m: ["Kalan hayvan, kayıp (ölü + ayıklanan) ve verilen yem görünür.", "Tartım girdiysen tahmini canlı ağırlık ve yemden yararlanma hesaplanır.", "Dönem bitince “Sürüyü kapat (dönem bitti)”."],
-      },
-    ],
-  },
-  {
-    id: "hayvan", ad: "Büyükbaş ve küçükbaş", ik: "🐄", ozet: "Küpe no, olaylar, gebelik, arınma.",
-    konular: [
-      {
-        b: "Hayvan ekle", k: "Küpe numarasıyla tek tek.",
-        m: ["Hayvanlar ekranında “+ Hayvan ekle”ye dokun.", "Türünü seç (İnek, Boğa, Koyun, Koç, Keçi, Teke), küpe numarasını yaz.", "İstersen adını, doğum gününü, ırkını ve nerede durduğunu (ahır, ağıl) yaz.", "“Kaydet”e dokun."],
-        ekran: { baslik: "Yeni hayvan", secim: [{ ad: "İnek", on: true }, { ad: "Koyun" }, { ad: "Keçi" }], alanlar: [["Küpe no", "TR 35 0012 3456"], ["Adı", "Sarıkız"]], dugme: "Kaydet" },
-      },
-      {
-        b: "Olay ekle", k: "Hayvanın başına gelen her şey.",
-        m: ["Hayvana dokun, “Olay ekle”yi seç.", "“Ne oldu?”: Doğurdu, Kızgın, Tohumlandı / katıldı, Gebe çıktı, Boş çıktı, Kuruya ayrıldı, İlaç, Aşı, Tartım, Satıldı, Öldü, Not.", "Günü seç (Bugün, Dün ya da başka gün) ve istenen bilgiyi yaz.", "Doğumda yavruları da eklersin; yavrular listeye girer, annesi bu hayvan olarak görünür."],
-        ekran: { baslik: "Ne oldu?", secim: [{ ad: "Doğurdu" }, { ad: "Tohumlandı" }, { ad: "İlaç", on: true }, { ad: "Aşı" }, { ad: "Tartım" }] },
-      },
-      {
-        b: "İlaç ve süt arınma uyarısı", k: "Sütü tanka katma.",
-        m: ["İlaç olayında ilacın adını ve kutusunda yazan süt ve et arınma süresini yaz.", "Süre bitene kadar hayvanın kartında “sütü tanka katılmaz” uyarısı görünür."],
-        ekran: { baslik: "İlaç", alanlar: [["İlacın adı", "Penisilin"], ["Süt arınma, gün", "4"], ["Et arınma, gün", "14"]], dugme: "Kaydet" },
-      },
-      {
-        b: "Aşı, gebelik, kuruya ayırma", k: "Uygulama hatırlatır.",
-        m: ["Aşıda sonraki aşı gününü yazarsan hatırlatılır.", "Tohumlamadan sonra gebelik kontrolü, doğum ve kuruya ayırma günleri hesaplanır.", "“Süreler” ile gebelik süresini, kızgınlık aralığını ve kuruya ayırma gününü kendine göre ayarla.", "“Bu hafta” kısmında yaklaşan işler sıralanır."],
-      },
-      {
-        b: "Satış ve ölüm", k: "Sürüden çıkanlar.",
-        m: ["“Satıldı” olayında satış fiyatını yazarsan gelire de yazılır.", "Satılan ve ölenler listeden düşer; “Satılan ve ölenleri göster” ile görürsün.", "Yanlışlıkla yaptıysan “Sürüye geri al”."],
-      },
     ],
   },
 ];

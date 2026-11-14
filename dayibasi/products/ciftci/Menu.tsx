@@ -4,7 +4,7 @@ import { MODULLER, useModul } from "./modul";
 
 type T = { id: string; label: string; emoji?: string };
 
-const URETIM = ["tarlalar", "fidan", "kumes", "buyukbas", "kucukbas", "depo", "makineler"];
+const URETIM = ["tarlalar", "fidan", "depo", "makineler"];
 const PARA: [string, string][] = [["rapor", "Sezon raporu ve kâr"], ["vadeler", "Borç ve vadeler"], ["kayitlar", "Kayıtlar"], ["fis", "Fiş yükle"]];
 const DEFTER: [string, string][] = [["takvim", "Takvim ve hatırlatmalar"], ["belgeler", "Belgeler"], ["fotograflar", "Fotoğraflar (fişler)"], ["gecmis", "Geçmiş"]];
 

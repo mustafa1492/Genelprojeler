@@ -4,7 +4,7 @@
 // - Giriş düğmesi metni: "Ücretsiz başla", alt not: "Basit paket hep ücretsiz. Kredi kartı istemez."
 // - SSS: "Ücretsiz paket ne kadar süre ücretsiz?" → "Basit paket hep ücretsiz ve sınırsız. Orta ve Tam paketlerde ilk sezon ücret alınmaz."
 // - Bölümler kartlarındaki paket etiketleri: Basit, Orta, Tam, Tam, Tam, Hepsinde
-//   (Tarla ve para: Basit · Defter işleri: Orta · Fidan, Kümes, Büyükbaş/küçükbaş: Tam · Ekranımı düzenle: Hepsinde)
+//   (Tarla ve para: Basit · Defter işleri: Orta · Fidan: Tam · Ekranımı düzenle: Hepsinde)
 
 export function Paketler() {
   return (
@@ -26,7 +26,7 @@ export function Paketler() {
             </div>
             <div className="tn-kart">
               <h3>Tam <span className="tn-taslak">[taslak]</span></h3><p className="fiyat">199 TL <small>/ ay</small></p><p className="yil">ya da yıllık 1.590 TL</p>
-              <ul><li>Orta paketteki her şey</li><li>Fidan</li><li>Kümes</li><li>Büyükbaş ve küçükbaş</li></ul>
+              <ul><li>Orta paketteki her şey</li><li>Fidan</li></ul>
               <a className="tn-btn ana" href="/ciftci">Başla</a>
             </div>
           </div>

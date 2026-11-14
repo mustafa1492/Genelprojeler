@@ -8,7 +8,7 @@ type Row = {
   business_id: string; name: string; product: string; owner_email: string | null; created_at: string;
   isci: number; ciftci: number; kayit: number; son_islem: string | null; modules: string[] | null;
 };
-const MODULES = [{ id: "fidan", label: "Fidan (şimşir) modülü", product: "ciftci" }, { id: "kanatli", label: "Kümes (kanatlı) modülü", product: "ciftci" }, { id: "buyukbas", label: "Büyükbaş modülü", product: "ciftci" }, { id: "kucukbas", label: "Küçükbaş modülü", product: "ciftci" }];
+const MODULES = [{ id: "fidan", label: "Fidan (şimşir) modülü", product: "ciftci" }];
 const when = (iso: string | null) => iso
   ? new Date(iso).toLocaleString("tr-TR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Istanbul" })
   : "Hiç işlem yok";

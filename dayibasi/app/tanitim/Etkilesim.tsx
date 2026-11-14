@@ -138,18 +138,16 @@ export function DenemeEkrani() {
 const SORULAR = [
   { id: "tarla", s: "Tarlan, bağın ya da bahçen var mı?", ik: "🌾" },
   { id: "fidan", s: "Fidan yetiştirip satıyor musun?", ik: "🌱" },
-  { id: "kumes", s: "Kümesin var mı?", ik: "🐔" },
-  { id: "hayvan", s: "İnek, koyun ya da keçin var mı?", ik: "🐄" },
 ] as const;
 type Cevap = Record<string, boolean | undefined>;
-const MODUL_AD: Record<string, string> = { tarla: "Tarla ve para", fidan: "Fidancılık", kumes: "Kümes", hayvan: "Büyükbaş ve küçükbaş" };
+const MODUL_AD: Record<string, string> = { tarla: "Tarla ve para", fidan: "Fidancılık" };
 
 export function ModulSecici() {
   const [c, setC] = useState<Cevap>({});
   const [zor, setZor] = useState<boolean | undefined>(undefined);
   const bitti = SORULAR.every((q) => c[q.id] !== undefined) && zor !== undefined;
   const secilen = SORULAR.filter((q) => c[q.id]).map((q) => q.id);
-  const gorunum = zor ? "En sade" : secilen.length === 1 && secilen[0] === "kumes" ? "Kümesçi" : c.tarla ? "Tarlacı" : "Sadece para";
+  const gorunum = zor ? "En sade" : secilen.length === 1 && secilen[0] === "fidan" ? "Fidancı" : c.tarla ? "Tarlacı" : "Sadece para";
   const EvetHayir = ({ v, set }: { v: boolean | undefined; set: (b: boolean) => void }) => (
     <div className="ms-eh">
       <button type="button" aria-pressed={v === true} onClick={() => set(true)}>Evet</button>

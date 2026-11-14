@@ -230,8 +230,6 @@ button.tn-btn:disabled { opacity: .4; cursor: default; }
 .tn-mk { border-radius: 22px; padding: 22px; border: 2px solid; display: flex; flex-direction: column; }
 .tn-mk.tarla { background: #eef6e9; border-color: #a7c99c; }
 .tn-mk.fidan { background: #edf7f1; border-color: #9ccdb0; }
-.tn-mk.kumes { background: #fff7e6; border-color: #f1d49a; }
-.tn-mk.hayvan { background: #f6f0e8; border-color: #d9c3a5; }
 .tn-mk .bas { display: flex; gap: 14px; align-items: center; }
 .tn-mk .ik { width: 64px; height: 64px; flex-shrink: 0; border-radius: 18px; background: #fff; display: grid; place-items: center; font-size: 2.1rem; box-shadow: 0 1px 3px rgba(20,45,25,.12); }
 .tn-mk h3 { font-size: 1.375rem; margin: 0 0 2px; }

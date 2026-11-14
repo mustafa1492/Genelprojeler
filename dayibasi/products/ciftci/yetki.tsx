@@ -7,7 +7,6 @@ export const SCREENS: { key: string; label: string; hint: string }[] = [
   { key: "masraf", label: "Masraflar", hint: "masraf tutarları, veresiye" },
   { key: "gelir", label: "Gelirler", hint: "satışlar, alacaklar" },
   { key: "fidan", label: "Fidan", hint: "partiler, sayım, sipariş, maliyet" },
-  { key: "hayvan", label: "Hayvanlar (kümes, ağıl, ahır)", hint: "barınak, sürü, günlük ölü ve yem" },
   { key: "depo", label: "Depo", hint: "gübre, ilaç, tohum stoku" },
   { key: "takvim", label: "Takvim ve hatırlatmalar", hint: "" },
   { key: "rapor", label: "Sezon raporu ve kâr", hint: "kâr / zarar, PDF, Excel" },
@@ -27,7 +26,7 @@ export const PRESETS: { key: NonNullable<Perms["preset"]>; label: string; hint: 
   { key: "calisan", label: "Çalışan", hint: "tarla işi, depo, takvim, fiş; para göremez" },
   { key: "ozel", label: "Özel", hint: "ekran ekran sen seçersin" },
 ];
-const CALISAN: Record<string, Level> = { tarlalar: "yaz", takvim: "yaz", depo: "yaz", fis: "yaz", belgeler: "gor", uyeler: "gor", hayvan: "yaz" };
+const CALISAN: Record<string, Level> = { tarlalar: "yaz", takvim: "yaz", depo: "yaz", fis: "yaz", belgeler: "gor", uyeler: "gor" };
 /** Hazır rolün ekran izinleri (Özel'e geçerken başlangıç olarak). Veritabanındaki perm_level ile aynı. */
 export function presetLevels(p: Perms["preset"]): Record<string, Level> {
   if (p === "yonetici") return Object.fromEntries(SCREENS.map((s) => [s.key, "yaz"]));

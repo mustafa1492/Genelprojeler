@@ -216,10 +216,11 @@ Mustafa'nın tespiti: veriyi hizmete çevirme fikri iyi.
 ### 6.7 Köy pazarı (14 Kasım fikir alışverişi)
 **Mustafa'nın kararı:** çiftçilerin birbirine (ve çevresindeki iş yapanlara) satış yapabildiği bir yer. Genel sosyal medya değil (akış, beğeni, yorum yok); yerel, düzenli ve defterle bağlı bir ilan ve talep-teklif yeri. Armut'a benzer: talep açılır, iş yapanlar teklif verir.
 
-**Üç bölüm (Mustafa'nın seçimi; fide yok):**
+**Dört bölüm (Mustafa'nın seçimi; fide sonradan eklendi):**
 | Bölüm | Veren | Arayan | Usul | Defterde |
 |---|---|---|---|---|
 | **Saman** | Çiftçi | Hayvancı / çiftçi | Basit ilan: satılık / aranıyor | Satıcıda gelir ve depodan düşüm, alıcıda masraf ve depo girişi |
+| **Fide ve fidan** | Fidancı / çiftçi | Çiftçi | İlan; fidan modülündeki stoktan tek dokunuşla | Satıcıda gelir ve stoktan düşüm, alıcıda masraf |
 | **Makine ve hizmet** | Makine sahibi (sürüm, balya, biçerdöver…) | Çiftçi | Talep → teklif | Makine sahibinde alacak, çiftçide masraf (tarlasıyla) |
 | **İşçilik** | Dayıbaşı (20–30 kişilik ekip) | Çiftçi | Talep → teklif | Dayıbaşında alacak, çiftçide masraf |
 

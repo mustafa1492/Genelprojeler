@@ -10,7 +10,7 @@
 - Son yayın: 14 Kasım 2026 (main `d009338`): TÜBİTAK deneme hesabı uygulama tarafı, veritabanı uyumasın (/api/uyanik).
 
 ## Yapılacaklar (sırayla)
-1. (boş) Yayın bekleyen iş yok.
+1. **Yayın bekliyor (18 Kasım TÜBİTAK'tan sonra):** hayvancılık ve kümesin koddan çıkarılması (arşiv `arsiv/hayvancilik`). Sonraki işler `docs/plan/uzun-vadeli-plan.md` §5 sırasıyla.
 2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
@@ -41,6 +41,7 @@
 - (Fidan, 10 Kasım 2026) **Dikim / alan hesaplayıcı:** önce fidan modülünde ürünlerden bağımsız yazılacak (alan ÷ bitki başı yer = adet; adet/alan × birim ihtiyaç = malzeme, maliyet; şablonlar modül ayarında). Çalışınca `core/` altına taşınması istenecek. Ayrıntı: `fidan.md` madde 6.
 
 ## Kararlar ve kalıcı bilgiler
+- **Modül kararı (14 Kasım 2026, Mustafa "karar ver" dedi):** tarla (ana ürün) ve fidan (gerçek kullanıcı: Köprü fidancılık) kalır; dayıbaşı beklemede kalır (Köy pazarı işçilik bölümü); kümes, büyükbaş, küçükbaş arşivlendi (`arsiv/hayvancilik`, veritabanına dokunulmadı). Hazır görünüm "Kümesçi" → "Fidancı". Plan: `docs/plan/uzun-vadeli-plan.md`.
 - **Veritabanı uyumasın (14 Kasım 2026):** Supabase ücretsiz plan 7 gün istek almazsa projeyi duraklatır. Önlem: `app/api/uyanik` veritabanından tek satır okur; `vercel.json` → crons her gün 03:17 UTC (06:17 TR) çağırır. Zamanlayıcı yalnız canlıda (main) çalışır. **Kontrol:** tarayıcıda `/api/uyanik` → `{"ok":true}`; Vercel → proje → Settings → Cron Jobs'ta görünür, Logs'ta günlük çağrı. **Uyursa:** Supabase paneli → proje → "Restore project" (veri silinmez, birkaç dakika sürer), sonra `/api/uyanik` ile doğrula. Ücretli plana geçilirse bu adım gereksiz olur.
 - **Güvenlik kontrolü (11 Kasım 2026):** bütün dallardaki 194 commit tarandı: gizli anahtar, şifre, belirteç yok; `.env` yalnız herkese açık anahtar. Depo o gün herkese açıktı, fork 0. Supabase denetimi: kritik yok; uyarılar: sızdırılmış şifre koruması kapalı, `admin_table_ok` ve `event_screen` arama yolu sabit değil, `is_demo` girişsiz çağrılabiliyor (veri sızdırmaz).
 - **Vercel önizleme adresi** (`genelprojeler-git-gelistirme-mustii1.vercel.app`) Vercel girişi ister; oturum giremez. Önizleme yerine aynı sürüm yerelde gerçek veritabanına bağlı çalıştırılıp denenir.
@@ -84,6 +85,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 14 Kas: Hayvancılık/kümes koddan çıkarıldı (arşiv dalı), tanıtım sitesi tarla+fidana göre; derleme ve 16 ekran denemesi temiz. Uzun vadeli plan yazıldı.
 - 14 Kas: Canlıya çıktı: deneme hesabı uygulama tarafı + /api/uyanik; canlıda /api/uyanik ok, ana sayfa başlığı görünüyor.
 - 14 Kas: Veritabanı uyumasın: `/api/uyanik` + günlük Vercel zamanlayıcısı (gelistirme; canlıya çıkınca çalışır).
 - 11 Kas: TÜBİTAK deneme hesabı hazırlandı: 0021 koruması ve örnek veri canlı veritabanında; uygulama tarafı gelistirme'de.
