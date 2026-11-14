@@ -18,7 +18,7 @@ export const ogResim = { url: "/tanitim/opengraph-image.png", width: 1200, heigh
 
 const MODULLER = [
   { id: "tarla", rehber: "tarlalar", ik: "🌾", kisa: "Tarla", ad: "Tarla ve para", soz: "Her çiftçinin defteri. Herkese açık.",
-    ne: ["Tarlalar, tapudan parsel", "Masraf, gelir, veresiye", "İlaçlama, gübre, sulama, verim", "Yıllara göre ürün ve verim", "Depo, makineler, takvim", "Sezon raporu (PDF, Excel)"] },
+    ne: ["Tarlalar, tapudan parsel", "Masraf, gelir, veresiye; istersen sesle", "İlaçlama, gübre, sulama, verim", "Yıllara göre ürün ve verim", "Depo, makineler, takvim", "Sezon raporu (PDF, Excel)"] },
   { id: "fidan", rehber: "fidan", ik: "🌱", kisa: "Fidan", ad: "Fidancılık", soz: "Partiden satışa fidanın hesabı.",
     ne: ["Dikim partileri ve boy boy sayım", "Fidan başı maliyet, önerilen fiyat", "Sipariş, kapora, sevk listesi", "Müşteriler ve alacak"] },
 ];
@@ -32,7 +32,7 @@ const dertler = [
 
 const ozellikler = [
   { i: "📊", h: "Özet ve kâr kartı", p: "Sezonda, bu ay, bu yıl ya da son 30 günde ne kazandığını tek kartta gör." },
-  { i: "🧾", h: "Masraf ve gelir", p: "Ne aldın, ne sattın; hangi tarlaya ait olduğunu seç, fişin fotoğrafını ekle." },
+  { i: "🧾", h: "Masraf ve gelir", p: "Ne aldın, ne sattın; hangi tarlaya ait olduğunu seç, fişin fotoğrafını ekle. İstersen söyle: “mazota üç bin verdim”." },
   { i: "🗺️", h: "Tarlalar", p: "Tarlanı ada ve parsel numarasıyla tapudan getir; dekarı kendisi gelir." },
   { i: "📦", h: "Depo", p: "Gübre, ilaç, tohum ne kadar kaldı; giren çıkan belli." },
   { i: "🚜", h: "Makineler", p: "Traktör ve aletlerinin bakımı, masrafı bir yerde." },
@@ -109,7 +109,7 @@ export function TanitimSayfasi() {
             <ul>
               <li>Dekar başı ve kilo başı kâr, girdi fiyatlarının yıllara göre karşılaştırması</li>
               <li>Köy pazarı: köyündeki çiftçilerle saman, fide ve fidan alıp satma; makine ve işçilik ilanları</li>
-              <li>Sesle masraf yazma ve fiş fotoğrafından masrafı kendiliğinden doldurma</li>
+              <li>Fiş fotoğrafından masrafı kendiliğinden doldurma</li>
               <li>Hava durumuna göre ilaçlama saati önerisi</li>
               <li>Google Play'den indirilebilen Android uygulaması</li>
             </ul>
