@@ -7,10 +7,10 @@
 - Kişiye özel ayarlar (`user_prefs`), internetsiz kayıt, tutarları gizle (`*** TL`), büyük yazı.
 - Döviz karşılığı (TCMB, kaydın günü; `/api/kur`), yeni Excel (tablolar, formüller, Özet sayfası), bütün verimi indir.
 - Modüller: fidan, kümes, büyükbaş, küçükbaş, makineler, tapudan parsel sorgusu.
-- Son yayın: 11 Kasım 2026 (arayüz raporu düzeltmeleri: okunur yazı, zarar yazısı, telefonda Rapor kartları, anahtarlar).
+- Son yayın: 14 Kasım 2026 (main `d009338`): TÜBİTAK deneme hesabı uygulama tarafı, veritabanı uyumasın (/api/uyanik).
 
 ## Yapılacaklar (sırayla)
-1. **Yayın bekliyor (gelistirme'de):** TÜBİTAK deneme hesabı için uygulama tarafı (Özet'te deneme notu, /sifre deneme hesabında kapalı, ana sayfada kısa başlık). Mustafa onay verince main'e. Veritabanı tarafı (0021 + örnek veri) uygulandı.
+1. (boş) Yayın bekleyen iş yok.
 2. Tanıtım taslağını (`modul/tanitim`, `/tanitim`) birleştirmek: Mustafa "birleştir" deyince.
 3. Mustafa'nın elle test listesinden (`docs/test-plani.md`) gelecek hatalar.
 4. Arayüz raporundan seçilenler (`docs/fikirler/arayuz-onerileri.md`) ve giriş ekranı düzenlemesi: Mustafa seçince.
@@ -18,7 +18,6 @@
 
 ## Mustafa'dan beklenenler
 - **Depoyu gizli yap** (11 Kasım isteği; oturum depo ayarını değiştiremiyor): GitHub → Settings → Danger Zone → Change visibility → private.
-- **"Yükle" onayı:** deneme hesabının uygulama tarafı gelistirme'de bekliyor (Özet notu, /sifre kapalı, ana sayfa başlık satırı, Ayarlar etiketi).
 - **Supabase onayı gereken iki komut** (onay penceresi cevapsız kaldı): deneme defterinin Geçmiş'indeki iki "koruma denemesi" izini silmek; `is_demo` fonksiyonunu `security invoker` yapmak.
 - Supabase panelinde "sızdırılmış şifre koruması"nı açmak (Authentication → şifre ayarları).
 - Telefon/WhatsApp numarasının doğrusu (11 hane) ve nerede görüneceği (bkz. `tanitim.md`).
@@ -84,6 +83,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 14 Kas: Canlıya çıktı: deneme hesabı uygulama tarafı + /api/uyanik; canlıda /api/uyanik ok, ana sayfa başlığı görünüyor.
 - 14 Kas: Veritabanı uyumasın: `/api/uyanik` + günlük Vercel zamanlayıcısı (gelistirme; canlıya çıkınca çalışır).
 - 11 Kas: TÜBİTAK deneme hesabı hazırlandı: 0021 koruması ve örnek veri canlı veritabanında; uygulama tarafı gelistirme'de.
 - 11 Kas: Canlıya çıktı: arayüz raporu düzeltmeleri (3 commit). Yayın öncesi 23 ekran × telefon/bilgisayar sahte sunucuyla açıldı, hata ve yatay taşma yok.
