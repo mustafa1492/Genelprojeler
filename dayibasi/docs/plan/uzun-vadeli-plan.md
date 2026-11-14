@@ -172,3 +172,24 @@ Puan: ★★★ çiftçinin işini çok azaltır · ★★ orta · ★ hoş ama 
 | 4. Fişten masraf, kredi dosyası, ÇKS takvimi | Yapılmadı |
 | Tanıtım sitesi | Yapıldı: tarla+fidan, "Deneme sürümü", Yakında'ya Köy pazarı, rehber adımları ＋ Ekle'ye göre |
 
+---
+
+## 8. İş sırası (14 Kasım gece, Mustafa "önerilenleri yap, diğerlerini sıraya koy" dedi)
+**Yapıldı (gelistirme'de, yüklenmedi):** sesle gelir ve tarla işi · tekrarlayan hatırlatma · takvimde "Önümüzdeki 7 gün" ve simgeler · masraf ay şeridi · Geçmiş geri tuşu · fotoğraflar Masraf başlığında ("Fişler") · Köy pazarı telefon taslağı (`docs/tasarim/koy-pazari/taslak.png`) · girdi kataloğu (gübre adları, ilaç türleri; depo ve tarla işinde öneri).
+
+**Sıradaki (bu sırayla):**
+| Sıra | İş | Neden bu sırada | Dış şart |
+|---|---|---|---|
+| 1 | Otomatik denemeyi genişletmek (kayıt ekle/sil akışları) | Daha fazla özellikten önce güvenlik ağı | — |
+| 2 | Bilgisayar görünümü (Özet iki sütun, Tarlalar tablo, geniş ekran) | Kooperatif/firma görüşmelerinde bilgisayarda gösterilecek | — |
+| 3 | Fidan stoğundan ilan (WhatsApp'a tek dokunuşla) | Köy pazarına ilk küçük adım; gerçek kullanıcısı (Hüseyin) var | — |
+| 4 | ÇKS ve destek takvimi | Tarihler Mustafa onaylayınca | Tarih onayı |
+| 5 | Veritabanı işleri tek oturumda: güvenlik uyarıları + gece yedeği (0013) + deneme izleri | Hepsi aynı onay penceresi | Supabase onayı |
+| 6 | E-postayla şifre sıfırlama | Gerçek kullanıcıdan önce şart | SMTP ayarı (Mustafa) |
+| 7 | KVKK: aydınlatma + açık rıza iki taslak | Gerçek kullanıcıdan önce | Avukat |
+| 8 | Android mağaza sürümü (TWA) | Ocak–Şubat planında | Google Play hesabı |
+| 9 | Fiş fotoğrafından masraf | Değerli ama ücretli servis | Maliyet onayı |
+| 10 | Kod temizliği | Ara işlerde | — |
+| 11 | Tanıtım sitesine kısa anlatım videosu | Pilot görüşmelerinden önce | — |
+| 12 | Onay akışı ("tek kayıt, iki taraf") | 2. aşama; muhtar/kooperatif/dayıbaşı görüşmelerinden sonra | Görüşmeler |
+

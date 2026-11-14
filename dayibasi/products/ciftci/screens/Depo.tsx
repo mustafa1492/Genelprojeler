@@ -1,4 +1,5 @@
 "use client";
+import { girdiOnerileri } from "@/core/catalog/girdiler";
 import { useCList } from "../lists";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
@@ -93,9 +94,12 @@ function ItemForm({ edit, onSave, onCancel, onDelete }: {
     <main className="ui-stack" style={{ paddingBottom: 120 }}>
       <BackButton onClick={onCancel} label="Vazgeç" />
       <PageHeader sub="Depo" title={edit ? "Malzemeyi düzenle" : "Yeni malzeme"} />
-      <TextField id="d_ad" label="Adı" placeholder="Örnek: 20-20-0 gübre, Decis, Budama makası" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
       <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Türü</span>
         <div className="ui-chips wrap">{invCats.map((c) => <Chip key={c} selected={c === category} onClick={() => setCategory(c)}>{c}</Chip>)}</div></div>
+      <TextField id="d_ad" label="Adı" placeholder="Örnek: 20-20-0 gübre, Budama makası" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
+      {!edit && girdiOnerileri(category).length > 0 && (
+        <div className="ui-chips wrap" aria-label="Sık kullanılanlar">{girdiOnerileri(category).map((g) => <Chip key={g} selected={name === g} onClick={() => setName(g)}>{g}</Chip>)}</div>
+      )}
       <div className="ui-stack" style={{ gap: 8 }}><span className="ui-label">Birimi</span>
         <div className="ui-chips wrap">{invUnits.map((u) => <Chip key={u} selected={u === unit} onClick={() => setUnit(u)}>{u}</Chip>)}</div></div>
       <TextField id="d_miktar" label={`Miktar (${unit})`} inputMode="decimal" placeholder="Örnek: 10" maxLength={12} value={qty} onChange={(e) => setQty(e.target.value)} style={{ fontSize: "1.6rem", fontWeight: 800 }} />

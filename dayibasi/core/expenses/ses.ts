@@ -10,6 +10,21 @@ export function tutarBul(metin: string): number | null {
   return l.length ? Math.max(...l) : null;
 }
 
+const SAYI_KELIME = new Set([...Object.keys(BIRLER), ...Object.keys(ONLAR), "yüz", "bin", "milyon", "buçuk"]);
+// Türkçe ekler: "yüzden", "bine", "dörtte", "ellilik", "üçer"… → kök. Önce kelimenin kendisi, sonra ek atılmış hâli denenir.
+const EKLER = ["lerden", "lardan", "liradan", "lira", "lık", "lik", "luk", "lük", "den", "dan", "ten", "tan", "de", "da", "te", "ta", "ye", "ya", "er", "ar", "e", "a", "i", "ı", "u", "ü", "tl"];
+function sayiKoku(k: string): string {
+  if (SAYI_KELIME.has(k) || /^\d+(\.\d+)?$/.test(k)) return k;
+  for (const e of EKLER) {
+    if (!k.endsWith(e) || k.length <= e.length) continue;
+    const r = k.slice(0, -e.length).replace(/'$/, "");
+    if (r === "on" && ["a", "da", "dan", "e"].includes(e)) continue;   // "ona", "onda", "ondan": çoğu zaman "o kişi", sayı değil
+    if (SAYI_KELIME.has(r) || /^\d+(\.\d+)?$/.test(r)) return r;
+    if (r === "dörd") return "dört";            // "dördü", "dörde"
+  }
+  return k;
+}
+
 /** Cümledeki sayılar, söylendiği sırayla ("50 ton 4 bin 800'den" → [50, 4800]). */
 export function sayilar(metin: string): number[] {
   const t = metin.toLocaleLowerCase("tr").replace(/(\d)\.(\d{3})/g, "$1$2").replace(/(\d),(\d+)/g, "$1.$2");
@@ -18,7 +33,7 @@ export function sayilar(metin: string): number[] {
   const out: number[] = [];
   const bitir = () => { if (sayi && toplam + grup > 0) out.push(Math.round((toplam + grup) * 100) / 100); toplam = 0; grup = 0; sayi = false; };
   for (const k of kelimeler) {
-    const kok = k.replace(/(lira|lık|lik|tl)$/u, "");
+    const kok = sayiKoku(k);
     if (/^\d+(\.\d+)?$/.test(kok)) { if (sayi && grup > 0 && grup % 1000 !== 0 && !(grup >= 100 && Number(kok) < 100 && grup % 100 === 0) && !(grup >= 20 && Number(kok) < 10 && grup % 10 === 0)) bitir(); grup += Number(kok); sayi = true; }
     else if (kok in BIRLER) { grup += BIRLER[kok]; sayi = true; }
     else if (kok in ONLAR) { grup += ONLAR[kok]; sayi = true; }

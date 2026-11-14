@@ -1,4 +1,5 @@
 "use client";
+import { GUBRELER, ILAC_TURLERI } from "@/core/catalog/girdiler";
 import { SesDugmesi } from "@/core/ui/SesDugmesi";
 import { islemCoz } from "@/core/expenses/ses";
 import { UrunSec } from "@/core/catalog/UrunSec";
@@ -427,6 +428,7 @@ function IslemForm({ place, items, history, initialType, edit, onSave, onCancel,
           <TextField id="i_urun" label={type === "İlaçlama" ? "Hangi ilaç?" : "Hangi gübre?"} placeholder={type === "İlaçlama" ? "Örnek: Decis" : "Örnek: 20-20-0"} maxLength={60}
             value={product} onChange={(e) => { setProduct(e.target.value); setItemId(null); }}
             onBlur={() => { if (product.trim() && !dose && !wait) { const l = lastUse(product.trim()); if (l) pick(product.trim()); } }} />
+          {!product.trim() && <div className="ui-chips wrap" aria-label="Sık kullanılanlar">{(type === "İlaçlama" ? ILAC_TURLERI : GUBRELER).map((g) => <Chip key={g} onClick={() => setProduct(g)}>{g}</Chip>)}</div>}
           {(card.label_dose || card.target || card.method || card.wait_days || last) && (
             <div className="ui-card ui-stack ilac-kart" style={{ gap: 4 }}>
               <b>{product} · ilaç kartı</b>

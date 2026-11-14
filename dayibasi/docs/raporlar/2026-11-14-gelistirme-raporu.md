@@ -155,3 +155,21 @@ Ekran görüntülerine tek tek bakılarak bulunan sorunlar ve yapılanlar. Hepsi
 **Denendi:** her adımda derleme; 20 ekran × 2 genişlik × (örnek veri + boş defter) = 80 açılış, sorun 0; sitede telefonda yatay taşma yok; ekran görüntüleriyle bakıldı.
 **Denenmedi:** gerçek telefon, eski Android tarayıcıda renk yedeği (kod incelemesiyle doğrulandı).
 
+---
+
+## 10. Ek: önerilen 8 iş (14 Kasım gece)
+| # | İş | Ne oldu | Denendi |
+|---|---|---|---|
+| 2 | Sesle gelir ve tarla işi | Gelir: "domatesi elli tona dört bin sekiz yüzden sattım" → Hasat satışı, Domates, 50 ton, 4.800 TL. Tarlalar: "ova tarlasını ilaçladım" → Ova tarlası, İlaçlama formu. "Devlet desteği yirmi bir bin" → Devlet desteği, 21.500 | Ayrıştırıcı 30+ cümle; sahte ses tanımayla uçtan uca |
+| 4 | Tekrarlayan masraf | Hatırlatmaya "Bir kere / Her ay / Her yıl"; "Yapıldı" deyince sonraki kendiliğinden kurulur (ayın 31'i kısa ayda son güne çekilir), geri alınabilir | Ekranda görüldü; kayıt akışı sahte sunucuda |
+| 9 | Takvim | Üstte "Önümüzdeki 7 gün" (en fazla 5 satır, simgeli); renk açıklamasına ve listeye simge (renk tek başına anlam taşımıyor) | Ekran görüntüsü |
+| 8 | Masraf formu | Ay şeridinin sağı soluk (kaydığı belli), seçili ay hep görünür. "Tarlalara böl" ve "Detaylandır" zaten düzeltilmişti | Ekran denemesi |
+| 7 | Başlık düzeni | Taradım; tek tutarsızlık Geçmiş'in "Geri"si hep Özet'e gidiyordu, artık geldiği ekrana döner | — |
+| 6 | Fiş/Fotoğraflar/Masraf | Masraf başlığında "Fişler" bağlantısı; Menü ve yan menüde ayrı Fotoğraflar satırı kalktı. Fiş ekranı (çalışanlar için) ve ＋ Ekle'deki "Fiş fotoğrafı" duruyor | Ekran denemesi |
+| 17 | Köy pazarı taslağı | 4 telefon ekranı: pazar, ilan ver, talep ve teklifler, onay bekliyor. `docs/tasarim/koy-pazari/taslak.png` | Resim |
+| 3 | Girdi kataloğu | `core/catalog/girdiler.ts`: 12 yaygın gübre, 7 ilaç türü (marka yok). Depo'da tür seçilince, tarla işinde ilaç/gübre adı boşken öneri | Ekranda görüldü |
+
+**Yakalanan hata:** ilk denemede "dört bin sekiz **yüzden**" 4.008 okundu (ek tanınmıyordu). Türkçe ek temizliği eklendi ("yüzden, bine, liradan, beşer, yüzlük…"); "ona verdim" gibi cümlelerde "on" sayısı sayılmıyor. Para tutarı olduğu için ayrıca 8 örnekle sınandı.
+
+**Sıradaki işler:** `docs/plan/uzun-vadeli-plan.md` §8 (12 madde, dış şartlarıyla).
+
