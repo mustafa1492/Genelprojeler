@@ -89,6 +89,7 @@
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle yapıldı) Giriş ekranı yeni görünüm: `core/auth/AuthGate.tsx` Login + `core/ui/ui.css` `.ui-auth*`. Mantık değişmedi; `?kayit=1` ile kayıt modunda açılır. Dayıbaşı tarafını da etkiler (aynı ekran).
 - (Tanıtım oturumu, 10 Kasım 2026, Mustafa'nın isteğiyle) **Ana sayfa değişti:** `app/page.tsx` = tanıtım sitesi. Dayıbaşı "Bugün" `/` → `/bugun` (`app/(dayibasi)/bugun/page.tsx`, `products/dayibasi/nav.tsx`, `Bugun.tsx`; çiftçi `otherHomes` dayibasi → `/bugun`). `manifest.ts` start_url `/ciftci`. `public/sw.js` PAGES'e `/ciftci` eklendi (önbellek adı aynı). Çıkış yapınca `/`'a gidilir = tanıtım sayfası.
 ## Günlük
+- 14 Kas (gece 3): eksikler tamamlandı: hatırlatmadan masraf, takvim kutucuğunda simge, ayrı "Tarlalara böl" düğmesi, 4 ekrana Geçmiş, Fotoğraflar ekranı → "Fişli olanlar" süzgeci, tohum ve masraf notunda öneri. Rapor §10.1.
 - 14 Kas (gece 2): sesle gelir/tarla işi, tekrarlayan hatırlatma, takvimde 7 gün, ay şeridi, Fişler bağlantısı, girdi kataloğu, Köy pazarı taslağı. Sıra: plan §8.
 - 14 Kas (akşam): Görünüm turu: renkler bölüme uyar, masraf son dolu aydan açılır, Özet'e son kayıtlar, Rapor kutuları; site: yer tutucu iletişim gizli, modül kartları, telefonda üst menü ve özellik kartları. Rapor §9.
 - 14 Kas (gece): Sadeleştirme: ＋ Ekle, Menü/yan menü, Başlarken, ürün kataloğu, tek sezonda çip gizli, yıllara göre ürün-verim, sesle masraf, tanıtım metinleri, kalıcı deneme betiği. gelistirme; 40+40 ekran temiz.

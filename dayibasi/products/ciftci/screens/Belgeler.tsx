@@ -1,4 +1,5 @@
 "use client";
+import { HistoryLink } from "../nav";
 import { useCList } from "../lists";
 import { useGo, useOnActivate, useBack, useTabParams } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
@@ -39,7 +40,7 @@ export default function Belgeler() {
   return (
     <main className="ui-stack">
       <BackButton onClick={() => { if (from) { const f = from; setFrom(null); go(f); } else back(); }} label="Geri" />
-      <PageHeader sub="Bitiş tarihleri ve hatırlatma" title="Belgeler" />
+      <PageHeader sub="Bitiş tarihleri ve hatırlatma" title="Belgeler" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <MainButton className="kompakt" onClick={() => { setDone(null); setForm({}); }}>+ Belge ekle</MainButton>
       {docs && list.length === 0 && <div className="ui-empty">Henüz belge yok. ÇKS, sigorta, kira sözleşmesi gibi bitiş tarihi olanları ekle.</div>}

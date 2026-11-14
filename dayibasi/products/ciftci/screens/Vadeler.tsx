@@ -1,4 +1,5 @@
 "use client";
+import { HistoryLink } from "../nav";
 import { useCList } from "../lists";
 import { useGo, useOnActivate, useBack } from "@/core/shell/TabShell";
 import { useCallback, useEffect, useState } from "react";
@@ -84,7 +85,7 @@ export default function Vadeler() {
   return (
     <main className="ui-stack">
       <BackButton onClick={() => back()} label="Geri" />
-      <PageHeader sub="Kredi, kooperatif, bayi, tüccar, çek" title="Borç ve vadeler" />
+      <PageHeader sub="Kredi, kooperatif, bayi, tüccar, çek" title="Borç ve vadeler" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <div className="ui-split">
         <div><span>Borcun</span><b>{formatTL(sum(borc))}</b></div>

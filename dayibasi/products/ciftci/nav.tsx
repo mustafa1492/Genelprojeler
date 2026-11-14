@@ -14,9 +14,9 @@ export const navItems: NavItem[] = [
   { href: `${BASE}/depo`, label: "Depo", icon: ic(<><path d="M3 9 12 4l9 5v11H3z" /><path d="M7 20v-7h10v7" /><path d="M7 16h10" /></>) },
 ];
 
-/** Masraf ekranının başında: bütün fiş ve belge fotoğrafları (Menü'de ayrı satır yok). */
+/** Masraf ekranının başında: fişi olan masraflar (süzgeç; ayrı Fotoğraflar ekranı kalktı). */
 export const PhotosLink = () => (
-  <TabLink to="fotograflar" className="ui-history">
+  <TabLink to="masraf" params={{ fisli: 1 }} className="ui-history">
     {ic(<><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="11" r="2" /><path d="m21 17-5-5-8 8" /></>)}
     Fişler
   </TabLink>

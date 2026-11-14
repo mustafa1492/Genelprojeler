@@ -1,4 +1,5 @@
 "use client";
+import { HistoryLink } from "../nav";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { addEvent, deleteEvent, listEvents, updateEvent, type EventRow } from "@/core/events/api";
@@ -124,7 +125,7 @@ export default function Makineler() {
   return (
     <main className="ui-stack">
       <BackButton onClick={() => back()} label="Geri" />
-      <PageHeader sub="Bakım, motor saati, sonraki bakım" title="Makineler" />
+      <PageHeader sub="Bakım, motor saati, sonraki bakım" title="Makineler" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       {names.length === 0 && <div className="ui-empty">Henüz makine yok. Traktör, pulluk, ilaçlama makinesi gibi makinelerini ekle.</div>}
       {names.map((m) => {

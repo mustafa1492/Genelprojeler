@@ -26,7 +26,6 @@ import { SeasonProvider } from "./sezon";
 import { PrefsProvider } from "@/core/prefs";
 import { usePrivacy } from "@/core/ui/privacy";
 import Ayarlar from "./screens/Ayarlar";
-import Fotograflar from "./screens/Fotograflar";
 import Duzenle from "./screens/Duzenle";
 import Menu from "./Menu";
 import { NAV_CHOICES, NAV_SLOTS, useGorunum } from "./gorunum";
@@ -63,7 +62,6 @@ const TABS: ShellTab[] = [
   { id: "fis", label: "Fiş yükle", emoji: "📷", path: `${BASE}/fis`, inNav: false, render: () => <Fis /> },
   { id: "takvim", label: "Takvim", icon: NAVI.takvim, group: "Genel", emoji: "📅", path: `${BASE}/takvim`, inNav: false, render: () => <Takvim /> },
   { id: "gecmis", label: "Geçmiş", path: `${BASE}/gecmis`, inNav: false, render: () => <Gecmis /> },
-  { id: "fotograflar", label: "Fotoğraflar", emoji: "🖼️", path: `${BASE}/fotograflar`, inNav: false, render: () => <Fotograflar /> },
   { id: "ayarlar", label: "Ayarlar", group: "Diğer", emoji: "⚙️", path: `${BASE}/ayarlar`, inNav: false, render: () => <Ayarlar /> },
   { id: "duzenle", label: "Ekranımı düzenle", path: `${BASE}/duzenle`, inNav: false, render: () => null },
 ];
@@ -82,7 +80,7 @@ function Inner({ initial, modul }: { initial: string; modul: Modul }) {
   const { lvl } = useRole();
   const off = (Array.isArray(biz.settings?.hidden_screens) ? biz.settings!.hidden_screens : []) as string[];
   const SCREEN: Record<string, string> = { masraf: "masraf", gelir: "gelir", fidan: "fidan", depo: "depo", tarlalar: "tarlalar", makineler: "tarlalar", takvim: "takvim", rapor: "rapor",
-    vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fotograflar: "masraf", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
+    vadeler: "vadeler", belgeler: "belgeler", kayitlar: "kayitlar", fis: "fis", gecmis: "gecmis", listeler: "ayarlar", sezonlar: "ayarlar", aile: "uyeler" };
   const base = TABS.filter((t) => (t.id !== "fidan" || hasFidan(biz)) && !off.includes(SCREEN[t.id] ?? "") && (!SCREEN[t.id] || lvl(SCREEN[t.id]) >= 1 || t.id === "aile"))
     .map((t) => (SCREEN[t.id] && t.id !== "aile" && lvl(SCREEN[t.id]) === 1 ? { ...t, readOnly: true } : t))
     .filter((t) => tabInModul(t.id, modul)); // başka bölüme özel sekmeler gizli (tarlalar, depo, makineler… ortak)
@@ -98,6 +96,8 @@ function Inner({ initial, modul }: { initial: string; modul: Modul }) {
   const menuTabs = tabs.map((t) => ({ id: t.id, label: t.label, emoji: t.emoji }));
   let start = initial, params: Record<string, string | number> | undefined;
   try { const q = new URLSearchParams(location.search); if (q.get("yeni")) params = { yeni: 1 }; } catch { /* sunucuda */ }
+  // Eski "Fotoğraflar" adresi: masraf listesinde "Fişli olanlar" süzgeci
+  if (start === "fotograflar") { start = "masraf"; params = { fisli: 1 }; }
   if (!tabs.some((t) => t.id === start)) start = "ozet";
   return <SeasonProvider><TabShell tabs={tabs} initial={start} initialParams={params} navIds={navIds} menu={() => <Menu tabs={menuTabs} />} add={(close) => <EkleSayfasi tabs={menuTabs} close={close} />} brand={<><img src="/icon-192.png" alt="" width={40} height={40} /><span><b>Çiftçi Defteri</b><small>{biz.name}</small></span><ModulChip /></>} /></SeasonProvider>;
 }

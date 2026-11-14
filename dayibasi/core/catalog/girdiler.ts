@@ -4,5 +4,7 @@ export const GUBRELER = ["Üre (%46)", "DAP (18-46-0)", "Amonyum sülfat (%21)",
   "Potasyum sülfat", "Kompoze", "Yaprak gübresi", "Ahır gübresi"];
 export const ILAC_TURLERI = ["Yabancı ot ilacı", "Mantar ilacı", "Böcek ilacı", "Örümcek ilacı", "Kükürt", "Göztaşı (bordo bulamacı)", "Yazlık yağ"];
 
-/** Depo türüne göre öneriler ("Gübre", "İlaç"); diğer türlerde boş. */
-export const girdiOnerileri = (tur: string): string[] => (/gübre/i.test(tur) ? GUBRELER : /ilaç/i.test(tur) ? ILAC_TURLERI : []);
+export const TOHUMLAR = ["Buğday tohumu", "Arpa tohumu", "Mısır tohumu", "Ayçiçeği tohumu", "Pamuk tohumu", "Domates fidesi", "Biber fidesi", "Karpuz fidesi", "Yonca tohumu", "Ispanak tohumu"];
+
+/** Türe göre öneriler (depo türü ya da masraf türü: "Gübre", "İlaç", "Tohum / fide"); diğer türlerde boş. */
+export const girdiOnerileri = (tur: string): string[] => (/gübre/i.test(tur) ? GUBRELER : /ilaç/i.test(tur) ? ILAC_TURLERI : /tohum|fide/i.test(tur) ? TOHUMLAR : []);

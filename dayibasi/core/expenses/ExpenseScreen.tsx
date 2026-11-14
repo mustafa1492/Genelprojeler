@@ -1,5 +1,6 @@
 "use client";
 // Ortak masraf ekranı (dayıbaşı + çiftçi defteri). Ürün farkları prop olarak gelir.
+import { girdiOnerileri } from "@/core/catalog/girdiler";
 import { dinle, sesVarMi, turBul, tutarBul } from "./ses";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBack, useOnActivate, useTabParams } from "@/core/shell/TabShell";
@@ -82,6 +83,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
     if (items.length && !items.some((e) => e.occurred_on.startsWith(bu))) setMonth(items.map((e) => e.occurred_on.slice(0, 7)).sort().at(-1)!);
   }, [items]);
   const [mode, setMode] = useState<"ay" | "sezon">("ay");
+  const [fisli, setFisli] = useState(false);
+  const [bekleyenTutar, setBekleyenTutar] = useState<number | undefined>(undefined);   // "Fişli olanlar": yalnız fotoğrafı olan masraflar (eski Fotoğraflar ekranı)
   const bySeason = !!period && mode === "sezon";
   const [done, setDone] = useState<Done>(null);
   const [error, setError] = useState("");
@@ -103,6 +106,10 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   useEffect(() => { if (tp.p.duzenle) { const e = (items ?? []).find((x) => x.id === tp.p.duzenle); if (e) { setDone(null); setView({ v: "form", cat: e.category, edit: e }); } return; }
     // Fiş ekranından: fotoğraf hazır, tutarı gir
     if (tp.p.fis) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setFromInbox({ photo: String(tp.p.fis), note: tp.p.not ? String(tp.p.not) : null, saved: () => {} }); setView({ v: "tur" }); return; }
+    if (tp.p.fisli) { setFisli(true); if (period) setMode("sezon"); setView({ v: "list" }); return; }
+    // Hatırlatmadan gelen ödeme ("Kira ödemesi", 5000): tür anlaşılırsa form dolu açılır, anlaşılmazsa tür sorulur, tutar korunur
+    if (tp.p.yeni && tp.p.metin) { setDone(null); setPresetPlace(null); const c = turBul(String(tp.p.metin), categories); const t = Number(tp.p.tutar) || undefined;
+      if (c) setView({ v: "form", cat: c, tutar: t }); else { setBekleyenTutar(t); setView({ v: "tur" }); } return; }
     if (tp.p.yeni) { setDone(null); setPresetPlace(tp.p.tarla ? String(tp.p.tarla) : null); setPresetLink(link && tp.p[link.param] ? String(tp.p[link.param]) : null); setView({ v: "tur" }); } }, [tp.n, !!items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const custom = (Array.isArray(biz.settings?.expense_categories) ? biz.settings!.expense_categories : []) as string[];
@@ -116,7 +123,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   // --- Tür seç
   if (view.v === "tur") {
     return <TurSec categories={categories} lastOf={lastOf} onEdit={onEditCategories} onCancel={leave}
-      onPick={(cat, tutar) => setView({ v: "form", cat, tutar })}
+      onPick={(cat, tutar) => { setView({ v: "form", cat, tutar: tutar ?? bekleyenTutar }); setBekleyenTutar(undefined); }}
       onAddCategory={async (name) => {
         const settings = { ...biz.settings, expense_categories: [...custom, name] };
         const { error } = await supabase().from("businesses").update({ settings }).eq("id", biz.id);
@@ -240,7 +247,8 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
   const byCat = [...new Set(mine.map((e) => e.category))].map((c) => ({ c, t: mine.filter((e) => e.category === c).reduce((s, e) => s + e.amount, 0) }))
     .sort((a, b) => b.t - a.t);
   const max = Math.max(1, ...byCat.map((x) => x.t));
-  const days = [...new Set(inMonth.map((e) => e.occurred_on))].sort().reverse();
+  const liste = fisli ? inMonth.filter((e) => e.photo_path) : inMonth;
+  const days = [...new Set(liste.map((e) => e.occurred_on))].sort().reverse();
   // Sezon içinde ay ay toplam
   const perMonth = [...new Set(mine.map((e) => e.occurred_on.slice(0, 7)))].sort().map((m) => ({ m, t: mine.filter((e) => e.occurred_on.startsWith(m)).reduce((s, e) => s + e.amount, 0) }));
   const maxM = Math.max(1, ...perMonth.map((x) => x.t));
@@ -312,7 +320,14 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
       )}
 
       {items && inMonth.length === 0 && <div className="ui-empty">{bySeason ? "Bu sezon masraf yok." : (month === todayIstanbul().slice(0, 7) ? "Bu ay masraf yok." : `${monthName(month)} için masraf yok.`)}</div>}
-      <DeskTable rows={inMonth} rowKey={(e) => e.id} onRow={(e) => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}
+      {items && (fisli || inMonth.some((e) => e.photo_path)) && (
+        <div className="ui-chips" role="group" aria-label="Süzgeç">
+          <Chip selected={!fisli} onClick={() => setFisli(false)}>Hepsi</Chip>
+          <Chip selected={fisli} onClick={() => setFisli(true)}>📷 Fişli olanlar</Chip>
+        </div>
+      )}
+      {fisli && liste.length === 0 && inMonth.length > 0 && <div className="ui-empty">Bu dönemde fişi olan masraf yok.</div>}
+      <DeskTable rows={liste} rowKey={(e) => e.id} onRow={(e) => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}
         cols={[
           { label: "Tarih", cell: (e) => `${e.occurred_on.slice(8)}.${e.occurred_on.slice(5, 7)}.${e.occurred_on.slice(0, 4)}`, width: "110px" },
           { label: "Tür", cell: (e) => <b>{e.category}</b> },
@@ -325,7 +340,7 @@ export function ExpenseScreen({ categories: baseCats, chargeTargets = [], places
       {days.map((d) => (
         <section key={d} className="ui-stack only-mobile" style={{ gap: 8 }}>
           <h2 style={{ margin: "6px 4px 0", fontSize: "1.05rem" }}>{dayText(d)}</h2>
-          {inMonth.filter((e) => e.occurred_on === d).map((e) => (
+          {liste.filter((e) => e.occurred_on === d).map((e) => (
             <button key={e.id} type="button" className="ui-moneyrow" style={{ width: "100%", font: "inherit", textAlign: "left", cursor: "pointer" }}
               onClick={() => { setDone(null); setView({ v: "form", cat: e.category, edit: e }); }}>
               <b style={{ minWidth: 0 }}>{e.category}{e.photo_path ? " · fişli" : ""}
@@ -459,8 +474,10 @@ function MasrafForm({ noPlaceLabel = "Genel", presetPhoto, presetNote, presetAmo
       {!edit && lastAmount && <Chip onClick={() => setAmount(String(lastAmount))}>Geçen sefer: {formatTL(lastAmount)}</Chip>}
       {places.length > 0 && (
         <div className="ui-stack" style={{ gap: 8 }}>
-          <Pick label="Hangi tarla?" value={placeId} onChange={pickPlace} options={[{ value: null, label: noPlaceLabel, hint: "Belli bir tarlaya ait değil (mazot, tamir, sigorta…)" }, ...places.map((p) => ({ value: p.id, label: p.name })),
-            ...(!edit && places.length > 1 ? [{ value: SPLIT, label: "Tarlalara böl", hint: "Tutar tarlalara dekarına göre paylaştırılır" }] : [])]} />
+          {placeId !== SPLIT && <Pick label="Hangi tarla?" value={placeId} onChange={pickPlace} options={[{ value: null, label: noPlaceLabel, hint: "Belli bir tarlaya ait değil (mazot, tamir, sigorta…)" }, ...places.map((p) => ({ value: p.id, label: p.name }))]} />}
+          {!edit && places.length > 1 && (placeId === SPLIT
+            ? <button type="button" className="ui-bol on" onClick={() => setPlaceId(null)}><b>Tarlalara bölünecek</b><small>Bölmeyi kaldır, tek tarla seç</small></button>
+            : <button type="button" className="ui-bol" onClick={() => setPlaceId(SPLIT)}><b>➗ Tutarı tarlalara böl</b><small>Bütün tarlalara dekarına göre paylaştırılır</small></button>)}
           {placeId === SPLIT && (() => {
             const ps = places.filter((p) => Number(p.custom?.donum) > 0).length ? places.filter((p) => Number(p.custom?.donum) > 0) : places;
             const w = ps.map((p) => Number(p.custom?.donum) || 1), W = w.reduce((a, b) => a + b, 0), a = num(amount) || 0;
@@ -499,6 +516,9 @@ function MasrafForm({ noPlaceLabel = "Genel", presetPhoto, presetNote, presetAmo
         <>
           <TextField id="masraf_gun" label="Tarih" type="date" max={todayIstanbul()} value={day} onChange={(e) => setDay(e.target.value)} />
           <TextField id="masraf_not" label="Not (isteğe bağlı)" placeholder="Örnek: Manisa yolunda" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} />
+          {girdiOnerileri(category).length > 0 && !note.trim() && (
+            <div className="ui-chips wrap" aria-label="Ne aldın?">{girdiOnerileri(category).map((g) => <Chip key={g} onClick={() => setNote(g)}>{g}</Chip>)}</div>
+          )}
 
           <div className="ui-stack" style={{ gap: 8 }}>
             <span className="ui-label">Ödeme</span>

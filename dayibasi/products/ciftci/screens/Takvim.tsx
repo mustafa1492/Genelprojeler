@@ -1,5 +1,6 @@
 "use client";
 // Takvim: ay görünümünde tarla işleri, hasat beklemesi, satış/verim, vadeler, belgeler ve hatırlatmalar.
+import { HistoryLink } from "../nav";
 import { useCallback, useEffect, useState } from "react";
 import { useBusiness } from "@/core/auth/AuthGate";
 import { daysLeft, listDocs, type Doc } from "@/core/documents/api";
@@ -54,20 +55,27 @@ export default function Takvim() {
 
   if (form) return <HatirlatForm places={places} edit={form.edit} defDay={day ?? todayStr()} onCancel={() => setForm(null)}
     onDelete={form.edit ? async () => { const e = form.edit!; await deleteEvent(e.id); setDone({ message: `Sildim: ${String(e.data.title)}.`, undo: () => mutate({ kind: "insert", table: "events", values: e }) }); setForm(null); load(); } : undefined}
-    onSave={async (v) => {
-      if (form.edit) {
-        const o = form.edit; await updateEvent(o.id, v);
+    onOde={form.edit ? async (v) => {
+      // "Ödendi, masrafı gir": hatırlatma kapanır (tekrarlıysa sonraki kurulur), masraf formu tür ve tutar dolu açılır
+      await kaydet({ ...v, data: { ...v.data, done: true } });
+      go("masraf", { yeni: 1, metin: String(v.data.title), ...(Number(v.data.tutar) > 0 ? { tutar: Number(v.data.tutar) } : {}) });
+    } : undefined}
+    onSave={(v) => kaydet(v)} />;
+
+  async function kaydet(v: { occurred_on: string; place_id: string | null; data: Record<string, unknown> }) {
+      if (form!.edit) {
+        const o = form!.edit; await updateEvent(o.id, v);
         // Tekrarlayan hatırlatma "Yapıldı" olunca bir sonraki kendiliğinden kurulur (kira, kredi taksiti, sigorta…)
         const t = v.data.tekrar as "ay" | "yil" | undefined;
         if (t && v.data.done && !o.data.done) {
           const sonraki = sonrakiGun(v.occurred_on, t);
-          const n = await addEvent(biz.id, { kind: HATIRLAT, person_id: null, quantity: null, occurred_on: sonraki, place_id: v.place_id, data: { title: v.data.title, tekrar: t } });
+          const n = await addEvent(biz.id, { kind: HATIRLAT, person_id: null, quantity: null, occurred_on: sonraki, place_id: v.place_id, data: { title: v.data.title, tekrar: t, ...(v.data.tutar ? { tutar: v.data.tutar } : {}) } });
           setDone({ message: `Yapıldı: ${String(v.data.title)}. Sonraki hatırlatma: ${dayYear(sonraki)}.`, undo: async () => { await deleteEvent(n.id); await updateEvent(o.id, { occurred_on: o.occurred_on, place_id: o.place_id, data: o.data }); } });
         } else setDone({ message: `Değiştirdim: ${String(v.data.title)}.`, undo: () => updateEvent(o.id, { occurred_on: o.occurred_on, place_id: o.place_id, data: o.data }) });
       }
       else { const e = await addEvent(biz.id, { kind: HATIRLAT, person_id: null, quantity: null, ...v }); setDone({ message: `Hatırlatma kuruldu: ${dayYear(v.occurred_on)}, ${String(v.data.title)}.`, undo: () => deleteEvent(e.id) }); }
       setMonth(ym(v.occurred_on)); setDay(v.occurred_on); setForm(null); load();
-    }} />;
+  }
 
   const marks: Mark[] = [
     ...ev.filter((e) => e.kind === ISLEM).map((e): Mark => ({ day: e.occurred_on, kind: "is", text: `${String(e.data.type)}${e.data.product ? ` · ${String(e.data.product)}` : ""}`, place: e.place_id, ev: e })),
@@ -107,7 +115,7 @@ export default function Takvim() {
   return (
     <main className="ui-stack" onClick={(e) => { if (day && !(e.target as HTMLElement).closest("button, a, input, select, label")) setDay(null); }}>
       <BackButton onClick={() => back()} label="Geri" />
-      <PageHeader sub="Tarla işleri, hasat, vade, hatırlatma" title="Takvim" />
+      <PageHeader sub="Tarla işleri, hasat, vade, hatırlatma" title="Takvim" right={<HistoryLink />} />
       {done && <DoneCard message={done.message} onUndo={done.undo ? async () => { await done.undo!(); setDone(null); load(); } : undefined} />}
       <MainButton className="kompakt" onClick={() => { setDone(null); setForm({}); }}>+ Hatırlatma ekle</MainButton>
       {places.length > 1 && (
@@ -141,7 +149,7 @@ export default function Takvim() {
           return (
             <button key={c} type="button" className={`gun${c === day ? " secili" : ""}${c === today ? " bugun" : ""}`} onClick={() => setDay(c === day ? null : c)} aria-pressed={c === day} aria-label={`${dayYear(c)}, ${ms.length} kayıt`}>
               <span>{Number(c.slice(8))}</span>
-              <i>{kinds.slice(0, 4).map((k) => <em key={k} style={{ background: COLOR[k] }} />)}</i>
+              <i className="simge" aria-hidden="true">{kinds.slice(0, 3).map((k) => <em key={k}>{SIMGE[k]}</em>)}{kinds.length > 3 && <em>+</em>}</i>
             </button>
           );
         })}
@@ -167,8 +175,9 @@ export default function Takvim() {
   );
 }
 
-function HatirlatForm({ places, edit, defDay, onSave, onCancel, onDelete }: {
+function HatirlatForm({ places, edit, defDay, onSave, onCancel, onDelete, onOde }: {
   places: Place[]; edit?: EventRow; defDay: string; onCancel: () => void; onDelete?: () => Promise<void>;
+  onOde?: (v: { occurred_on: string; place_id: string | null; data: Record<string, unknown> }) => Promise<void>;
   onSave: (v: { occurred_on: string; place_id: string | null; data: Record<string, unknown> }) => Promise<void>;
 }) {
   const [title, setTitle] = useState(String(edit?.data.title ?? ""));
@@ -176,6 +185,9 @@ function HatirlatForm({ places, edit, defDay, onSave, onCancel, onDelete }: {
   const [placeId, setPlaceId] = useState<string | null>(edit?.place_id ?? null);
   const [doneF, setDoneF] = useState(!!edit?.data.done);
   const [tekrar, setTekrar] = useState<"yok" | "ay" | "yil">((edit?.data.tekrar as "ay" | "yil") ?? "yok");
+  const [tutar, setTutar] = useState(edit?.data.tutar ? String(edit.data.tutar) : "");
+  const odeme = tekrar !== "yok" || /kira|taksit|sigorta|ödeme|fatura|aidat|kredi/i.test(title);
+  const veri = () => ({ title: title.trim(), ...(doneF ? { done: true } : {}), ...(tekrar !== "yok" ? { tekrar } : {}), ...(odeme && Number(tutar.replace(/\./g, "").replace(",", ".")) > 0 ? { tutar: Number(tutar.replace(/\./g, "").replace(",", ".")) } : {}) });
   const [error, setError] = useState("");
   const quick = ["İlaçlama", "Gübre", "Sulama", "Hasat", "Kira ödemesi", "Kredi taksiti", "ÇKS başvurusu", "Traktör muayenesi"];
   const plus = (k: number) => { const d = new Date(todayStr() + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + k); setDay(d.toISOString().slice(0, 10)); };
@@ -203,13 +215,15 @@ function HatirlatForm({ places, edit, defDay, onSave, onCancel, onDelete }: {
         </div>
         {tekrar !== "yok" && <span className="ui-note" style={{ margin: 0 }}>"Yapıldı" dediğinde bir sonraki {tekrar === "ay" ? "ay" : "yıl"} için kendiliğinden kurulur.</span>}
       </div>
+      {odeme && <TextField id="h_tutar" label="Tutar (isteğe bağlı; masrafa geçerken dolu gelir)" inputMode="decimal" placeholder="Örnek: 5000" maxLength={12} value={tutar} onChange={(e) => setTutar(e.target.value)} />}
       {edit && <label className="ui-check"><input type="checkbox" checked={doneF} onChange={(e) => setDoneF(e.target.checked)} /> Yapıldı</label>}
+      {edit && onOde && odeme && !edit.data.done && <MainButton secondary onClick={async () => { if (!title.trim()) { setError("Ne yapılacağını yaz."); return; } await onOde({ occurred_on: day, place_id: placeId, data: veri() }); }}>Ödendi, masrafı gir</MainButton>}
       {error && <ErrorText>{error}</ErrorText>}
       <div className="ui-sticky-bottom">
         <MainButton onClick={async () => {
           if (!title.trim()) { setError("Ne yapılacağını yaz."); return; }
           if (!day) { setError("Günü seç."); return; }
-          await onSave({ occurred_on: day, place_id: placeId, data: { title: title.trim(), ...(doneF ? { done: true } : {}), ...(tekrar !== "yok" ? { tekrar } : {}) } });
+          await onSave({ occurred_on: day, place_id: placeId, data: veri() });
         }}>Kaydet</MainButton>
       </div>
       {onDelete && <button type="button" className="ui-link" style={{ color: "var(--tehlike)" }} onClick={onDelete}>Bu hatırlatmayı sil</button>}

@@ -173,3 +173,15 @@ Ekran görüntülerine tek tek bakılarak bulunan sorunlar ve yapılanlar. Hepsi
 
 **Sıradaki işler:** `docs/plan/uzun-vadeli-plan.md` §8 (12 madde, dış şartlarıyla).
 
+### 10.1 Düzeltme: eksik kalan kısımlar tamamlandı (Mustafa sordu: "her şeyi yaptın mı?")
+İlk turda 8 işin 6'sı kısmen yapılmış, raporda bu açıkça yazılmamıştı. Tamamlananlar:
+| # | Eksik olan | Şimdi |
+|---|---|---|
+| 4 | Hatırlatmadan tek dokunuşla masraf | Ödeme hatırlatmasına isteğe bağlı tutar; "Ödendi, masrafı gir" → hatırlatma kapanır (tekrarlıysa sonraki kurulur), masraf formu tür ve tutar dolu açılır ("Kira ödemesi, 5000" → Kira, 5.000). Tür anlaşılmazsa tür sorulur, tutar korunur |
+| 9 | Takvim kutucuklarında yalnız renkli nokta | Kutucukta küçük simgeler (🌾 🔔 🧺 💳…), 3'ten fazlaysa "+" |
+| 8 | "Tarlalara böl" açılır listede bir seçenekti | Tarla seçiminin altında ayrı, kesik çizgili "➗ Tutarı tarlalara böl" düğmesi; seçilince "Bölmeyi kaldır" |
+| 7 | Takvim, Vadeler, Belgeler, Makineler'de Geçmiş yoktu | Hepsinde başlığın sağında Geçmiş; geri tuşu solda. (Rapor yazdırılan bir sayfa, orada Geçmiş yok) |
+| 6 | Fotoğraflar ayrı ekrandı, süzgeç yoktu | Ayrı Fotoğraflar ekranı kaldırıldı; Masraf listesinde "Hepsi / 📷 Fişli olanlar" süzgeci. Masraf başlığındaki "Fişler" ve eski `/ciftci/fotograflar` adresi bu süzgeçle açılır |
+| 3 | Tohum ve masraf yoktu | Tohum/fide önerileri; masraf formunda (Detaylandır → Not) Gübre, İlaç, Tohum türünde aynı öneriler |
+**Denendi:** derleme; 80 ekran açılışı sorun 0; altı iş tek tek ekranda (sahte sunucu). **Denenmedi:** gerçek telefon.
+
